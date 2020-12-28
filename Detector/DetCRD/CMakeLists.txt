@@ -18,6 +18,7 @@ find_package(ROOT COMPONENTS MathCore GenVector Geom REQUIRED)
 gaudi_add_module(DetCRD
                  SOURCES src/Calorimeter/CRDEcal.cpp
                          src/Other/CRDBeamPipe_v01_geo.cpp
+								 src/Calorimeter/CRDEcalMatrix.cpp
 		 LINK ${DD4hep_COMPONENT_LIBRARIES}
 )
 

@@ -1,0 +1,7 @@
+/run/initialize
+
+/run/dumpCouples
+/run/particle/dumpCutValues
+
+/run/setCut 1 mm
+/run/particle/dumpCutValues
