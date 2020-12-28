@@ -14,7 +14,7 @@ Before run following commands, please make sure you setup the CVMFS:
 ```
 $ git clone git@github.com:cepc/CEPCSW.git
 $ cd CEPCSW
-$ git checkout master # branch name
+$ git checkout dev-EcalRec-v01 # branch name
 $ source setup.sh
 $ ./build.sh
 $ ./run.sh Examples/options/helloalg.py
@@ -43,3 +43,9 @@ Keep the collection names compatible between the prototype and the existing CEPC
 * SITCollection
 * TPCCollection
 * SETCollection
+
+
+*Update: CRD Ecal
+  * A global Ecal geometry: CRDEcal_v01
+  * Digitalization for CRDEcal: Digitisers/CRDEcalDigi/
+  * Reconstruction for CRDEcal: Digitisers/CRDEcalDigi/  (Use hard-cut in 1D clustering)

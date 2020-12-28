@@ -1,4 +1,4 @@
 build.*
 ./Generator/output/
 ./Generator/options/
-./run/*.root
+./run/
