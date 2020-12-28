@@ -7,6 +7,8 @@
 #include "edm4hep/Cluster.h"
 
 #include "TVector3.h"
+#include "TVector.h"
+#include "TMatrix.h"
 using namespace std;
 
 class CRDEcalPreRecAlg{
@@ -17,13 +19,18 @@ public:
 
 	std::vector<CRDEcalDigiEDM::BarCollection>  Bars2Shower( std::vector<CRDEcalDigiEDM::DigiBar>& barCol );
 	std::vector<CRDEcalDigiEDM::BarCluster> Clustering(std::vector<CRDEcalDigiEDM::DigiBar>& barCol); 
-	CRDEcalDigiEDM::BarCollection  findSeed( CRDEcalDigiEDM::BarCluster& m_cluster );
-	CRDEcalDigiEDM::BarCollection  getNeighbors(CRDEcalDigiEDM::BarCluster& m_cluster, CRDEcalDigiEDM::BarCollection& seed);
+	std::vector<CRDEcalDigiEDM::DigiBar>  findSeeds( CRDEcalDigiEDM::BarCluster& m_cluster );
+	std::vector<CRDEcalDigiEDM::DigiBar>  getNeighbors(CRDEcalDigiEDM::BarCluster& m_cluster, CRDEcalDigiEDM::DigiBar& seed);
 	std::vector<CRDEcalDigiEDM::BarCollection>  ClusterSplitting( CRDEcalDigiEDM::BarCluster& m_cluster);
-	vector<int> getShowerEdge(CRDEcalDigiEDM::BarCluster& m_cluster, std::vector<CRDEcalDigiEDM::BarCollection>& m_seeds);
 	void RemoveBars(CRDEcalDigiEDM::BarCluster& m_cluster, CRDEcalDigiEDM::BarCollection& m_barCol);
 	void RemoveBars(std::vector<CRDEcalDigiEDM::DigiBar>& m_bars, std::vector<CRDEcalDigiEDM::DigiBar>& m_subbars);
-	
+	void CalculateInitialEseed(std::vector<CRDEcalDigiEDM::DigiBar>& Seeds, dd4hep::Position* pos, double* Eseed);
+	double GetShowerProfile(dd4hep::Position& p_bar, dd4hep::Position& p_seed );
+
+	double Sth_split;
+	double Eth_SeedAbs;
+	double Eth_ShowerAbs;
+	double Eth_ClusAbs;
 	double Eth_SeedWithNeigh;
 	double Eth_SeedWithTot;
 	double Eth_ShowerWithTot;

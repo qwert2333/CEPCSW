@@ -2,3 +2,4 @@ build.*
 ./Generator/output/
 ./Generator/options/
 ./run/
+./build/

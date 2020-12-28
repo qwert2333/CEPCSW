@@ -85,9 +85,15 @@ protected:
 	FloatVec m_Rec_x, m_Rec_y, m_Rec_z, m_Rec_E;
 
 	FloatVec m_PreRec_Bar0x, m_PreRec_Bar0y, m_PreRec_Bar0z, m_PreRec_Bar0E, m_PreRec_Bar1x, m_PreRec_Bar1y, m_PreRec_Bar1z, m_PreRec_Bar1E;
-	FloatVec m_PreRec_EshowerX, m_PreRec_XshowerX, m_PreRec_YshowerX, m_PreRec_ZshowerX;
-	FloatVec m_PreRec_EshowerY, m_PreRec_XshowerY, m_PreRec_YshowerY, m_PreRec_ZshowerY;
+	FloatVec m_PreRec_shower0E, m_PreRec_shower0X, m_PreRec_shower0Y, m_PreRec_shower0Z;
+	FloatVec m_PreRec_shower1E, m_PreRec_shower1X, m_PreRec_shower1Y, m_PreRec_shower1Z;
 	Int_t    m_PreRec_NshowerX, m_PreRec_NshowerY, m_PreRec_NclusterX, m_PreRec_NclusterY;
+	FloatVec m_ClusX_ScndM, m_ClusY_ScndM;
+	FloatVec m_chi2E, m_chi2Tx, m_chi2Ty, m_chi2, m_chi2comb; 
+
+	FloatVec m_showerX_Nbars, m_showerX_barx, m_showerX_bary, m_showerX_barz, m_showerX_barE;
+	FloatVec m_showerY_Nbars, m_showerY_barx, m_showerY_bary, m_showerY_barz, m_showerY_barE;
+
 
 
 	dd4hep::rec::CellIDPositionConverter* m_cellIDConverter;
@@ -108,15 +114,21 @@ protected:
 	mutable Gaudi::Property<float> Tinit{this, 	"InitalTime", 2, "Start time (ns)"};
 
 	mutable Gaudi::Property<float> _Qthfrac  {this, 	"ChargeThresholdFrac", 0.05, "Charge threshold fraction"};
-	mutable Gaudi::Property<float> _Eth_diff {this, 	"MatchingEnergy", 0.30, "Threshold for energy matching (/100%)"};
+
+
+	//All thresholds are used. IF you don't want them please set to 0. 
+	mutable Gaudi::Property<float> _Sth_split		{this,  	"ScndMomentThreshold", 0, ""};
+	mutable Gaudi::Property<float> _Eth_SeedAbs	{this,	"SeedEnergyThreshold", 0.05, ""};
+	mutable Gaudi::Property<float> _Eth_ShowerAbs{this,	"ShowerEnergyThreshold", 0.01, ""};
+	mutable Gaudi::Property<float> _Eth_ClusAbs	{this,	"ClusterEnergyThreshold", 0.01, ""};
 
 	mutable Gaudi::Property<float> _Eth_SeedWithNeigh  {this,    "SeedWithNeighThreshold", 0.4,  ""};
 	mutable Gaudi::Property<float> _Eth_SeedWithTot    {this,    "SeedWithTotThreshold",   0.15, ""};
-	mutable Gaudi::Property<float> _Eth_ShowerWithTot  {this,    "ShowerWithTotThreshold", 0.05, ""};
-	mutable Gaudi::Property<float> _Eth_ClusterWithTot {this,    "ClusterWithTotThreshold",0.05, ""};
+	mutable Gaudi::Property<float> _Eth_ShowerWithTot  {this,    "ShowerWithTotThreshold", 0.03, ""};
+	mutable Gaudi::Property<float> _Eth_ClusterWithTot {this,    "ClusterWithTotThreshold",0.03, ""};
 
 	mutable Gaudi::Property<float> _chi2Wi_E {this, 	"EnergyChi2Weight", 1, "Weight for energy contribution in chi2 cal."};
-	mutable Gaudi::Property<float> _chi2Wi_T {this, 	"TimeChi2Weight", 1, "Weight for time contribution in chi2 cal."};
+	mutable Gaudi::Property<float> _chi2Wi_T {this, 	"TimeChi2Weight", 2, "Weight for time contribution in chi2 cal."};
 	mutable Gaudi::Property<float> _th_chi2 {this, 	"Chi2Threshold", 0., "Threshold for chi2 matching"};
 
   // Output collections

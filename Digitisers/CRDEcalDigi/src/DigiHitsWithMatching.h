@@ -3,7 +3,6 @@
 
 #include "CRDEcalDigiAlg.h"
 #include "DigiHitsWithPos.h"
-#include "DigiHitsWithTime.h"
 
 #include "edm4hep/SimCalorimeterHit.h"
 #include "edm4hep/CalorimeterHit.h"
@@ -29,8 +28,8 @@ std::vector<edm4hep::ConstCalorimeterHit> CRDEcalDigiAlg::DigiHitsWithMatching(s
 	double chi2_tx[Nshower][Nshower];
 	double chi2_ty[Nshower][Nshower];
 
-	double sigmaE = 0.1;
-	double sigmaPos = sqrt(10*10 + pow((Tres*C/(2*nMat)),2) );	//const
+	double sigmaE = 0.05;  //Energy resolution 5%
+	double sigmaPos = sqrt(10*10/12 + pow((Tres*C/(2*nMat)),2) );	//position resolution
 	double wi_E = _chi2Wi_E/(_chi2Wi_E + _chi2Wi_T);
 	double wi_T = _chi2Wi_T/(_chi2Wi_E + _chi2Wi_T);
 
@@ -55,6 +54,11 @@ std::vector<edm4hep::ConstCalorimeterHit> CRDEcalDigiAlg::DigiHitsWithMatching(s
 		chi2_ty[ix][iy] = pow( fabs(PosTy - m_vec.x() )/sigmaPos, 2);
 
 		chi2[ix][iy] = chi2_E[ix][iy]*wi_E + (chi2_tx[ix][iy]+chi2_ty[ix][iy])*wi_T ;
+
+		m_chi2.push_back(chi2[ix][iy]);
+		m_chi2E.push_back(chi2_E[ix][iy]);
+		m_chi2Tx.push_back(chi2_tx[ix][iy]);
+		m_chi2Ty.push_back(chi2_ty[ix][iy]);
 	}}
 
 
@@ -75,6 +79,7 @@ std::vector<edm4hep::ConstCalorimeterHit> CRDEcalDigiAlg::DigiHitsWithMatching(s
 		double chi2_tot=0;
 		for(int i=0;i<Index.size();i++) chi2_tot += chi2[Index[i].first][Index[i].second];
 		matchingMap[chi2_tot] = Index;
+		m_chi2comb.push_back(chi2_tot);
 
 		Index.clear();
 		if(!next_permutation(num, num+Nshower)) break;			

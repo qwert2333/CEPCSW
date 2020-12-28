@@ -29,13 +29,28 @@ public:
 		double Q2=0;      // Q in right readout;
 		double T1=999;    // T in left readout;
 		double T2=999;    // T in right readout;
-		double getEnergy(){ return (Q1+Q2)/2.; }
 		inline bool operator < (const DigiBar &x) const {
 			return bar<x.bar ;
 		}
 		inline bool operator == (const DigiBar &x) const{
 			return cellID == x.cellID;
 		}
+
+
+		double getEnergy(){ return (Q1+Q2)/2.; }
+      bool isNeighbor(DigiBar &x){
+			if(x.cellID!=cellID && 
+				x.system==system && 
+				x.module==module &&
+				x.dlayer==dlayer && 
+				x.part==part && 
+				x.block==block &&
+				x.slayer==slayer &&
+				(x.bar==bar+1 || x.bar==bar-1) 
+			) return true;
+         return false;
+      }
+
   };
 
 
@@ -80,16 +95,26 @@ public:
 			for(int i=0;i<Bars.size();i++) pos += (Bars[i].position * Bars[i].getEnergy())/Etot;
 			return pos;
 		}
+		double getScndMoment(){
+			dd4hep::Position pos = getPos();
+			double Etot = getE();
+			double scndM = 0;
+			for(int i=0;i<Bars.size();i++) scndM += (Bars[i].getEnergy() * (pos-Bars[i].position).Mag2()) / Etot;
+			return scndM;
+		}
+
+		//members in this class
 		std::vector<CRDEcalDigiEDM::DigiBar> Bars;
+		std::vector<CRDEcalDigiEDM::DigiBar> Seeds;
+		double Energy;
+		dd4hep::Position pos;
 		int Nseeds=0;
-		double Dis=0.; //Maximum distance between 2 seeds. 
-		double scndMoment=0.;  //Second moment of this cluster. 
+		double ScndMoment=0.;  //Second moment of this cluster. 
   };
 
 
   class BarCollection{
 	public: 
-		void Clear(){ Bars.clear(); SubCol.clear();}
       bool isNeighbor(CRDEcalDigiEDM::DigiBar iBar){
          for(int i=0;i<Bars.size();i++){
             if(!inCluster(iBar) && (iBar.bar==Bars[i].bar+1 || iBar.bar==Bars[i].bar-1) ) return true;
@@ -127,8 +152,10 @@ public:
 			return T2;
 		}
 
+		double Energy;
+		dd4hep::Position pos;
 		std::vector<CRDEcalDigiEDM::DigiBar> Bars;
-		std::vector<CRDEcalDigiEDM::DigiBar> SubCol;
+		CRDEcalDigiEDM::DigiBar Seed;
   };
 
 	//bool compPos(DigiBar &a, DigiBar &b){ return (a.bar < b.bar); }

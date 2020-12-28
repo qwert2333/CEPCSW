@@ -56,6 +56,11 @@ std::vector<edm4hep::ConstCalorimeterHit> CRDEcalDigiAlg::DigiHitsWithMatchingL2
 		chi2_ty[ix][iy] = pow( fabs(PosTy - m_vec.x() )/sigmaPos, 2);
 
 		chi2[ix][iy] = chi2_E[ix][iy]*wi_E + (chi2_tx[ix][iy]+chi2_ty[ix][iy])*wi_T ;
+
+      m_chi2.push_back(chi2[ix][iy]);
+      m_chi2E.push_back(chi2_E[ix][iy]);
+      m_chi2Tx.push_back(chi2_tx[ix][iy]);
+      m_chi2Ty.push_back(chi2_ty[ix][iy]);
 	}}
 
 	for(int ix=0;ix<NshowerX;ix++){

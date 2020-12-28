@@ -3,11 +3,8 @@
 // NOTE: This digitialization highly matches detector geometry CRDEcalBarrel_v01. 
 #include "CRDEcalDigiEDM.h"
 #include "CRDEcalDigiAlg.h"
-#include "CRDEcalDigiHitCreator.h"
 #include "CRDEcalPreRecAlg.h"
 #include "DigiHitsWithPos.h"
-#include "DigiHitsWithTime.h"
-#include "DigiHitsWithEnergy.h"
 #include "DigiHitsWithMatching.h"
 #include "DigiHitsWithMatchingL2.h"
 
@@ -88,6 +85,7 @@ StatusCode CRDEcalDigiAlg::initialize()
 	t_Rec->Branch("Rec_y", &m_Rec_y);
 	t_Rec->Branch("Rec_z", &m_Rec_z);
 	t_Rec->Branch("Rec_E", &m_Rec_E);
+
 	t_PreRec->Branch("PreRec_Bar0x",&m_PreRec_Bar0x);
 	t_PreRec->Branch("PreRec_Bar0y",&m_PreRec_Bar0y);
 	t_PreRec->Branch("PreRec_Bar0z",&m_PreRec_Bar0z);
@@ -96,19 +94,35 @@ StatusCode CRDEcalDigiAlg::initialize()
 	t_PreRec->Branch("PreRec_Bar1y",&m_PreRec_Bar1y);
 	t_PreRec->Branch("PreRec_Bar1z",&m_PreRec_Bar1z);
 	t_PreRec->Branch("PreRec_Bar1E",&m_PreRec_Bar1E);
-	t_PreRec->Branch("PreRec_XshowerX", &m_PreRec_XshowerX);
-	t_PreRec->Branch("PreRec_YshowerX", &m_PreRec_YshowerX);
-	t_PreRec->Branch("PreRec_ZshowerX", &m_PreRec_ZshowerX);
-	t_PreRec->Branch("PreRec_EshowerX", &m_PreRec_EshowerX);
-	t_PreRec->Branch("PreRec_XshowerY", &m_PreRec_XshowerY);
-	t_PreRec->Branch("PreRec_YshowerY", &m_PreRec_YshowerY);
-	t_PreRec->Branch("PreRec_ZshowerY", &m_PreRec_ZshowerY);
-	t_PreRec->Branch("PreRec_EshowerY", &m_PreRec_EshowerY);
+	t_PreRec->Branch("PreRec_shower0X", &m_PreRec_shower0X);
+	t_PreRec->Branch("PreRec_shower0Y", &m_PreRec_shower0Y);
+	t_PreRec->Branch("PreRec_shower0Z", &m_PreRec_shower0Z);
+	t_PreRec->Branch("PreRec_shower0E", &m_PreRec_shower0E);
+	t_PreRec->Branch("PreRec_shower1X", &m_PreRec_shower1X);
+	t_PreRec->Branch("PreRec_shower1Y", &m_PreRec_shower1Y);
+	t_PreRec->Branch("PreRec_shower1Z", &m_PreRec_shower1Z);
+	t_PreRec->Branch("PreRec_shower1E", &m_PreRec_shower1E);
 	t_PreRec->Branch("PreRec_NshowerX", &m_PreRec_NshowerX);
 	t_PreRec->Branch("PreRec_NshowerY", &m_PreRec_NshowerY);
 	t_PreRec->Branch("PreRec_NclusterX", &m_PreRec_NclusterX);
 	t_PreRec->Branch("PreRec_NclusterY", &m_PreRec_NclusterY);
-
+	t_PreRec->Branch("PreRec_ClusX_ScndM", &m_ClusX_ScndM);
+	t_PreRec->Branch("PreRec_ClusY_ScndM", &m_ClusY_ScndM);
+	t_PreRec->Branch("PreRec_chi2", &m_chi2);
+	t_PreRec->Branch("PreRec_chi2E", &m_chi2E);
+	t_PreRec->Branch("PreRec_chi2Tx", &m_chi2Tx);
+	t_PreRec->Branch("PreRec_chi2Ty", &m_chi2Ty);
+	t_PreRec->Branch("PreRec_chi2comb_C2", &m_chi2comb);
+	t_PreRec->Branch("PreRec_showerX_Nbars", &m_showerX_Nbars);
+	t_PreRec->Branch("PreRec_showerX_barx", &m_showerX_barx);
+	t_PreRec->Branch("PreRec_showerX_bary", &m_showerX_bary);
+	t_PreRec->Branch("PreRec_showerX_barz", &m_showerX_barz);
+	t_PreRec->Branch("PreRec_showerX_barE", &m_showerX_barE);
+	t_PreRec->Branch("PreRec_showerY_Nbars", &m_showerY_Nbars);
+	t_PreRec->Branch("PreRec_showerY_barx", &m_showerY_barx);
+	t_PreRec->Branch("PreRec_showerY_bary", &m_showerY_bary);
+	t_PreRec->Branch("PreRec_showerY_barz", &m_showerY_barz);
+	t_PreRec->Branch("PreRec_showerY_barE", &m_showerY_barE);
 
 	std::cout<<"CRDEcalDigiAlg::m_scale="<<m_scale<<std::endl;
 	m_geosvc = service<IGeomSvc>("GeoSvc");
@@ -359,6 +373,11 @@ StatusCode CRDEcalDigiAlg::execute()
 		preRec.Eth_SeedWithTot    = _Eth_SeedWithTot;
 		preRec.Eth_ShowerWithTot  = _Eth_ShowerWithTot;
 		preRec.Eth_ClusterWithTot = _Eth_ClusterWithTot;
+		preRec.Sth_split			  	= _Sth_split;
+		preRec.Eth_SeedAbs				=	_Eth_SeedAbs;
+		preRec.Eth_ShowerAbs			= _Eth_ShowerAbs;
+		preRec.Eth_ClusAbs				= _Eth_ClusAbs;
+	
 		//Step1: Cluster bars in 1D. 
 		//std::vector<CRDEcalDigiEDM::BarCollection> barShowerXCol = preRec.Bars2Shower(barColX);
 		//std::vector<CRDEcalDigiEDM::BarCollection> barShowerYCol = preRec.Bars2Shower(barColY);
@@ -371,16 +390,18 @@ StatusCode CRDEcalDigiAlg::execute()
 		for(int i=0;i<barClusterX.size();i++){
 			double _Etot=0;
 			for(int i=0;i<barColX.size();i++) _Etot+=barColX[i].getEnergy();
-			if(barClusterX[i].getE()/_Etot < 0.05) continue;
+			if(barClusterX[i].getE()/_Etot < _Eth_ClusterWithTot || barClusterX[i].getE()<_Eth_ClusAbs ) continue;
 			std::vector<CRDEcalDigiEDM::BarCollection> showers = preRec.ClusterSplitting(barClusterX[i]);
 			barShowerXCol.insert(barShowerXCol.end(), showers.begin(), showers.end());
+			m_ClusX_ScndM.push_back(barClusterX[i].getScndMoment());
 		}
 		for(int i=0;i<barClusterY.size();i++){
 			double _Etot=0;
 			for(int i=0;i<barColY.size();i++) _Etot+=barColY[i].getEnergy();
-			if(barClusterY[i].getE()/_Etot < 0.05) continue;
+			if(barClusterY[i].getE()/_Etot < _Eth_ClusterWithTot || barClusterY[i].getE()<_Eth_ClusAbs) continue;
 			std::vector<CRDEcalDigiEDM::BarCollection> showers = preRec.ClusterSplitting(barClusterY[i]);
 			barShowerYCol.insert(barShowerYCol.end(), showers.begin(), showers.end());
+			m_ClusY_ScndM.push_back(barClusterY[i].getScndMoment());
 		}
 
 
@@ -398,30 +419,45 @@ StatusCode CRDEcalDigiAlg::execute()
 			m_PreRec_Bar1E.push_back(barColY[i].getEnergy());
 		}
 		for(int i=0;i<barShowerXCol.size();i++){ 
-			m_PreRec_XshowerX.push_back(barShowerXCol[i].getPos().x());
-			m_PreRec_YshowerX.push_back(barShowerXCol[i].getPos().y());
-			m_PreRec_ZshowerX.push_back(barShowerXCol[i].getPos().z());
-			m_PreRec_EshowerX.push_back(barShowerXCol[i].getE());
+			m_PreRec_shower0X.push_back(barShowerXCol[i].getPos().x());
+			m_PreRec_shower0Y.push_back(barShowerXCol[i].getPos().y());
+			m_PreRec_shower0Z.push_back(barShowerXCol[i].getPos().z());
+			m_PreRec_shower0E.push_back(barShowerXCol[i].getE());
+		
+			m_showerX_Nbars.push_back(barShowerXCol[i].Bars.size());
+			for(int ii=0;ii<barShowerXCol[i].Bars.size();ii++){
+				m_showerX_barx.push_back(barShowerXCol[i].Bars[ii].position.x());
+				m_showerX_bary.push_back(barShowerXCol[i].Bars[ii].position.y());
+				m_showerX_barz.push_back(barShowerXCol[i].Bars[ii].position.z());
+				m_showerX_barE.push_back(barShowerXCol[i].Bars[ii].getEnergy());
+			}
 		}
 		for(int i=0;i<barShowerYCol.size();i++){ 
-			m_PreRec_XshowerY.push_back(barShowerYCol[i].getPos().x());
-			m_PreRec_YshowerY.push_back(barShowerYCol[i].getPos().y());
-			m_PreRec_ZshowerY.push_back(barShowerYCol[i].getPos().z());
-			m_PreRec_EshowerY.push_back(barShowerYCol[i].getE());
+			m_PreRec_shower1X.push_back(barShowerYCol[i].getPos().x());
+			m_PreRec_shower1Y.push_back(barShowerYCol[i].getPos().y());
+			m_PreRec_shower1Z.push_back(barShowerYCol[i].getPos().z());
+			m_PreRec_shower1E.push_back(barShowerYCol[i].getE());
+
+			m_showerY_Nbars.push_back(barShowerYCol[i].Bars.size());
+			for(int ii=0;ii<barShowerYCol[i].Bars.size();ii++){
+				m_showerY_barx.push_back(barShowerYCol[i].Bars[ii].position.x());
+				m_showerY_bary.push_back(barShowerYCol[i].Bars[ii].position.y());
+				m_showerY_barz.push_back(barShowerYCol[i].Bars[ii].position.z());
+				m_showerY_barE.push_back(barShowerYCol[i].Bars[ii].getEnergy());
+			}
 		}
 		m_PreRec_NshowerX = barShowerXCol.size();
 		m_PreRec_NshowerY = barShowerYCol.size();
 		m_PreRec_NclusterX = barClusterX.size();
 		m_PreRec_NclusterY = barClusterY.size();
 
-		t_PreRec->Fill();
 
 
 		//Step2: Reconstruction in different cases
 		std::vector<edm4hep::ConstCalorimeterHit> m_caloHits; m_caloHits.clear();
 
 		//Case1(1*N or N*1): Use cross-locating directly. 
-		if( barShowerXCol.size()==1 || barShowerYCol.size()==1){
+		if( barShowerXCol.size()<=1 || barShowerYCol.size()<=1 ){
 			if(_Debug>=2) std::cout<<"PreRecAlg: Case1. Shower number X/Y: "<<barShowerXCol.size()<<'\t'<<barShowerYCol.size()<<std::endl;
 			m_caloHits = DigiHitsWithPos(m_block);
 		}
@@ -439,11 +475,7 @@ StatusCode CRDEcalDigiAlg::execute()
 			m_caloHits = DigiHitsWithMatchingL2(barShowerXCol, barShowerYCol);
 		}
 
-		//Case2: Only use time to reconstruct position
-		//else{
-		//if(_Debug>=2) std::cout<<"PreRecAlg: Case2. Shower number X/Y: "<<barShowerXCol.size()<<'\t'<<barShowerYCol.size()<<std::endl;
-		//m_caloHits = DigiHitsWithTime(m_block);
-		//}
+		t_PreRec->Fill();
 
 
 		//Finish caloHits reconstruction. Stored in m_caloHits. 
@@ -615,7 +647,7 @@ void CRDEcalDigiAlg::Clear(){
 }
 
 void CRDEcalDigiAlg::ClearPreRec(){
-   m_PreRec_Bar0x.clear();
+	m_PreRec_Bar0x.clear();
 	m_PreRec_Bar0y.clear();
 	m_PreRec_Bar0z.clear();
 	m_PreRec_Bar0E.clear();
@@ -623,17 +655,34 @@ void CRDEcalDigiAlg::ClearPreRec(){
 	m_PreRec_Bar1y.clear();
 	m_PreRec_Bar1z.clear();
 	m_PreRec_Bar1E.clear();
-   m_PreRec_XshowerX.clear();
-   m_PreRec_YshowerX.clear();
-   m_PreRec_ZshowerX.clear();
-   m_PreRec_EshowerX.clear();
-	m_PreRec_XshowerY.clear();
-	m_PreRec_YshowerY.clear();
-	m_PreRec_ZshowerY.clear();
-	m_PreRec_EshowerY.clear();
-   m_PreRec_NshowerX=-999;
+	m_PreRec_shower0X.clear();
+	m_PreRec_shower0Y.clear();
+	m_PreRec_shower0Z.clear();
+	m_PreRec_shower0E.clear();
+	m_PreRec_shower1X.clear();
+	m_PreRec_shower1Y.clear();
+	m_PreRec_shower1Z.clear();
+	m_PreRec_shower1E.clear();
+	m_PreRec_NshowerX=-999;
 	m_PreRec_NshowerY=-999;
 	m_PreRec_NclusterX=-999;
 	m_PreRec_NclusterY=-999;
+	m_ClusX_ScndM.clear();
+	m_ClusY_ScndM.clear();
+	m_chi2.clear();
+	m_chi2E.clear();
+	m_chi2Tx.clear();
+	m_chi2Ty.clear();
+	m_chi2comb.clear();
 
+	m_showerX_Nbars.clear();
+	m_showerX_barx.clear();
+	m_showerX_bary.clear();
+	m_showerX_barz.clear();
+	m_showerX_barE.clear();
+	m_showerY_Nbars.clear();
+	m_showerY_barx.clear();
+	m_showerY_bary.clear();
+	m_showerY_barz.clear();
+	m_showerY_barE.clear();
 }

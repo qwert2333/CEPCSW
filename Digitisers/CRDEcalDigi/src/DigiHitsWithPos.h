@@ -31,7 +31,6 @@ std::vector<edm4hep::ConstCalorimeterHit> CRDEcalDigiAlg::DigiHitsWithPos(std::v
    }
 
    TVector3 m_vec(0,0,0);
-   dd4hep::Position m_pos(0,0,0);
    for(int ibar=0;ibar<Nbars;ibar++){
       if(m_block[ibar].slayer==1) continue;     //Outer loop in slayer==0.
       CRDEcalDigiEDM::DigiBar bar_s0 = m_block[ibar];

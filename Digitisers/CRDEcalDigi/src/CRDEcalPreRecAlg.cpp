@@ -5,10 +5,14 @@
 using namespace std;
 
 CRDEcalPreRecAlg::CRDEcalPreRecAlg(){
+	Sth_split = -1;
+	Eth_SeedAbs = 0.05; //50MeV
+	Eth_ShowerAbs = 0.01; 
+	Eth_ClusAbs = 0.01;
 	Eth_SeedWithNeigh = 0.4;
 	Eth_SeedWithTot = 0.15;
-	Eth_ShowerWithTot = 0.05;
-	Eth_ClusterWithTot = 0.05;
+	Eth_ShowerWithTot = 0.03;
+	Eth_ClusterWithTot = 0.03;
 	Etot=0;
 }
 
@@ -24,7 +28,7 @@ std::vector<CRDEcalDigiEDM::BarCollection>  CRDEcalPreRecAlg::Bars2Shower( std::
 	m_clusCol = CRDEcalPreRecAlg::Clustering(barCol); 
 
 	for(int i=0;i<m_clusCol.size();i++){
-		if(m_clusCol[i].getE()/Etot < Eth_ClusterWithTot) continue;
+		if( (m_clusCol[i].getE()/Etot < Eth_ClusterWithTot) || m_clusCol[i].getE()<Eth_ClusAbs  ) continue;
 		std::vector<CRDEcalDigiEDM::BarCollection> showers = ClusterSplitting(m_clusCol[i]);
 		m_showers.insert(m_showers.end(), showers.begin(), showers.end());
 	}
@@ -50,117 +54,136 @@ std::vector<CRDEcalDigiEDM::BarCluster> CRDEcalPreRecAlg::Clustering(std::vector
 		CRDEcalDigiEDM::BarCluster clus;
 		clus.Bars.push_back(iBar);
 		m_clusCol.push_back(clus);
-
 	}
 
-	return m_clusCol;
+
+	std::vector<CRDEcalDigiEDM::BarCluster> out_clusCol; out_clusCol.clear();
+	for(int i=0;i<m_clusCol.size();i++){
+		CRDEcalDigiEDM::BarCluster iclus = m_clusCol[i];
+		if( (iclus.getE()/Etot < Eth_ClusterWithTot) || iclus.getE()<Eth_ClusAbs ) continue;
+		iclus.CRDEcalDigiEDM::BarCluster::sortByPos();
+		std::vector<CRDEcalDigiEDM::DigiBar> m_seedVec = findSeeds(iclus);
+		iclus.Seeds = m_seedVec;
+		iclus.Nseeds = m_seedVec.size();
+		iclus.ScndMoment = iclus.getScndMoment();
+		out_clusCol.push_back(iclus);
+	}
+
+	return out_clusCol;
 }
 
 
 std::vector<CRDEcalDigiEDM::BarCollection> CRDEcalPreRecAlg::ClusterSplitting( CRDEcalDigiEDM::BarCluster& m_cluster){
 
 	std::vector<CRDEcalDigiEDM::BarCollection> m_showers; m_showers.clear();
-	m_cluster.CRDEcalDigiEDM::BarCluster::sortByPos();
-	//std::sort(m_cluster.Bars.begin(), m_cluster.Bars.end());
-	std::vector<CRDEcalDigiEDM::BarCollection> m_seedVec; m_seedVec.clear(); 
 
-	CRDEcalDigiEDM::BarCluster tmp_cl = m_cluster;
-	CRDEcalDigiEDM::BarCollection m_seed = findSeed(m_cluster);
-	while(m_seed.getE()/m_cluster.getE() > Eth_SeedWithTot ){
-		m_seedVec.push_back(m_seed);
-		CRDEcalDigiEDM::BarCollection m_neighbor = getNeighbors(tmp_cl, m_seed);
-		RemoveBars(tmp_cl, m_seed);
-		RemoveBars(tmp_cl, m_neighbor);
-		m_seed.Clear();
-		m_seed = findSeed(tmp_cl);
-	}
-
-	int Nseed = m_seedVec.size();
-	m_cluster.Nseeds = Nseed;
-	if(Nseed<2){ 
+	//Not split. Turn cluster to shower and return
+	if(m_cluster.Nseeds<2 || m_cluster.ScndMoment<Sth_split){ 
 		CRDEcalDigiEDM::BarCollection shower;
 		shower.Bars = m_cluster.Bars;
-		if( shower.getE()/Etot > Eth_ShowerWithTot) m_showers.push_back(shower);
+		if(m_cluster.Nseeds!=0) shower.Seed = m_cluster.Seeds[0];
+		if( (shower.getE()/Etot > Eth_ShowerWithTot) && shower.getE()>Eth_ShowerAbs  ) m_showers.push_back(shower);
 		return m_showers;
 	}
 
-	vector<int> index = getShowerEdge(m_cluster, m_seedVec); //array of shower edge. Size should be Nseed+1. 
-	sort(index.begin(), index.end());
+	//Split
+	int Nshower = m_cluster.Nseeds;
+	int Nbars = m_cluster.Bars.size();
+	double Eseed[Nshower] = {0};
+	double weight[Nbars][Nshower] = {0};
+	dd4hep::Position SeedPos[Nshower];
+	for(int is=0;is<Nshower;is++) SeedPos[is] = m_cluster.Seeds[is].position;
 
-	int id0 = m_cluster.Bars[0].bar;
-	for(int ish=0;ish<Nseed; ish++){
-		CRDEcalDigiEDM::BarCollection shower;
-		for(int i=index[ish];i<index[ish+1];i++){
-			shower.Bars.push_back(m_cluster.Bars[i-id0]);
+	bool isConverge = false;
+	int iter=0;
+	do{
+		CalculateInitialEseed(m_cluster.Seeds, SeedPos, Eseed);
+
+		for(int ibar=0;ibar<m_cluster.Bars.size();ibar++){
+			double Eexp[Nshower]; 
+			double Eexp_tot=0;
+			for(int is=0;is<Nshower;is++){ Eexp[is] = Eseed[is]*GetShowerProfile(m_cluster.Bars[ibar].position, SeedPos[is] ); Eexp_tot+= Eexp[is];}
+			for(int is=0;is<Nshower;is++) weight[ibar][is] = Eexp[is]/Eexp_tot;
 		}
-		if( shower.getE()/Etot > Eth_ShowerWithTot) m_showers.push_back(shower); 
+
+		dd4hep::Position SeedPos_prev[Nshower];
+	   for(int is=0;is<Nshower;is++){
+			SeedPos_prev[is]=SeedPos[is];
+   	   CRDEcalDigiEDM::BarCollection shower;
+      	shower.Bars = m_cluster.Bars;
+	      for(int ib=0;ib<shower.Bars.size();ib++){
+   	      shower.Bars[ib].Q1 = shower.Bars[ib].Q1*weight[ib][is];
+      	   shower.Bars[ib].Q2 = shower.Bars[ib].Q2*weight[ib][is];
+	      }
+			SeedPos[is] = shower.getPos();
+   	}
+
+		isConverge=true;
+		for(int is=0;is<Nshower;is++) if((SeedPos_prev[Nshower]-SeedPos[is]).Mag2()>2.89){ isConverge=false; break;}
+		iter++;
+
+for(int is=0;is<Nshower;is++) cout<<(SeedPos_prev[Nshower]-SeedPos[is]).Mag2()<<'\t';
+cout<<endl;
+
 	}
+	while(iter<20 && !isConverge);
+	if(iter>=20) std::cout<<"WARNING: Iteration time larger than 20! Might not converge!"<<std::endl;
+
+	for(int is=0;is<Nshower;is++){
+		CRDEcalDigiEDM::BarCollection shower;
+		shower.Bars = m_cluster.Bars;
+		for(int ib=0;ib<shower.Bars.size();ib++){
+			shower.Bars[ib].Q1 = shower.Bars[ib].Q1*weight[ib][is];
+			shower.Bars[ib].Q2 = shower.Bars[ib].Q2*weight[ib][is];
+		}
+		shower.Energy = shower.getE();
+		shower.pos = shower.getPos();
+		m_showers.push_back(shower);
+	}
+
 	return m_showers;
 
 }
 
 
-CRDEcalDigiEDM::BarCollection CRDEcalPreRecAlg::findSeed(CRDEcalDigiEDM::BarCluster& m_cluster){
+std::vector<CRDEcalDigiEDM::DigiBar> CRDEcalPreRecAlg::findSeeds(CRDEcalDigiEDM::BarCluster& m_cluster){
 
-	CRDEcalDigiEDM::BarCollection m_seed;
-	CRDEcalDigiEDM::DigiBar seedbar;
-	double Emax=-1;
+	std::vector<CRDEcalDigiEDM::DigiBar> m_seeds;
 	for(int i=0;i<m_cluster.Bars.size();i++){
-		if(m_cluster.Bars[i].getEnergy()>Emax){ seedbar = m_cluster.Bars[i]; Emax = m_cluster.Bars[i].getEnergy();}
-	}
-	m_seed.Bars.push_back(seedbar);
-
-	CRDEcalDigiEDM::BarCollection m_neighbor = getNeighbors(m_cluster, m_seed);
-	while(m_seed.getE()!=0 && m_neighbor.getE()!=0 && ( m_seed.getE()/(m_seed.getE()+m_neighbor.getE())<Eth_SeedWithNeigh )){
-		CRDEcalDigiEDM::DigiBar subseed;
-		double Esub=-1;
-		for(int i=0;i<m_neighbor.Bars.size(); i++){
-			if(m_neighbor.Bars[i].getEnergy()>Esub){ subseed = m_neighbor.Bars[i]; Esub = m_neighbor.Bars[i].getEnergy();}
+		CRDEcalDigiEDM::DigiBar ibar = m_cluster.Bars[i]; 
+		std::vector<CRDEcalDigiEDM::DigiBar> m_neighbor = getNeighbors(m_cluster, ibar);
+		if(m_neighbor.size()==0){ 
+			std::cout<<"WARNING: An isolated bar without neighbors! "<<std::endl;
+			if(ibar.getEnergy()>Eth_SeedAbs) m_seeds.push_back(ibar);
+			continue;
 		}
-		if(Esub>0){ m_seed.Bars.push_back(subseed);}
 
-		m_neighbor.Clear();
-		m_neighbor = getNeighbors(m_cluster, m_seed);
-	}	
+		bool isLocalMax=true;
+		bool isIso;
+		double Eneigh=0;
+		for(int j=0;j<m_neighbor.size();j++){
+			if(m_neighbor[j].getEnergy()>ibar.getEnergy()) isLocalMax=false;
+			Eneigh += m_neighbor[j].getEnergy();
+		}
+		isIso = (ibar.getEnergy()/(ibar.getEnergy()+Eneigh))>Eth_SeedWithNeigh;
+		if(ibar.getEnergy()>Eth_SeedAbs && isLocalMax && isIso) m_seeds.push_back(ibar);
+	}
 
-	return m_seed;
+	return m_seeds;
 }
 
-vector<int> CRDEcalPreRecAlg::getShowerEdge(CRDEcalDigiEDM::BarCluster& m_cluster, std::vector<CRDEcalDigiEDM::BarCollection>& m_seedVec){
-	vector<int> index;
 
-	//m_cluster.CRDEcalDigiEDM::BarCluster::sortByPos();
-	std::sort(m_cluster.Bars.begin(), m_cluster.Bars.end());
-	vector<int> seedID;
-	for(int i=0;i<m_seedVec.size();i++){	
-		for(int j=0;j<m_seedVec[i].Bars.size();j++) seedID.push_back(m_seedVec[i].Bars[j].bar);
-	}
+std::vector<CRDEcalDigiEDM::DigiBar> CRDEcalPreRecAlg::getNeighbors(CRDEcalDigiEDM::BarCluster& m_cluster, CRDEcalDigiEDM::DigiBar& seed){
 
-	int id0 = m_cluster.Bars[0].bar;
-	index.push_back(id0);
-	std::sort(seedID.begin(), seedID.end());
-	for(int iseed=0; iseed<seedID.size()-1; iseed++){
-
-		double minE=999;
-		double minIndex=-99;
-		for(int ibar = seedID[iseed]; ibar<seedID[iseed+1]; ibar++){	
-			CRDEcalDigiEDM::DigiBar m_bar = m_cluster.Bars[ibar-id0];
-			if(m_bar.getEnergy()<minE){ minE=m_bar.getEnergy(); minIndex = ibar; }
-		}
-		if(minIndex>0) index.push_back(minIndex);
-	}
-	
-
-	index.push_back(m_cluster.Bars[m_cluster.Bars.size()-1].bar);
-	return index;
-}
-
-CRDEcalDigiEDM::BarCollection CRDEcalPreRecAlg::getNeighbors(CRDEcalDigiEDM::BarCluster& m_cluster, CRDEcalDigiEDM::BarCollection& seed){
-	CRDEcalDigiEDM::BarCollection m_neighbor;
+	std::vector<CRDEcalDigiEDM::DigiBar> m_neighbor;
 	for(int i=0;i<m_cluster.Bars.size();i++){
-		if( seed.isNeighbor(m_cluster.Bars[i]) ) m_neighbor.Bars.push_back(m_cluster.Bars[i]);
+
+		if( seed.isNeighbor(m_cluster.Bars[i]) ) m_neighbor.push_back(m_cluster.Bars[i]);
 	}
-	if(m_neighbor.Bars.size()>2) std::cout<<"WARNING: more than 2 hits in neighborCol!!"<<std::endl;
+	if(m_neighbor.size()>2) std::cout<<"WARNING: more than 2 hits in neighborCol!!"<<std::endl;
+	if(m_neighbor.size()==0) std::cout<<"WARNING: Can not find neighborCol!!"<<std::endl;
+
+
 	return m_neighbor;
 }
 
@@ -177,3 +200,38 @@ void CRDEcalPreRecAlg::RemoveBars(std::vector<CRDEcalDigiEDM::DigiBar>& m_bars, 
 		m_bars.erase(iter, m_bars.end());
 	}
 }
+
+void CRDEcalPreRecAlg::CalculateInitialEseed(std::vector<CRDEcalDigiEDM::DigiBar>& Seeds, dd4hep::Position* pos, double* Eseed){
+//Calculate Eseed by solving a linear function: 
+// [ f(11) .. f(1mu)  .. ]   [E_seed 1 ]   [E_bar 1]
+// [  ..   ..   ..    .. ] * [...      ] = [...    ]
+// [ f(i1) .. f(imu)  .. ]   [E_seed mu]   [E_bar i]
+// [ f(N1) ..   ..  f(NN)]   [E_seed N ]   [E_bar N]
+
+	const int Nele = Seeds.size();
+	std::vector<double> Eratio;
+	std::vector<double> vec_Etot; //bar energy
+
+	TVector vecE(Nele); 
+	TMatrix matrixR(Nele, Nele);
+
+	for(int i=0;i<Nele;i++){ //Loop bar
+		vecE[i] = Seeds[i].getEnergy();
+		for(int j=0;j<Nele;j++) matrixR[i][j] = GetShowerProfile(Seeds[i].position, pos[j]);
+	}
+
+	matrixR.Invert();
+	TVector sol = matrixR*vecE;
+
+	for(int i=0;i<Nele;i++) Eseed[i] = sol[i];
+
+}
+
+double CRDEcalPreRecAlg::GetShowerProfile(dd4hep::Position& p_bar, dd4hep::Position& p_seed ){
+	double frac[10] = {1., 0.2678, 0.1238, 0.0610, 0.0322, 0.0202, 0.0112, 0.0077, 0.0052, 0.0032};
+	dd4hep::Position rpos = p_bar-p_seed;
+	int dis = floor(sqrt(rpos.Mag2())/10 );
+	if(dis>9) return 0;
+	return frac[dis];
+}
+
