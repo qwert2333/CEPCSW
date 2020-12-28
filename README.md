@@ -45,7 +45,7 @@ Keep the collection names compatible between the prototype and the existing CEPC
 * SETCollection
 
 
-##Update in branch dev-EcalRec-v01: CRD Ecal
+## Update in branch dev-EcalRec-v01: CRD Ecal
   * A global Ecal geometry: CRDEcal_v01
   * Digitalization for CRDEcal: Digitisers/CRDEcalDigi/
   * Reconstruction for CRDEcal: Digitisers/CRDEcalDigi/  (Use hard-cut in 1D clustering)
