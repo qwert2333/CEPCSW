@@ -80,13 +80,13 @@ protected:
 	TTree *t_PreRec;
 	
 	FloatVec m_step_x, m_step_y, m_step_z, m_step_E, m_step_T1, m_step_T2, m_stepBar_x, m_stepBar_y, m_stepBar_z;
-	FloatVec m_simBar_x, m_simBar_y, m_simBar_z, m_simBar_T1, m_simBar_T2, m_simBar_Q1, m_simBar_Q2, m_simBar_dlayer, m_simBar_part, m_simBar_block, m_simBar_slayer;
+	FloatVec m_simBar_x, m_simBar_y, m_simBar_z, m_simBar_T1, m_simBar_T2, m_simBar_Q1, m_simBar_Q2, m_simBar_dlayer, m_simBar_part, m_simBar_block, m_simBar_slayer, m_simBar_module;
 	FloatVec m_simTruth_x, m_simTruth_y, m_simTruth_z, m_simTruth_E, m_simTruth_dlayer, m_simTruth_slayer;
 	FloatVec m_Rec_x, m_Rec_y, m_Rec_z, m_Rec_E;
 
 	FloatVec m_PreRec_Bar0x, m_PreRec_Bar0y, m_PreRec_Bar0z, m_PreRec_Bar0E, m_PreRec_Bar1x, m_PreRec_Bar1y, m_PreRec_Bar1z, m_PreRec_Bar1E;
-	FloatVec m_PreRec_shower0E, m_PreRec_shower0X, m_PreRec_shower0Y, m_PreRec_shower0Z;
-	FloatVec m_PreRec_shower1E, m_PreRec_shower1X, m_PreRec_shower1Y, m_PreRec_shower1Z;
+	FloatVec m_PreRec_shower0E, m_PreRec_shower0X, m_PreRec_shower0Y, m_PreRec_shower0Z, m_PreRec_shower0T1, m_PreRec_shower0T2;
+	FloatVec m_PreRec_shower1E, m_PreRec_shower1X, m_PreRec_shower1Y, m_PreRec_shower1Z, m_PreRec_shower1T1, m_PreRec_shower1T2;
 	Int_t    m_PreRec_NshowerX, m_PreRec_NshowerY, m_PreRec_NclusterX, m_PreRec_NclusterY;
 	FloatVec m_ClusX_ScndM, m_ClusY_ScndM;
 	FloatVec m_chi2E, m_chi2Tx, m_chi2Ty, m_chi2, m_chi2comb; 

@@ -11,7 +11,6 @@ CRDEcalPreRecAlg::CRDEcalPreRecAlg(){
 	Eth_ShowerAbs = 0.01; 
 	Eth_ClusAbs = 0.01;
 	Eth_SeedWithNeigh = 0.4;
-	Eth_SeedWithTot = 0.15;
 	Eth_ShowerWithTot = 0.03;
 	Eth_ClusterWithTot = 0.03;
 	Etot=0;

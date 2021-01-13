@@ -52,9 +52,9 @@ static dd4hep::Ref_t create_detector(dd4hep::Detector& theDetector,
 		
 		dd4hep::Material mat_BGO(theDetector.material("G4_BGO"));
 
-      dd4hep::Volume bar_s0("bar_s0", dd4hep::Box(bar_width/2, bar_Length/2, bar_width/2), mat_BGO);
-      bar_s0.setVisAttributes(theDetector, "VisibleRed");
-      bar_s0.setSensitiveDetector(sens);
+		dd4hep::Volume bar_s0("bar_s0", dd4hep::Box(bar_width/2, bar_Length/2, bar_width/2), mat_BGO);
+		bar_s0.setVisAttributes(theDetector, "VisibleRed");
+		bar_s0.setSensitiveDetector(sens);
 		dd4hep::Volume bar_s1("bar_s1", dd4hep::Box(bar_width/2, bar_width/2, bar_Length/2), mat_BGO);
 		bar_s1.setVisAttributes(theDetector, "VisibleGreen");
 		bar_s1.setSensitiveDetector(sens);
@@ -67,18 +67,18 @@ static dd4hep::Ref_t create_detector(dd4hep::Detector& theDetector,
 			dd4hep::DetElement sd(sdet, layername, detid);
 
 			//layer 0: bars along phi. length=barz_s0. Bar num=Nbars
-         for(int ibar0=1;ibar0<=Nbars;ibar0++){
-            dd4hep::PlacedVolume plv_bar0 = layer.placeVolume(bar_s0, dd4hep::Position(-bar_width/2, 0, (2*ibar0-1)*bar_width/2-bar_Length/2) );
-            plv_bar0.addPhysVolID("slayer",0).addPhysVolID("bar",ibar0);
-            std::string barname0 = "CrystalBar_s0_"+std::to_string(ibar0);
-            dd4hep::DetElement bardet0(sd, barname0, detid);
-            bardet0.setPlacement(plv_bar0);
-         }
+			for(int ibar0=1;ibar0<=Nbars;ibar0++){
+				dd4hep::PlacedVolume plv_bar0 = layer.placeVolume(bar_s0, dd4hep::Position(-bar_width/2, 0, (2*ibar0-1)*bar_width/2-bar_Length/2) );
+				plv_bar0.addPhysVolID("slayer",0).addPhysVolID("bar",ibar0);
+				std::string barname0 = "CrystalBar_s0_"+std::to_string(ibar0);
+				dd4hep::DetElement bardet0(sd, barname0, detid);
+				bardet0.setPlacement(plv_bar0);
+			}
 
 			//layer1 
 			for(int ibar1=1;ibar1<=Nbars;ibar1++){
 				dd4hep::PlacedVolume plv_bar1 = layer.placeVolume(bar_s1, dd4hep::Position(bar_width/2, (2*ibar1-1)*bar_width/2-bar_Length/2, 0));
-            plv_bar1.addPhysVolID("slayer",1).addPhysVolID("bar",ibar1);
+				plv_bar1.addPhysVolID("slayer",1).addPhysVolID("bar",ibar1);
 				std::string barname1 = "CrystalBar_s1_"+std::to_string(ibar1);
 				dd4hep::DetElement bardet1(sd, barname1, detid);
 				bardet1.setPlacement(plv_bar1);

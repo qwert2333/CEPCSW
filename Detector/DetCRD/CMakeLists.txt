@@ -21,6 +21,7 @@ gaudi_add_module(DetCRD
 													src/Calorimeter/CRDEcalMatrix.cpp
 													src/Calorimeter/CRDEcal_v01.cpp
 													src/Calorimeter/CRDEcalModule.cpp
+													src/Calorimeter/CRDEcalBlock.cpp
 		 LINK ${DD4hep_COMPONENT_LIBRARIES}
 )
 

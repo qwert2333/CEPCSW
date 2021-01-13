@@ -16,12 +16,13 @@
 #include <map>
 
 std::vector<edm4hep::ConstCalorimeterHit> CRDEcalDigiAlg::DigiHitsWithPos(std::vector<CRDEcalDigiEDM::DigiBar>& m_block){
-   int Nbars = m_block.size();
-   if(Nbars==0) exit(0);
-
    std::vector<edm4hep::ConstCalorimeterHit> m_digiCol; m_digiCol.clear();
+
+   int Nbars = m_block.size();
+   if(Nbars==0){ std::cout<<"WARNING: empty DigiHitsCol returned!"<<std::endl; return m_digiCol;}
+
 	//std::vector<edm4hep::CalorimeterHit> m_digiColForClus; m_digiColForClus.clear();
-   float rotAngle = m_block[0].module*PI/4.;
+   float rotAngle = -m_block[0].module*PI/4.;
    float Edes[2][50]={0};           //Deposited energy in slayer 0/1. 
    float totE[2]={0};
    for(int ibar=0;ibar<Nbars;ibar++){

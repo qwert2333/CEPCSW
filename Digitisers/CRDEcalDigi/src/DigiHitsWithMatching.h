@@ -34,25 +34,42 @@ std::vector<edm4hep::ConstCalorimeterHit> CRDEcalDigiAlg::DigiHitsWithMatching(s
 	double wi_T = _chi2Wi_T/(_chi2Wi_E + _chi2Wi_T);
 
 	TVector3 m_vec(0,0,0);
-	double rotAngle = (barShowerXCol[0].Bars)[0].module*PI/4.;
+	double rotAngle = -(barShowerXCol[0].Bars)[0].module*PI/4.;
+	TVector3 Cblock((barShowerXCol[0].Bars)[0].position.x(), (barShowerXCol[0].Bars)[0].position.y(), (barShowerYCol[0].Bars)[0].position.z());
+
+//cout<<"Block center: "<<Cblock.x()<<'\t'<<Cblock.y()<<'\t'<<Cblock.z()<<endl;
+
+	Cblock.RotateZ(rotAngle);
+
+//cout<<"Block center after rotation: "<<Cblock.x()<<'\t'<<Cblock.y()<<'\t'<<Cblock.z()<<endl;
 
 	for(int ix=0;ix<Nshower;ix++){
 	for(int iy=0;iy<Nshower;iy++){
 		CRDEcalDigiEDM::BarCollection showerX = barShowerXCol[ix];
 		CRDEcalDigiEDM::BarCollection showerY = barShowerYCol[iy];
 
+//cout<<"Shower information in ix: "<<ix<<"and iy: "<<iy<<" (x, y, z, E, T1, T2)"<<endl;
+//cout<<"Shower X: "<<showerX.getPos().x()<<'\t'<<showerX.getPos().y()<<'\t'<<showerX.getPos().z()<<'\t'<<showerX.getE()<<'\t'<<showerX.getT1()<<'\t'<<showerX.getT2()<<endl;
+//cout<<"Shower Y: "<<showerY.getPos().x()<<'\t'<<showerY.getPos().y()<<'\t'<<showerY.getPos().z()<<'\t'<<showerY.getE()<<'\t'<<showerY.getT1()<<'\t'<<showerY.getT2()<<endl;
+
+
 		double Ex = showerX.getE();
 		double Ey = showerY.getE();
 		chi2_E[ix][iy] = pow(fabs(Ex-Ey)/sigmaE, 2);
 
-		double PosTx = C*(showerX.getT1()-showerX.getT2())/(2*nMat) + showerX.getPos().z();
-		double PosTy = C*(showerY.getT1()-showerY.getT2())/(2*nMat);
-		chi2_tx[ix][iy] = pow( fabs(PosTx-showerY.getPos().z())/sigmaPos, 2);
+//cout<<"chi2E: "<<chi2_E[ix][iy]<<endl;
 
-		m_vec.SetXYZ(showerX.getPos().x(), showerX.getPos().y(), showerX.getPos().z());
+		double PosTx = C*(showerY.getT1()-showerY.getT2())/(2*nMat) + showerY.getPos().z();
+		chi2_tx[ix][iy] = pow( fabs(PosTx-showerX.getPos().z())/sigmaPos, 2);
+
+		double PosTy = C*(showerX.getT1()-showerX.getT2())/(2*nMat);
+		m_vec.SetXYZ(showerY.getPos().x(), showerY.getPos().y(), showerY.getPos().z());
 		m_vec.RotateZ(rotAngle);
-		chi2_ty[ix][iy] = pow( fabs(PosTy - m_vec.x() )/sigmaPos, 2);
+		chi2_ty[ix][iy] = pow( fabs(PosTy - (m_vec-Cblock).x() )/sigmaPos, 2);
 
+//cout<<"Shower vec after rot: "<<m_vec.x()<<'\t'<<m_vec.y()<<'\t'<<m_vec.z()<<endl;
+//cout<<"posTx, posTy and barx: "<<PosTx<<'\t'<<PosTy<<'\t'<<(m_vec-Cblock).x()<<endl;
+//cout<<"chi2_tx and chi2_ty: "<<chi2_tx[ix][iy]<<'\t'<<chi2_ty[ix][iy]<<endl;
 		chi2[ix][iy] = chi2_E[ix][iy]*wi_E + (chi2_tx[ix][iy]+chi2_ty[ix][iy])*wi_T ;
 
 		m_chi2.push_back(chi2[ix][iy]);
@@ -60,10 +77,12 @@ std::vector<edm4hep::ConstCalorimeterHit> CRDEcalDigiAlg::DigiHitsWithMatching(s
 		m_chi2Tx.push_back(chi2_tx[ix][iy]);
 		m_chi2Ty.push_back(chi2_ty[ix][iy]);
 	}}
-
+//cout<<endl;
 
 	int Ncomb=1;
 	for(int i=Nshower; i>0; i--) Ncomb = Ncomb*i;
+
+//cout<<"Nshower and Ncomb: "<<Nshower<<'\t'<<Ncomb<<endl;
 
 	map<double, vector<pair<int, int>> > matchingMap;
 	int num[Nshower];
