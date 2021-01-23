@@ -404,7 +404,6 @@ static Ref_t create_detector(Detector& theDetector, xml_h element, SensitiveDete
   //   module = 1 is at -ve z
 
   for (int istave = 0; istave < nsides ; istave++) {
-    //for (int istave = 0; istave < 1 ; istave++) {
     int stave_id = istave+1;
 
     // dstave is the change in stave index from the top module to the one with smallest positive phi (which has istave=0)

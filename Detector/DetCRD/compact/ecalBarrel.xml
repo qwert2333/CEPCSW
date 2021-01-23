@@ -7,6 +7,10 @@
   </includes>
 
   <define>
+  <constant name="DetType_CALORIMETER"     value =  " 0x2 "/>
+  <constant name="DetType_BARREL"          value =  " 0x10 "/>
+  <constant name="DetType_ELECTROMAGNETIC" value =  " 0x800 "/>
+
     <constant name="world_size" value="30*m"/>
     <constant name="world_x" value="world_size"/>
     <constant name="world_y" value="world_size"/>
@@ -16,8 +20,7 @@
     <constant name="ecalbarrel_inner_radius" value="1800*mm"/>
     <constant name="ecalbarrel_thickness"    value="280*mm"/>    <!--Must be n*bar_x! -->
     <constant name="ecalbarrel_zlength"      value="4600*mm"/>   <!--Must be n*bar_y! -->
-
-    <include ref="detector_types.xml"/>
+    <!--include ref="detector_types.xml"/-->
   </define>
 
   <display>
@@ -30,7 +33,7 @@
 
   <detectors>
     <detector id="31" name="ECalBarrel" type="CRDEcalBarrel_v01" readout="CaloHitsCollection" vis="Invisible" sensitive="true">
-      <type_flags type=" DetType_CALORIMETER + DetType_BARREL + DetType_ELECTROMAGNETIC " />
+	   <type_flags type=" DetType_CALORIMETER + DetType_BARREL + DetType_ELECTROMAGNETIC " />
       <!-- Use cm as unit if you want to use Pandora for reconstruction -->
     </detector>
   </detectors>
