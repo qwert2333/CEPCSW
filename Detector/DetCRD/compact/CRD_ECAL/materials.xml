@@ -548,26 +548,12 @@
        <fraction n="0.194" ref="Cu" />
     </material>
 
-    <material name="G4_PARAFFIN">
-      <D type="density" value="0.93" unit="g/cm3" />
-       <fraction n="0.148605" ref="H" />
-       <fraction n="0.851395" ref="C" />
-    </material>
-
-    <material name="G4_BGO" state="solid">
-      <MEE unit="eV" value="534.1"/>
-      <D value="7.13" unit="g/cm3" />
-      <fraction n="0.154126" ref="O"/>
-      <fraction n="0.174820" ref="Ge" />
-      <fraction n="0.671054" ref="Bi" />
-    </material>
-
-    <!-- Driftchamber: material for the drift chamber -->
-   <material name="GasHe_90Isob_10">
-     <D value="0.0003983999999999999" unit="g/cm3" />
-     <fraction n="0.3826351004462046" ref="He"/>
-     <fraction n="0.011371937371285891"   ref="H" />
-     <fraction n="0.6059929621825095" ref="C" />
-   </material>
+  <material name="G4_BGO" state="solid">
+    <MEE unit="eV" value="534.1"/>
+    <D value="7.13" unit="g/cm3" />
+    <fraction n="0.154126" ref="O"/>
+    <fraction n="0.174820" ref="Ge" />
+    <fraction n="0.671054" ref="Bi" />
+  </material>
 
   </materials>

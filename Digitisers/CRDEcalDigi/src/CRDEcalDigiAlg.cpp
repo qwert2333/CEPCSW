@@ -135,8 +135,8 @@ StatusCode CRDEcalDigiAlg::initialize()
 	dd4hep::Detector* m_dd4hep = m_geosvc->lcdd();
 	if ( !m_dd4hep )  throw "CRDEcalDigiAlg :Failed to get dd4hep::Detector ...";
 	m_cellIDConverter = new dd4hep::rec::CellIDPositionConverter(*m_dd4hep);
-	const std::string name_readout = "CaloHitsCollection";
-	m_decoder = m_geosvc->getDecoder(name_readout);
+	//const std::string name_readout = "CaloHitsCollection";
+	m_decoder = m_geosvc->getDecoder(_readout);
 	if (!m_decoder) {
 		error() << "Failed to get the decoder. " << endmsg;
 		return StatusCode::FAILURE;
@@ -366,6 +366,7 @@ StatusCode CRDEcalDigiAlg::execute()
 		ClearPreRec();
 
 		std::vector<CRDEcalDigiEDM::DigiBar> m_block = iter->second;
+		if(m_block.size()==0){ std::cout<<"WARNING: No DigiBar in this block!"<<std::endl; continue;}
 
 		std::vector<CRDEcalDigiEDM::DigiBar> barColX; barColX.clear();
 		std::vector<CRDEcalDigiEDM::DigiBar> barColY; barColY.clear();
@@ -505,6 +506,9 @@ StatusCode CRDEcalDigiAlg::execute()
 			m_Rec_E.push_back(m_caloHits[ihit].getEnergy());
 			caloVec->push_back(m_caloHits[ihit]);
 		}
+
+
+
 	}
 	t_Rec->Fill();
 	if(_Debug>=1) std::cout<<"RecoDigiHit Number: "<<caloVec->size()<<std::endl;

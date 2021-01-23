@@ -1,13 +1,14 @@
+<!--
+   SET parameters for ILD_o1_v5
+  -->
+
 <lccdd>
-  <define>
-    <constant name="SET_inner_radius" value="OuterTracker_outer_radius + env_safety"/>
-    <constant name="SET_outer_radius" value="Ecal_barrel_inner_radius - env_safety "/>
-    <constant name="SET_half_length"  value="OuterTracker_half_length"/>
-  </define>
 
   <detectors>
-    <detector id="DetID_SET" name="SET" type="SET_Simple_Planar" vis="SETVis" readout="SETCollection" insideTrackingVolume="true">
-      <envelope vis="SETVis">
+
+    <detector name="SET" type="SET_Simple_Planar" vis="ILD_SETVis" id="ILDDetID_SET" readout="SETCollection" insideTrackingVolume="true">
+
+      <envelope vis="ILD_SETVis">
         <shape type="Tube" rmin="SET_inner_radius" rmax="SET_outer_radius" dz="SET_half_length"  material = "Air" />
       </envelope>
 
@@ -36,7 +37,8 @@
 
   <readouts>
     <readout name="SETCollection">
-      <id>system:5,side:-2,layer:9,module:8,sensor:8,barrelside:-2</id>
+      <!-- fixme: for now DD4hep cannot handle signed values - side should actually be "-2" -->
+      <id>system:5,side:2,layer:9,module:8,sensor:8</id>
     </readout>
   </readouts>
 

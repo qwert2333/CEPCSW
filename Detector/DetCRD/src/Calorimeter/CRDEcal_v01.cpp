@@ -96,10 +96,10 @@ static dd4hep::Ref_t create_detector(dd4hep::Detector& theDetector,
 		_caloLayer.distance 								 = R0+il*2*barx;
 		_caloLayer.phi0 										 = 0;
 		_caloLayer.absorberThickness 				 = 0;
-    _caloLayer.inner_nRadiationLengths   = 0;
-    _caloLayer.inner_nInteractionLengths = 0;
-    _caloLayer.outer_nRadiationLengths   = 0;
-    _caloLayer.outer_nInteractionLengths = 0;
+    _caloLayer.inner_nRadiationLengths   = 0.01;
+    _caloLayer.inner_nInteractionLengths = 0.01;
+    _caloLayer.outer_nRadiationLengths   = 0.01;
+    _caloLayer.outer_nInteractionLengths = 0.01;
 		_caloLayer.inner_thickness					 = barx;		//1cm
 		_caloLayer.outer_thickness					 = barx;		//1cm
     _caloLayer.sensitive_thickness       = 2*barx;	//2cm
