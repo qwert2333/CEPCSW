@@ -54,11 +54,10 @@ public:
 	edm4hep::SimCalorimeterHit find(std::vector<edm4hep::SimCalorimeterHit> m_col, unsigned long long cellid);
 	unsigned long int coder(CRDEcalDigiEDM::DigiBar bar);
 
-	std::vector<edm4hep::ConstCalorimeterHit> DigiHitsWithPos(std::vector<CRDEcalDigiEDM::DigiBar>& m_block);
-	std::vector<edm4hep::ConstCalorimeterHit> DigiHitsWithTime(std::vector<CRDEcalDigiEDM::DigiBar>& m_block);
+	std::vector<edm4hep::ConstCalorimeterHit> DigiHitsWithPos( CRDEcalDigiEDM::BarCollection& barShowerX, CRDEcalDigiEDM::BarCollection& barShowerY);
 	std::vector<edm4hep::ConstCalorimeterHit> DigiHitsWithEnergy(std::vector<CRDEcalDigiEDM::DigiBar>& m_block, std::vector<CRDEcalDigiEDM::BarCollection>& barShowerX, std::vector<CRDEcalDigiEDM::BarCollection>& barShowerY);
-	std::vector<edm4hep::ConstCalorimeterHit> DigiHitsWithMatching(std::vector<CRDEcalDigiEDM::BarCollection>& barShowerXCol, std::vector<CRDEcalDigiEDM::BarCollection>& barShowerYCol);
-	std::vector<edm4hep::ConstCalorimeterHit> DigiHitsWithMatchingL2(std::vector<CRDEcalDigiEDM::BarCollection>& barShowerXCol, std::vector<CRDEcalDigiEDM::BarCollection>& barShowerYCol);
+	std::vector<CRDEcalDigiEDM::CRD2DShowerInLayer> DigiHitsWithMatching(std::vector<CRDEcalDigiEDM::BarCollection>& barShowerXCol, std::vector<CRDEcalDigiEDM::BarCollection>& barShowerYCol);
+	std::vector<CRDEcalDigiEDM::CRD2DShowerInLayer> DigiHitsWithMatchingL2(std::vector<CRDEcalDigiEDM::BarCollection>& barShowerXCol, std::vector<CRDEcalDigiEDM::BarCollection>& barShowerYCol);
 
 
 	void Clear();

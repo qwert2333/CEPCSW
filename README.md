@@ -14,7 +14,7 @@ Before run following commands, please make sure you setup the CVMFS:
 ```
 $ git clone git@github.com:cepc/CEPCSW.git
 $ cd CEPCSW
-$ git checkout dev-EcalRec-v02 # branch name
+$ git checkout dev-EcalRec-v03 # branch name
 $ source setup.sh
 $ ./build.sh
 $ ./run.sh Examples/options/helloalg.py
@@ -45,5 +45,6 @@ Keep the collection names compatible between the prototype and the existing CEPC
 * SETCollection
 
 
-## Update in branch dev-EcalRec-v02: CRD Ecal Reconstruction
-  * /Digitisers/CRDEcalDigi Use BESIII EMC seed finding and shower splitting method in 1D clustering
+## Update in branch dev-EcalRec-v03: CRD Ecal Reconstruction
+  * link the hits in longitutional layers. 
+  * Develope a new PFA for crystal ECal. 

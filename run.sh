@@ -31,12 +31,12 @@ function build-dir() {
     local blddir=build
 
     # If detect the extra env var, append it to the build dir
-    if [ -n "${lcg_version}" ]; then
-        blddir=${blddir}.${lcg_version}
-    fi
-    if [ -n "${lcg_platform}" ]; then
-        blddir=${blddir}.${lcg_platform}
-    fi
+#    if [ -n "${lcg_version}" ]; then
+#        blddir=${blddir}.${lcg_version}
+#    fi
+#    if [ -n "${lcg_platform}" ]; then
+#        blddir=${blddir}.${lcg_platform}
+#    fi
 
     echo $blddir
 }

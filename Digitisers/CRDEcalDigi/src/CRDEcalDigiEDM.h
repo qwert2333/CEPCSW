@@ -178,5 +178,16 @@ public:
 	//bool compE(DigiBar &a, DigiBar &b){ return (a.getEnergy() < b.getEnergy()); }
 
 
+	class CRD2DShowerInLayer{
+	public: 	
+		void Clear(){
+			barShowerX.Clear(); barShowerY.Clear(); CaloHits.clear();
+		}
+		CRDEcalDigiEDM::BarCollection barShowerX;
+		CRDEcalDigiEDM::BarCollection barShowerY;
+		std::vector<edm4hep::ConstCalorimeterHit> CaloHits;
+	};
+
+
 };
 #endif
