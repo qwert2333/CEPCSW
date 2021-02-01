@@ -33,8 +33,8 @@ dsvc = k4DataSvc("EventDataSvc")
 ##############################################################################
 
 #geometry_path = "/cefs/higgs/guofy/cepcsoft/CEPCSW_dev/CEPCSW/Detector/DetCRD/compact/ecalBarrel.xml"
-#geometry_path = "/cefs/higgs/guofy/cepcsoft/CEPCSW_dev/CEPCSW/Detector/DetCRD/compact/CRD_ECAL/CepC_v4-onlyECAL.xml"
-geometry_path = "/cefs/higgs/guofy/cepcsoft/CEPCSW_dev/CEPCSW/Detector/DetCRD/compact/CRD_ECAL/CepC_v4.xml"
+geometry_path = "/cefs/higgs/guofy/cepcsoft/CEPCSW_dev/CEPCSW_dev02/Detector/DetCRD/compact/CRD_ECAL/CepC_v4-onlyECAL.xml"
+#geometry_path = "/cefs/higgs/guofy/cepcsoft/CEPCSW_dev/CEPCSW_dev02/Detector/DetCRD/compact/CRD_ECAL/CepC_v4.xml"
 if not os.path.exists(geometry_path):
     print("Can't find the compact geometry file: %s"%geometry_path)
     sys.exit(-1)
@@ -55,16 +55,16 @@ from Configurables import GenPrinter
 
 
 gun = GtGunTool("GtGunTool")
-gun.Particles = ["e+","e-"]
-gun.PositionXs = [0.,0.] # mm
-gun.PositionYs = [0.,0.] # mm
-gun.PositionZs = [-30.,30.] # mm
-gun.EnergyMins = [10.,10.] # GeV
-gun.EnergyMaxs = [10.,10.] # GeV
-gun.ThetaMins = [90., 90.] # rad; 45deg
-gun.ThetaMaxs = [90., 90.] # rad; 45deg
-gun.PhiMins = [0., 0.] # rad; 0deg
-gun.PhiMaxs = [0., 0.] # rad; 360deg
+gun.Particles = ["gamma"]
+gun.PositionXs = [0.] # mm
+gun.PositionYs = [0.] # mm
+gun.PositionZs = [0.] # mm
+gun.EnergyMins = [10.] # GeV
+gun.EnergyMaxs = [10.] # GeV
+gun.ThetaMins = [90.] # rad; 45deg
+gun.ThetaMaxs = [90.] # rad; 45deg
+gun.PhiMins = [0.] # rad; 0deg
+gun.PhiMaxs = [0.] # rad; 360deg
 
 
 # stdheprdr = StdHepRdr("StdHepRdr")
@@ -124,7 +124,7 @@ example_dettool = AnExampleDetElemTool("AnExampleDetElemTool")
 ##############################################################################
 from Configurables import PodioOutput
 out = PodioOutput("outputalg")
-out.filename = "CRDGlobalTest_eePFA.root"
+out.filename = "CRDGlobalTest_1gamPFA.root"
 out.outputCommands = ["keep *"]
 
 ##############################################################################

@@ -18,18 +18,15 @@
 
 using namespace std;
 
-std::vector<edm4hep::ConstCalorimeterHit> CRDEcalDigiAlg::DigiHitsWithMatching(std::vector<CRDEcalDigiEDM::BarCollection>& barShowerXCol, std::vector<CRDEcalDigiEDM::BarCollection>& barShowerYCol){
+std::vector<CRDEcalDigiEDM::CRD2DShowerInLayer> CRDEcalDigiAlg::DigiHitsWithMatching(std::vector<CRDEcalDigiEDM::BarCollection>& barShowerXCol, std::vector<CRDEcalDigiEDM::BarCollection>& barShowerYCol){
 
-	std::vector<edm4hep::ConstCalorimeterHit> m_digiCol; m_digiCol.clear();
+	std::vector<CRDEcalDigiEDM::CRD2DShowerInLayer> m_showerCol; m_showerCol.clear();
 
 	const int Nshower = barShowerXCol.size();
 	double chi2[Nshower][Nshower];
 	double chi2_E[Nshower][Nshower];
 	double chi2_tx[Nshower][Nshower];
 	double chi2_ty[Nshower][Nshower];
-	double _sumChi2E=0;
-	double _sumChi2Tx=0;
-	double _sumChi2Ty=0;
 
 	double sigmaE = 0.05;  //Energy resolution 5%
 	double sigmaPos = sqrt(10*10/12 + pow((Tres*C/(2*nMat)),2) );	//position resolution
@@ -40,16 +37,27 @@ std::vector<edm4hep::ConstCalorimeterHit> CRDEcalDigiAlg::DigiHitsWithMatching(s
 	double rotAngle = -(barShowerXCol[0].Bars)[0].module*PI/4.;
 	TVector3 Cblock((barShowerXCol[0].Bars)[0].position.x(), (barShowerXCol[0].Bars)[0].position.y(), (barShowerYCol[0].Bars)[0].position.z());
 
+//cout<<"Block center: "<<Cblock.x()<<'\t'<<Cblock.y()<<'\t'<<Cblock.z()<<endl;
+
 	Cblock.RotateZ(rotAngle);
+
+//cout<<"Block center after rotation: "<<Cblock.x()<<'\t'<<Cblock.y()<<'\t'<<Cblock.z()<<endl;
 
 	for(int ix=0;ix<Nshower;ix++){
 	for(int iy=0;iy<Nshower;iy++){
 		CRDEcalDigiEDM::BarCollection showerX = barShowerXCol[ix];
 		CRDEcalDigiEDM::BarCollection showerY = barShowerYCol[iy];
 
+//cout<<"Shower information in ix: "<<ix<<"and iy: "<<iy<<" (x, y, z, E, T1, T2)"<<endl;
+//cout<<"Shower X: "<<showerX.getPos().x()<<'\t'<<showerX.getPos().y()<<'\t'<<showerX.getPos().z()<<'\t'<<showerX.getE()<<'\t'<<showerX.getT1()<<'\t'<<showerX.getT2()<<endl;
+//cout<<"Shower Y: "<<showerY.getPos().x()<<'\t'<<showerY.getPos().y()<<'\t'<<showerY.getPos().z()<<'\t'<<showerY.getE()<<'\t'<<showerY.getT1()<<'\t'<<showerY.getT2()<<endl;
+
+
 		double Ex = showerX.getE();
 		double Ey = showerY.getE();
 		chi2_E[ix][iy] = pow(fabs(Ex-Ey)/sigmaE, 2);
+
+//cout<<"chi2E: "<<chi2_E[ix][iy]<<endl;
 
 		double PosTx = C*(showerY.getT1()-showerY.getT2())/(2*nMat) + showerY.getPos().z();
 		chi2_tx[ix][iy] = pow( fabs(PosTx-showerX.getPos().z())/sigmaPos, 2);
@@ -59,26 +67,22 @@ std::vector<edm4hep::ConstCalorimeterHit> CRDEcalDigiAlg::DigiHitsWithMatching(s
 		m_vec.RotateZ(rotAngle);
 		chi2_ty[ix][iy] = pow( fabs(PosTy - (m_vec-Cblock).x() )/sigmaPos, 2);
 
-		_sumChi2E+=chi2_E[ix][iy];
-		_sumChi2Tx+=chi2_tx[ix][iy];
-		_sumChi2Ty+=chi2_ty[ix][iy];
-	}}
-
-	for(int ix=0;ix<Nshower;ix++){
-	for(int iy=0;iy<Nshower;iy++){
-		chi2_E[ix][iy] = chi2_E[ix][iy]/_sumChi2E;
-		chi2_tx[ix][iy] = chi2_tx[ix][iy]/_sumChi2Tx;
-		chi2_ty[ix][iy] = chi2_ty[ix][iy]/_sumChi2Ty;
-		chi2[ix][iy] = chi2_E[ix][iy]*wi_E + (chi2_tx[ix][iy]+chi2_ty[ix][iy])*wi_T/2. ;
+//cout<<"Shower vec after rot: "<<m_vec.x()<<'\t'<<m_vec.y()<<'\t'<<m_vec.z()<<endl;
+//cout<<"posTx, posTy and barx: "<<PosTx<<'\t'<<PosTy<<'\t'<<(m_vec-Cblock).x()<<endl;
+//cout<<"chi2_tx and chi2_ty: "<<chi2_tx[ix][iy]<<'\t'<<chi2_ty[ix][iy]<<endl;
+		chi2[ix][iy] = chi2_E[ix][iy]*wi_E + (chi2_tx[ix][iy]+chi2_ty[ix][iy])*wi_T ;
 
 		m_chi2.push_back(chi2[ix][iy]);
 		m_chi2E.push_back(chi2_E[ix][iy]);
 		m_chi2Tx.push_back(chi2_tx[ix][iy]);
 		m_chi2Ty.push_back(chi2_ty[ix][iy]);
 	}}
+//cout<<endl;
 
 	int Ncomb=1;
 	for(int i=Nshower; i>0; i--) Ncomb = Ncomb*i;
+
+//cout<<"Nshower and Ncomb: "<<Nshower<<'\t'<<Ncomb<<endl;
 
 	map<double, vector<pair<int, int>> > matchingMap;
 	int num[Nshower];
@@ -107,15 +111,14 @@ std::vector<edm4hep::ConstCalorimeterHit> CRDEcalDigiAlg::DigiHitsWithMatching(s
       CRDEcalDigiEDM::BarCollection showerX = barShowerXCol[Index[i].first];
       CRDEcalDigiEDM::BarCollection showerY = barShowerYCol[Index[i].second];
 
-		std::vector<edm4hep::ConstCalorimeterHit> m_hitsInShower; m_hitsInShower.clear();
-		std::vector<CRDEcalDigiEDM::DigiBar> m_ShowerBlock; m_ShowerBlock.clear();
-		m_ShowerBlock.insert(m_ShowerBlock.end(), showerX.Bars.begin(), showerX.Bars.end());
-		m_ShowerBlock.insert(m_ShowerBlock.end(), showerY.Bars.begin(), showerY.Bars.end());
-		m_hitsInShower = DigiHitsWithPos(m_ShowerBlock);
-		m_digiCol.insert(m_digiCol.end(), m_hitsInShower.begin(), m_hitsInShower.end());
+		CRDEcalDigiEDM::CRD2DShowerInLayer tmp_shower; tmp_shower.Clear();
+      tmp_shower.barShowerX = showerX;
+      tmp_shower.barShowerY = showerY;
+		tmp_shower.CaloHits = DigiHitsWithPos(showerX, showerY);
+		m_showerCol.push_back(tmp_shower);
 	}
 
-	return m_digiCol;
+	return m_showerCol;
 
 }
 

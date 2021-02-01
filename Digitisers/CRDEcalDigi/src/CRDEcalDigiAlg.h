@@ -50,15 +50,14 @@ public:
 	std::vector<edm4hep::SimCalorimeterHit> MergeHits(const edm4hep::SimCalorimeterHitCollection* m_col);
 	double GetBarLength(CRDEcalDigiEDM::DigiBar bar);
 	dd4hep::Position GetCellPos(dd4hep::Position pos, CRDEcalDigiEDM::DigiBar bar);
-	edm4hep::SimCalorimeterHit find(edm4hep::SimCalorimeterHitCollection* m_col, dd4hep::Position pos);
+	edm4hep::CalorimeterHit find(edm4hep::CalorimeterHitCollection* m_col, dd4hep::Position pos);
 	edm4hep::SimCalorimeterHit find(std::vector<edm4hep::SimCalorimeterHit> m_col, unsigned long long cellid);
 	unsigned long int coder(CRDEcalDigiEDM::DigiBar bar);
 
-	std::vector<edm4hep::ConstCalorimeterHit> DigiHitsWithPos(std::vector<CRDEcalDigiEDM::DigiBar>& m_block);
-	std::vector<edm4hep::ConstCalorimeterHit> DigiHitsWithTime(std::vector<CRDEcalDigiEDM::DigiBar>& m_block);
+	std::vector<edm4hep::ConstCalorimeterHit> DigiHitsWithPos( CRDEcalDigiEDM::BarCollection& barShowerX, CRDEcalDigiEDM::BarCollection& barShowerY);
 	std::vector<edm4hep::ConstCalorimeterHit> DigiHitsWithEnergy(std::vector<CRDEcalDigiEDM::DigiBar>& m_block, std::vector<CRDEcalDigiEDM::BarCollection>& barShowerX, std::vector<CRDEcalDigiEDM::BarCollection>& barShowerY);
-	std::vector<edm4hep::ConstCalorimeterHit> DigiHitsWithMatching(std::vector<CRDEcalDigiEDM::BarCollection>& barShowerXCol, std::vector<CRDEcalDigiEDM::BarCollection>& barShowerYCol);
-	std::vector<edm4hep::ConstCalorimeterHit> DigiHitsWithMatchingL2(std::vector<CRDEcalDigiEDM::BarCollection>& barShowerXCol, std::vector<CRDEcalDigiEDM::BarCollection>& barShowerYCol);
+	std::vector<CRDEcalDigiEDM::CRD2DShowerInLayer> DigiHitsWithMatching(std::vector<CRDEcalDigiEDM::BarCollection>& barShowerXCol, std::vector<CRDEcalDigiEDM::BarCollection>& barShowerYCol);
+	std::vector<CRDEcalDigiEDM::CRD2DShowerInLayer> DigiHitsWithMatchingL2(std::vector<CRDEcalDigiEDM::BarCollection>& barShowerXCol, std::vector<CRDEcalDigiEDM::BarCollection>& barShowerYCol);
 
 
 	void Clear();
@@ -104,7 +103,7 @@ protected:
   // Input collections
   DataHandle<edm4hep::SimCalorimeterHitCollection> r_SimCaloCol{"SimCaloCol", Gaudi::DataHandle::Reader, this};
 	mutable Gaudi::Property<std::string> _filename{this, "OutFileName", "testout.root", "Output file name"};
-	mutable Gaudi::Property<std::string> _readout{this, "ReadOutName", "EcalBarrelCollection", "Readout name"};
+   mutable Gaudi::Property<std::string> _readout{this, "ReadOutName", "EcalBarrelCollection", "Readout name"};
 	mutable Gaudi::Property<float> _seed{this, 	"Seed", 2131, "Random Seed"};
 	mutable Gaudi::Property<int>  _Debug{this, 	"Debug", 0, "Debug level"};
 	mutable Gaudi::Property<float> _Eth {this, 	"EnergyThreshold", 0.001, "Energy Threshold (/GeV)"};
@@ -134,7 +133,7 @@ protected:
 
   // Output collections
   DataHandle<edm4hep::CalorimeterHitCollection>    w_DigiCaloCol{"DigiCaloCol", Gaudi::DataHandle::Writer, this};
-  DataHandle<edm4hep::SimCalorimeterHitCollection>    w_SimCaloTruth{"SimCaloCol", Gaudi::DataHandle::Writer, this};
+  DataHandle<edm4hep::CalorimeterHitCollection>    w_SimCaloTruth{"SimCaloCol", Gaudi::DataHandle::Writer, this};
   DataHandle<edm4hep::MCRecoCaloAssociationCollection>    w_CaloAssociationCol{"MCRecoCaloAssociationCollection", Gaudi::DataHandle::Writer, this};
 };
 

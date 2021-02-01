@@ -135,7 +135,6 @@ StatusCode CRDEcalDigiAlg::initialize()
 	dd4hep::Detector* m_dd4hep = m_geosvc->lcdd();
 	if ( !m_dd4hep )  throw "CRDEcalDigiAlg :Failed to get dd4hep::Detector ...";
 	m_cellIDConverter = new dd4hep::rec::CellIDPositionConverter(*m_dd4hep);
-	//const std::string name_readout = "CaloHitsCollection";
 	m_decoder = m_geosvc->getDecoder(_readout);
 	if (!m_decoder) {
 		error() << "Failed to get the decoder. " << endmsg;
@@ -157,7 +156,7 @@ StatusCode CRDEcalDigiAlg::execute()
 
 	edm4hep::CalorimeterHitCollection* caloVec = w_DigiCaloCol.createAndPut();
 	edm4hep::MCRecoCaloAssociationCollection* caloAssoVec = w_CaloAssociationCol.createAndPut();
-	edm4hep::SimCalorimeterHitCollection* SimHitCellCol = w_SimCaloTruth.createAndPut();
+	edm4hep::CalorimeterHitCollection* SimHitCellCol = w_SimCaloTruth.createAndPut();
  	std::vector<edm4hep::SimCalorimeterHit> m_simhitCol; m_simhitCol.clear();
 
 
@@ -298,7 +297,7 @@ StatusCode CRDEcalDigiAlg::execute()
 			//Create truth SimHit(1cm*1cm*1cm cellsize)
 			//NOTE: NO cellID for this truth SimHit. 
 			dd4hep::Position truthpos = GetCellPos(steppos, hitbar); 
-			edm4hep::SimCalorimeterHit simhitTruth = find(SimHitCellCol, truthpos); 
+			edm4hep::CalorimeterHit simhitTruth = find(SimHitCellCol, truthpos); 
 			if(simhitTruth.getCellID()==0){ 
 				simhitTruth = SimHitCellCol->create();
 				edm4hep::Vector3f m_vec(truthpos.x(), truthpos.y(), truthpos.z());
@@ -308,7 +307,7 @@ StatusCode CRDEcalDigiAlg::execute()
 				m_simTruth_dlayer.push_back(hitbar.dlayer);
 			}
 
-			simhitTruth.addToContributions(conb);
+			//simhitTruth.addToContributions(conb);
 			simhitTruth.setEnergy(simhitTruth.getEnergy()+en );
 
 		}
@@ -366,7 +365,6 @@ StatusCode CRDEcalDigiAlg::execute()
 		ClearPreRec();
 
 		std::vector<CRDEcalDigiEDM::DigiBar> m_block = iter->second;
-		if(m_block.size()==0){ std::cout<<"WARNING: No DigiBar in this block!"<<std::endl; continue;}
 
 		std::vector<CRDEcalDigiEDM::DigiBar> barColX; barColX.clear();
 		std::vector<CRDEcalDigiEDM::DigiBar> barColY; barColY.clear();
@@ -467,36 +465,41 @@ StatusCode CRDEcalDigiAlg::execute()
 
 
 		//Step2: Reconstruction in different cases
-		std::vector<edm4hep::ConstCalorimeterHit> m_caloHits; m_caloHits.clear();
+		std::vector<edm4hep::ConstCalorimeterHit> m_caloHits; m_caloHits.clear(); //output total calohit;
+		std::vector<CRDEcalDigiEDM::CRD2DShowerInLayer> m_showerCol; m_showerCol.clear();
 
 		//Case1(1*N or N*1): Use cross-locating directly. 
 		if( barShowerXCol.size()<=1 || barShowerYCol.size()<=1 ){
 			if(_Debug>=2) std::cout<<"PreRecAlg: Case1. Shower number X/Y: "<<barShowerXCol.size()<<'\t'<<barShowerYCol.size()<<std::endl;
-			//m_caloHits = DigiHitsWithPos(m_block);
-			std::vector<CRDEcalDigiEDM::DigiBar> m_ShowerBlock; m_ShowerBlock.clear();
-			for(int i=0;i<barShowerXCol.size();i++)  m_ShowerBlock.insert(m_ShowerBlock.end(), barShowerXCol[i].Bars.begin(), barShowerXCol[i].Bars.end());
-			for(int i=0;i<barShowerYCol.size();i++)  m_ShowerBlock.insert(m_ShowerBlock.end(), barShowerYCol[i].Bars.begin(), barShowerYCol[i].Bars.end());
-			m_caloHits = DigiHitsWithPos(m_ShowerBlock);
-
-		}
+			for(int is=0;is<barShowerXCol.size();is++){
+			for(int js=0;js<barShowerYCol.size();js++){
+				CRDEcalDigiEDM::CRD2DShowerInLayer tmp_shower; tmp_shower.Clear();
+				tmp_shower.barShowerX = barShowerXCol[is];
+				tmp_shower.barShowerY = barShowerYCol[js];
+				tmp_shower.CaloHits = DigiHitsWithPos(tmp_shower.barShowerX, tmp_shower.barShowerY);
+				m_showerCol.push_back(tmp_shower);
+		}}}
 
 		//Case2(N*N): match bars with shower energy
 		else if(barShowerXCol.size()==barShowerYCol.size()){
 			if(_Debug>=2) std::cout<<"PreRecAlg: Case2. Shower number X/Y: "<<barShowerXCol.size()<<'\t'<<barShowerYCol.size()<<std::endl;
-			//m_caloHits = DigiHitsWithEnergy(m_block, barShowerXCol, barShowerYCol);
-			m_caloHits = DigiHitsWithMatching(barShowerXCol, barShowerYCol);
+			m_showerCol = DigiHitsWithMatching(barShowerXCol, barShowerYCol);
 		}
 
 		//Case3(M*N)
 		else{
 			if(_Debug>=2) std::cout<<"PreRecAlg: Case3. Shower number X/Y: "<<barShowerXCol.size()<<'\t'<<barShowerYCol.size()<<std::endl;
-			m_caloHits = DigiHitsWithMatchingL2(barShowerXCol, barShowerYCol);
+			m_showerCol = DigiHitsWithMatchingL2(barShowerXCol, barShowerYCol);
 		}
 
 		t_PreRec->Fill();
 
 
 		//Finish caloHits reconstruction. Stored in m_caloHits. 
+		if(m_showerCol.size()>std::max(barShowerXCol.size(), barShowerYCol.size()))  std::cout<<"WARNING: 2Dshower number is larger than showerX/Y number! Please check!"<<std::endl; 
+		for(int is=0;is<m_showerCol.size();is++) m_caloHits.insert(m_caloHits.end(), m_showerCol[is].CaloHits.begin(), m_showerCol[is].CaloHits.end());
+
+
 		if(_Debug>=2) std::cout<<"After PreRec. CaloHit number: "<<m_caloHits.size()<<std::endl;
 		for(int ihit=0;ihit<m_caloHits.size();ihit++){
 			totE_Digi+=m_caloHits[ihit].getEnergy();
@@ -506,17 +509,14 @@ StatusCode CRDEcalDigiAlg::execute()
 			m_Rec_E.push_back(m_caloHits[ihit].getEnergy());
 			caloVec->push_back(m_caloHits[ihit]);
 		}
-
-
-
-	}
+	} //end loop in layers
 	t_Rec->Fill();
 	if(_Debug>=1) std::cout<<"RecoDigiHit Number: "<<caloVec->size()<<std::endl;
 
 
 	if(_Debug>=1) std::cout<<"TruthSimHit Number: "<<SimHitCellCol->size()<<std::endl;
 	for(int iter=0; iter<SimHitCellCol->size();iter++){
-		edm4hep::SimCalorimeterHit m_simhit = SimHitCellCol->at(iter);
+		edm4hep::CalorimeterHit m_simhit = SimHitCellCol->at(iter);
 		if(!m_simhit.isAvailable()) continue;
 		m_simTruth_x.push_back(m_simhit.getPosition()[0]);
 		m_simTruth_y.push_back(m_simhit.getPosition()[1]);
@@ -608,13 +608,13 @@ dd4hep::Position CRDEcalDigiAlg::GetCellPos(dd4hep::Position pos, CRDEcalDigiEDM
 	return relv+bar.position;
 }
 
-edm4hep::SimCalorimeterHit CRDEcalDigiAlg::find(edm4hep::SimCalorimeterHitCollection* m_col, dd4hep::Position pos){
+edm4hep::CalorimeterHit CRDEcalDigiAlg::find(edm4hep::CalorimeterHitCollection* m_col, dd4hep::Position pos){
    for(int i=0;i<m_col->size();i++){
-      edm4hep::SimCalorimeterHit hit = m_col->at(i);
+      edm4hep::CalorimeterHit hit = m_col->at(i);
 		dd4hep::Position ipos(hit.getPosition().x, hit.getPosition().y, hit.getPosition().z);
 		if(ipos==pos) return hit;
 	}
-   edm4hep::SimCalorimeterHit hit;
+   edm4hep::CalorimeterHit hit;
    hit.setCellID(0);
    return hit;
 }

@@ -18,9 +18,9 @@
 
 using namespace std;
 
-std::vector<edm4hep::ConstCalorimeterHit> CRDEcalDigiAlg::DigiHitsWithMatchingL2(std::vector<CRDEcalDigiEDM::BarCollection>& barShowerXCol, std::vector<CRDEcalDigiEDM::BarCollection>& barShowerYCol){
+std::vector<CRDEcalDigiEDM::CRD2DShowerInLayer> CRDEcalDigiAlg::DigiHitsWithMatchingL2(std::vector<CRDEcalDigiEDM::BarCollection>& barShowerXCol, std::vector<CRDEcalDigiEDM::BarCollection>& barShowerYCol){
 
-	std::vector<edm4hep::ConstCalorimeterHit> m_digiCol; m_digiCol.clear();
+	std::vector<CRDEcalDigiEDM::CRD2DShowerInLayer> m_showerCol; m_showerCol.clear();
 
 	const int NshowerX = barShowerXCol.size();
 	const int NshowerY = barShowerYCol.size();
@@ -66,51 +66,38 @@ std::vector<edm4hep::ConstCalorimeterHit> CRDEcalDigiAlg::DigiHitsWithMatchingL2
       m_chi2Ty.push_back(chi2_ty[ix][iy]);
 	}}
 
-//cout<<"Finish chi2 calculation"<<endl;
 
 	for(int ix=0;ix<NshowerX;ix++){
 	for(int iy=0;iy<NshowerY;iy++){
-//cout<<"Loop: "<<ix<<'\t'<<iy<<endl;
 		if(chi2[ix][iy]<_th_chi2){
 		CRDEcalDigiEDM::BarCollection showerX = barShowerXCol[ix];
 		CRDEcalDigiEDM::BarCollection showerY = barShowerYCol[iy];
 		if(showerX.Bars.size()==0 || showerY.Bars.size()==0) continue;
 
-//cout<<"Matching hits"<<endl;
-		std::vector<edm4hep::ConstCalorimeterHit> m_hitsInShower; m_hitsInShower.clear();
-		std::vector<CRDEcalDigiEDM::DigiBar> m_ShowerBlock; m_ShowerBlock.clear();
-		m_ShowerBlock.insert(m_ShowerBlock.end(), showerX.Bars.begin(), showerX.Bars.end());
-		m_ShowerBlock.insert(m_ShowerBlock.end(), showerY.Bars.begin(), showerY.Bars.end());
-//cout<<"Shower size: "<<showerX.Bars.size()<<'\t'<<showerY.Bars.size()<<endl;
-//cout<<"Input block size: "<<m_ShowerBlock.size()<<endl;
-		m_hitsInShower = DigiHitsWithPos(m_ShowerBlock);
-		m_digiCol.insert(m_digiCol.end(), m_hitsInShower.begin(), m_hitsInShower.end());
+		CRDEcalDigiEDM::CRD2DShowerInLayer tmp_shower; tmp_shower.Clear();
+      tmp_shower.barShowerX = showerX;
+      tmp_shower.barShowerY = showerY;
+      tmp_shower.CaloHits = DigiHitsWithPos(showerX, showerY);
+      m_showerCol.push_back(tmp_shower);
 
-//cout<<"Remove showers"<<endl;
-		//auto iterx = barShowerXCol.erase(barShowerXCol.begin()+ix);
-		//auto itery = barShowerYCol.erase(barShowerYCol.begin()+iy);
 		CRDEcalDigiEDM::BarCollection m_empty; m_empty.Clear();
 		barShowerXCol[ix]=m_empty;
 		barShowerYCol[iy]=m_empty;
 		}
 	}}
 
-//cout<<"Finish minchi2 matching"<<endl;
+	for(int is=0;is<barShowerXCol.size();is++){
+	for(int js=0;js<barShowerYCol.size();js++){
+		if(barShowerXCol[is].Bars.size()==0 || barShowerYCol[js].Bars.size()==0) continue;
+		CRDEcalDigiEDM::CRD2DShowerInLayer tmp_shower; tmp_shower.Clear();
+		tmp_shower.barShowerX = barShowerXCol[is];
+		tmp_shower.barShowerY = barShowerYCol[js];
+		tmp_shower.CaloHits = DigiHitsWithPos(tmp_shower.barShowerX, tmp_shower.barShowerY);
+		m_showerCol.push_back(tmp_shower);
+	}}
 
-	std::vector<edm4hep::ConstCalorimeterHit> m_hitsInShower; m_hitsInShower.clear();
-	std::vector<CRDEcalDigiEDM::DigiBar> m_ShowerBlock; m_ShowerBlock.clear();
-	for(int i=0;i<barShowerXCol.size();i++){
-		if(barShowerXCol[i].Bars.size()==0) continue;
-		m_ShowerBlock.insert(m_ShowerBlock.end(), barShowerXCol[i].Bars.begin(), barShowerXCol[i].Bars.end());
-	}
-	for(int i=0;i<barShowerYCol.size();i++){  
-		if(barShowerYCol[i].Bars.size()==0) continue;
-		m_ShowerBlock.insert(m_ShowerBlock.end(), barShowerYCol[i].Bars.begin(), barShowerYCol[i].Bars.end());
-	}
-	m_hitsInShower = DigiHitsWithPos(m_ShowerBlock);
-	m_digiCol.insert(m_digiCol.end(), m_hitsInShower.begin(), m_hitsInShower.end());
 
-	return m_digiCol;
+	return m_showerCol;
 
 }
 

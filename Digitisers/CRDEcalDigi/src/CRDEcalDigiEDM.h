@@ -178,39 +178,16 @@ public:
 	//bool compE(DigiBar &a, DigiBar &b){ return (a.getEnergy() < b.getEnergy()); }
 
 
-	class CRDEcal2DShower{
-	public: 
-      double getE(){
-         double E=0;
-         for(int i=0;i<CaloHits.size();i++) E+=CaloHits[i].getEnergy();
-         return E;
-      }
-      dd4hep::Position getPos(){
-         dd4hep::Position pos(0,0,0);
-         double Etot=getE();
-         for(int i=0;i<CaloHits.size();i++){
-				double E_ihit = CaloHits[i].getEnergy();
-				dd4hep::Position ipos(CaloHits[i].getPosition()[0], CaloHits[i].getPosition()[1], CaloHits[i].getPosition()[2]);
-				pos += (ipos* E_ihit)/Etot;
-			}
-         return pos;
-      }
-
-		std::vector<edm4hep::ConstCalorimeterHit> CaloHits; 
+	class CRD2DShowerInLayer{
+	public: 	
+		void Clear(){
+			barShowerX.Clear(); barShowerY.Clear(); CaloHits.clear();
+		}
 		CRDEcalDigiEDM::BarCollection barShowerX;
 		CRDEcalDigiEDM::BarCollection barShowerY;
-
+		std::vector<edm4hep::ConstCalorimeterHit> CaloHits;
 	};
 
-	class CRDEcal2DShowerinBlock{
-	public:
-      int module;
-      int dlayer;
-      int part;
-      int block;
-		std::vector<CRDEcal2DShower> ShowerCol;
-		void clear();
-	};
 
 };
 #endif

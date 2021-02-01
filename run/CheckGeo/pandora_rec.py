@@ -1,8 +1,8 @@
 from Gaudi.Configuration import *
 
 ############## GeomSvc #################
-#geometry_path = "/cefs/higgs/guofy/cepcsoft/CEPCSW_dev/CEPCSW/Detector/DetCRD/compact/CRD_ECAL/CepC_v4-onlyECAL.xml"
-geometry_path = "/cefs/higgs/guofy/cepcsoft/CEPCSW_dev/CEPCSW/Detector/DetCRD/compact/CRD_ECAL/CepC_v4.xml"
+geometry_path = "/cefs/higgs/guofy/cepcsoft/CEPCSW_dev/CEPCSW_dev02/Detector/DetCRD/compact/CRD_ECAL/CepC_v4-onlyECAL.xml"
+#geometry_path = "/cefs/higgs/guofy/cepcsoft/CEPCSW_dev/CEPCSW_dev02/Detector/DetCRD/compact/CRD_ECAL/CepC_v4.xml"
 if not os.path.exists(geometry_path):
     print("Can't find the compact geometry file: %s"%geometry_path)
     sys.exit(-1)
@@ -16,14 +16,14 @@ geomsvc.compact = geometry_path
 ##############GEAR Svc#################
 from Configurables import GearSvc
 gearSvc  = GearSvc("GearSvc")
-gearSvc.GearXMLFile = "/cefs/higgs/guofy/cepcsoft/CEPCSW_dev/CEPCSW/Detector/DetCEPCv4/compact/FullDetGear.xml"
+gearSvc.GearXMLFile = "/cefs/higgs/guofy/cepcsoft/CEPCSW_dev/CEPCSW_dev02/Detector/DetCEPCv4/compact/FullDetGear.xml"
 
 
 ########### k4DataSvc ####################
 from Configurables import k4DataSvc
 podioevent = k4DataSvc("EventDataSvc")
 podioevent.inputs = [
-"CRDGlobalTest_eePFA.root"
+"CRDGlobalTest_1gamPFA.root"
 ]
 ##########################################
 
@@ -48,6 +48,7 @@ from Configurables import CRDEcalDigiAlg
 EcalDigi = CRDEcalDigiAlg("CRDEcalDigiAlg")
 EcalDigi.SimCaloHitCollection = "EcalBarrelCollection"
 EcalDigi.CaloHitCollection = "ECALBarrel"
+#EcalDigi.TruthSimCaloHitCollection = "ECALBarrel"
 EcalDigi.CaloAssociationCollection = "MCRecoCaloAssociationCollection"
 EcalDigi.CalibrECAL = 1
 EcalDigi.Seed = 1013
@@ -65,7 +66,7 @@ EcalDigi.EnergyChi2Weight = 1
 EcalDigi.TimeChi2Weight = 1
 EcalDigi.Chi2Threshold = 0.
 EcalDigi.Debug=0
-EcalDigi.OutFileName = "OutTree_2gam20_case1.root"
+EcalDigi.OutFileName = "OutTree_gam.root"
 #########################################
 
 ##############################################################################
@@ -108,7 +109,7 @@ pandoralg.WriteClusterCollection               = "PandoraClusters"
 pandoralg.WriteReconstructedParticleCollection = "PandoraPFOs"
 pandoralg.WriteVertexCollection                = "PandoraPFANewStartVertices"
 
-pandoralg.PandoraSettingsDefault_xml = "/cefs/higgs/guofy/cepcsoft/CEPCSW_dev/CEPCSW/Reconstruction/PFA/Pandora/PandoraSettingsDefault.xml"
+pandoralg.PandoraSettingsDefault_xml = "/cefs/higgs/guofy/cepcsoft/CEPCSW_dev/CEPCSW_dev02/Reconstruction/PFA/Pandora/PandoraSettingsDefault.xml"
 #### Do not chage the collection name, only add or remove ###############
 pandoralg.TrackCollections      =  ["MarlinTrkTracks"]
 pandoralg.ECalCaloHitCollections=  ["ECALBarrel", "ECALEndcap", "ECALOther"]
