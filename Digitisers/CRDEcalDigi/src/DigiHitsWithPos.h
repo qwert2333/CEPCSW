@@ -38,7 +38,7 @@ std::vector<edm4hep::ConstCalorimeterHit> CRDEcalDigiAlg::DigiHitsWithPos( CRDEc
      		m_vec.RotateZ(rotAngle);
 			bary.position.SetXYZ(m_vec.x(), m_vec.y(), m_vec.z());
 
-         TVector3 p_hit(bary.position.x(), (barx.position.y()+bary.position.y())/2., bary.position.z() );
+         TVector3 p_hit(bary.position.x(), (barx.position.y()+bary.position.y())/2., barx.position.z() );
          p_hit.RotateZ(-rotAngle);
          edm4hep::Vector3f m_vec3f(p_hit.x(), p_hit.y(), p_hit.z());
          float m_En = barx.getEnergy()*bary.getEnergy()/barShowerY.getE() + barx.getEnergy()*bary.getEnergy()/barShowerX.getE();
