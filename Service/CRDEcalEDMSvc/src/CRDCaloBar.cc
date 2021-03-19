@@ -9,7 +9,7 @@ namespace CRDEcalEDM{
   bool CRDCaloBar::isNeighbor(CRDCaloBar &x){
     if(x.getcellID() != cellID &&
        x.getSystem() == system &&
-       x.getModele() == module &&
+       x.getModule() == module &&
        x.getDlayer() == dlayer &&
        x.getPart()   == part   &&
        x.getBlock()  == block  &&

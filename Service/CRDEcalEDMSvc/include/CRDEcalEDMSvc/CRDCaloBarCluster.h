@@ -21,17 +21,21 @@ namespace CRDEcalEDM{
     bool inCluster(CRDEcalEDM::CRDCaloBar iBar);
     void sortByPos() { std::sort(Bars.begin(), Bars.end()); }
 
-    double getE(); 
-    dd4hep::Position getPos();
+    double getE() const; 
+    dd4hep::Position getPos() const;
     double getScndMoment();
-    std::vector<CRDEcalEDM::CRDCaloBar> getBars()  { return Bars;  }
-    std::vector<CRDEcalEDM::CRDCaloBar> getSeeds() { return Seeds; }
+    int getNseeds() const { return Nseeds; }
+    std::vector<CRDEcalEDM::CRDCaloBar> getBars()  const { return Bars;  }
+    std::vector<CRDEcalEDM::CRDCaloBar> getSeeds() const { return Seeds; }
 
     void PrintBars();
     void PrintSeeds();
 
+    void addBar( CRDEcalEDM::CRDCaloBar _bar ) { Bars.push_back(_bar); }
+    void addSeed( CRDEcalEDM::CRDCaloBar _seed ) { Seeds.push_back(_seed); }
+    void setScndMoment(double _scndM ) { ScndMoment = _scndM; }
     void setBars( std::vector<CRDEcalEDM::CRDCaloBar> _bars ) { Bars = _bars; }
-    void setSeeds( std::vector<CRDEcalEDM::CRDCaloBar> _seeds) { Seeds = _seeds; }
+    void setSeeds( std::vector<CRDEcalEDM::CRDCaloBar> _seeds) { Seeds = _seeds;  Nseeds = _seeds.size(); }
 
   private: 
     std::vector<CRDEcalEDM::CRDCaloBar> Bars;

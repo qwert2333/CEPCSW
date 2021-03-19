@@ -2,10 +2,7 @@
 #define _CRD_CALOBAR_
 
 #include <DD4hep/Objects.h>
-#include "k4FWCore/DataHandle.h"
-
-#include "DetInterface/IGeomSvc.h"
-
+#include "TVector3.h"
 using namespace dd4hep;
 //namespace dd4hep{
 //  class Position; 
@@ -27,7 +24,7 @@ namespace CRDEcalEDM{
     }
     unsigned long long getcellID() const { return cellID; }
     int getSystem() const { return system; }
-    int getModele() const { return module; }
+    int getModule() const { return module; }
     int getDlayer() const { return dlayer; }
     int getPart()   const { return part;   }
     int getBlock()  const { return block;  }
@@ -38,12 +35,14 @@ namespace CRDEcalEDM{
     double getT1()  const { return T1;     }
     double getT2()  const { return T2;     }
 
-    dd4hep::Position getPosition() { return position; }
-    double getEnergy() { return (Q1+Q2)/2.; }
+    dd4hep::Position getPosition() const { return position; }
+    double getEnergy() const { return (Q1+Q2)/2.; }
     bool isNeighbor(CRDCaloBar &x);
 
     void setcellID(unsigned long long _cellid) { cellID = _cellid; }
     void setcellID(int _system, int _module, int _dlayer, int _part, int _block, int _slayer, int _bar) { system=_system; module=_module; dlayer=_dlayer; part=_part; block=_block; slayer=_slayer; bar=_bar; }
+    void setPosition( dd4hep::Position pos) { position = pos; }
+    void setPosition( TVector3 posv3) { position.SetXYZ( posv3.x(), posv3.y(), posv3.z() ); }
     void setQ(double _q1, double _q2) { Q1=_q1; Q2=_q2; }
     void setT(double _t1, double _t2) { T1=_t1; T2=_t2; }
 
@@ -63,6 +62,7 @@ namespace CRDEcalEDM{
 		double T2;    // T in right readout;
 
   };
-
+  typedef  std::vector<CRDEcalEDM::CRDCaloBar> DigiBlock;
+  
 }
 #endif

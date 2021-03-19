@@ -1,12 +1,17 @@
 #ifndef _CRD_CALOSTEP_
 #define _CRD_CALOSTEP_
 
-namespace CRDEcalDigiEDM {
+namespace CRDEcalEDM {
 
   class CRDCaloStep{
 
   public: 
-    CRDCaloStep (double _Q, double _T): Q(_Q), T(_T);
+    CRDCaloStep (double _Q, double _T): Q(_Q), T(_T) {};
+    //CRDCaloStep (double _Q, double _T) { Q=_Q; T=_T; };
+    CRDCaloStep() {};
+
+    void setQ(double _Q) { Q =_Q; }
+    void setT(double _T) { T =_T; }
 
     double getQ() const { return Q; }
     double getT() const { return T; }

@@ -1,29 +1,31 @@
-
 # Modules
-gaudi_add_module(Tracking
-                 SOURCES src/Clupatra/ClupatraAlg.cpp
-                         src/Clupatra/clupatra_new.cpp
-                         src/FullLDCTracking/FullLDCTrackingAlg.cpp
-                         src/TruthTracker/TruthTrackerAlg.cpp
-                 LINK GearSvc
-                      EventSeeder
-                      TrackSystemSvcLib
-                      DetSegmentation
-                      Gaudi::GaudiAlgLib
+gaudi_add_module(CRDEcalRec
+                 SOURCES src/PandoraPlusPFAlg.cpp
+                         src/EcalClusterReconstruction.cpp
+                         src/PandoraPlusDataCol.cpp
+                         src/Algorithm/EnergySplittingAlg.cpp
+                         src/Algorithm/EnergyTimeMatchingAlg.cpp
+                         src/Algorithm/ConeClusteringAlg.cpp
+                 LINK k4FWCore::k4FWCore
+                      GearSvc
+                      DetInterface
+                      CRDEcalEDMSvcLib
                       Gaudi::GaudiKernel
-                      ${GEAR_LIBRARIES}
-                      ${GSL_LIBRARIES}
+                      Gaudi::GaudiAlgLib 
+                      ${CLHEP_LIBRARIES}
+                      ${GEAR_LIBRARIES} 
+                      ${GSL_LIBRARIES} 
                       ${LCIO_LIBRARIES}
-                      DetSegmentation
+                      ${ROOT_LIBRARIES}
                       EDM4HEP::edm4hep EDM4HEP::edm4hepDict
 )
-
-target_include_directories(Tracking PUBLIC
+target_include_directories(CRDEcalRec PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}>/include
   $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
 
-install(TARGETS Tracking
+install(TARGETS CRDEcalRec
   EXPORT CEPCSWTargets
   RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}" COMPONENT bin
   LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}" COMPONENT shlib
   COMPONENT dev)
+

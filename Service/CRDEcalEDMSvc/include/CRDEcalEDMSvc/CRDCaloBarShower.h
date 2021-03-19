@@ -9,18 +9,18 @@ namespace CRDEcalEDM {
   class CRDCaloBarShower{
 
   public: 
-    CRDCaloBarShower(); 
+    CRDCaloBarShower() {}; 
 
     void Clear() { Energy=0; Bars.clear(); }
     bool isNeighbor(CRDEcalEDM::CRDCaloBar iBar); 
-    bool inCluster(CRDEcalEDM::CRDCaloBar iBar); 
+    bool inShower(CRDEcalEDM::CRDCaloBar iBar); 
 
-    dd4hep::Position getPos();
-    double getE();
-    double getT1();
-    double getT2();
-    std::vector<CRDEcalEDM::CRDCaloBar> getBars() { return Bars; }
-    CRDEcalEDM::CRDCaloBar getSeed() { return Seed; };
+    dd4hep::Position getPos() const;
+    double getE()  const;
+    double getT1() const;
+    double getT2() const;
+    std::vector<CRDEcalEDM::CRDCaloBar> getBars() const { return Bars; }
+    CRDEcalEDM::CRDCaloBar getSeed() const { return Seed; };
 
     void setBars(std::vector<CRDEcalEDM::CRDCaloBar> _bars){ Bars = _bars; }
     void setSeed(CRDEcalEDM::CRDCaloBar _seed ) { Seed = _seed; }

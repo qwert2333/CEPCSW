@@ -1,10 +1,10 @@
 # Modules
 gaudi_add_module(CRDEcalDigi
                  SOURCES src/CRDEcalDigiAlg.cpp
-                         src/CRDEcalPreRecAlg.cpp
                  LINK k4FWCore::k4FWCore
                       GearSvc
                       DetInterface
+                      CRDEcalEDMSvcLib
                       Gaudi::GaudiKernel
                       Gaudi::GaudiAlgLib 
                       ${CLHEP_LIBRARIES}

@@ -29,13 +29,13 @@ namespace CRDEcalEDM{
     return false;
   }
 
-  double CRDCaloBarCluster::getE(){
+  double CRDCaloBarCluster::getE() const{
     double E=0;
     for(int i=0;i<Bars.size();i++) E+=Bars[i].getEnergy();
     return E;
   }
 
-  dd4hep::Position CRDCaloBarCluster::getPos(){
+  dd4hep::Position CRDCaloBarCluster::getPos() const{
     dd4hep::Position pos(0,0,0);
     double Etot=getE();
     for(int i=0;i<Bars.size();i++) pos += (Bars[i].getPosition() * Bars[i].getEnergy())/Etot;
@@ -47,7 +47,8 @@ namespace CRDEcalEDM{
     double Etot = getE();
     double scndM = 0;
     for(int i=0;i<Bars.size();i++) scndM += (Bars[i].getEnergy() * (pos-Bars[i].getPosition()).Mag2()) / Etot;
-    return scndM;
+    ScndMoment = scndM;
+    return ScndMoment;
   }
 
   void CRDCaloBarCluster::PrintBars(){
@@ -67,5 +68,5 @@ namespace CRDEcalEDM{
   }
 
 
-}
+};
 #endif

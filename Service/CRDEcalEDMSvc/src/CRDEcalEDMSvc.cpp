@@ -1,19 +1,21 @@
-#include "GearSvc/IGearSvc.h"
-#include "gear/GearMgr.h"
 #include "CRDEcalEDMSvc.h"
 
 DECLARE_COMPONENT(CRDEcalEDMSvc)
 
-CRDEcalEDMSvc::CRDEcalEDMSvc(const std::string& name, ISvcLocator* svc)
-  : base_class(name, svc){
+StatusCode
+CRDEcalEDMSvc::initialize() {
+    m_DigiBlockVec.clear();
+    StatusCode sc = Service::initialize();
+
+    return sc;
 }
 
-CRDEcalEDMSvc::~CRDEcalEDMSvc(){
+StatusCode
+CRDEcalEDMSvc::finalize() {
+    // clear or reset
+    m_DigiBlockVec.clear();
+
+    StatusCode sc = Service::finalize();
+    return sc;
 }
 
-StatusCode CRDEcalEDMSvc::initialize(){
-  return StatusCode::SUCCESS;
-}
-StatusCode CRDEcalEDMSvc::finalize(){
-  return StatusCode::SUCCESS;
-}

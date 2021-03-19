@@ -1,193 +1,65 @@
-#ifndef _CRDECAL_DIGI_EDM_
-#define _CRDECAL_DIGI_EDM_
+#ifndef _CRD_CALOHIT_3DSHOWER_H
+#define _CRD_CALOHIT_3DSHOWER_H
 
 #include "k4FWCore/DataHandle.h"
 #include "edm4hep/CalorimeterHit.h"
 #include "edm4hep/CalorimeterHitCollection.h"
 #include "edm4hep/SimCalorimeterHitCollection.h"
+#include "CRDEcalEDMSvc/CRDCaloHit2DShower.h"
+#include "CRDEcalEDMSvc/TrackFitInEcal.h"
 
-#include "DetInterface/IGeomSvc.h"
+#include "TMath.h"
 #include "TVector3.h"
 #include "TString.h"
 
 using namespace std;
-class CRDEcalDigiEDM {
-public: 
+namespace CRDEcalEDM{
 
-  class DigiBar {
+  class CRDCaloHit3DShower{
   public:
-		unsigned long long cellID = 0;
-		int system;
-		int module;
-		int dlayer;
-		int part;
-		int block;
-		int slayer;
-		int bar;
-		dd4hep::Position position;
-		double Q1=0;      // Q in left readout
-		double Q2=0;      // Q in right readout;
-		double T1=999;    // T in left readout;
-		double T2=999;    // T in right readout;
-		inline bool operator < (const DigiBar &x) const {
-			return bar<x.bar ;
-		}
-		inline bool operator == (const DigiBar &x) const{
-			return cellID == x.cellID;
-		}
+    CRDCaloHit3DShower(){};
 
+    edm4hep::ConstCalorimeterHit getClusterInitialHit() const; 
+    TVector3 getHitCenter() const;
+    TVector3 getShowerCenter() const;
+    double getHitsE() const;
+    double getShowerE() const;
+    bool   isEMShowerPre() const;
 
-		double getEnergy(){ return (Q1+Q2)/2.; }
-      bool isNeighbor(DigiBar &x){
-			if(x.cellID!=cellID && 
-				x.system==system && 
-				x.module==module &&
-				x.dlayer==dlayer && 
-				x.part==part && 
-				x.block==block &&
-				x.slayer==slayer &&
-				(x.bar==bar+1 || x.bar==bar-1) 
-			) return true;
-         return false;
-      }
+    void FitProfile();
+    void FitAxis(); 
+    void AddShower(CRDEcalEDM::CRDCaloHit2DShower& shower);
+    void MergeCluster(CRDEcalEDM::CRDCaloHit3DShower& clus);
+
+    inline bool operator == ( const CRDEcalEDM::CRDCaloHit3DShower &x) const {
+      TVector3 vec = this->getHitCenter();
+      double En = this->getHitsE();
+      return ( vec==x.getHitCenter() && En==x.getHitsE());
+    }
+
+    std::vector<CRDEcalEDM::CRDCaloHit2DShower> get2DShowers() const { return ShowerinLayer; }
+    std::vector<edm4hep::ConstCalorimeterHit> getCaloHits() const { return CaloHits; }
+    double getShowerMax() const {return showerMax; }
+    double getChi2() const { return chi2; }
+    TVector3 getAxis() const { return axis; }
+    void getFitPars(double& _alpha, double& _beta ) const { _alpha = alpha; _beta = beta; }
+    void setShowerVec( std::vector<CRDEcalEDM::CRDCaloHit2DShower>& _svec ) { ShowerinLayer = _svec;}
+    void setCaloHits( std::vector<edm4hep::ConstCalorimeterHit>& _hits ) { CaloHits = _hits; }
+    void Clear() { ShowerinLayer.clear(); CaloHits.clear(); showerEnergy=0; hitsEnergy=0; showerMax=0; chi2=0; alpha=0; beta=0; axis.SetXYZ(0,0,0); }
+
+  private: 
+    std::vector<CRDEcalEDM::CRDCaloHit2DShower> ShowerinLayer;
+    std::vector<edm4hep::ConstCalorimeterHit> CaloHits;
+    TVector3 axis;
+    double showerEnergy;
+    double hitsEnergy;
+    double showerMax;
+    double chi2;
+    double alpha;
+    double beta;
+
+    TrackFitInEcal* track = new TrackFitInEcal(); 
 
   };
-
-
-  class StepDigiOut {
-  public: 
-    double Q;
-    double T;
-    inline bool operator < (const StepDigiOut &x) const { 
-      return T<x.T ;
-    } 
-  };
-
-
-  class BarCluster{
-	public: 
-		bool isNeighbor(CRDEcalDigiEDM::DigiBar iBar){
-			for(int i=0;i<Bars.size();i++){
-				if(!inCluster(iBar) && (iBar.bar==Bars[i].bar+1 || iBar.bar==Bars[i].bar-1) ) return true;
-			}
-			return false;
-		}
-		bool inCluster(CRDEcalDigiEDM::DigiBar iBar){
-			for(int i=0;i<Bars.size();i++){
-				if(iBar.cellID == Bars[i].cellID) return true;
-			}
-			return false;
-		}
-		void sortByPos(){
-			std::sort(Bars.begin(), Bars.end());
-		}
-		//void sortByE(){
-		//	std::sort(Bars.begin(), Bars.end(), compE);
-		//}
-		double getE(){
-			double E=0;
-			for(int i=0;i<Bars.size();i++) E+=Bars[i].getEnergy();
-			return E;
-		}
-		dd4hep::Position getPos(){
-			dd4hep::Position pos(0,0,0);
-			double Etot=getE();
-			for(int i=0;i<Bars.size();i++) pos += (Bars[i].position * Bars[i].getEnergy())/Etot;
-			return pos;
-		}
-		double getScndMoment(){
-			dd4hep::Position pos = getPos();
-			double Etot = getE();
-			double scndM = 0;
-			for(int i=0;i<Bars.size();i++) scndM += (Bars[i].getEnergy() * (pos-Bars[i].position).Mag2()) / Etot;
-			return scndM;
-		}
-		void PrintBars(){
-			if(Bars.size()!=0){
-				std::cout<<"BarCluster::PrintBars"<<std::endl;
-				printf("#bar \t x \t y \t z \t E \n");
-				for(int i=0;i<Bars.size();i++) printf("%d \t %f \t %f \t %f \t %f \n",i, Bars[i].position.x(), Bars[i].position.y(), Bars[i].position.z(), Bars[i].getEnergy() );
-			}
-		}
-		void PrintSeeds(){
-			if(Seeds.size()!=0){
-				std::cout<<"BarCluster::PrintSeeds"<<std::endl;
-				printf("#Seed \t x \t y \t z \t E \n");
-				for(int i=0;i<Seeds.size();i++) printf("%d \t %f \t %f \t %f \t %f \n",i, Seeds[i].position.x(), Seeds[i].position.y(), Seeds[i].position.z(), Seeds[i].getEnergy() );
-			}
-		}
-		//members in this class
-		std::vector<CRDEcalDigiEDM::DigiBar> Bars;
-		std::vector<CRDEcalDigiEDM::DigiBar> Seeds;
-		double Energy;
-		dd4hep::Position pos;
-		int Nseeds=0;
-		double ScndMoment=0.;  //Second moment of this cluster. 
-  };
-
-
-  class BarCollection{
-	public: 
-		void Clear(){
-			Energy=0; Bars.clear();
-		}
-      bool isNeighbor(CRDEcalDigiEDM::DigiBar iBar){
-         for(int i=0;i<Bars.size();i++){
-            if(!inCluster(iBar) && (iBar.bar==Bars[i].bar+1 || iBar.bar==Bars[i].bar-1) ) return true;
-         }
-         return false;
-      }
-      bool inCluster(CRDEcalDigiEDM::DigiBar iBar){
-         for(int i=0;i<Bars.size();i++){
-            if(iBar.cellID == Bars[i].cellID) return true;
-         }
-         return false;
-      }
-      double getE(){
-         double E=0;
-         for(int i=0;i<Bars.size();i++) E+=Bars[i].getEnergy();
-         return E;
-      }
-		dd4hep::Position getPos(){
-			dd4hep::Position pos(0,0,0);
-			double Etot=getE();
-			for(int i=0;i<Bars.size();i++) pos += (Bars[i].position * Bars[i].getEnergy())/Etot;
-			return pos;
-		}
-
-		double getT1(){
-			double T1=0;
-			double Etot = getE();
-			for(int i=0;i<Bars.size();i++) T1 += (Bars[i].T1 * Bars[i].getEnergy())/Etot;
-			return T1;
-		}
-		double getT2(){
-			double T2=0;
-			double Etot = getE();
-			for(int i=0;i<Bars.size();i++) T2 += (Bars[i].T2 * Bars[i].getEnergy())/Etot;
-			return T2;
-		}
-
-		double Energy;
-		dd4hep::Position pos;
-		std::vector<CRDEcalDigiEDM::DigiBar> Bars;
-		CRDEcalDigiEDM::DigiBar Seed;
-  };
-
-	//bool compPos(DigiBar &a, DigiBar &b){ return (a.bar < b.bar); }
-	//bool compE(DigiBar &a, DigiBar &b){ return (a.getEnergy() < b.getEnergy()); }
-
-
-	class CRD2DShowerInLayer{
-	public: 	
-		void Clear(){
-			barShowerX.Clear(); barShowerY.Clear(); CaloHits.clear();
-		}
-		CRDEcalDigiEDM::BarCollection barShowerX;
-		CRDEcalDigiEDM::BarCollection barShowerY;
-		std::vector<edm4hep::ConstCalorimeterHit> CaloHits;
-	};
-
-
 };
 #endif

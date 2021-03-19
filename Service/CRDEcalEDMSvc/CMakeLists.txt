@@ -4,10 +4,10 @@ gaudi_add_library(CRDEcalEDMSvcLib
                   SOURCES src/CRDCaloBar.cc
                           src/CRDCaloBarCluster.cc
                           src/CRDCaloBarShower.cc
-
+                          src/CRDCaloHit2DShower.cc
+                          src/CRDCaloHit3DShower.cc
+                          src/TrackFitInEcal.cpp
                   LINK DataHelperLib 
-                       KalTestLib 
-                       KalDetLib 
                        GearSvc
                        Gaudi::GaudiKernel 
                        ${ROOT_LIBRARIES}

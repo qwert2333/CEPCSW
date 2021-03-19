@@ -8,7 +8,7 @@ gaudi_add_module(Arbor
 		 	src/ClusterAna.cc 
 		 	src/DetectorPos.cc 
 		 	src/HelixClassD.cc 
-			 src/MarlinArbor.cc
+         src/MarlinArbor.cc
 		 	src/BushConnect.cc
                  LINK EventSeeder
                       GearSvc
