@@ -1,0 +1,49 @@
+<define>
+  <constant name="Hcal_radiator_thickness" value="20.0*mm"/>
+  <constant name="Hcal_airgap_thickness" value="1*mm"/>
+  <constant name="Hcal_mylar_cathode_thickness" value="0.18*mm"/>
+  <constant name="Hcal_graphite_cathode_thickness" value="0.05*mm"/>
+  <constant name="Hcal_glass_cathode_thickness" value="1.1*mm"/>
+  <constant name="Hcal_sensitive_gas_gap" value="1.2*mm"/>
+  <constant name="Hcal_glass_anode_thickness" value="0.7*mm"/>
+  <constant name="Hcal_graphite_anode_thickness" value="0.05*mm"/>
+  <constant name="Hcal_mylar_anode_thickness" value="0.05*mm"/>
+  <constant name="Hcal_PCB_thickness" value="0.8*mm"/>
+  <constant name="Hcal_electronics_mask_thickness" value="1.6*mm"/>
+  
+  <constant name="Hcal_nlayers" value="40"/>
+  <constant name="Hcal_endcap_nlayers" value="Hcal_nlayers"/>
+  <constant name="Hcal_ring_nlayers"         value="7"/>
+  <constant name="Hcal_cells_size" value="10*mm"/>
+
+  <constant name="Hcal_gas_edge_width" value="1*mm"/>
+  <constant name="Hcal_MinNumCellsInTransvPlane" value="11"/>
+  <constant name="Hcal_barrel_number_modules" value="5"/>
+  <constant name="Hcal_chamber_thickness" value="6.73*mm"/>
+  <constant name="Hcal_back_plate_thickness" value="15*mm"/>
+  <constant name="Hcal_lateral_structure_thickness" value="10*mm"/>
+  <constant name="Hcal_stave_gaps" value="0*mm"/>
+  <constant name="Hcal_modules_gap" value="2*mm"/>
+
+  <constant name="Hcal_pad_separation" value="0*mm"/>
+  <constant name="Hcal_gasInlet_length" value="3.0*mm"/>
+  <constant name="Hcal_spacer_separation" value="100*mm"/>
+  <constant name="Hcal_spacer_thickness" value="8*mm"/>
+  <constant name="Hcal_gasInlet_inner_radius" value="0.4*mm"/>
+  <constant name="Hcal_gasInlet_outer_radius" value="0.5*mm"/>
+
+  <constant name="Hcal_endcap_outer_symmetry" value="Hcal_outer_symmetry"/>
+  <constant name="Hcal_ring_inner_symmetry"  value="Ecal_Hcal_symmetry"/>
+  <constant name="Hcal_ring_outer_symmetry"  value="Hcal_endcap_outer_symmetry"/>
+
+  <constant name="Hcal_graphite_thickness" value="Hcal_graphite_cathode_thickness+Hcal_graphite_anode_thickness"/>
+  <constant name="Hcal_mylar_thickness" value="Hcal_mylar_cathode_thickness+Hcal_mylar_anode_thickness"/>
+  <constant name="Hcal_g10_thickness" value="Hcal_PCB_thickness+Hcal_electronics_mask_thickness"/>
+  <constant name="Hcal_mix_thickness" value="Hcal_airgap_thickness+Hcal_graphite_thickness+Hcal_mylar_thickness+Hcal_g10_thickness"/>
+  <constant name="Hcal_mix_density" value="Hcal_airgap_thickness/Hcal_mix_thickness*0.00120479 + Hcal_graphite_thickness/Hcal_mix_thickness*2.21 +
+                                           Hcal_mylar_thickness/Hcal_mix_thickness*1.4 + Hcal_g10_thickness/Hcal_mix_thickness*1.7"/>
+  <constant name="Hcal_airgap_fraction" value="Hcal_airgap_thickness/Hcal_mix_thickness*0.00120479/Hcal_mix_density"/>
+  <constant name="Hcal_graphite_fraction" value="Hcal_graphite_thickness/Hcal_mix_thickness*2.21/Hcal_mix_density"/>
+  <constant name="Hcal_mylar_fraction" value="Hcal_mylar_thickness/Hcal_mix_thickness*1.4/Hcal_mix_density"/>
+  <constant name="Hcal_g10_fraction" value="Hcal_g10_thickness/Hcal_mix_thickness*1.7/Hcal_mix_density"/>
+</define>

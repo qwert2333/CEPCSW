@@ -24,7 +24,7 @@ namespace CRDEcalEDM{
     TVector3 getShowerCenter() const;
     double getHitsE() const;
     double getShowerE() const;
-    bool   isEMShowerPre() const;
+    bool   isEMShowerPre();
 
     void FitProfile();
     void FitAxis(); 
