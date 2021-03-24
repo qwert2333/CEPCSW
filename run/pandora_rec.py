@@ -1,8 +1,7 @@
 from Gaudi.Configuration import *
 
 ############## GeomSvc #################
-geometry_path = "/cefs/higgs/guofy/cepcsoft/CEPCSW_dev/CEPCSW_dev02/Detector/DetCRD/compact/CRD_ECAL/CepC_v4-onlyECAL.xml"
-#geometry_path = "/cefs/higgs/guofy/cepcsoft/CEPCSW_dev/CEPCSW_dev02/Detector/DetCRD/compact/CRD_ECAL/CepC_v4.xml"
+geometry_path = "/cefs/higgs/guofy/CEPCSW/Detector/DetCRD/compact/CRD_ECAL/CepC_v4-onlyECAL.xml"
 if not os.path.exists(geometry_path):
     print("Can't find the compact geometry file: %s"%geometry_path)
     sys.exit(-1)
@@ -16,7 +15,7 @@ geomsvc.compact = geometry_path
 ##############GEAR Svc#################
 from Configurables import GearSvc
 gearSvc  = GearSvc("GearSvc")
-gearSvc.GearXMLFile = "/cefs/higgs/guofy/cepcsoft/CEPCSW_dev/CEPCSW_dev02/Detector/DetCEPCv4/compact/FullDetGear.xml"
+gearSvc.GearXMLFile = "/cefs/higgs/guofy/CEPCSW/Detector/DetCEPCv4/compact/FullDetGear.xml"
 
 
 ########### k4DataSvc ####################
@@ -30,43 +29,27 @@ podioevent.inputs = [
 ########## Podio Input ###################
 from Configurables import PodioInput
 inp = PodioInput("InputReader")
-inp.collections = [
-	"VXDCollection",
-	"SITCollection",
-	"TPCCollection",
-	"SETCollection",
-	"EcalBarrelCollection", 
-	"EcalEndcapRingCollection", 
-	"EcalEndcapsCollection", 
-	"HcalBarrelCollection",
-	"MCParticle"]
-#inp.collections = ["SimCalorimeterCol", "MCParticle"]
+inp.collections = ["EcalBarrelCollection", "EcalEndcapRingCollection", "EcalEndcapsCollection", "MCParticle"]
 ##########################################
+
+
 
 ########## Digitalization ################
 from Configurables import CRDEcalDigiAlg
 EcalDigi = CRDEcalDigiAlg("CRDEcalDigiAlg")
 EcalDigi.SimCaloHitCollection = "EcalBarrelCollection"
-#EcalDigi.CaloHitCollection = "ECALBarrel"
-EcalDigi.TruthSimCaloHitCollection = "ECALBarrel"
-EcalDigi.CaloAssociationCollection = "MCRecoCaloAssociationCollection"
-EcalDigi.CalibrECAL = 1
-EcalDigi.Seed = 1013
+EcalDigi.CaloHitCollection = "ECALBarrel"
+#EcalDigi.TruthSimCaloHitCollection = "ECALBarrel"
+EcalDigi.CaloAssociationCollection = "RecoCaloAssociation_ECALBarrel"
+EcalDigi.Seed = 2077
 #Digitalization parameters
+EcalDigi.CalibrECAL = 1
 EcalDigi.AttenuationLength = 7e10
-EcalDigi.TimeResolution = 0.3
-EcalDigi.EnergyThreshold = 0.003
+EcalDigi.TimeResolution = 0.5
+EcalDigi.EnergyThreshold = 0.001   #1 MeV
 EcalDigi.ChargeThresholdFrac = 0.05
-#Reconstruction parameters
-EcalDigi.SeedWithNeighThreshold = 0.4
-EcalDigi.SeedWithTotThreshold   = 0.15
-EcalDigi.ShowerWithTotThreshold = 0.05
-EcalDigi.ClusterWithTotThreshold = 0.05
-EcalDigi.EnergyChi2Weight = 1
-EcalDigi.TimeChi2Weight = 1
-EcalDigi.Chi2Threshold = 0.
-EcalDigi.Debug=0
-EcalDigi.OutFileName = "OutTree_gam.root"
+EcalDigi.Debug=1
+EcalDigi.OutFileName = "OutTree_testsvc.root"
 #########################################
 
 ##############################################################################
@@ -109,7 +92,7 @@ pandoralg.WriteClusterCollection               = "PandoraClusters"
 pandoralg.WriteReconstructedParticleCollection = "PandoraPFOs"
 pandoralg.WriteVertexCollection                = "PandoraPFANewStartVertices"
 
-pandoralg.PandoraSettingsDefault_xml = "/cefs/higgs/guofy/cepcsoft/CEPCSW_dev/CEPCSW_dev02/Reconstruction/PFA/Pandora/PandoraSettingsDefault.xml"
+pandoralg.PandoraSettingsDefault_xml = "/cefs/higgs/guofy/CEPCSW/Reconstruction/PFA/Pandora/PandoraSettingsDefault.xml"
 #### Do not chage the collection name, only add or remove ###############
 pandoralg.TrackCollections      =  ["MarlinTrkTracks"]
 pandoralg.ECalCaloHitCollections=  ["ECALBarrel", "ECALEndcap", "ECALOther"]

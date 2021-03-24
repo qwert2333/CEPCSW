@@ -84,6 +84,7 @@ protected:
 
   // Input collections
   DataHandle<edm4hep::SimCalorimeterHitCollection> r_SimCaloCol{"SimCaloCol", Gaudi::DataHandle::Reader, this};
+   mutable Gaudi::Property<std::string> _readout{this, "ReadOutName", "EcalBarrelCollection", "Readout name"};
 	mutable Gaudi::Property<std::string> _filename{this, "OutFileName", "testout.root", "Output file name"};
 	mutable Gaudi::Property<float> _seed{this,   "Seed", 2131, "Random Seed"};
 	mutable Gaudi::Property<int>  _Debug{this,   "Debug", 0, "Debug level"};

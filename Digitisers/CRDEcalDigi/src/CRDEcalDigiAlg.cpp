@@ -83,8 +83,7 @@ StatusCode CRDEcalDigiAlg::initialize()
 	dd4hep::Detector* m_dd4hep = m_geosvc->lcdd();
 	if ( !m_dd4hep )  throw "CRDEcalDigiAlg :Failed to get dd4hep::Detector ...";
 	m_cellIDConverter = new dd4hep::rec::CellIDPositionConverter(*m_dd4hep);
-	const std::string name_readout = "CaloHitsCollection";
-	m_decoder = m_geosvc->getDecoder(name_readout);
+   m_decoder = m_geosvc->getDecoder(_readout);
 	if (!m_decoder) {
 		error() << "Failed to get the decoder. " << endmsg;
 		return StatusCode::FAILURE;
@@ -311,6 +310,12 @@ StatusCode CRDEcalDigiAlg::execute()
 		m_simTruth_y.push_back(m_simhit.getPosition()[1]);
 		m_simTruth_z.push_back(m_simhit.getPosition()[2]);
 		m_simTruth_E.push_back(m_simhit.getEnergy());
+
+      edm4hep::CalorimeterHit hit;
+      hit.setCellID(0);
+      hit.setPosition(m_simhit.getPosition());
+      hit.setEnergy(m_simhit.getEnergy());
+      caloVec->push_back(hit);
 	}
 	t_SimTruth->Fill();
 	std::cout<<"Total Bar Energy: "<<totE_bar<<std::endl;

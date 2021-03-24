@@ -32,7 +32,7 @@ dsvc = k4DataSvc("EventDataSvc")
 # Geometry Svc
 ##############################################################################
 
-geometry_path = "/cefs/higgs/guofy/cepcsoft/CEPCSW_dev/CEPCSW_dev02/Detector/DetCRD/compact/CRD_ECAL/CepC_v4-onlyECAL.xml"
+geometry_path = "/cefs/higgs/guofy/CEPCSW/Detector/DetCRD/compact/CRD_ECAL/CepC_v4-onlyECAL.xml"
 if not os.path.exists(geometry_path):
     print("Can't find the compact geometry file: %s"%geometry_path)
     sys.exit(-1)
