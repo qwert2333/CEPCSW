@@ -13,6 +13,10 @@
 #include "CRDEcalEDMSvc/CRDCaloHit3DShower.h"
 #include "CRDEcalEDMSvc/PFObject.h"
 
+#include "k4FWCore/DataHandle.h"
+#include "edm4hep/MCParticleCollection.h"
+#include "edm4hep/MCParticle.h"
+
 #define PI 3.141592653
 #define C 299.79  // unit: mm/ns
 
@@ -20,7 +24,8 @@ class PandoraPlusDataCol{
 public:
  
   //MCParticle Collections
- 
+  std::vector<edm4hep::MCParticle>            MCParticleCol;
+
   //Track Collections
   
   //Vertex Collections

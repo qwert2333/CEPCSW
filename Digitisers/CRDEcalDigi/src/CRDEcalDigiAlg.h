@@ -84,19 +84,19 @@ protected:
 
   // Input collections
   DataHandle<edm4hep::SimCalorimeterHitCollection> r_SimCaloCol{"SimCaloCol", Gaudi::DataHandle::Reader, this};
-   mutable Gaudi::Property<std::string> _readout{this, "ReadOutName", "EcalBarrelCollection", "Readout name"};
-	mutable Gaudi::Property<std::string> _filename{this, "OutFileName", "testout.root", "Output file name"};
-	mutable Gaudi::Property<int>   _Nskip{this,  "SkipEvt", 0, "Skip event"};
-	mutable Gaudi::Property<float> _seed{this,   "Seed", 2131, "Random Seed"};
-	mutable Gaudi::Property<int>  _Debug{this,   "Debug", 0, "Debug level"};
-	mutable Gaudi::Property<float> _Eth {this,   "EnergyThreshold", 0.001, "Energy Threshold (/GeV)"};
-	mutable Gaudi::Property<float> r_cali{this,  "CalibrECAL", 1, "Calibration coefficients for ECAL"};
-	mutable Gaudi::Property<float> Latt{this, 	"AttenuationLength", 7000, "Crystal Attenuation Length(mm)"};
-	mutable Gaudi::Property<float> Tres{this, 	"TimeResolution", 0.1, "Crystal time resolution in one side (ns)"};
-	mutable Gaudi::Property<float> nMat{this, 	"MatRefractive", 2.15, "Material refractive index of crystal"};
-	mutable Gaudi::Property<float> Tinit{this, 	"InitalTime", 2, "Start time (ns)"};
-
-	mutable Gaudi::Property<float> _Qthfrac  {this, 	"ChargeThresholdFrac", 0.05, "Charge threshold fraction"};
+  mutable Gaudi::Property<std::string> _readout{this, "ReadOutName", "CaloHitsCollection", "Readout name"};
+  mutable Gaudi::Property<std::string> _filename{this, "OutFileName", "testout.root", "Output file name"};
+  mutable Gaudi::Property<int>   _Nskip{this,  "SkipEvt", 0, "Skip event"};
+  mutable Gaudi::Property<float> _seed{this,   "Seed", 2131, "Random Seed"};
+  mutable Gaudi::Property<int>  _Debug{this,   "Debug", 0, "Debug level"};
+  mutable Gaudi::Property<float> _Eth {this,   "EnergyThreshold", 0.001, "Energy Threshold (/GeV)"};
+  mutable Gaudi::Property<float> r_cali{this,  "CalibrECAL", 1, "Calibration coefficients for ECAL"};
+  mutable Gaudi::Property<float> Latt{this, 	"AttenuationLength", 7000, "Crystal Attenuation Length(mm)"};
+  mutable Gaudi::Property<float> Tres{this, 	"TimeResolution", 0.1, "Crystal time resolution in one side (ns)"};
+  mutable Gaudi::Property<float> nMat{this, 	"MatRefractive", 2.15, "Material refractive index of crystal"};
+  mutable Gaudi::Property<float> Tinit{this, 	"InitalTime", 2, "Start time (ns)"};
+  
+  mutable Gaudi::Property<float> _Qthfrac  {this, 	"ChargeThresholdFrac", 0.05, "Charge threshold fraction"};
 
 
   // Output collections

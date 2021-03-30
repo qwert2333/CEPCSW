@@ -16,7 +16,8 @@ PandoraPlusPFAlg::PandoraPlusPFAlg(const std::string& name, ISvcLocator* svcLoc)
   : GaudiAlgorithm(name, svcLoc),
     _nEvt(0)
 {
-  
+   declareProperty("MCParticle", r_MCParticleCol, "Handle of the Input MCParticle collection");
+ 
    
 }
 
@@ -96,16 +97,25 @@ StatusCode PandoraPlusPFAlg::initialize()
   t_PreRec->Branch("PreRec_NclusterX", &m_PreRec_NclusterX);
   t_PreRec->Branch("PreRec_NclusterY", &m_PreRec_NclusterY);
 
+  t_recoPFO->Branch("Npfo", &m_Npfo);
   t_recoPFO->Branch("recPFO_px", &m_recPFO_px);
   t_recoPFO->Branch("recPFO_py", &m_recPFO_py);
   t_recoPFO->Branch("recPFO_pz", &m_recPFO_pz);
   t_recoPFO->Branch("recPFO_En", &m_recPFO_En);
+  t_recoPFO->Branch("N2dshInClus", &m_N2dshInClus);
   t_recoPFO->Branch("Shower2D_x", &m_2DShower_x);
   t_recoPFO->Branch("Shower2D_y", &m_2DShower_y);
   t_recoPFO->Branch("Shower2D_z", &m_2DShower_z);
   t_recoPFO->Branch("Shower2D_E", &m_2DShower_E);
-  t_recoPFO->Branch("Npfo", &m_Npfo);
-  t_recoPFO->Branch("N2dshInClus", &m_N2dshInClus);
+  t_recoPFO->Branch("mcPdgid",     &m_mcPdgid);
+  t_recoPFO->Branch("mcStatus",    &m_mcStatus);
+  t_recoPFO->Branch("mcNdaughter", &m_mcNdaughter);
+  t_recoPFO->Branch("mcNparent",   &m_mcNparent);
+  t_recoPFO->Branch("mcPx", &m_mcPx);
+  t_recoPFO->Branch("maPy", &m_mcPy);
+  t_recoPFO->Branch("mcPz", &m_mcPz);
+  t_recoPFO->Branch("mcEn", &m_mcEn);
+  t_recoPFO->Branch("Nmc",  &m_Nmc);
 
   return GaudiAlgorithm::initialize();
 }
@@ -122,7 +132,8 @@ StatusCode PandoraPlusPFAlg::execute()
   //m_edmsvc->ClearSystem();
 
   //Get dataCol from service
-  m_pMCParticleCreator->GetMCParticle( m_DataCol );
+  const edm4hep::MCParticleCollection* const_MCPCol =  r_MCParticleCol.get();
+  if( const_MCPCol!=NULL ) m_pMCParticleCreator->GetMCParticle( m_DataCol, *const_MCPCol);
   m_pTrackCreator->     GetTracks( m_DataCol );
   m_pVertexCreator->    GetVertex( m_DataCol );
   m_pEcalHitsCreator->  GetEcalBars( m_DataCol, *m_edmsvc); 
@@ -256,19 +267,12 @@ StatusCode PandoraPlusPFAlg::execute()
     m_recPFO_pz.push_back(m_pfoCol[ipfo].getP4().Pz());
     m_recPFO_En.push_back(m_pfoCol[ipfo].getEnergy()); 
   }
-  std::vector<CRDEcalEDM::CRDCaloHit2DShower> m_shower2dCol = m_DataCol.shower2DCol;
-  for(int is=0; is<m_shower2dCol.size(); is++){
-    m_2DShower_x.push_back( m_shower2dCol[is].getPos().x() );
-    m_2DShower_y.push_back( m_shower2dCol[is].getPos().y() );
-    m_2DShower_z.push_back( m_shower2dCol[is].getPos().z() );
-    m_2DShower_E.push_back( m_shower2dCol[is].getShowerE() );
-  }
 
   std::vector<CRDEcalEDM::CRDCaloHit3DShower> m_clus = m_DataCol.Clus3DCol;
   m_N2dshInClus=0;
   for(int i=0;i<m_clus.size();i++){
     m_N2dshInClus += m_clus[i].get2DShowers().size();
-/*    if(m_clus.size()==1){
+    if(m_clus.size()==1){
 	 std::vector<CRDEcalEDM::CRDCaloHit2DShower> m_shower2dCol = m_clus[i].get2DShowers();
     for(int is=0; is<m_N2dshInClus; is++){
       m_2DShower_x.push_back( m_shower2dCol[is].getPos().x() );
@@ -276,13 +280,22 @@ StatusCode PandoraPlusPFAlg::execute()
       m_2DShower_z.push_back( m_shower2dCol[is].getPos().z() );
       m_2DShower_E.push_back( m_shower2dCol[is].getShowerE() );
     }}
-*/
+  }
+  std::vector<edm4hep::MCParticle> m_MCPCol = m_DataCol.MCParticleCol; 
+  m_Nmc = m_MCPCol.size(); 
+  for(int imc=0; imc<m_MCPCol.size(); imc++){
+    m_mcPdgid.push_back( m_MCPCol[imc].getPDG() );
+    m_mcNdaughter.push_back( m_MCPCol[imc].daughters_size() );
+    m_mcNparent.push_back( m_MCPCol[imc].parents_size() );
+    m_mcStatus.push_back( m_MCPCol[imc].getGeneratorStatus() );
+    m_mcPx.push_back( m_MCPCol[imc].getMomentum()[0] );
+    m_mcPy.push_back( m_MCPCol[imc].getMomentum()[1] );
+    m_mcPz.push_back( m_MCPCol[imc].getMomentum()[2] );
+    m_mcEn.push_back( m_MCPCol[imc].getEnergy() );
   }
   t_recoPFO->Fill();
 
-
   //Reset
-  std::cout<<"Clear service"<<std::endl;
   m_edmsvc->ClearSystem();
 
   std::cout<<"Event: "<<_nEvt<<" is done"<<std::endl;
@@ -295,7 +308,7 @@ StatusCode PandoraPlusPFAlg::finalize()
 
   m_wfile->cd();
   t_SimBar->Write();
-  t_PreRec->Write();
+  //t_PreRec->Write();
   t_recoPFO->Write();
   m_wfile->Close();
 
@@ -375,7 +388,16 @@ void PandoraPlusPFAlg::ClearRecPFO(){
   m_2DShower_y.clear();
   m_2DShower_z.clear();
   m_2DShower_E.clear();
+  m_mcPdgid.clear(); 
+  m_mcStatus.clear();
+  m_mcNdaughter.clear(); 
+  m_mcNparent.clear();
+  m_mcPx.clear();
+  m_mcPy.clear();
+  m_mcPz.clear();
+  m_mcEn.clear();
   m_Npfo=-99;
+  m_Nmc=-99;
   m_N2dshInClus=-99;
 }
 #endif

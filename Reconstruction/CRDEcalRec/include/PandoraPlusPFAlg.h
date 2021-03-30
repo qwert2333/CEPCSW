@@ -79,21 +79,28 @@ protected:
 
 
 
+  //Input collection
+  DataHandle<edm4hep::MCParticleCollection> r_MCParticleCol{"MCParticle", Gaudi::DataHandle::Reader, this};
+
   //Parameters for algorithm settings.
   //TODO: use a xml file to readin all parameters. 
   mutable Gaudi::Property<std::string> _filename{this, "OutFileName", "testout.root", "Output file name"};
   mutable Gaudi::Property<float> _seed{this,   "Seed", 2131, "Random Seed"};
   mutable Gaudi::Property<int>  _Debug{this,   "Debug", 0, "Debug level"};
   mutable Gaudi::Property<int>  _Nskip{this,   "SkipEvt", 0, "Skip event"};
-
+  //Gaudi::Property< std::vector<std::string> >  m_MCParticleCollections{ this, "MCParticleCollections", {"MCParticle"} };
 
   // Output collections
   // output: PFOs 
+
+
+
 
   //PFA input end here. 
   //-----------------------------------------------------------
   //Followings are for code testing. 
   typedef std::vector<float> FloatVec;
+  typedef std::vector<int>   IntVec;
   TFile* m_wfile;
   //Stage0: check input simbars. 
   TTree* t_SimBar;
@@ -108,7 +115,9 @@ protected:
   TTree *t_recoPFO;
   FloatVec m_recPFO_px, m_recPFO_py, m_recPFO_pz, m_recPFO_En;
   FloatVec m_2DShower_x, m_2DShower_y, m_2DShower_z, m_2DShower_E; 
-  int m_Npfo, m_N2dshInClus; 
+  IntVec m_mcPdgid, m_mcNdaughter, m_mcNparent, m_mcStatus; 
+  FloatVec m_mcPx, m_mcPy, m_mcPz, m_mcEn;
+  int m_Npfo, m_Nmc, m_N2dshInClus; 
 
   void ClearBar();
   void ClearPreRec();
