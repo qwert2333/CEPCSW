@@ -85,11 +85,11 @@
     <constant name="DC_half_length"  value="2225*mm" />
     <constant name="MainTracker_half_length"  value="DC_half_length+DC_Endcap_z" />
     <constant name="InnerTracker_half_length"  value="DC_half_length" />
-    <constant name="InnerTracker_inner_radius" value="234*mm"/>
-    <constant name="InnerTracker_outer_radius" value="906*mm"/>
+    <constant name="InnerTracker_inner_radius" value="234.8*mm"/>
+    <constant name="InnerTracker_outer_radius" value="908.8*mm"/>
     <constant name="OuterTracker_half_length"  value="DC_half_length"/>
-    <constant name="OuterTracker_inner_radius" value="1085*mm"/>
-    <constant name="OuterTracker_outer_radius" value="1720*mm"/>
+    <constant name="OuterTracker_inner_radius" value="1084.8*mm"/>
+    <constant name="OuterTracker_outer_radius" value="1717.8*mm"/>
     
     <constant name="SIT1_inner_radius"   value="152.90*mm"/>
     <constant name="SIT1_half_length"    value="368.00*mm"/>
@@ -125,42 +125,50 @@
     <constant name="Ecal_endcap_zmin"        value="2260*mm"/>
     <constant name="Ecal_endcap_zmax"        value="2540*mm"/>
     <constant name="Ecal_endcap_symmetry"    value="8"/>
+    <!--obseleted constance, used by old construct, should be removed while creating new constrcut-->
+    <constant name="EcalEndcap_outer_radius" value="Ecal_barrel_outer_radius"/>
     
-    <constant name="Solenoid_inner_radius" value="2250*mm"/>
-    <constant name="Solenoid_outer_radius" value="2550*mm"/>
+    <constant name="Solenoid_inner_radius" value="2260*mm"/>
+    <constant name="Solenoid_outer_radius" value="2560*mm"/>
     <constant name="Solenoid_half_length" value="3000*mm"/>
     <constant name="SolenoidCoil_half_length" value="2900*mm"/>
     <constant name="SolenoidCoil_radius" value="2300*mm"/>
     <constant name="SolenoidCoil_center_radius" value="(Solenoid_inner_radius+Solenoid_outer_radius)/2"/>
 
     <constant name="Hcal_barrel_inner_radius" value="2600*mm"/>
-    <constant name="Hcal_barrel_outer_radius" value="3700*mm"/>
+    <constant name="Hcal_barrel_outer_radius" value="3670.6805372782*mm"/>
     <constant name="Hcal_barrel_half_length"  value="3000*mm"/>
     <constant name="Hcal_barrel_symmetry"    value="8"/>
     
     <constant name="Hcal_endcap_inner_radius" value="340*mm"/>
     <constant name="Hcal_endcap_outer_radius" value="Hcal_barrel_outer_radius"/>
     <constant name="Hcal_endcap_zmin" value="3010*mm"/>
-    <constant name="Hcal_endcap_zmax" value="4110*mm"/>
+    <constant name="Hcal_endcap_zmax" value="4094.2*mm"/>
     <constant name="Hcal_endcap_symmetry" value="8"/>
-    
+    <!--obseleted constance, used by old construct, should be removed while creating new constrcut-->
+    <constant name="HcalEndcap_max_z" value="Hcal_endcap_zmax"/>
+    <constant name="Hcal_endcap_outer_symmetry" value="Hcal_endcap_symmetry"/>
+    <constant name="Hcal_outer_radius" value="Hcal_barrel_outer_radius"/>
+
     <constant name="Hcal_ring_inner_radius" value="Hcal_endcap_inner_radius"/>
     <constant name="Hcal_ring_outer_radius" value="Solenoid_inner_radius"/>
     <constant name="Hcal_ring_zmin" value="2600*mm"/>
-    <constant name="Hcal_ring_zmax" value="Hcal_endcap_zmin"/>
+    <constant name="Hcal_ring_zmax" value="Hcal_endcap_zmin-10*mm"/>
     <constant name="Hcal_ring_symmetry" value="8"/>
         
     <constant name="Yoke_barrel_inner_radius" value="3710*mm"/>
-    <constant name="Yoke_barrel_outer_radius" value="5170*mm"/>
-    <constant name="Yoke_barrel_half_length" value="3650*mm"/>
+    <constant name="Yoke_barrel_outer_radius" value="6951*mm"/>
+    <constant name="Yoke_barrel_half_length" value="Hcal_endcap_zmax"/>
     <constant name="Yoke_barrel_symmetry" value="8"/>
     
     <constant name="Yoke_endcap_inner_radius" value="400*mm"/>
-    <constant name="Yoke_endcap_outer_radius" value="5170*mm"/>
-    <constant name="Yoke_endcap_zmin" value="4150*mm"/>
-    <constant name="Yoke_endcap_zmax" value="5610*mm"/>
+    <constant name="Yoke_endcap_outer_radius" value="Yoke_barrel_outer_radius"/>
+    <constant name="Yoke_endcap_zmin" value="Yoke_barrel_half_length+25*mm"/>
+    <constant name="Yoke_endcap_zmax" value="6750*mm"/>
     <constant name="Yoke_endcap_outer_symmetry" value="8"/>
     <constant name="Yoke_endcap_inner_symmetry" value="0"/>
+    <!--obseleted constance, used by old construct, should be removed while creating new constrcut-->
+    <constant name="Yoke_Z_start_endcaps" value="Yoke_endcap_zmin"/>
     
     <constant name="LumiCal_zmax" value="805*mm" />
     <constant name="LumiCal_zmin" value="700*mm"/>
