@@ -64,7 +64,6 @@ bool TrackFitInEcal::fitTrack(){
 	 }
 
 	 if( ! mnFit3D() ){
-	 	  cout << "ERROR in fit with minuit" << endl;
 	 	  clear();
 	 	  return false;
 	 }
@@ -161,6 +160,8 @@ bool TrackFitInEcal::mnFit3D(){
 
           return true;
      } else{
+	 	  cout << "ERROR in fit with minuit! ";
+        cout <<"ierflg = "<<ierflg<<" , stat = "<<istat<<endl;
 		  return false;
 	 }
 }

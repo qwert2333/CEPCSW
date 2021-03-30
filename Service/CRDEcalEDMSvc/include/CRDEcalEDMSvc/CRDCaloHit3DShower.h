@@ -24,7 +24,10 @@ namespace CRDEcalEDM{
     TVector3 getShowerCenter() const;
     double getHitsE() const;
     double getShowerE() const;
-    bool   isEMShowerPre() const;
+    bool   isEMShowerPre();
+
+    double getExpEnergy(int& dlayer) const;
+    TVector3 getExpPos(int& dlayer) const;
 
     void FitProfile();
     void FitAxis(); 
@@ -43,6 +46,10 @@ namespace CRDEcalEDM{
     double getChi2() const { return chi2; }
     TVector3 getAxis() const { return axis; }
     void getFitPars(double& _alpha, double& _beta ) const { _alpha = alpha; _beta = beta; }
+    int getBeginningDlayer() const; 
+    int getEndDlayer() const;     
+
+
     void setShowerVec( std::vector<CRDEcalEDM::CRDCaloHit2DShower>& _svec ) { ShowerinLayer = _svec;}
     void setCaloHits( std::vector<edm4hep::ConstCalorimeterHit>& _hits ) { CaloHits = _hits; }
     void Clear() { ShowerinLayer.clear(); CaloHits.clear(); showerEnergy=0; hitsEnergy=0; showerMax=0; chi2=0; alpha=0; beta=0; axis.SetXYZ(0,0,0); }

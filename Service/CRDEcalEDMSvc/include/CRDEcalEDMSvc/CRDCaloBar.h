@@ -4,9 +4,7 @@
 #include <DD4hep/Objects.h>
 #include "TVector3.h"
 using namespace dd4hep;
-//namespace dd4hep{
-//  class Position; 
-//}
+
 namespace CRDEcalEDM{
 
   class CRDCaloBar{

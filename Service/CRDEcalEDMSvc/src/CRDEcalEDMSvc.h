@@ -3,7 +3,6 @@
 
 #include <GaudiKernel/Service.h>
 #include "CRDEcalEDMSvc/ICRDEcalEDMSvc.h"
-#include "CRDEcalEDMSvc/CRDCaloBar.h"
 
 class CRDEcalEDMSvc: public extends<Service, ICRDEcalEDMSvc> {
 public:
@@ -12,11 +11,12 @@ public:
     StatusCode initialize() override;
     StatusCode finalize() override;
 
-    void setDigiSystem( std::vector<CRDEcalEDM::DigiBlock> blockVec ) { m_DigiBlockVec = blockVec; }
-    std::vector<CRDEcalEDM::DigiBlock> getDigiSystem() { return m_DigiBlockVec; }
+    void setDigiSystem( std::vector<CRDEcalEDM::CRDCaloBlock>& blockVec ) { m_CaloBlockVec = blockVec; }
+    void getDigiSystem( std::vector<CRDEcalEDM::CRDCaloBlock>& blockVec ) { blockVec = m_CaloBlockVec; }
+    void ClearSystem() { m_CaloBlockVec.clear(); }
 
 private:
-    std::vector<CRDEcalEDM::DigiBlock> m_DigiBlockVec;
+    std::vector<CRDEcalEDM::CRDCaloBlock> m_CaloBlockVec;
 
 };
 

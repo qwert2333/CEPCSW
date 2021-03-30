@@ -38,6 +38,7 @@ StatusCode EnergyTimeMatchingAlg::RunAlgorithm( EnergyTimeMatchingAlg::Settings&
     std::vector<CRDEcalEDM::CRDCaloBarShower> showerYCol = layers[il].barShowerYCol;
     if(showerXCol.size()==0 || showerYCol.size()==0) continue;
 
+//printf("Debug: in layer %d:  #showerX: %d,  #showerY: %d. posX: %.2f, %.2f \n",il, showerXCol.size(), showerYCol.size(), showerXCol[0].getPos().x(), showerYCol[0].getPos().x() );
     //Case1: 1*N or N*1
 
     if(showerXCol.size()==1 || showerYCol.size()==1){ 
@@ -67,7 +68,10 @@ StatusCode EnergyTimeMatchingAlg::RunAlgorithm( EnergyTimeMatchingAlg::Settings&
         m_splitshower1.setBars( m_wibars );
         m_splitshower1.setSeed( m_wiseed);
 
-        m_showersinLayer.push_back( DigiHitsWithPos( m_splitshower1, showerNCol[is] ) );
+        CRDEcalEDM::CRDCaloHit2DShower m_shower; m_shower.Clear();
+        if(showerXCol.size()==1) m_shower = DigiHitsWithPos( m_splitshower1, showerNCol[is] );
+        else m_shower = DigiHitsWithPos( showerNCol[is], m_splitshower1 );
+        m_showersinLayer.push_back( m_shower );
       }
     }
 
@@ -80,7 +84,8 @@ StatusCode EnergyTimeMatchingAlg::RunAlgorithm( EnergyTimeMatchingAlg::Settings&
       m_showersinLayer = DigiHitsWithMatchingL2( showerXCol, showerYCol );
     }
 
-    if(m_showersinLayer.size()>std::max(showerXCol.size(), showerYCol.size()))  std::cout<<"WARNING: 2Dshower number is larger than showerX/Y number! Please check!"<<std::endl;
+    if(m_showersinLayer.size()>std::max(showerXCol.size(), showerYCol.size()))  
+    printf( "WARNING! In layer #%d: 2Dshower number(%d) is larger than showerX/Y number(%d / %d)! Please check! \n", il, m_showersinLayer.size(), showerXCol.size(), showerYCol.size() );
 
     m_2DshowerCol.insert( m_2DshowerCol.end(),  m_showersinLayer.begin(), m_showersinLayer.end() );
   
@@ -106,7 +111,7 @@ CRDEcalEDM::CRDCaloHit2DShower EnergyTimeMatchingAlg::DigiHitsWithPos( CRDEcalED
   int _part   = barShowerX.getBars()[0].getPart();
   int _block  = barShowerX.getBars()[0].getBlock();
 
-  float rotAngle = _module*PI/4.;
+  float rotAngle = -_module*PI/4.;
 
   TVector3 m_vec(0,0,0);
   for(int ibar=0;ibar<NbarsX;ibar++){
@@ -235,6 +240,7 @@ std::vector<CRDEcalEDM::CRDCaloHit2DShower> EnergyTimeMatchingAlg::DigiHitsWithM
 
   double wi_E = settings.chi2Wi_E/(settings.chi2Wi_E + settings.chi2Wi_T);
   double wi_T = settings.chi2Wi_T/(settings.chi2Wi_E + settings.chi2Wi_T);
+  double min_chi2 = 999; 
 
   TVector3 m_vec(0,0,0);
   double rotAngle = -(barShowerXCol[0].getBars())[0].getModule()*PI/4.;
@@ -260,12 +266,17 @@ std::vector<CRDEcalEDM::CRDCaloHit2DShower> EnergyTimeMatchingAlg::DigiHitsWithM
 
     chi2[ix][iy] = chi2_E[ix][iy]*wi_E + (chi2_tx[ix][iy]+chi2_ty[ix][iy])*wi_T ;
 
+    if(chi2[ix][iy]<min_chi2) min_chi2 = chi2[ix][iy];
   }}
 
+  //WIP-- Now: For the hit with minimum chi2, regared it as a 1*1 hit, and remove the corresponding X&Y showers. 
+  //           This only work for 2*3 case, and may work for N*(N+1) case after recursion. 
+  //      Future: Set a threshold in settings th_chi2, if( hit_chi2<th_chi2 )  regard it as a 1*1 hit and remove X&Y showers. 
   for(int ix=0;ix<NshowerX;ix++){
   for(int iy=0;iy<NshowerY;iy++){
 
-    if(chi2[ix][iy]<settings.th_chi2){
+    //if(chi2[ix][iy]<settings.th_chi2){
+    if(chi2[ix][iy]==min_chi2){
     CRDEcalEDM::CRDCaloBarShower showerX = barShowerXCol[ix];
     CRDEcalEDM::CRDCaloBarShower showerY = barShowerYCol[iy];
     if(showerX.getBars().size()==0 || showerY.getBars().size()==0) continue;

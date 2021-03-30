@@ -59,9 +59,58 @@ namespace CRDEcalEDM{
 
   bool CRDCaloHit3DShower::isEMShowerPre(){
     FitProfile();
-    if(ShowerinLayer.size()>=5 && chi2<6) return true;
+    if(ShowerinLayer.size()>=5 && chi2<10) return true;
     return false;
   }
+
+
+  //Get the expected deposited energy in layer i. Now is the average of i+1 and i-1. Need to update with profile. 
+  double CRDCaloHit3DShower::getExpEnergy(int& dlayer) const{ 
+    if(dlayer<getBeginningDlayer() || dlayer>getEndDlayer() ) return -99; 
+
+    double Einlayer[2] = {0}; 
+    for(int i=0;i<ShowerinLayer.size(); i++){
+      if(ShowerinLayer[i].getDlayer()==dlayer-1) Einlayer[0] = ShowerinLayer[i].getShowerE();
+      if(ShowerinLayer[i].getDlayer()==dlayer+1) Einlayer[1] = ShowerinLayer[i].getShowerE();
+    }
+    return (Einlayer[0]+Einlayer[1])/2.; 
+  }
+
+
+  //Get the expected shower position in layer i, with maxE layer as base.  
+  TVector3 CRDCaloHit3DShower::getExpPos(int& dlayer) const{
+    double maxE = -99; 
+    int dlayer_maxE = 0;
+    TVector3 pos_maxE(0,0,0);
+    if(dlayer<getBeginningDlayer() || dlayer>getEndDlayer() ) return pos_maxE; 
+
+    for(int i=0;i<ShowerinLayer.size();i++){
+      if(ShowerinLayer[i].getShowerE()>maxE){
+        maxE = ShowerinLayer[i].getShowerE(); 
+        dlayer_maxE = ShowerinLayer[i].getDlayer(); 
+        pos_maxE.SetXYZ(ShowerinLayer[i].getPos().x(), ShowerinLayer[i].getPos().y(), ShowerinLayer[i].getPos().z());
+    }}
+    return pos_maxE + axis*20*(dlayer-dlayer_maxE);
+  }
+
+  int CRDCaloHit3DShower::getBeginningDlayer() const{
+    int re_dlayer = -99; 
+    std::vector<int> dlayers; dlayers.clear(); 
+    for(int ish=0; ish<ShowerinLayer.size(); ish++) dlayers.push_back(ShowerinLayer[ish].getDlayer());
+    re_dlayer = *std::min_element(dlayers.begin(), dlayers.end());
+    
+    return re_dlayer; 
+  }
+
+  int CRDCaloHit3DShower::getEndDlayer() const{
+    int re_dlayer = -99;
+    std::vector<int> dlayers; dlayers.clear();
+    for(int ish=0; ish<ShowerinLayer.size(); ish++) dlayers.push_back(ShowerinLayer[ish].getDlayer());
+    re_dlayer = *std::max_element(dlayers.begin(), dlayers.end());
+
+    return re_dlayer;
+  }
+
 
   void CRDCaloHit3DShower::FitProfile(){
     FitAxis();
@@ -97,7 +146,15 @@ namespace CRDEcalEDM{
       axis.SetXYZ(ShowerinLayer[0].getPos().x(), ShowerinLayer[0].getPos().y(),ShowerinLayer[0].getPos().z());
       axis *= 1./axis.Mag();
     }
-    else if(ShowerinLayer.size()>1){
+    else if( ShowerinLayer.size()==2 ){
+      dd4hep::Position rpos = ShowerinLayer.back().getPos() - ShowerinLayer.front().getPos() ;
+      double mag = sqrt(rpos.Mag2());
+      axis.SetXYZ(rpos.x(), rpos.y(), rpos.z());
+      axis *= 1./mag;
+    }
+    else if(ShowerinLayer.size()>2){
+      track->clear();
+
       double barAngle = (ShowerinLayer[0].getModule()+2)*TMath::Pi()/4.;
       double posErr = 10./sqrt(12); 
       if(barAngle>=TMath::TwoPi()) barAngle = barAngle-TMath::TwoPi();
@@ -105,26 +162,20 @@ namespace CRDEcalEDM{
       for(int is=0;is<ShowerinLayer.size();is++){
         CRDEcalEDM::CRDCaloBarShower barsX = ShowerinLayer[is].getShowerX(); //U
         CRDEcalEDM::CRDCaloBarShower barsY = ShowerinLayer[is].getShowerY(); //Z
-        track->setGlobalPoint(0, barsX.getPos().x(), posErr, barsX.getPos().y(), posErr, barsX.getPos().z(), posErr);
-        track->setGlobalPoint(1, barsY.getPos().x(), posErr, barsY.getPos().y(), posErr, barsY.getPos().z(), posErr);
+//printf("\t DEBUG: input pointX (%.3f, %.3f, %.3f) \n", barsX.getPos().x(), barsX.getPos().y(), barsX.getPos().z());
+//printf("\t DEBUG: input pointY (%.3f, %.3f, %.3f) \n", barsY.getPos().x(), barsY.getPos().y(), barsY.getPos().z());
+        track->setGlobalPoint(1, barsX.getPos().x(), posErr, barsX.getPos().y(), posErr, barsX.getPos().z(), posErr);
+        track->setGlobalPoint(0, barsY.getPos().x(), posErr, barsY.getPos().y(), posErr, barsY.getPos().z(), posErr);
       }
     track->fitTrack();
     double fitPhi = track->getTrkPar(2);
     double fitTheta = track->getTrkPar(3);
+//printf("\t DEBUG: fitted phi and theta: %.3f \t %.3f \n", fitPhi, fitTheta);
 
-    if(fitPhi>0 && fitPhi<TMath::TwoPi() && fitTheta>0 && fitTheta<TMath::Pi()){
     axis.SetMag(1.);
     axis.SetPhi(fitPhi);
     axis.SetTheta(fitTheta);
-    }
-    else{
-    std::cout<<"CRDCaloHit3DShower::FitAxis()"<<'\t'<<"Axis fit failed. Use R(end)-R(begin) as axis"<<std::endl;
-    dd4hep::Position rpos = ShowerinLayer.back().getPos() - ShowerinLayer.front().getPos() ;
-    double mag = sqrt(rpos.Mag2());
-    axis.SetXYZ(rpos.x(), rpos.y(), rpos.z());
-    axis *= 1./mag;
-    }}
-
+  } 
   }
 
   void CRDCaloHit3DShower::AddShower(CRDEcalEDM::CRDCaloHit2DShower& shower){

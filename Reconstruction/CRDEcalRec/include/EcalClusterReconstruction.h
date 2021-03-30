@@ -6,6 +6,7 @@
 #include "Algorithm/EnergySplittingAlg.h"
 #include "Algorithm/EnergyTimeMatchingAlg.h"
 #include "Algorithm/ConeClusteringAlg.h"
+#include "Algorithm/ClusterMergingAlg.h"
 
 class EcalClusterReconstruction {
 public: 
@@ -28,10 +29,12 @@ public:
   EnergySplittingAlg     *m_energysplittingAlg;
   EnergyTimeMatchingAlg  *m_etmatchingAlg;
   ConeClusteringAlg      *m_coneclusterAlg;
+  ClusterMergingAlg      *m_clustermergingAlg;
 
   EnergySplittingAlg::Settings    *m_ESAlgSettings;
   EnergyTimeMatchingAlg::Settings *m_ETAlgSettings;
   ConeClusteringAlg::Settings     *m_CCAlgSettings;
+  ClusterMergingAlg::Settings     *m_CMAlgSettings; 
 
 private: 
 

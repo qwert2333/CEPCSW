@@ -12,6 +12,7 @@ void ConeClusteringAlg::Settings::SetInitialValue(){
   th_ConeTheta = PI/6.; 
   th_ConeR = 50.; //50mm
   th_ClusChi2 = 10e17;
+  fl_MergeBadClus=false; 
 }
 
 
@@ -84,16 +85,17 @@ StatusCode ConeClusteringAlg::RunAlgorithm( ConeClusteringAlg::Settings& m_setti
     if(CheckClusterQuality(m_ClusterCol[icl])) goodClus.push_back(m_ClusterCol[icl]);
     else badClus.push_back(m_ClusterCol[icl]);
   }
-std::cout<<"Number of good cluster: "<<goodClus.size()<<std::endl;
-std::cout<<"Number of bad cluster:  "<<badClus.size()<<std::endl;
+//std::cout<<"Number of good cluster: "<<goodClus.size()<<std::endl;
+//std::cout<<"Number of bad cluster:  "<<badClus.size()<<std::endl;
 
   m_datacol.GoodClus3DCol = goodClus;
   m_datacol.BadClus3DCol = badClus;
 
-  //Merge the bad clusters into good closest good cluster
-//  for(int icl=0;icl<badClus.size();icl++) if(!MergeToGoodCluster(goodClus, badClus[icl], true))  cout<<"WARNING: Cluster merging fail!"<<endl;
+  //Merge the bad clusters into closest good cluster
+  if(settings.fl_MergeBadClus) 
+    for(int icl=0;icl<badClus.size();icl++) if(!MergeToGoodCluster(goodClus, badClus[icl], true))  cout<<"WARNING: Cluster merging fail!"<<endl;
   
-//  m_datacol.Clus3DCol = goodClus;
+  m_datacol.Clus3DCol = goodClus;
 
   return StatusCode::SUCCESS;
 }
@@ -130,7 +132,7 @@ bool ConeClusteringAlg::CheckClusterQuality(CRDEcalEDM::CRDCaloHit3DShower& clus
 
 bool ConeClusteringAlg::MergeToGoodCluster( std::vector<CRDEcalEDM::CRDCaloHit3DShower>& goodClusCol,  CRDEcalEDM::CRDCaloHit3DShower& badClus, bool ForceMerging){
 
-   CRDEcalEDM::CRDCaloHit3DShower goodClus = GetClosestGoodCluster(goodClusCol, badClus);
+   CRDEcalEDM::CRDCaloHit3DShower m_goodClus = GetClosestGoodCluster(goodClusCol, badClus);
 
    //WIP: check the chi2 before/after megering.
    //double chi2_before;
@@ -140,7 +142,8 @@ bool ConeClusteringAlg::MergeToGoodCluster( std::vector<CRDEcalEDM::CRDCaloHit3D
    // return false;
    //}
 
-   std::vector<CRDEcalEDM::CRDCaloHit3DShower>::iterator iter = find(goodClusCol.begin(), goodClusCol.end(), goodClus);
+   std::vector<CRDEcalEDM::CRDCaloHit3DShower>::iterator iter = find(goodClusCol.begin(), goodClusCol.end(), m_goodClus);
+
    if(iter==goodClusCol.end()) return false;
    else{
       iter->MergeCluster(badClus);
@@ -150,15 +153,18 @@ bool ConeClusteringAlg::MergeToGoodCluster( std::vector<CRDEcalEDM::CRDCaloHit3D
 
 
 CRDEcalEDM::CRDCaloHit3DShower ConeClusteringAlg::GetClosestGoodCluster( std::vector<CRDEcalEDM::CRDCaloHit3DShower>& goodClusCol,  CRDEcalEDM::CRDCaloHit3DShower& badClus ){
+
    TVector3 m_clusCent = badClus.getShowerCenter();
-   CRDEcalEDM::CRDCaloHit3DShower m_clusCandi;
+   CRDEcalEDM::CRDCaloHit3DShower m_clusCandi; m_clusCandi.Clear();
    double minTheta=999;
    for(int i=0;i<goodClusCol.size();i++){
       TVector3 vec_goodClus = goodClusCol[i].getShowerCenter();
       TVector3 vec_goodAxis = goodClusCol[i].getAxis();
       double theta = vec_goodAxis.Cross(m_clusCent-vec_goodClus).Mag();
+
       if(theta<minTheta){
          minTheta=theta;
+         m_clusCandi.Clear();
          m_clusCandi = goodClusCol[i];
       }
    }

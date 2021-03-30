@@ -11,6 +11,7 @@
 #include "Tools/VertexCreator.h"
 #include "Tools/EcalHitsCreator.h"
 #include "Tools/HcalHitsCreator.h"
+#include "Tools/PFOCreator.h"
 
 #include "EcalClusterReconstruction.h"
 
@@ -39,7 +40,6 @@ public:
    */
   virtual StatusCode finalize() ;
 
-
 protected:
 
   int _nEvt ;
@@ -61,13 +61,14 @@ protected:
   VertexCreator           *m_pVertexCreator;
   EcalHitsCreator         *m_pEcalHitsCreator;
   HcalHitsCreator         *m_pHcalHitsCreator;
-  
+  PFOCreator              *m_pPfoCreator;   
+
   MCParticleCreator::Settings      *m_pMCParticleCreatorSettings;
   TrackCreator::Settings           *m_pTrackCreatorSettings;
   VertexCreator::Settings          *m_pVertexCreatorSettings;
   EcalHitsCreator::Settings        *m_EcalHitsCreatorSettings;
   HcalHitsCreator::Settings        *m_pHcalHitsCreatorSettings;
-
+  PFOCreator::Settings             *m_pPfoCreatorSettings;
 
   //Algorithm for PFA
   EcalClusterReconstruction   *m_pEcalClusterRec;
@@ -83,6 +84,7 @@ protected:
   mutable Gaudi::Property<std::string> _filename{this, "OutFileName", "testout.root", "Output file name"};
   mutable Gaudi::Property<float> _seed{this,   "Seed", 2131, "Random Seed"};
   mutable Gaudi::Property<int>  _Debug{this,   "Debug", 0, "Debug level"};
+  mutable Gaudi::Property<int>  _Nskip{this,   "SkipEvt", 0, "Skip event"};
 
 
   // Output collections
@@ -103,8 +105,14 @@ protected:
   FloatVec m_PreRec_shower1E, m_PreRec_shower1X, m_PreRec_shower1Y, m_PreRec_shower1Z, m_PreRec_shower1T1, m_PreRec_shower1T2;
   int m_PreRec_NshowerX, m_PreRec_NshowerY, m_PreRec_NclusterX, m_PreRec_NclusterY;
 
+  TTree *t_recoPFO;
+  FloatVec m_recPFO_px, m_recPFO_py, m_recPFO_pz, m_recPFO_En;
+  FloatVec m_2DShower_x, m_2DShower_y, m_2DShower_z, m_2DShower_E; 
+  int m_Npfo, m_N2dshInClus; 
+
   void ClearBar();
   void ClearPreRec();
+  void ClearRecPFO(); 
 
 };
 #endif

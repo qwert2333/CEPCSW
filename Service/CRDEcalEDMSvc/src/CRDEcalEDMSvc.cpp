@@ -4,7 +4,7 @@ DECLARE_COMPONENT(CRDEcalEDMSvc)
 
 StatusCode
 CRDEcalEDMSvc::initialize() {
-    m_DigiBlockVec.clear();
+    m_CaloBlockVec.clear();
     StatusCode sc = Service::initialize();
 
     return sc;
@@ -13,7 +13,7 @@ CRDEcalEDMSvc::initialize() {
 StatusCode
 CRDEcalEDMSvc::finalize() {
     // clear or reset
-    m_DigiBlockVec.clear();
+    m_CaloBlockVec.clear();
 
     StatusCode sc = Service::finalize();
     return sc;

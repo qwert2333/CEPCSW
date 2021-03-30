@@ -10,7 +10,7 @@
 #include "edm4hep/SimCalorimeterHitCollection.h"
 #include "edm4hep/MCRecoCaloAssociationCollection.h"
 #include "CRDEcalEDMSvc/ICRDEcalEDMSvc.h"
-#include "CRDEcalEDMSvc/CRDCaloBar.h"
+#include "CRDEcalEDMSvc/CRDCaloBlock.h"
 #include "CRDEcalEDMSvc/CRDCaloStep.h"
 
 #include <DDRec/DetectorData.h>
@@ -49,12 +49,12 @@ public:
   virtual StatusCode finalize() ;
  
 
-	std::vector<edm4hep::SimCalorimeterHit> MergeHits(const edm4hep::SimCalorimeterHitCollection* m_col);
-	double GetBarLength(CRDEcalEDM::CRDCaloBar bar);
-	dd4hep::Position GetCellPos(dd4hep::Position pos, CRDEcalEDM::CRDCaloBar bar);
-	edm4hep::SimCalorimeterHit find(edm4hep::SimCalorimeterHitCollection* m_col, dd4hep::Position pos);
-	edm4hep::SimCalorimeterHit find(std::vector<edm4hep::SimCalorimeterHit> m_col, unsigned long long cellid);
-	unsigned long int coder(CRDEcalEDM::CRDCaloBar bar);
+	std::vector<edm4hep::SimCalorimeterHit> MergeHits(const edm4hep::SimCalorimeterHitCollection& m_col);
+	double GetBarLength(CRDEcalEDM::CRDCaloBar& bar);
+	dd4hep::Position GetCellPos(dd4hep::Position& pos, CRDEcalEDM::CRDCaloBar& bar);
+	edm4hep::SimCalorimeterHit find(edm4hep::SimCalorimeterHitCollection& m_col, dd4hep::Position& pos);
+	edm4hep::SimCalorimeterHit find(std::vector<edm4hep::SimCalorimeterHit>& m_col, unsigned long long& cellid);
+	unsigned long int coder(CRDEcalEDM::CRDCaloBar& bar);
 
 	void Clear();
 
@@ -85,6 +85,7 @@ protected:
   // Input collections
   DataHandle<edm4hep::SimCalorimeterHitCollection> r_SimCaloCol{"SimCaloCol", Gaudi::DataHandle::Reader, this};
 	mutable Gaudi::Property<std::string> _filename{this, "OutFileName", "testout.root", "Output file name"};
+	mutable Gaudi::Property<int>   _Nskip{this,  "SkipEvt", 0, "Skip event"};
 	mutable Gaudi::Property<float> _seed{this,   "Seed", 2131, "Random Seed"};
 	mutable Gaudi::Property<int>  _Debug{this,   "Debug", 0, "Debug level"};
 	mutable Gaudi::Property<float> _Eth {this,   "EnergyThreshold", 0.001, "Energy Threshold (/GeV)"};

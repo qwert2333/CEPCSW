@@ -101,7 +101,10 @@ void PandoraPlusDataCol::Print3DClus(){
   cout<<"Loop good 3Dshowers: "<<endl;
   for(int i=0;i<GoodClus3DCol.size();i++){
     cout<<'\t'<<"Shower #"<<i;
-    printf("\t (%2f, %2f, %2f), Energy=%2f \n", GoodClus3DCol[i].getShowerCenter().x(), GoodClus3DCol[i].getShowerCenter().y(), GoodClus3DCol[i].getShowerCenter().z(),  GoodClus3DCol[i].getShowerE());
+    printf("\t (%2f, %2f, %2f), Energy=%2f, axis (%.2f, %.2f, %.2f) \n", 
+            GoodClus3DCol[i].getShowerCenter().x(), GoodClus3DCol[i].getShowerCenter().y(), GoodClus3DCol[i].getShowerCenter().z(),  
+            GoodClus3DCol[i].getShowerE(), 
+            GoodClus3DCol[i].getAxis().x(), GoodClus3DCol[i].getAxis().y(), GoodClus3DCol[i].getAxis().z());
     cout<<'\t'<<'\t'<<"2D shower depth: ";
     for(int j=0;j<GoodClus3DCol[i].get2DShowers().size();j++) cout<<GoodClus3DCol[i].get2DShowers()[j].getPos().x()<<'\t';
     cout<<endl;
@@ -111,7 +114,10 @@ void PandoraPlusDataCol::Print3DClus(){
   cout<<"Loop bad 3Dshowers: "<<endl;
   for(int i=0;i<BadClus3DCol.size();i++){
     cout<<'\t'<<"Shower #"<<i;
-    printf("\t (%2f, %2f, %2f), Energy=%2f \n", BadClus3DCol[i].getShowerCenter().x(), BadClus3DCol[i].getShowerCenter().y(), BadClus3DCol[i].getShowerCenter().z(),  BadClus3DCol[i].getShowerE());
+    printf("\t (%2f, %2f, %2f), Energy=%2f, axis (%.2f, %.2f, %.2f) \n", 
+            BadClus3DCol[i].getShowerCenter().x(), BadClus3DCol[i].getShowerCenter().y(), BadClus3DCol[i].getShowerCenter().z(),  
+            BadClus3DCol[i].getShowerE(), 
+            BadClus3DCol[i].getAxis().x(), BadClus3DCol[i].getAxis().y(), BadClus3DCol[i].getAxis().z()  );
     cout<<'\t'<<'\t'<<"2D shower depth: ";
     for(int j=0;j<BadClus3DCol[i].get2DShowers().size();j++) cout<<BadClus3DCol[i].get2DShowers()[j].getPos().x()<<'\t';
     cout<<endl;
@@ -121,7 +127,10 @@ void PandoraPlusDataCol::Print3DClus(){
   cout<<"Loop merged 3Dshowers: "<<endl;
   for(int i=0;i<Clus3DCol.size();i++){
     cout<<'\t'<<"Shower #"<<i;
-    printf("\t (%2f, %2f, %2f), Energy=%4f \n", Clus3DCol[i].getShowerCenter().x(), Clus3DCol[i].getShowerCenter().y(), Clus3DCol[i].getShowerCenter().z(),  Clus3DCol[i].getShowerE());
+    printf("\t (%2f, %2f, %2f), Energy=%2f, axis (%.2f, %.2f, %.2f) \n", 
+            Clus3DCol[i].getShowerCenter().x(), Clus3DCol[i].getShowerCenter().y(), Clus3DCol[i].getShowerCenter().z(),  
+            Clus3DCol[i].getShowerE(),
+            Clus3DCol[i].getAxis().x(), Clus3DCol[i].getAxis().y(), Clus3DCol[i].getAxis().z()  );
     cout<<'\t'<<'\t'<<"2D shower depth: ";
     for(int j=0;j<Clus3DCol[i].get2DShowers().size();j++) cout<<Clus3DCol[i].get2DShowers()[j].getPos().x()<<'\t';
     cout<<endl;
@@ -133,8 +142,11 @@ void PandoraPlusDataCol::Print3DClus(){
 }
 
 void PandoraPlusDataCol::Clear(){
-  blockVec.clear();
-  LayerCol.clear();
-  shower2DCol.clear();
-  Clus3DCol.clear();
+  Flag_Iter = false; 
+  ClearBlock();  
+  ClearLayer();  
+  ClearShower(); 
+  ClearCluster();
+  ClearPFO();    
+
 }

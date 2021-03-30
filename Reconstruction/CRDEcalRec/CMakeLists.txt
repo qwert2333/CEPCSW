@@ -6,6 +6,7 @@ gaudi_add_module(CRDEcalRec
                          src/Algorithm/EnergySplittingAlg.cpp
                          src/Algorithm/EnergyTimeMatchingAlg.cpp
                          src/Algorithm/ConeClusteringAlg.cpp
+                         src/Algorithm/ClusterMergingAlg.cpp
                  LINK k4FWCore::k4FWCore
                       GearSvc
                       DetInterface

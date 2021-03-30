@@ -102,6 +102,9 @@ StatusCode CRDEcalDigiAlg::execute()
 {
 	if(_nEvt==0) std::cout<<"CRDEcalDigiAlg::execute Start"<<std::endl;
 	std::cout<<"Processing event: "<<_nEvt<<std::endl;
+   if(_nEvt<_Nskip){ _nEvt++; return StatusCode::SUCCESS; }
+
+   m_edmsvc->ClearSystem(); 
 	Clear();
 
  	const edm4hep::SimCalorimeterHitCollection* SimHitCol =  r_SimCaloCol.get();
@@ -123,7 +126,7 @@ StatusCode CRDEcalDigiAlg::execute()
 	double totE_Digi=0;
 
 	//Merge input simhit(steps) to real simhit(bar).
-	m_simhitCol = MergeHits(SimHitCol);
+	m_simhitCol = MergeHits(*SimHitCol);
 	if(_Debug>=1) std::cout<<"Finish Hit Merge, with Nhit: "<<m_simhitCol.size()<<std::endl;
 
 	std::map< unsigned long int, CRDEcalEDM::DigiBlock > DigiBlocks; DigiBlocks.clear();
@@ -238,7 +241,7 @@ StatusCode CRDEcalDigiAlg::execute()
 			//Create truth SimHit(1cm*1cm*1cm cellsize)
 			//NOTE: NO cellID for this truth SimHit. 
 			dd4hep::Position truthpos = GetCellPos(steppos, hitbar); 
-			edm4hep::SimCalorimeterHit simhitTruth = find(SimHitCellCol, truthpos); 
+			edm4hep::SimCalorimeterHit simhitTruth = find(*SimHitCellCol, truthpos); 
 			if(simhitTruth.getCellID()==0){ 
 				simhitTruth = SimHitCellCol->create();
 				edm4hep::Vector3f m_vec(truthpos.x(), truthpos.y(), truthpos.z());
@@ -316,8 +319,20 @@ StatusCode CRDEcalDigiAlg::execute()
 	std::cout<<"Total Bar Energy: "<<totE_bar<<std::endl;
 
 
-	std::vector<CRDEcalEDM::DigiBlock> blockVec;
-	for(auto iter=DigiBlocks.begin(); iter!=DigiBlocks.end();iter++) blockVec.push_back(iter->second);
+	std::vector<CRDEcalEDM::CRDCaloBlock> blockVec; blockVec.clear();
+	for(auto iter=DigiBlocks.begin(); iter!=DigiBlocks.end();iter++){ 
+      CRDEcalEDM::DigiBlock m_block = iter->second;
+      CRDEcalEDM::CRDCaloBlock m_calobl; m_calobl.Clear();
+      m_calobl.setForced(false);
+      m_calobl.setMode(0);
+      std::vector<CRDEcalEDM::CRDCaloBar> barXCol, barYCol; barXCol.clear(); barYCol.clear(); 
+      for(int i=0;i<m_block.size();i++){
+         if(m_block[i].getSlayer()==0) barXCol.push_back(m_block[i]);
+         else barYCol.push_back(m_block[i]);
+      }
+      m_calobl.setBarCol( barXCol, barYCol );
+      blockVec.push_back(m_calobl);
+   }
 	m_edmsvc->setDigiSystem( blockVec ); 
 
 
@@ -337,12 +352,12 @@ StatusCode CRDEcalDigiAlg::finalize()
   return GaudiAlgorithm::finalize();
 }
 
-std::vector<edm4hep::SimCalorimeterHit> CRDEcalDigiAlg::MergeHits(const edm4hep::SimCalorimeterHitCollection* m_col){
+std::vector<edm4hep::SimCalorimeterHit> CRDEcalDigiAlg::MergeHits(const edm4hep::SimCalorimeterHitCollection& m_col){
 	std::vector<edm4hep::SimCalorimeterHit> m_mergedhit;
 	m_mergedhit.clear();
 
-	for(int iter=0;iter<m_col->size();iter++){
-		edm4hep::SimCalorimeterHit m_step = m_col->at(iter);
+	for(int iter=0;iter<m_col.size();iter++){
+		edm4hep::SimCalorimeterHit m_step = m_col[iter];
 		if(!m_step.isAvailable()){ cout<<"ERROR HIT!"<<endl; continue;}
 		if(m_step.getEnergy()==0) continue;
 		unsigned long long cellid = m_step.getCellID();
@@ -367,13 +382,13 @@ std::vector<edm4hep::SimCalorimeterHit> CRDEcalDigiAlg::MergeHits(const edm4hep:
 
 
 
-double CRDEcalDigiAlg::GetBarLength(CRDEcalEDM::CRDCaloBar bar){
+double CRDEcalDigiAlg::GetBarLength(CRDEcalEDM::CRDCaloBar& bar){
 	//TODO: reading bar length from geosvc. 
 	if(bar.getSlayer()==1) return 460.;
 	else return 470.-bar.getDlayer()*10.;
 }
 
-dd4hep::Position CRDEcalDigiAlg::GetCellPos(dd4hep::Position pos, CRDEcalEDM::CRDCaloBar bar){
+dd4hep::Position CRDEcalDigiAlg::GetCellPos(dd4hep::Position& pos, CRDEcalEDM::CRDCaloBar& bar){
 	dd4hep::Position rpos = pos-bar.getPosition();
 	TVector3 vec(0,0,0); 
 	if(bar.getSlayer()==1) vec.SetXYZ(0, 0, floor(rpos.z()/10)*10+5 );
@@ -397,9 +412,9 @@ dd4hep::Position CRDEcalDigiAlg::GetCellPos(dd4hep::Position pos, CRDEcalEDM::CR
 	return relv+bar.getPosition();
 }
 
-edm4hep::SimCalorimeterHit CRDEcalDigiAlg::find(edm4hep::SimCalorimeterHitCollection* m_col, dd4hep::Position pos){
-   for(int i=0;i<m_col->size();i++){
-      edm4hep::SimCalorimeterHit hit = m_col->at(i);
+edm4hep::SimCalorimeterHit CRDEcalDigiAlg::find(edm4hep::SimCalorimeterHitCollection& m_col, dd4hep::Position& pos){
+   for(int i=0;i<m_col.size();i++){
+      edm4hep::SimCalorimeterHit hit = m_col[i];
 		dd4hep::Position ipos(hit.getPosition().x, hit.getPosition().y, hit.getPosition().z);
 		if(ipos==pos) return hit;
 	}
@@ -408,7 +423,7 @@ edm4hep::SimCalorimeterHit CRDEcalDigiAlg::find(edm4hep::SimCalorimeterHitCollec
    return hit;
 }
 
-edm4hep::SimCalorimeterHit CRDEcalDigiAlg::find(std::vector<edm4hep::SimCalorimeterHit> m_col, unsigned long long cellid){
+edm4hep::SimCalorimeterHit CRDEcalDigiAlg::find(std::vector<edm4hep::SimCalorimeterHit>& m_col, unsigned long long& cellid){
    for(int i=0;i<m_col.size();i++){
 		edm4hep::SimCalorimeterHit hit=m_col.at(i);
 		if(hit.getCellID() == cellid) return hit;
@@ -418,7 +433,7 @@ edm4hep::SimCalorimeterHit CRDEcalDigiAlg::find(std::vector<edm4hep::SimCalorime
 	return hit;
 }
 
-unsigned long int CRDEcalDigiAlg::coder(CRDEcalEDM::CRDCaloBar bar){
+unsigned long int CRDEcalDigiAlg::coder(CRDEcalEDM::CRDCaloBar& bar){
    return 10099*bar.getModule() + 6911*bar.getDlayer() + 727*bar.getPart() + 31*bar.getBlock();
 }
 

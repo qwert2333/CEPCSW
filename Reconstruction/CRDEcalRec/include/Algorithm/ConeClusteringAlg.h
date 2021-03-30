@@ -8,10 +8,14 @@ public:
   class Settings{
   public: 
     Settings(){};
+
     void SetInitialValue();
+    void SetMergeBadClus(bool flag) { fl_MergeBadClus = flag; }
+
     double th_ConeTheta;
     double th_ConeR;
     double th_ClusChi2;
+    bool fl_MergeBadClus; 
   };
 
   ConeClusteringAlg();

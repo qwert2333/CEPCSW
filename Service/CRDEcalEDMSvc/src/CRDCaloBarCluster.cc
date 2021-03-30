@@ -51,6 +51,41 @@ namespace CRDEcalEDM{
     return ScndMoment;
   }
 
+  bool CRDCaloBarCluster::getGlobalRange( double& xmin,  double& ymin, double& zmin, double& xmax, double& ymax, double& zmax ) const{
+    if(Bars.size()==0) return false; 
+
+    std::vector<double> posx; posx.clear();
+    std::vector<double> posy; posx.clear();
+    std::vector<double> posz; posx.clear();
+    for(int i=0; i<Bars.size(); i++){  
+      posx.push_back(Bars[i].getPosition().x());  
+      posy.push_back(Bars[i].getPosition().y());
+      posz.push_back(Bars[i].getPosition().z());
+    }
+    auto xminptr = std::min_element( std::begin(posx), std::end(posx) );
+    auto xmaxptr = std::max_element( std::begin(posx), std::end(posx) );
+    auto yminptr = std::min_element( std::begin(posy), std::end(posy) );
+    auto ymaxptr = std::max_element( std::begin(posy), std::end(posy) );
+    auto zminptr = std::min_element( std::begin(posz), std::end(posz) );
+    auto zmaxptr = std::max_element( std::begin(posz), std::end(posz) );
+
+    int slayer = Bars[0].getSlayer(); 
+    if(slayer==0){
+      xmin = -9999.;    xmax = 9999.; 
+      ymin = -9999.;    ymax = 9999.; 
+      zmin = *zminptr;  zmax = *zmaxptr;
+    }
+    else if(slayer==1){
+      xmin = *xminptr-6;  xmax = *xmaxptr+6;
+      ymin = *yminptr-6;  ymax = *ymaxptr+6;
+      zmin = -9999;     zmax = 9999; 
+    }
+    else return false; 
+
+    return true;
+  }
+
+
   void CRDCaloBarCluster::PrintBars(){
     if(Bars.size()!=0){
       std::cout<<"BarCluster::PrintBars"<<std::endl;

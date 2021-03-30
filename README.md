@@ -46,5 +46,7 @@ Keep the collection names compatible between the prototype and the existing CEPC
 
 
 ## Update in branch dev-EcalRec-v03: CRD Ecal Reconstruction
-  * link the hits in longitutional layers. 
-  * Develope a new PFA for crystal ECal. 
+  * link the hits in longitutional layers.
+  * Depart the digitization and reconstruction: New reconstruction in Reconstruction/CRDEcalRec 
+  * New PFA for crystal ECal: PandoraPlusPFAlg (temporary)
+  * Iterate to do the clustering and energy splitting with expected shower position. 
