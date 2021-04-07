@@ -112,7 +112,7 @@ StatusCode PandoraPlusPFAlg::initialize()
   t_recoPFO->Branch("mcNdaughter", &m_mcNdaughter);
   t_recoPFO->Branch("mcNparent",   &m_mcNparent);
   t_recoPFO->Branch("mcPx", &m_mcPx);
-  t_recoPFO->Branch("maPy", &m_mcPy);
+  t_recoPFO->Branch("mcPy", &m_mcPy);
   t_recoPFO->Branch("mcPz", &m_mcPz);
   t_recoPFO->Branch("mcEn", &m_mcEn);
   t_recoPFO->Branch("Nmc",  &m_Nmc);
@@ -147,9 +147,9 @@ StatusCode PandoraPlusPFAlg::execute()
 
 
   //Perform PFA algorithm
-  //m_pEcalClusterRec->Initialize();
+  m_pEcalClusterRec->Initialize();
   m_pEcalClusterRec->RunAlgorithm( *m_pEcalClusterRecSettings, m_DataCol );
-  //m_pEcalClusterRec->ClearAlgorithm();
+  m_pEcalClusterRec->ClearAlgorithm();
 
   //m_DataCol.Print3DClus();
 

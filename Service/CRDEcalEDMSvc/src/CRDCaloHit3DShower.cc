@@ -140,6 +140,7 @@ namespace CRDEcalEDM{
     showerMax = (alpha-1)/beta;
   }
 
+
   void CRDCaloHit3DShower::FitAxis(){
     if(ShowerinLayer.size()==0) axis.SetXYZ(0,0,0);
     else if(ShowerinLayer.size()==1){ 
@@ -154,6 +155,7 @@ namespace CRDEcalEDM{
     }
     else if(ShowerinLayer.size()>2){
       track->clear();
+      track->setImpactParameter(0, 230.);
 
       double barAngle = (ShowerinLayer[0].getModule()+2)*TMath::Pi()/4.;
       double posErr = 10./sqrt(12); 

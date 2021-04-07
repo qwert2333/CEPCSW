@@ -14,6 +14,7 @@ public:
     void setBarAngle(double barAngle) { m_barAngle=barAngle; }
 	 void setPoint(int flagUZ, double uzPos, double uzPosErr, double depth, double depthErr);
     void setGlobalPoint(int flagUZ, double x, double xerr, double y, double yerr, double z, double zerr);
+    void setImpactParameter( double dr, double dz ) { m_IPvar[0]=dr; m_IPvar[1]=dz; m_FixIP=true; } 
 	 bool fitTrack();
 	 void clear();
 
@@ -46,6 +47,8 @@ private:
 	 double m_trkPar[NTRKPAR];		/* dr, dz, phi, theta */
 	 double m_trkParErr[NTRKPAR];
 	 double m_covariance[NTRKPAR][NTRKPAR];
+    double m_IPvar[2];  //dr, dz
+    bool   m_FixIP; 
 };
 
 inline double TrackFitInEcal::getTrkPar(int i) const{

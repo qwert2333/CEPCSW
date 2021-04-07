@@ -38,12 +38,9 @@ StatusCode EcalClusterReconstruction::RunAlgorithm( EcalClusterReconstruction::S
   //dataCol.PrintShower();
   //dataCol.Print3DClus();
 
-  //Iteration: 
+  //Iteration 1: 
   m_CMAlgSettings->SetInitialValue(); 
-
-  //m_clustermergingAlg->Initialize();
   m_clustermergingAlg->RunAlgorithm( *m_CMAlgSettings, dataCol );
-  //m_clustermergingAlg->ClearAlgorithm();
 
   //std::cout<<"DEBUG: come back! iter = "<<dataCol.Flag_Iter<<std::endl;
 
@@ -61,6 +58,26 @@ StatusCode EcalClusterReconstruction::RunAlgorithm( EcalClusterReconstruction::S
     m_coneclusterAlg->    RunAlgorithm( *m_CCAlgSettings, dataCol); 
   }
   //std::cout<<"Iteration 1 is done!"<<std::endl;
+
+
+  //Iteration 2: 
+/*  m_CMAlgSettings->SetInitialValue();
+  m_clustermergingAlg->RunAlgorithm( *m_CMAlgSettings, dataCol );
+  if(dataCol.Flag_Iter){
+    dataCol.ClearLayer();
+    dataCol.ClearShower();
+    dataCol.ClearCluster();
+    dataCol.ClearPFO();
+
+    m_ESAlgSettings->SetValues();
+    m_CCAlgSettings->SetMergeBadClus(true);
+
+    m_energysplittingAlg->RunAlgorithm( *m_ESAlgSettings, dataCol );
+    m_etmatchingAlg->     RunAlgorithm( *m_ETAlgSettings, dataCol );
+    m_coneclusterAlg->    RunAlgorithm( *m_CCAlgSettings, dataCol);
+  }
+  //std::cout<<"Iteration 2 is done!"<<std::endl;
+*/
 
   return StatusCode::SUCCESS;
 

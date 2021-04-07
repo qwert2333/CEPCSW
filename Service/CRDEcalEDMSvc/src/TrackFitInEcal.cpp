@@ -20,6 +20,8 @@ vector<double> TrackFitInEcal::m_depthErr;
 
 TrackFitInEcal::TrackFitInEcal(double barAngle){
 	 m_barAngle = barAngle;
+    m_IPvar[0]=0; m_IPvar[1]=0; 
+    m_FixIP = false; 
 }
 
 TrackFitInEcal::~TrackFitInEcal(){
@@ -74,6 +76,8 @@ bool TrackFitInEcal::fitTrack(){
 
 bool TrackFitInEcal::fit2D(){
 	 int iPointXY = 0;
+    // cout<<"Fit IP: "<<m_FixIP<<'\t'<<m_IPvar[0]<<'\t'<<m_IPvar[1]<<endl;
+
 	 TGraphErrors* grXY = new TGraphErrors();
 	 for(unsigned int i=0; i<m_flagUZ.size(); i++){
 		  int flag = m_flagUZ[i];
@@ -82,14 +86,22 @@ bool TrackFitInEcal::fit2D(){
 		  grXY->SetPointError(iPointXY, m_depthErr[i], m_uzPosErr[i]);
 		  iPointXY++;
 	 }
-	 grXY->Fit("pol1", "Q");
-	 double a0 = grXY->GetFunction("pol1")->GetParameter(0);
-	 double a1 = grXY->GetFunction("pol1")->GetParameter(1);
+    TF1 *func1 = new TF1("func1", "pol1", 1800, 2100);
+	 grXY->Fit("func1", "Q");
+	 double a0 = func1->GetParameter(0);
+	 double a1 = func1->GetParameter(1);
+    if(m_FixIP){
+      func1->FixParameter(0, m_IPvar[0]/cos(atan(a1))); //fix dr. 
+      grXY->Fit("func1", "Q");
+      a0 = func1->GetParameter(0);
+      a1 = func1->GetParameter(1);
+    }
 
 	 m_trkPar[2] = atan(a1); // phi
 	 m_trkPar[0] = a0 * cos(m_trkPar[2]); // dr
 	 double x0 = m_trkPar[0] * cos(m_trkPar[2] + TMath::PiOver2());
 	 // cout << "fit in x-y: " << setw(15) << a0 << setw(15) << a1 << setw(15) << m_trkPar[0] << setw(15) << m_trkPar[2] << endl;
+
 
 	 int iPointWZ = 0;
 	 TGraphErrors* grWZ = new TGraphErrors();
@@ -103,18 +115,22 @@ bool TrackFitInEcal::fit2D(){
 		  // cout << "iPointWZ " << setw(5) << iPointWZ << setw(15) << w << setw(15) << m_uzPos[i] << endl;
 		  iPointWZ++;
 	 }
-	 grWZ->Fit("pol1", "Q");
-	 a0 = grWZ->GetFunction("pol1")->GetParameter(0);
-	 a1 = grWZ->GetFunction("pol1")->GetParameter(1);
+    TF1 *func2 = new TF1("func2", "pol1", 1800, 2100);
+    if(m_FixIP) func2->FixParameter(0, m_IPvar[1]); //fix dz.
+	 grWZ->Fit("func2", "Q");
+	 a0 = func2->GetParameter(0);
+	 a1 = func2->GetParameter(1);
 
 	 double lamda = atan(a1);
 	 m_trkPar[3] = TMath::PiOver2() - lamda; // theta
 	 m_trkPar[1] = a0;						 // dz
-	 // cout << "fit in w-z: " << setw(15) << a0 << setw(15) << a1 << setw(15) << m_trkPar[1]
+	 //cout << "fit in w-z: " << setw(15) << a0 << setw(15) << a1 << setw(15) << m_trkPar[1]
 	 // 	  << setw(15) << lamda << setw(15) << m_trkPar[3] << endl;
 
 	 delete grXY;
 	 delete grWZ;
+    delete func1;
+    delete func2;
 	 return true;
 }
 
@@ -132,11 +148,13 @@ bool TrackFitInEcal::mnFit3D(){
 	 mnTrk->SetPrintLevel(-1);
 	 mnTrk->SetFCN(fcnTrk);
 	 mnTrk->SetErrorDef(1.0);
-	 mnTrk->mnparm(0, "dr", 0, 0.1, 0, 0, ierflg);
-	 mnTrk->mnparm(1, "dz", 0, 0.1, 0, 0, ierflg);
+	 mnTrk->mnparm(0, "dr", m_IPvar[0], 0.1, 0, 0, ierflg);
+	 mnTrk->mnparm(1, "dz", m_IPvar[1], 0.1, 0, 0, ierflg);
 	 mnTrk->mnparm(2, "phi", 0, 0.1, 0, 0, ierflg);
 	 mnTrk->mnparm(3, "theta", 0, 0.1, 0, 0, ierflg);
 	 arglist[0] = 0;
+    if(m_FixIP){ mnTrk->FixParameter(0); mnTrk->FixParameter(1); }
+
 	 mnTrk->mnexcm("SET NOW", arglist, 0, ierflg);
 
 	 for(int i=0; i<NTRKPAR; i++){
@@ -172,6 +190,8 @@ void TrackFitInEcal::clear(){
 	 m_uzPosErr.clear();
 	 m_depth.clear();
 	 m_depthErr.clear();
+    m_IPvar[0]=0; m_IPvar[1]=0;
+    m_FixIP = false; 
 }
 
 void TrackFitInEcal::fcnTrk(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par, Int_t iflag){
