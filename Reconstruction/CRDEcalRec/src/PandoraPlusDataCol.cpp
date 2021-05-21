@@ -10,9 +10,10 @@ void PandoraPlusDataCol::PrintLayer(){
   cout<<"Layer collection: Number = "<<LayerCol.size()<<endl;
   cout<<"Loop print all layers: "<<endl;
   for(int i=0;i<LayerCol.size();i++){
+  double totE;
 
-  cout<<'\t'<<"BarX collection in layer #"<<i<<endl;
-  double totE=0;
+/*  cout<<'\t'<<"BarX collection in layer #"<<i<<endl;
+  totE=0;
   for(int j=0;j<LayerCol[i].barXCol.size();j++){
     printf(" \t Position: (%.2f, %.2f, %.2f), and Energy: %.4f \n", 
             LayerCol[i].barXCol[j].getPosition().x(), 
@@ -34,7 +35,7 @@ void PandoraPlusDataCol::PrintLayer(){
   }
   cout<<'\t'<<"Total energy in BarY: "<<totE<<endl;
   cout<<'\t'<<"------------------------------------------"<<endl;
-
+*/
   cout<<'\t'<<"ShowerX collection in layer #"<<i<<endl;
   totE=0;
   for(int j=0;j<LayerCol[i].barShowerXCol.size();j++){
@@ -71,15 +72,15 @@ void PandoraPlusDataCol::PrintShower(){
   cout<<"------------------------------------------------"<<endl;
 
   cout<<"------------------------------------------------"<<endl;
-  cout<<"2D shower collection:  Number = "<<shower2DCol.size()<<endl;
+  cout<<"2D shower collection:  Number = "<<Shower2DCol.size()<<endl;
   cout<<"Loop print in layers: "<<endl;
   cout<<'\t'<<"Layer"<<'\t'<<"position (x, y, z)"<<'\t'<<"Energy"<<endl;
   double totE=0;
-  for(int i=0;i<shower2DCol.size();i++){
-    cout<<'\t'<<shower2DCol[i].getDlayer()<<'\t';
-    cout<<shower2DCol[i].getPos().x()<<'\t'<<shower2DCol[i].getPos().y()<<'\t'<<shower2DCol[i].getPos().z()<<'\t';
-    cout<<shower2DCol[i].getShowerE()<<endl;
-    totE+=shower2DCol[i].getShowerE();
+  for(int i=0;i<Shower2DCol.size();i++){
+    cout<<'\t'<<Shower2DCol[i].getDlayer()<<'\t';
+    cout<<Shower2DCol[i].getPos().x()<<'\t'<<Shower2DCol[i].getPos().y()<<'\t'<<Shower2DCol[i].getPos().z()<<'\t';
+    cout<<Shower2DCol[i].getShowerE()<<endl;
+    totE+=Shower2DCol[i].getShowerE();
   }
   cout<<"Total Energy: "<<totE<<endl;
   cout<<"------------------------------------------------"<<endl;
@@ -141,12 +142,33 @@ void PandoraPlusDataCol::Print3DClus(){
 
 }
 
+void PandoraPlusDataCol::ClearTempCol(){
+  BlockVec_raw.clear();
+
+  BlockVec_iter0.clear();
+  LayerCol_iter0.clear();
+  Shower2DCol_iter0.clear();
+  GoodClus3DCol_iter0.clear();
+  BadClus3DCol_iter0.clear();
+  Clus3DCol_iter0.clear();
+
+  BlockVec_iter1.clear();
+  LayerCol_iter1.clear();
+  Shower2DCol_iter1.clear();
+  GoodClus3DCol_iter1.clear();
+  BadClus3DCol_iter1.clear();
+  Clus3DCol_iter1.clear();
+
+}
+
 void PandoraPlusDataCol::Clear(){
-  Flag_Iter = false; 
+  Flag_Iter = 0; 
   ClearBlock();  
   ClearLayer();  
   ClearShower(); 
   ClearCluster();
+  ClearTrack();
   ClearPFO();    
+  ClearTempCol();
 
 }

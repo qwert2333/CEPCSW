@@ -22,6 +22,12 @@ namespace CRDEcalEDM {
     void ClearShowers() { barShowerXCol.clear(); barShowerYCol.clear(); }
     void ClearClusters() { barClusXCol.clear(); barClusYCol.clear(); }
 
+    int getDlayer() const {
+      if(barXCol.size()>0) return barXCol[0].getDlayer();
+      if(barYCol.size()>0) return barYCol[0].getDlayer();
+      return -1;
+    }
+
     std::vector<CRDEcalEDM::CRDCaloBar> barXCol;
     std::vector<CRDEcalEDM::CRDCaloBar> barYCol;
     std::vector<CRDEcalEDM::CRDCaloBarShower> barShowerXCol;

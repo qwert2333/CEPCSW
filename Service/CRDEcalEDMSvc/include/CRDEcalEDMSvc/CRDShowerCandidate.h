@@ -4,10 +4,10 @@
 namespace CRDEcalEDM {
 
   //Expected shower in one layer. 
-  class CRDExpEMShower{
+  class CRDShowerCandidate{
   public: 
 
-    CRDExpEMShower(){}; 
+    CRDShowerCandidate(){}; 
     void Clear(){  Dlayer=0; ExpEshower=0; ExpEseed=0; ExpDepth=0; ExpPos.SetXYZ(0,0,0);  }
 
     int Dlayer; 

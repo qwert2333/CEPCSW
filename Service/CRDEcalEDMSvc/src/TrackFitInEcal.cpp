@@ -178,8 +178,8 @@ bool TrackFitInEcal::mnFit3D(){
 
           return true;
      } else{
-	 	  cout << "ERROR in fit with minuit! ";
-        cout <<"ierflg = "<<ierflg<<" , stat = "<<istat<<endl;
+//	 	  cout << "ERROR in fit with minuit! ";
+//      cout <<"ierflg = "<<ierflg<<" , stat = "<<istat<<endl;
 		  return false;
 	 }
 }

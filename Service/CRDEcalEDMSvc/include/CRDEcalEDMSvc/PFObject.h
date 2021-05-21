@@ -14,6 +14,7 @@ namespace CRDEcalEDM {
     int    getCharge() const { return m_charge; }
     double getMass()   const { return m_4vec.M(); }
     double getEnergy() const { return m_4vec.E(); }
+    CRDEcalEDM::CRDCaloHit3DShower getECalShower() const { return m_EcalShower; }
     TLorentzVector getP4() const { return m_4vec; }
 
     void Clear() { m_EcalShower.Clear(); m_particleID=-99; m_charge=-99; m_4vec.SetXYZT(0.,0.,0.,0.); }

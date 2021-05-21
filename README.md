@@ -47,6 +47,7 @@ Keep the collection names compatible between the prototype and the existing CEPC
 
 ## Update in branch dev-EcalRec-v04: CRD Ecal Reconstruction
   * Update Ecal geometry: new cellID, 11 blocks in z-direction, less memory in simulation.
-  * Update Ecal digitalization for updated geometry
+  * Update Ecal digitalization for updated geometry (WARNING: would have conflict with previous version!)
+  * WIP: add track, deal with MIP. 
 
 

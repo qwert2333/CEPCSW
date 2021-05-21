@@ -28,9 +28,11 @@ namespace CRDEcalEDM{
     std::vector<CRDEcalEDM::CRDCaloBar> getBars()  const { return Bars;  }
     std::vector<CRDEcalEDM::CRDCaloBar> getSeeds() const { return Seeds; }
     bool getGlobalRange( double& xmin,  double& ymin, double& zmin, double& xmax, double& ymax, double& zmax ) const;
+    int  getLeftEdge();
+    int  getRightEdge();
 
-    void PrintBars();
-    void PrintSeeds();
+    void PrintBars() const;
+    void PrintSeeds() const;
 
     void addBar( CRDEcalEDM::CRDCaloBar _bar ) { Bars.push_back(_bar); }
     void addSeed( CRDEcalEDM::CRDCaloBar _seed ) { Seeds.push_back(_seed); }

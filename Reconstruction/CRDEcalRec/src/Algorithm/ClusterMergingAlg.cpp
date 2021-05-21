@@ -4,65 +4,38 @@
 #include "Algorithm/ClusterMergingAlg.h"
 
 void ClusterMergingAlg::Settings::SetInitialValue(){
-
+  Debug=0;
 }
 
 StatusCode ClusterMergingAlg::Initialize(){
 
   //Initialize settings
-/*  m_ESAlgSettings = new EnergySplittingAlg::Settings();
-  m_ETAlgSettings = new EnergyTimeMatchingAlg::Settings();
-  m_CCAlgSettings = new ConeClusteringAlg::Settings();
-
-  //Initialize Algorthm
-  m_energysplittingAlg = new EnergySplittingAlg();
-  m_etmatchingAlg = new EnergyTimeMatchingAlg();
-  m_coneclusterAlg = new ConeClusteringAlg();
-*/
-
   return StatusCode::SUCCESS;
 }
 
 StatusCode ClusterMergingAlg::RunAlgorithm(ClusterMergingAlg::Settings& m_settings, PandoraPlusDataCol& m_datacol){
+  settings = m_settings;
 
-//std::cout<<"DEBUG: Run ClusterMergingAlg"<<std::endl; 
   std::vector<CRDEcalEDM::CRDCaloHit3DShower> m_goodClus = m_datacol.GoodClus3DCol;
   std::vector<CRDEcalEDM::CRDCaloHit3DShower> m_badClus  = m_datacol.BadClus3DCol;
+  if(settings.Debug>0) { m_datacol.PrintLayer(); m_datacol.PrintShower(); m_datacol.Print3DClus(); }
 
-  //std::cout<<"#GoodClus and #BadClus: "<<m_goodClus.size()<<'\t'<<m_badClus.size()<<endl;
-
-/*
-//  std::vector<int> m_DlayerVec = GetGhostHitsLayer( m_goodClus, m_badClus );
-  //std::cout<<"#GhostHitsLayer: "<<m_DlayerVec.size()<<std::endl;
-
-  // No ghost hit layer, merge the bad cluster into closest good cluster
-  if(m_DlayerVec.size()==0){ 
-    m_datacol.ClearCluster(); 
-    m_datacol.GoodClus3DCol = m_goodClus; 
-    m_datacol.BadClus3DCol = m_badClus; 
-    std::vector<CRDEcalEDM::CRDCaloHit3DShower> m_mergedClus; m_mergedClus.clear(); 
-    m_mergedClus = m_goodClus; 
-    for(int icl=0;icl<m_badClus.size();icl++) if(!MergeToGoodCluster(m_mergedClus, m_badClus[icl], true))  cout<<"WARNING: Cluster merging fail!"<<endl;
-
-    m_datacol.Clus3DCol = m_mergedClus;
-    //std::cout<<"Cluster Merged! Go back to PandoraPlusPFAlg"<<std::endl;
-    return StatusCode::SUCCESS;
-  }
-*/
+  for(int ib=0;ib<m_datacol.BlockVec.size(); ib++) m_datacol.BlockVec[ib].ClearCandidate();
 
   std::vector<int> m_DlayerVec = GetLayerNeedModification( m_goodClus, m_badClus );
+  if(settings.Debug>0){ 
+    std::cout<<"DEBUG: Layers need to modify: ";
+    for(int il=0;il<m_DlayerVec.size();il++) std::cout<<m_DlayerVec[il]<<"   ";
+    std::cout<<std::endl;
+  }
 
-//std::cout<<"Layers need modification: ";
-//for(int i=0; i<m_DlayerVec.size(); i++) std::cout<<m_DlayerVec[i]<<'\t';
-//std::cout<<std::endl;
-
-  //Update CaloBlock with ExpShower
+  //Update CaloBlock with EMCandidate
   for(int i=0;i<m_DlayerVec.size();i++){
     int dlayer = m_DlayerVec[i];
     //std::cout<<"DEBUG: layer with ghost: "<<dlayer<<std::endl;
-    std::vector<CRDEcalEDM::CRDExpEMShower> m_expshvec; m_expshvec.clear();
+    std::vector<CRDEcalEDM::CRDShowerCandidate> m_expshvec; m_expshvec.clear();
     for(int icl=0; icl<m_goodClus.size(); icl++){
-      CRDEcalEDM::CRDExpEMShower m_expsh; m_expsh.Clear(); 
+      CRDEcalEDM::CRDShowerCandidate m_expsh; m_expsh.Clear(); 
       m_expsh.Dlayer = dlayer; 
       m_expsh.ExpEshower = m_goodClus[icl].getExpEnergy(dlayer); 
       if(m_expsh.ExpEshower <0 ) continue; 
@@ -72,37 +45,22 @@ StatusCode ClusterMergingAlg::RunAlgorithm(ClusterMergingAlg::Settings& m_settin
       m_expshvec.push_back(m_expsh);
     }
 
-//std::cout<<"DEBUG: #ExpShower: "<<m_expshvec.size()<<std::endl;
-//for(int iexp=0;iexp<m_expshvec.size(); iexp++) printf("\t DEBUG: ExpShower position (%.2f, %.2f, %.2f), Energy %.3f \n", m_expshvec[iexp].ExpPos.x(), m_expshvec[iexp].ExpPos.y(),m_expshvec[iexp].ExpPos.z(), m_expshvec[iexp].ExpEshower );
+    if(settings.Debug>0){
+      std::cout<<"DEBUG: #EMCandidate: "<<m_expshvec.size()<<std::endl;
+      for(int iexp=0;iexp<m_expshvec.size(); iexp++) 
+        printf("\t DEBUG: EMCandidate position (%.2f, %.2f, %.2f), Energy %.3f \n", 
+               m_expshvec[iexp].ExpPos.x(), m_expshvec[iexp].ExpPos.y(),m_expshvec[iexp].ExpPos.z(), m_expshvec[iexp].ExpEshower );
 
-    for(int ib=0;ib<m_datacol.blockVec.size(); ib++){
-      if(m_datacol.blockVec[ib].getDlayer()==dlayer){
-//std::cout<<"DEBUG: Found corresponding block!"<<std::endl;
-        m_datacol.blockVec[ib].setForced(true);
-        m_datacol.blockVec[ib].setMode(1);
-        m_datacol.blockVec[ib].setExpShowerCol(m_expshvec);
-//std::cout<<"DEBUG: Added ExpShowers into block!"<<std::endl;
+    }
+
+    for(int ib=0;ib<m_datacol.BlockVec.size(); ib++){
+      if(m_datacol.BlockVec[ib].getDlayer()==dlayer){
+        m_datacol.BlockVec[ib].setForced(true);
+        m_datacol.BlockVec[ib].setCandidateCol(m_expshvec);
     }}
   }
 
-
-  //Do the iteration1
-/*  m_datacol.ClearLayer(); 
-  m_datacol.ClearShower(); 
-  m_datacol.ClearCluster();
-  m_datacol.ClearPFO(); 
-
-  m_ESAlgSettings->SetInitialValue();
-  m_ETAlgSettings->SetInitialValue();
-  m_CCAlgSettings->SetInitialValue(); 
-  m_ESAlgSettings->SetValues();
-  m_CCAlgSettings->SetMergeBadClus(true);
-
-  m_energysplittingAlg->RunAlgorithm( *m_ESAlgSettings, m_datacol );
-  m_etmatchingAlg->     RunAlgorithm( *m_ETAlgSettings, m_datacol );
-  m_coneclusterAlg->    RunAlgorithm( *m_CCAlgSettings, m_datacol); 
-*/
-  m_datacol.Flag_Iter = true;
+  //m_datacol.Flag_Iter++;
   return StatusCode::SUCCESS;
 
 }
@@ -161,7 +119,7 @@ std::vector<int> ClusterMergingAlg::GetLayerNeedModification( std::vector<CRDEca
   }
 
 
-  //Case2: multiple clusters: tune in overlapping layers. 
+  //Case2: multiple clusters: tune in all layers. 
   std::vector<int> layer_start; layer_start.clear(); 
   std::vector<int> layer_end; layer_end.clear(); 
   for(int icl=0; icl<m_goodClus.size(); icl++){ 
@@ -171,63 +129,18 @@ std::vector<int> ClusterMergingAlg::GetLayerNeedModification( std::vector<CRDEca
   std::sort( layer_start.begin(), layer_start.end() );
   std::sort( layer_end.begin(), layer_end.end() );
 
-  int start = layer_start[1];                //second 
-  int end   = layer_end[layer_end.size()-2]; //second last. Dlayer in [start, end] would have overlapping clusters.  
+  int start = layer_start[0];                
+  int end   = layer_end[layer_end.size()-1]; 
 
-  for(int i=start-1; i<end+1; i++) vec_dlayer.push_back(i);
+  for(int i=start; i<end+1; i++) vec_dlayer.push_back(i);
   return vec_dlayer; 
 
-}
-
-bool ClusterMergingAlg::MergeToGoodCluster( std::vector<CRDEcalEDM::CRDCaloHit3DShower>& goodClusCol,  CRDEcalEDM::CRDCaloHit3DShower& badClus, bool ForceMerging){
-
-   CRDEcalEDM::CRDCaloHit3DShower goodClus = GetClosestGoodCluster(goodClusCol, badClus);
-
-   //WIP: check the chi2 before/after megering.
-   //double chi2_before;
-   //double chi2_after;
-   //if(!ForceMerging && chi2_after>chi2_before){
-   // std::cout<<"WARNING: chi2 increases after merging. Skip this merging!"<<std<<endl;
-   // return false;
-   //}
-
-   std::vector<CRDEcalEDM::CRDCaloHit3DShower>::iterator iter = find(goodClusCol.begin(), goodClusCol.end(), goodClus);
-   if(iter==goodClusCol.end()) return false;
-   else{
-      iter->MergeCluster(badClus);
-   }
-   return true;
-}
-
-
-CRDEcalEDM::CRDCaloHit3DShower ClusterMergingAlg::GetClosestGoodCluster( std::vector<CRDEcalEDM::CRDCaloHit3DShower>& goodClusCol,  CRDEcalEDM::CRDCaloHit3DShower& badClus ){
-   TVector3 m_clusCent = badClus.getShowerCenter();
-   CRDEcalEDM::CRDCaloHit3DShower m_clusCandi;
-   double minTheta=999;
-   for(int i=0;i<goodClusCol.size();i++){
-      TVector3 vec_goodClus = goodClusCol[i].getShowerCenter();
-      TVector3 vec_goodAxis = goodClusCol[i].getAxis();
-      double theta = vec_goodAxis.Cross(m_clusCent-vec_goodClus).Mag();
-      if(theta<minTheta){
-         minTheta=theta;
-         m_clusCandi = goodClusCol[i];
-      }
-   }
-
-   return m_clusCandi;
 }
 
 
 StatusCode ClusterMergingAlg::ClearAlgorithm(){
 
-/*  delete m_energysplittingAlg;
-  delete m_etmatchingAlg;
-  delete m_coneclusterAlg;
 
-  delete m_ESAlgSettings;
-  delete m_ETAlgSettings;
-  delete m_CCAlgSettings;
-*/
   return StatusCode::SUCCESS;
 
 }

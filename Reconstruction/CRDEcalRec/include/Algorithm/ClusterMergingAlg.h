@@ -15,7 +15,8 @@ public:
   public: 
     Settings() {};
     void SetInitialValue();
-
+    void SetDebug(int _level) { Debug  =_level; }
+    int Debug;
   };
 
   ClusterMergingAlg() {};
@@ -23,21 +24,11 @@ public:
   StatusCode RunAlgorithm( ClusterMergingAlg::Settings& m_settings, PandoraPlusDataCol& m_datacol);
   StatusCode ClearAlgorithm(); 
 
-  CRDEcalEDM::CRDCaloHit3DShower GetClosestGoodCluster( std::vector<CRDEcalEDM::CRDCaloHit3DShower>& goodClusCol,  CRDEcalEDM::CRDCaloHit3DShower& badClus );
-  bool MergeToGoodCluster( std::vector<CRDEcalEDM::CRDCaloHit3DShower>& goodClusCol,  CRDEcalEDM::CRDCaloHit3DShower& badClus, bool ForceMerging);
   std::vector<int> GetGhostHitsLayer( std::vector<CRDEcalEDM::CRDCaloHit3DShower>& m_goodClus, std::vector<CRDEcalEDM::CRDCaloHit3DShower>& m_badClus );
   std::vector<int> GetLayerNeedModification( std::vector<CRDEcalEDM::CRDCaloHit3DShower>& m_goodClus, std::vector<CRDEcalEDM::CRDCaloHit3DShower>& m_badClus );
 
   Settings settings;
 
-/*  EnergySplittingAlg     *m_energysplittingAlg;
-  EnergyTimeMatchingAlg  *m_etmatchingAlg;
-  ConeClusteringAlg      *m_coneclusterAlg;
-
-  EnergySplittingAlg::Settings    *m_ESAlgSettings;
-  EnergyTimeMatchingAlg::Settings *m_ETAlgSettings;
-  ConeClusteringAlg::Settings     *m_CCAlgSettings;
-*/
 
 };
 

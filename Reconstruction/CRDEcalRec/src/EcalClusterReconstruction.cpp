@@ -24,61 +24,69 @@ StatusCode EcalClusterReconstruction::RunAlgorithm( EcalClusterReconstruction::S
   m_ESAlgSettings->SetInitialValue();
   m_ETAlgSettings->SetInitialValue();
   m_CCAlgSettings->SetInitialValue();
+  m_CMAlgSettings->SetInitialValue(); 
+  //m_CMAlgSettings->SetDebug(1);
 
-  //std::cout<<"ESAlg::Running"<<std::endl;
+  dataCol.BlockVec_raw = dataCol.BlockVec;
+  std::cout<<"Start Iteration 0"<<std::endl;
   m_energysplittingAlg->RunAlgorithm( *m_ESAlgSettings, dataCol ); 
-  //std::cout<<"ETAlg::Running"<<std::endl;
   m_etmatchingAlg->     RunAlgorithm( *m_ETAlgSettings, dataCol );
-  //std::cout<<"CCAlg::Running"<<std::endl;
   m_coneclusterAlg->    RunAlgorithm( *m_CCAlgSettings, dataCol);
   //std::cout<<"Iteration 0 is done!"<<std::endl;
-
-
-  //dataCol.PrintLayer();
-  //dataCol.PrintShower();
-  //dataCol.Print3DClus();
-
-  //Iteration 1: 
-  m_CMAlgSettings->SetInitialValue(); 
   m_clustermergingAlg->RunAlgorithm( *m_CMAlgSettings, dataCol );
-
-  //std::cout<<"DEBUG: come back! iter = "<<dataCol.Flag_Iter<<std::endl;
-
-  if(dataCol.Flag_Iter){
-    dataCol.ClearLayer();
-    dataCol.ClearShower();
-    dataCol.ClearCluster();
-    dataCol.ClearPFO();
-
-    m_ESAlgSettings->SetValues();
-    m_CCAlgSettings->SetMergeBadClus(true);
-
-    m_energysplittingAlg->RunAlgorithm( *m_ESAlgSettings, dataCol );
-    m_etmatchingAlg->     RunAlgorithm( *m_ETAlgSettings, dataCol );
-    m_coneclusterAlg->    RunAlgorithm( *m_CCAlgSettings, dataCol); 
-  }
-  //std::cout<<"Iteration 1 is done!"<<std::endl;
+  dataCol.Flag_Iter++;
 
 
-  //Iteration 2: 
-/*  m_CMAlgSettings->SetInitialValue();
-  m_clustermergingAlg->RunAlgorithm( *m_CMAlgSettings, dataCol );
-  if(dataCol.Flag_Iter){
-    dataCol.ClearLayer();
-    dataCol.ClearShower();
-    dataCol.ClearCluster();
-    dataCol.ClearPFO();
+    dataCol.BlockVec_iter0       = dataCol.BlockVec;
+    dataCol.LayerCol_iter0       = dataCol.LayerCol;
+    dataCol.Shower2DCol_iter0    = dataCol.Shower2DCol;
+    dataCol.GoodClus3DCol_iter0  = dataCol.GoodClus3DCol;
+    dataCol.BadClus3DCol_iter0   = dataCol.BadClus3DCol;
+    dataCol.Clus3DCol_iter0      = dataCol.Clus3DCol;
 
-    m_ESAlgSettings->SetValues();
-    m_CCAlgSettings->SetMergeBadClus(true);
+/*  //Iteration 1: 
+  std::cout<<"Start Iteration 1"<<std::endl;
+  dataCol.ClearLayer();
+  dataCol.ClearShower();
+  dataCol.ClearCluster();
+  dataCol.ClearPFO();
 
-    m_energysplittingAlg->RunAlgorithm( *m_ESAlgSettings, dataCol );
-    m_etmatchingAlg->     RunAlgorithm( *m_ETAlgSettings, dataCol );
-    m_coneclusterAlg->    RunAlgorithm( *m_CCAlgSettings, dataCol);
-  }
-  //std::cout<<"Iteration 2 is done!"<<std::endl;
+  m_ESAlgSettings->SetValues();
+  m_CCAlgSettings->SetGoodClusLevel(1);
+  m_CCAlgSettings->SetMergeBadClus(false);
+
+  m_energysplittingAlg->RunAlgorithm( *m_ESAlgSettings, dataCol );
+  m_etmatchingAlg->     RunAlgorithm( *m_ETAlgSettings, dataCol );
+  m_coneclusterAlg->    RunAlgorithm( *m_CCAlgSettings, dataCol ); 
+  m_clustermergingAlg-> RunAlgorithm( *m_CMAlgSettings, dataCol );
+  dataCol.Flag_Iter++;
+
+    dataCol.BlockVec_iter1       = dataCol.BlockVec;
+    dataCol.LayerCol_iter1       = dataCol.LayerCol;
+    dataCol.Shower2DCol_iter1    = dataCol.Shower2DCol;
+    dataCol.GoodClus3DCol_iter1  = dataCol.GoodClus3DCol;
+    dataCol.BadClus3DCol_iter1   = dataCol.BadClus3DCol;
+    dataCol.Clus3DCol_iter1      = dataCol.Clus3DCol;  
+
+
+  //Itertion 2: 
+  std::cout<<"Start Iteration 2"<<std::endl;
+  dataCol.ClearLayer();
+  dataCol.ClearShower();
+  dataCol.ClearCluster();
+  dataCol.ClearPFO();
+
+  m_ESAlgSettings->SetValues();
+  m_CCAlgSettings->SetGoodClusLevel(2);
+  m_CCAlgSettings->SetMergeBadClus(true);
+
+  m_energysplittingAlg->RunAlgorithm( *m_ESAlgSettings, dataCol );
+  m_etmatchingAlg->     RunAlgorithm( *m_ETAlgSettings, dataCol );
+  m_coneclusterAlg->    RunAlgorithm( *m_CCAlgSettings, dataCol );
+  dataCol.Flag_Iter++;
+
+  std::cout<<"Finish Iteration! "<<std::endl;
 */
-
   return StatusCode::SUCCESS;
 
 }

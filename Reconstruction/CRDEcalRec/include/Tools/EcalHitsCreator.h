@@ -22,7 +22,7 @@ public:
   StatusCode ReadSettings( Settings& settings ){ return StatusCode::SUCCESS; };
 
   StatusCode GetEcalBars(PandoraPlusDataCol& dataCol , ICRDEcalEDMSvc& m_svc ){ 
-    m_svc.getDigiSystem( dataCol.blockVec );  
+    m_svc.getDigiSystem( dataCol.BlockVec );  
     return StatusCode::SUCCESS;
   };
 

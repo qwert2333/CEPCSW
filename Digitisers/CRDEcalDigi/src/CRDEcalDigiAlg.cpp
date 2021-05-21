@@ -329,7 +329,6 @@ StatusCode CRDEcalDigiAlg::execute()
       CRDEcalEDM::DigiBlock m_block = iter->second;
       CRDEcalEDM::CRDCaloBlock m_calobl; m_calobl.Clear();
       m_calobl.setForced(false);
-      m_calobl.setMode(0);
       std::vector<CRDEcalEDM::CRDCaloBar> barXCol, barYCol; barXCol.clear(); barYCol.clear(); 
       for(int i=0;i<m_block.size();i++){
          if(m_block[i].getSlayer()==0) barXCol.push_back(m_block[i]);

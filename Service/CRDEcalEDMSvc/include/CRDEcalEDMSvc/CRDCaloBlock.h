@@ -2,7 +2,7 @@
 #define _CRD_CALOBLOCK_
 
 #include "CRDEcalEDMSvc/CRDCaloBar.h"
-#include "CRDEcalEDMSvc/CRDExpEMShower.h"
+#include "CRDEcalEDMSvc/CRDShowerCandidate.h"
 namespace CRDEcalEDM {
 
   class CRDCaloBlock {
@@ -12,14 +12,13 @@ namespace CRDEcalEDM {
     void Clear(){
       barXCol.clear(); 
       barYCol.clear();
-      ForcedEMShower.clear();
+      CandidateCol.clear();
     }
-    int getNforcedEMShower() const { return ForcedEMShower.size(); }
+    void ClearCandidate() { CandidateCol.clear(); }
     std::vector<CRDEcalEDM::CRDCaloBar> getBarXCol() const { return barXCol; }
     std::vector<CRDEcalEDM::CRDCaloBar> getBarYCol() const { return barYCol; }
-    std::vector<CRDEcalEDM::CRDExpEMShower> getExpShower() const { return ForcedEMShower; }
+    std::vector<CRDEcalEDM::CRDShowerCandidate> getCandidateCol() const { return CandidateCol; }
     bool isForced() const { return m_isForced; }
-    int getMode()  const { return m_ForcedMode; }
     int getDlayer() const { 
       if(barXCol.size()>0) return barXCol[0].getDlayer(); 
       if(barYCol.size()>0) return barYCol[0].getDlayer();
@@ -27,8 +26,7 @@ namespace CRDEcalEDM {
     }
 
     void setForced(bool flag) { m_isForced=flag; }
-    void setMode(int flag) { m_ForcedMode=flag; }
-    void setExpShowerCol( std::vector<CRDEcalEDM::CRDExpEMShower> _showers) { ForcedEMShower = _showers; }
+    void setCandidateCol( std::vector<CRDEcalEDM::CRDShowerCandidate> _showers) { CandidateCol = _showers; }
     void setBarCol( std::vector<CRDEcalEDM::CRDCaloBar> _colX, std::vector<CRDEcalEDM::CRDCaloBar> _colY ){ barXCol=_colX, barYCol=_colY; }
  
   private:
@@ -36,8 +34,7 @@ namespace CRDEcalEDM {
     std::vector<CRDEcalEDM::CRDCaloBar> barYCol;
 
     bool m_isForced;         //false for no forced shower.
-    int m_ForcedMode;       //0 for no forced, 1 for exclusive, 2 for inclusive 
-    std::vector<CRDEcalEDM::CRDExpEMShower> ForcedEMShower; 
+    std::vector<CRDEcalEDM::CRDShowerCandidate> CandidateCol; 
 
   };
 

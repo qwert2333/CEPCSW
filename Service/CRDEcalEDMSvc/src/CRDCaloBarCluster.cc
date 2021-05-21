@@ -85,8 +85,20 @@ namespace CRDEcalEDM{
     return true;
   }
 
+  int CRDCaloBarCluster::getLeftEdge(){
+    std::sort(Bars.begin(), Bars.end());
+    if(Bars.size()==0) return -99;
+    return Bars[0].getBar();
+  }
 
-  void CRDCaloBarCluster::PrintBars(){
+  int CRDCaloBarCluster::getRightEdge(){
+    std::sort(Bars.begin(), Bars.end());
+    if(Bars.size()==0) return -99;
+    return Bars[Bars.size()-1].getBar();
+  }  
+
+
+  void CRDCaloBarCluster::PrintBars() const{
     if(Bars.size()!=0){
       std::cout<<"BarCluster::PrintBars"<<std::endl;
       printf("#bar \t x \t y \t z \t E \n");
@@ -94,8 +106,8 @@ namespace CRDEcalEDM{
     }
   }
 
-  void CRDCaloBarCluster::PrintSeeds(){
-    if(Seeds.size()!=0){
+  void CRDCaloBarCluster::PrintSeeds() const{
+    if(Seeds.size()>0){
       std::cout<<"BarCluster::PrintSeeds"<<std::endl;
       printf("#Seed \t x \t y \t z \t E \n");
       for(int i=0;i<Seeds.size();i++) printf("%d \t %f \t %f \t %f \t %f \n",i, Seeds[i].getPosition().x(), Seeds[i].getPosition().y(), Seeds[i].getPosition().z(), Seeds[i].getEnergy() );

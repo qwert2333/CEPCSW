@@ -66,7 +66,8 @@ namespace CRDEcalEDM{
 
   //Get the expected deposited energy in layer i. Now is the average of i+1 and i-1. Need to update with profile. 
   double CRDCaloHit3DShower::getExpEnergy(int& dlayer) const{ 
-    if(dlayer<getBeginningDlayer() || dlayer>getEndDlayer() ) return -99; 
+    if(dlayer<getBeginningDlayer()) return -99; 
+    else if(dlayer>getEndDlayer() ) return 1; 
 
     double Einlayer[2] = {0}; 
     for(int i=0;i<ShowerinLayer.size(); i++){
@@ -82,7 +83,7 @@ namespace CRDEcalEDM{
     double maxE = -99; 
     int dlayer_maxE = 0;
     TVector3 pos_maxE(0,0,0);
-    if(dlayer<getBeginningDlayer() || dlayer>getEndDlayer() ) return pos_maxE; 
+    if( dlayer<getBeginningDlayer() ) return pos_maxE; 
 
     for(int i=0;i<ShowerinLayer.size();i++){
       if(ShowerinLayer[i].getShowerE()>maxE){
@@ -155,7 +156,7 @@ namespace CRDEcalEDM{
     }
     else if(ShowerinLayer.size()>2){
       track->clear();
-      track->setImpactParameter(0, 230.);
+      //track->setImpactParameter(0, 230.); //fix dr=0, dz=230.
 
       double barAngle = (ShowerinLayer[0].getModule()+2)*TMath::Pi()/4.;
       double posErr = 10./sqrt(12); 

@@ -22,14 +22,13 @@ StatusCode Initialize(){
 	return StatusCode::SUCCESS;
 }
 
-StatusCode EnergyTimeMatchingAlg::RunAlgorithm( EnergyTimeMatchingAlg::Settings& m_settings, PandoraPlusDataCol& m_datasvc ){
-
+StatusCode EnergyTimeMatchingAlg::RunAlgorithm( EnergyTimeMatchingAlg::Settings& m_settings, PandoraPlusDataCol& m_datacol ){
   settings = m_settings;
 
-  std::vector<CRDEcalEDM::CRDCaloLayer> layers = m_datasvc.LayerCol;
-
+  std::vector<CRDEcalEDM::CRDCaloLayer> layers = m_datacol.LayerCol;
+  if(layers.size()==0){ std::cout<<"Warning: Empty input in EnergyTimeMatchingAlg! Please check previous algorithm!"<<std::endl; return StatusCode::SUCCESS; }
   std::vector<CRDEcalEDM::CRDCaloHit2DShower> m_2DshowerCol; m_2DshowerCol.clear();
-  //Loop in layers
+
   for(int il=0;il<layers.size();il++){ 
 
     std::vector<CRDEcalEDM::CRDCaloHit2DShower> m_showersinLayer; m_showersinLayer.clear();
@@ -38,60 +37,70 @@ StatusCode EnergyTimeMatchingAlg::RunAlgorithm( EnergyTimeMatchingAlg::Settings&
     std::vector<CRDEcalEDM::CRDCaloBarShower> showerYCol = layers[il].barShowerYCol;
     if(showerXCol.size()==0 || showerYCol.size()==0) continue;
 
-//printf("Debug: in layer %d:  #showerX: %d,  #showerY: %d. posX: %.2f, %.2f \n",il, showerXCol.size(), showerYCol.size(), showerXCol[0].getPos().x(), showerYCol[0].getPos().x() );
-    //Case1: 1*N or N*1
-
-    if(showerXCol.size()==1 || showerYCol.size()==1){ 
-      std::vector<CRDEcalEDM::CRDCaloBarShower> shower1Col;
-      std::vector<CRDEcalEDM::CRDCaloBarShower> showerNCol;
-      if(showerXCol.size()==1) { shower1Col = showerXCol; showerNCol = showerYCol; }
-      else { shower1Col = showerYCol; showerNCol = showerXCol; }
-
-      const int NshY = showerNCol.size();
-      double totE_shY = 0;
-      double EshY[NshY] = {0};
-      for(int is=0;is<NshY;is++){ EshY[is] = showerNCol[is].getE(); totE_shY += EshY[is]; }
-      for(int is=0;is<NshY;is++){
-        double wi_E = EshY[is]/totE_shY;
-        CRDEcalEDM::CRDCaloBarShower m_splitshower1;
-
-        CRDEcalEDM::CRDCaloBar m_wiseed = shower1Col[0].getSeed();
-        m_wiseed.setQ( wi_E*m_wiseed.getQ1(), wi_E*m_wiseed.getQ2() );
-
-        std::vector<CRDEcalEDM::CRDCaloBar> m_wibars; 
-        for(int ib=0;ib<shower1Col[0].getBars().size();ib++){
-          CRDEcalEDM::CRDCaloBar m_wibar = shower1Col[0].getBars()[ib];
-          m_wibar.setQ(wi_E*m_wibar.getQ1(), wi_E*m_wibar.getQ2());
-          m_wibars.push_back(m_wibar);
-        }
-
-        m_splitshower1.setBars( m_wibars );
-        m_splitshower1.setSeed( m_wiseed);
-
-        CRDEcalEDM::CRDCaloHit2DShower m_shower; m_shower.Clear();
-        if(showerXCol.size()==1) m_shower = DigiHitsWithPos( m_splitshower1, showerNCol[is] );
-        else m_shower = DigiHitsWithPos( showerNCol[is], m_splitshower1 );
-        m_showersinLayer.push_back( m_shower );
-      }
+  
+    //For iteration0: Save all combinations for 3D clustering, leave it for next time. 
+    if(m_datacol.Flag_Iter==0){
+      for(int is=0;is<showerXCol.size();is++){
+      for(int js=0;js<showerYCol.size();js++){
+        if(showerXCol[is].getBars().size()==0 || showerYCol[js].getBars().size()==0) continue;
+        CRDEcalEDM::CRDCaloHit2DShower tmp_shower; tmp_shower.Clear();
+        tmp_shower = DigiHitsWithPos(showerXCol[is], showerYCol[js]);
+        m_showersinLayer.push_back(tmp_shower);
+      }}
     }
 
-    //Case2: N*N
-    else if(showerXCol.size()==showerYCol.size()){
-      m_showersinLayer = DigiHitsWithMatching( showerXCol, showerYCol );
-    }
-    //Case3: M*N (M, N!=1)
+    //For next iteration: use several algorithm to solve ghost hit and multiplicity problem.
     else{
-      m_showersinLayer = DigiHitsWithMatchingL2( showerXCol, showerYCol );
-    }
-
-    if(m_showersinLayer.size()>std::max(showerXCol.size(), showerYCol.size()))  
-    printf( "WARNING! In layer #%d: 2Dshower number(%d) is larger than showerX/Y number(%d / %d)! Please check! \n", il, m_showersinLayer.size(), showerXCol.size(), showerYCol.size() );
+      //Case1: 1*N or N*1
+      if(showerXCol.size()==1 || showerYCol.size()==1){ 
+        std::vector<CRDEcalEDM::CRDCaloBarShower> shower1Col;
+        std::vector<CRDEcalEDM::CRDCaloBarShower> showerNCol;
+        if(showerXCol.size()==1) { shower1Col = showerXCol; showerNCol = showerYCol; }
+        else { shower1Col = showerYCol; showerNCol = showerXCol; }
+   
+        const int NshY = showerNCol.size();
+        double totE_shY = 0;
+        double EshY[NshY] = {0};
+        for(int is=0;is<NshY;is++){ EshY[is] = showerNCol[is].getE(); totE_shY += EshY[is]; }
+        for(int is=0;is<NshY;is++){
+          double wi_E = EshY[is]/totE_shY;
+          CRDEcalEDM::CRDCaloBarShower m_splitshower1;
+   
+          CRDEcalEDM::CRDCaloBar m_wiseed = shower1Col[0].getSeed();
+          m_wiseed.setQ( wi_E*m_wiseed.getQ1(), wi_E*m_wiseed.getQ2() );
+   
+          std::vector<CRDEcalEDM::CRDCaloBar> m_wibars; 
+          for(int ib=0;ib<shower1Col[0].getBars().size();ib++){
+            CRDEcalEDM::CRDCaloBar m_wibar = shower1Col[0].getBars()[ib];
+            m_wibar.setQ(wi_E*m_wibar.getQ1(), wi_E*m_wibar.getQ2());
+            m_wibars.push_back(m_wibar);
+          }
+   
+          m_splitshower1.setBars( m_wibars );
+          m_splitshower1.setSeed( m_wiseed);
+   
+          CRDEcalEDM::CRDCaloHit2DShower m_shower; m_shower.Clear();
+          if(showerXCol.size()==1) m_shower = DigiHitsWithPos( m_splitshower1, showerNCol[is] );
+          else m_shower = DigiHitsWithPos( showerNCol[is], m_splitshower1 );
+          m_showersinLayer.push_back( m_shower );
+        }
+      }
+      //Case2: N*N
+      else if(showerXCol.size()==showerYCol.size()){
+        m_showersinLayer = DigiHitsWithMatching( showerXCol, showerYCol );
+      }
+      //Case3: M*N (M, N!=1)
+      else{
+        m_showersinLayer = DigiHitsWithMatchingL2( showerXCol, showerYCol );
+      }
+      if(m_showersinLayer.size()>std::max(showerXCol.size(), showerYCol.size()))  
+      printf( "WARNING! In layer #%d: 2Dshower number(%d) is larger than showerX/Y number(%d / %d)! Please check! \n", il, m_showersinLayer.size(), showerXCol.size(), showerYCol.size() );
+      }
 
     m_2DshowerCol.insert( m_2DshowerCol.end(),  m_showersinLayer.begin(), m_showersinLayer.end() );
-  
   }
 
-  m_datasvc.shower2DCol = m_2DshowerCol;
+  m_datacol.Shower2DCol = m_2DshowerCol;
   return StatusCode::SUCCESS;
 }
 
@@ -107,9 +116,9 @@ CRDEcalEDM::CRDCaloHit2DShower EnergyTimeMatchingAlg::DigiHitsWithPos( CRDEcalED
   if(NbarsX==0 || NbarsY==0){ std::cout<<"WARNING: empty DigiHitsCol returned!"<<std::endl; return m_2dshower;}
 
   int _module = barShowerX.getBars()[0].getModule(); 
-  int _stave  = barShowerX.getBars()[0].getStave();
   int _dlayer = barShowerX.getBars()[0].getDlayer();
   int _part   = barShowerX.getBars()[0].getPart();
+  int _stave  = barShowerX.getBars()[0].getStave();
 
   float rotAngle = -_module*PI/4.;
 

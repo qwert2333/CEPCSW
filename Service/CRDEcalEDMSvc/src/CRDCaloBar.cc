@@ -10,9 +10,9 @@ namespace CRDEcalEDM{
     if(x.getcellID() != cellID &&
        x.getSystem() == system &&
        x.getModule() == module &&
-       x.getStave()  == stave  &&
        x.getDlayer() == dlayer &&
        x.getPart()   == part   &&
+       x.getStave()  == stave  &&
        x.getSlayer() == slayer &&
        (x.getBar()==bar+1 || x.getBar()==bar-1)
       ) return true;
