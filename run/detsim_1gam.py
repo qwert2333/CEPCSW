@@ -32,7 +32,7 @@ dsvc = k4DataSvc("EventDataSvc")
 # Geometry Svc
 ##############################################################################
 
-geometry_path = "/cefs/higgs/guofy/CEPCSW/Detector/DetCRD/compact/CRD_ECAL/CepC_v4-onlyECAL.xml"
+geometry_path = "/cefs/higgs/guofy/cepcsoft/CEPCSW_v4/Detector/DetCRD/compact/ecalBarrel.xml"
 if not os.path.exists(geometry_path):
     print("Can't find the compact geometry file: %s"%geometry_path)
     sys.exit(-1)
@@ -132,7 +132,7 @@ out.outputCommands = ["keep *"]
 from Configurables import ApplicationMgr
 ApplicationMgr( TopAlg = [genalg, detsimalg, out],
                 EvtSel = 'NONE',
-                EvtMax = 1,
+                EvtMax = 10,
                 ExtSvc = [rndmengine, dsvc, geosvc],
 					 #OutputLevel=DEBUG
 )

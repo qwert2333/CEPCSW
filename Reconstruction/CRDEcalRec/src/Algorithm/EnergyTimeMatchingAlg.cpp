@@ -107,9 +107,9 @@ CRDEcalEDM::CRDCaloHit2DShower EnergyTimeMatchingAlg::DigiHitsWithPos( CRDEcalED
   if(NbarsX==0 || NbarsY==0){ std::cout<<"WARNING: empty DigiHitsCol returned!"<<std::endl; return m_2dshower;}
 
   int _module = barShowerX.getBars()[0].getModule(); 
+  int _stave  = barShowerX.getBars()[0].getStave();
   int _dlayer = barShowerX.getBars()[0].getDlayer();
   int _part   = barShowerX.getBars()[0].getPart();
-  int _block  = barShowerX.getBars()[0].getBlock();
 
   float rotAngle = -_module*PI/4.;
 
@@ -141,7 +141,7 @@ CRDEcalEDM::CRDCaloHit2DShower EnergyTimeMatchingAlg::DigiHitsWithPos( CRDEcalED
 
   m_2dshower.setBarShowers( barShowerX, barShowerY );
   m_2dshower.setCaloHits( m_digiCol );
-  m_2dshower.setIDInfo( _module, _dlayer, _part, _block);
+  m_2dshower.setIDInfo( _module, _stave, _dlayer, _part);
   return m_2dshower;
 
 }

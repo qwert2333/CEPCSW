@@ -104,7 +104,7 @@ protected:
   TFile* m_wfile;
   //Stage0: check input simbars. 
   TTree* t_SimBar;
-  FloatVec m_simBar_x, m_simBar_y, m_simBar_z, m_simBar_T1, m_simBar_T2, m_simBar_Q1, m_simBar_Q2, m_simBar_dlayer, m_simBar_part, m_simBar_block, m_simBar_slayer, m_simBar_module;
+  FloatVec m_simBar_x, m_simBar_y, m_simBar_z, m_simBar_T1, m_simBar_T2, m_simBar_Q1, m_simBar_Q2, m_simBar_dlayer, m_simBar_part, m_simBar_stave, m_simBar_slayer, m_simBar_module;
   //Stage1: EnergySplittingAlg result: clustered bars. 
   TTree *t_PreRec;
   FloatVec m_PreRec_Bar0x, m_PreRec_Bar0y, m_PreRec_Bar0z, m_PreRec_Bar0E, m_PreRec_Bar1x, m_PreRec_Bar1y, m_PreRec_Bar1z, m_PreRec_Bar1E;

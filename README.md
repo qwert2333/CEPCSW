@@ -14,7 +14,7 @@ Before run following commands, please make sure you setup the CVMFS:
 ```
 $ git clone git@github.com:cepc/CEPCSW.git
 $ cd CEPCSW
-$ git checkout dev-EcalRec-v03 # branch name
+$ git checkout dev-EcalRec-v04 # branch name
 $ source setup.sh
 $ ./build.sh
 $ ./run.sh Examples/options/helloalg.py
@@ -45,8 +45,8 @@ Keep the collection names compatible between the prototype and the existing CEPC
 * SETCollection
 
 
-## Update in branch dev-EcalRec-v03: CRD Ecal Reconstruction
-  * link the hits in longitutional layers.
-  * Depart the digitization and reconstruction: New reconstruction in Reconstruction/CRDEcalRec 
-  * New PFA for crystal ECal: PandoraPlusPFAlg (temporary)
-  * Iterate to do the clustering and energy splitting with expected shower position. 
+## Update in branch dev-EcalRec-v04: CRD Ecal Reconstruction
+  * Update Ecal geometry: new cellID, 11 blocks in z-direction, less memory in simulation.
+  * Update Ecal digitalization for updated geometry
+
+

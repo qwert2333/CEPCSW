@@ -10,8 +10,8 @@ namespace CRDEcalEDM{
   class CRDCaloBar{
 
   public:
-    CRDCaloBar(unsigned long long _cellID, int _system, int _module, int _dlayer, int _part, int _block, int _slayer, int _bar, dd4hep::Position _pos, double _Q1, double _Q2, double _T1, double _T2)
-    : cellID(_cellID), system(_system), module(_module), dlayer(_dlayer), part(_part), block(_block), slayer(_slayer), bar(_bar), position(_pos), Q1(_Q1), Q2(_Q2), T1(_T1), T2(_T2) {}; 
+    CRDCaloBar(unsigned long long _cellID, int _system, int _module, int _stave, int _dlayer, int _part, int _slayer, int _bar, dd4hep::Position _pos, double _Q1, double _Q2, double _T1, double _T2)
+    : cellID(_cellID), system(_system), module(_module), stave(_stave), dlayer(_dlayer), part(_part), slayer(_slayer), bar(_bar), position(_pos), Q1(_Q1), Q2(_Q2), T1(_T1), T2(_T2) {}; 
     CRDCaloBar() {};
 
     inline bool operator < (const CRDCaloBar &x) const {
@@ -23,9 +23,9 @@ namespace CRDEcalEDM{
     unsigned long long getcellID() const { return cellID; }
     int getSystem() const { return system; }
     int getModule() const { return module; }
+    int getStave()  const { return stave;  }
     int getDlayer() const { return dlayer; }
     int getPart()   const { return part;   }
-    int getBlock()  const { return block;  }
     int getSlayer() const { return slayer; }
     int getBar()    const { return bar;    }
     double getQ1()  const { return Q1;     }
@@ -38,7 +38,7 @@ namespace CRDEcalEDM{
     bool isNeighbor(CRDCaloBar &x);
 
     void setcellID(unsigned long long _cellid) { cellID = _cellid; }
-    void setcellID(int _system, int _module, int _dlayer, int _part, int _block, int _slayer, int _bar) { system=_system; module=_module; dlayer=_dlayer; part=_part; block=_block; slayer=_slayer; bar=_bar; }
+    void setcellID(int _system, int _module, int _stave, int _dlayer, int _part, int _slayer, int _bar) { system=_system; module=_module; stave=_stave; dlayer=_dlayer; part=_part; slayer=_slayer; bar=_bar; }
     void setPosition( dd4hep::Position pos) { position = pos; }
     void setPosition( TVector3 posv3) { position.SetXYZ( posv3.x(), posv3.y(), posv3.z() ); }
     void setQ(double _q1, double _q2) { Q1=_q1; Q2=_q2; }
@@ -48,9 +48,9 @@ namespace CRDEcalEDM{
 		unsigned long long cellID;
 		int system;
 		int module;
+		int stave;
 		int dlayer;
 		int part;
-		int block;
 		int slayer;
 		int bar;
 		dd4hep::Position position;

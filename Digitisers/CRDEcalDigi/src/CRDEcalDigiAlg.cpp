@@ -66,9 +66,9 @@ StatusCode CRDEcalDigiAlg::initialize()
 	t_SimBar->Branch("simBar_Q1", &m_simBar_Q1);
 	t_SimBar->Branch("simBar_Q2", &m_simBar_Q2);
 	t_SimBar->Branch("simBar_module", &m_simBar_module);
+	t_SimBar->Branch("simBar_stave", &m_simBar_stave);
 	t_SimBar->Branch("simBar_dlayer", &m_simBar_dlayer);
 	t_SimBar->Branch("simBar_part", &m_simBar_part);
-	t_SimBar->Branch("simBar_block", &m_simBar_block);
 	t_SimBar->Branch("simBar_slayer", &m_simBar_slayer);
 	t_SimTruth->Branch("simTruth_x", &m_simTruth_x);
 	t_SimTruth->Branch("simTruth_y", &m_simTruth_y);
@@ -142,8 +142,8 @@ StatusCode CRDEcalDigiAlg::execute()
 		hitbar.setcellID( id);
 		hitbar.setcellID(	m_decoder->get(id, "system"), 
 											m_decoder->get(id, "module"), 
+											m_decoder->get(id, "stave"), 
 											m_decoder->get(id, "dlayer"), 
-											m_decoder->get(id, "block"), 
 											m_decoder->get(id, "part"), 
 											m_decoder->get(id, "slayer"),
 											m_decoder->get(id, "bar"));
@@ -294,9 +294,9 @@ StatusCode CRDEcalDigiAlg::execute()
 		m_simBar_T1.push_back(hitbar.getT1());
 		m_simBar_T2.push_back(hitbar.getT2());
 		m_simBar_module.push_back(hitbar.getModule());
+		m_simBar_stave.push_back(hitbar.getStave());
 		m_simBar_dlayer.push_back(hitbar.getDlayer());
 		m_simBar_part.push_back(hitbar.getPart());
-		m_simBar_block.push_back(hitbar.getBlock());
 		m_simBar_slayer.push_back(hitbar.getSlayer());
 
 	}
@@ -439,7 +439,7 @@ edm4hep::SimCalorimeterHit CRDEcalDigiAlg::find(std::vector<edm4hep::SimCalorime
 }
 
 unsigned long int CRDEcalDigiAlg::coder(CRDEcalEDM::CRDCaloBar& bar){
-   return 10099*bar.getModule() + 6911*bar.getDlayer() + 727*bar.getPart() + 31*bar.getBlock();
+   return 10099*bar.getModule() + 6911*bar.getDlayer() + 727*bar.getPart() + 31*bar.getStave();
 }
 
 void CRDEcalDigiAlg::Clear(){
@@ -460,9 +460,9 @@ void CRDEcalDigiAlg::Clear(){
 	m_simBar_Q1.clear();
 	m_simBar_Q2.clear();
 	m_simBar_module.clear();
+	m_simBar_stave.clear();
 	m_simBar_dlayer.clear();
 	m_simBar_part.clear();
-	m_simBar_block.clear();
 	m_simBar_slayer.clear();
 	m_simTruth_x.clear();
 	m_simTruth_y.clear();
