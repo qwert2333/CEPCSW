@@ -13,6 +13,7 @@ GridDriftChamber::GridDriftChamber(const std::string& cellEncoding) : Segmentati
   registerParameter("cell_size", "cell size", m_cellSize, 0., SegmentationParameter::LengthUnit);
   registerParameter("detector_length", "Length of the wire", m_detectorLength, 1., SegmentationParameter::LengthUnit);
   registerIdentifier("identifier_phi", "Cell ID identifier for phi", m_phiID, "cellID");
+  registerIdentifier("layerID", "layer id", layer_id, "layer");
 }
 
 GridDriftChamber::GridDriftChamber(const BitFieldCoder* decoder) : Segmentation(decoder) {
@@ -24,6 +25,13 @@ GridDriftChamber::GridDriftChamber(const BitFieldCoder* decoder) : Segmentation(
   registerParameter("epsilon0", "epsilon", m_epsilon0, 0., SegmentationParameter::AngleUnit, true);
   registerParameter("detector_length", "Length of the wire", m_detectorLength, 1., SegmentationParameter::LengthUnit);
   registerIdentifier("identifier_phi", "Cell ID identifier for phi", m_phiID, "cellID");
+  registerIdentifier("layerID", "layer id", layer_id, "layer");
+  registerParameter("safe_distance", "safe_distance", m_safe_distance, 0., SegmentationParameter::LengthUnit);
+  registerParameter("layer_width", "layer_width", m_layer_width, 0., SegmentationParameter::LengthUnit);
+  registerParameter("DC_rbegin", "DC_rbegin", m_DC_rbegin, 0., SegmentationParameter::LengthUnit);
+  registerParameter("DC_rend", "DC_rend", m_DC_rend, 0., SegmentationParameter::LengthUnit);
+  registerParameter("DC_rmin", "DC_rmin", m_DC_rmin, 0., SegmentationParameter::LengthUnit);
+  registerParameter("DC_rmax", "DC_rmax", m_DC_rmax, 0., SegmentationParameter::LengthUnit);
 }
 
 Vector3D GridDriftChamber::position(const CellID& /*cID*/) const {
@@ -31,17 +39,32 @@ Vector3D GridDriftChamber::position(const CellID& /*cID*/) const {
   return cellPosition;
 }
 
-
 CellID GridDriftChamber::cellID(const Vector3D& /*localPosition*/, const Vector3D& globalPosition,
                                 const VolumeID& vID) const {
 
   CellID cID = vID;
-  unsigned int layerID = _decoder->get(vID, "layer");
-  updateParams(layerID);
 
-  double phi_hit = phiFromXY(globalPosition);
+  int chamberID = _decoder->get(cID, "chamber");
+
   double posx = globalPosition.X;
   double posy = globalPosition.Y;
+  double radius = sqrt(posx*posx+posy*posy);
+
+  int m_DC_layer_number = floor((m_DC_rend-m_DC_rbegin)/m_layer_width);
+  double DC_layerdelta = m_layer_width;
+
+  int layerid;
+  if( radius<= m_DC_rend && radius>= m_DC_rbegin) {
+      layerid = floor((radius - m_DC_rbegin)/DC_layerdelta);
+  } else if ( radius>= (m_DC_rmin-m_safe_distance) && radius < m_DC_rbegin) {
+      layerid = 0;
+  } else if ( radius> m_DC_rend && radius <= (m_DC_rmax+m_safe_distance)) {
+      layerid = m_DC_layer_number-1;
+  }
+
+  updateParams(chamberID,layerid);
+
+  double phi_hit = phiFromXY(globalPosition);
   double offsetphi= m_offset;
   int _lphi;
 
@@ -53,16 +76,8 @@ CellID GridDriftChamber::cellID(const Vector3D& /*localPosition*/, const Vector3
   }
 
   int lphi = _lphi;
+  _decoder->set(cID, layer_id, layerid);
   _decoder->set(cID, m_phiID, lphi);
-
-
-// std::cout << "#######################################: " 
-//           <<  " offset : " << m_offset
-//           << " offsetphi: " << offsetphi
-//           << " layerID: " << layerID
-//           << " r: " << _currentRadius
-//           << " layerphi: " << _currentLayerphi
-//           << std::endl;
 
   return cID;
 }
@@ -75,8 +90,9 @@ double GridDriftChamber::phi(const CellID& cID) const {
 void GridDriftChamber::cellposition(const CellID& cID, TVector3& Wstart,
                                     TVector3& Wend) const {
 
+  auto chamberIndex = _decoder->get(cID, "chamber");
   auto layerIndex = _decoder->get(cID, "layer");
-  updateParams(layerIndex);
+  updateParams(chamberIndex,layerIndex);
 
   double phi_start = phi(cID);
   double phi_mid = phi_start + _currentLayerphi/2.;
@@ -86,19 +102,9 @@ void GridDriftChamber::cellposition(const CellID& cID, TVector3& Wstart,
   Wend = returnWirePosition(phi_end, 1);
 }
 
-
-
 double GridDriftChamber::distanceTrackWire(const CellID& cID, const TVector3& hit_start,
                                            const TVector3& hit_end) const {
 
-//  auto layerIndex = _decoder->get(cID, "layer");
-//  updateParams(layerIndex);
-//
-//  double phi_start = phi(cID);
-//  double phi_end = phi_start + returnAlpha();
-
-//  TVector3 Wstart = returnWirePosition(phi_start, -1); // The default centimeter unit in DD4hep
-//  TVector3 Wend = returnWirePosition(phi_end, 1);   // The default centimeter unit in DD4hep
   TVector3 Wstart = {0,0,0};
   TVector3 Wend = {0,0,0};
   cellposition(cID,Wstart,Wend);
@@ -109,8 +115,6 @@ double GridDriftChamber::distanceTrackWire(const CellID& cID, const TVector3& hi
 
   double num = std::abs(c.Dot(a.Cross(b)));
   double denum = (a.Cross(b)).Mag();
-//  double num = (b.Cross(c)).Mag();
-//  double denum = b.Mag();
 
   double DCA = 0;
 
@@ -122,6 +126,5 @@ double GridDriftChamber::distanceTrackWire(const CellID& cID, const TVector3& hi
 }
 
 
-REGISTER_SEGMENTATION(GridDriftChamber)
 }
 }
