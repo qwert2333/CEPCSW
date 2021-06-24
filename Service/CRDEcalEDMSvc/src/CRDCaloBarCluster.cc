@@ -73,7 +73,7 @@ namespace CRDEcalEDM{
     if(slayer==0){
       xmin = -9999.;    xmax = 9999.; 
       ymin = -9999.;    ymax = 9999.; 
-      zmin = *zminptr;  zmax = *zmaxptr;
+      zmin = *zminptr-6.;  zmax = *zmaxptr+6.;
     }
     else if(slayer==1){
       xmin = *xminptr-6;  xmax = *xmaxptr+6;

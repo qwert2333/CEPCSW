@@ -103,7 +103,7 @@ StatusCode CRDEcalDigiAlg::execute()
 	std::cout<<"Processing event: "<<_nEvt<<std::endl;
    if(_nEvt<_Nskip){ _nEvt++; return StatusCode::SUCCESS; }
 
-   m_edmsvc->ClearSystem(); 
+  m_edmsvc->ClearSystem(); 
 	Clear();
 
  	const edm4hep::SimCalorimeterHitCollection* SimHitCol =  r_SimCaloCol.get();
@@ -327,6 +327,7 @@ StatusCode CRDEcalDigiAlg::execute()
 	std::vector<CRDEcalEDM::CRDCaloBlock> blockVec; blockVec.clear();
 	for(auto iter=DigiBlocks.begin(); iter!=DigiBlocks.end();iter++){ 
       CRDEcalEDM::DigiBlock m_block = iter->second;
+      if(m_block.size()==0) continue; 
       CRDEcalEDM::CRDCaloBlock m_calobl; m_calobl.Clear();
       m_calobl.setForced(false);
       std::vector<CRDEcalEDM::CRDCaloBar> barXCol, barYCol; barXCol.clear(); barYCol.clear(); 
@@ -335,8 +336,9 @@ StatusCode CRDEcalDigiAlg::execute()
          else barYCol.push_back(m_block[i]);
       }
       m_calobl.setBarCol( barXCol, barYCol );
+      m_calobl.setIDInfo( m_block[0].getModule(), m_block[0].getStave(), m_block[0].getDlayer(), m_block[0].getPart());
       blockVec.push_back(m_calobl);
-   }
+  }
 	m_edmsvc->setDigiSystem( blockVec ); 
 
 
@@ -388,7 +390,7 @@ std::vector<edm4hep::SimCalorimeterHit> CRDEcalDigiAlg::MergeHits(const edm4hep:
 
 double CRDEcalDigiAlg::GetBarLength(CRDEcalEDM::CRDCaloBar& bar){
 	//TODO: reading bar length from geosvc. 
-	if(bar.getSlayer()==1) return 460.;
+	if(bar.getSlayer()==1) return 418.18;
 	else return 470.-bar.getDlayer()*10.;
 }
 

@@ -2,6 +2,7 @@
 #define _CRD_CALOHIT_2DSHOWER_H
 #include <vector>
 #include "CRDEcalEDMSvc/CRDCaloBarShower.h"
+#include "CRDEcalEDMSvc/CRDShowerCandidate.h"
 #include "edm4hep/CalorimeterHit.h"
 #include "TVector3.h"
 
@@ -27,19 +28,27 @@ namespace CRDEcalEDM{
     CRDEcalEDM::CRDCaloBarShower getShowerX() const { return barShowerX; }
     CRDEcalEDM::CRDCaloBarShower getShowerY() const { return barShowerY; }
     std::vector<edm4hep::ConstCalorimeterHit> getCaloHits() const { return CaloHits; }
+    CRDEcalEDM::CRDShowerCandidate getCandidate() const { return Candidate; }
+    bool isTrkShower() const { return m_isTrkShower; }
+    bool isNeuShower() const { return m_isNeuShower; }
 
     void setBarShowers( CRDEcalEDM::CRDCaloBarShower _bar1, CRDEcalEDM::CRDCaloBarShower _bar2){ barShowerX=_bar1; barShowerY=_bar2; }
     void setCaloHits( std::vector<edm4hep::ConstCalorimeterHit> _hits) { CaloHits=_hits; }
     void setIDInfo( int _m, int _s, int _d, int _p ){ module=_m; stave=_s; dlayer=_d; part=_p; } 
+    void setCandidate( CRDEcalEDM::CRDShowerCandidate _candi ) { Candidate = _candi; }
+    void setCandidateType( int _flag );  //1 for track-type, 0 for non-track-type.
 
   private:
     int module;
     int stave;
     int dlayer;
     int part;
+    bool m_isTrkShower;
+    bool m_isNeuShower;
     CRDEcalEDM::CRDCaloBarShower barShowerX;
     CRDEcalEDM::CRDCaloBarShower barShowerY;
     std::vector<edm4hep::ConstCalorimeterHit> CaloHits;
+    CRDEcalEDM::CRDShowerCandidate Candidate; 
   };
 
 };

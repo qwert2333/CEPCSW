@@ -33,5 +33,10 @@ namespace CRDEcalEDM{
     return en;
   }
 
+  void CRDCaloHit2DShower::setCandidateType( int _flag ){
+    if(_flag==1)      { m_isTrkShower=true; m_isNeuShower=false; }
+    else if(_flag==0) { m_isTrkShower=false; m_isNeuShower=true; }
+    else              { m_isTrkShower=false; m_isNeuShower=false;}
+  }
 };
 #endif

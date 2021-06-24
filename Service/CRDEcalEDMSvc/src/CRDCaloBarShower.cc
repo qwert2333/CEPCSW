@@ -33,7 +33,7 @@ namespace CRDEcalEDM {
       for(int i=0;i<Bars.size();i++) pos += (Bars[i].getPosition() * Bars[i].getEnergy())/Etot;
       return pos;
     }
-
+   
     double CRDCaloBarShower::getT1() const{
       double T1=0;
       double Etot = getE();
@@ -48,6 +48,12 @@ namespace CRDEcalEDM {
       return T2;
     }
 
+    std::vector<CRDEcalEDM::CRDShowerCandidate> CRDCaloBarShower::getAllCandiCol() const{
+      std::vector<CRDEcalEDM::CRDShowerCandidate> m_allcandi; m_allcandi.clear();
+      m_allcandi = NeuCandidateCol;
+      m_allcandi.insert(m_allcandi.end(), TrkCandidateCol.begin(), TrkCandidateCol.end());
+      return m_allcandi;
+    }
 
 };
 #endif

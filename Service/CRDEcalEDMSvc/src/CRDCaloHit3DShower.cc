@@ -57,12 +57,6 @@ namespace CRDEcalEDM{
     return en;
   }
 
-  bool CRDCaloHit3DShower::isEMShowerPre(){
-    FitProfile();
-    if(ShowerinLayer.size()>=5 && chi2<10) return true;
-    return false;
-  }
-
 
   //Get the expected deposited energy in layer i. Now is the average of i+1 and i-1. Need to update with profile. 
   double CRDCaloHit3DShower::getExpEnergy(int& dlayer) const{ 
@@ -194,6 +188,28 @@ namespace CRDEcalEDM{
     for(int i=0;i<clus.ShowerinLayer.size();i++){
        AddShower(clus.ShowerinLayer[i]);
     }
+  }
+
+
+  void CRDCaloHit3DShower::IdentifyCluster(){
+    const int Nlayer = ShowerinLayer.size(); 
+    double En[Nlayer] = {0};
+    double sumE = 0;
+    for(int i=0; i<Nlayer; i++){ 
+      En[i] = ShowerinLayer[i].getShowerE(); 
+      sumE += En[i];
+    }
+    double aveE = sumE/Nlayer; 
+    double sumE2 = 0;
+    for(int i=0; i<Nlayer; i++)
+      sumE2 += (En[i]-aveE)*(En[i]-aveE);
+    double StdDev = sqrt( sumE2/Nlayer );
+
+
+    if(ShowerinLayer.size()>=10 && fabs((aveE-0.02)/0.02)<0.2 && StdDev<0.4 ) type = 0; 
+    else if( chi2<5 && ShowerinLayer.size() >5 ) type = 1; 
+    else type = 2;  
+
   }
 
 };

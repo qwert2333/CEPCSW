@@ -172,8 +172,9 @@ protected:
   TTree *t_recoPFO;
   int m_Npfo, m_Nmc, m_N3dclus; 
   FloatVec m_recPFO_px, m_recPFO_py, m_recPFO_pz, m_recPFO_En;
-  FloatVec m_2DShower_x, m_2DShower_y, m_2DShower_z, m_2DShower_E; 
-  IntVec m_N2dshInClus;
+  IntVec m_recPFO_pid;
+  FloatVec m_Clus_x, m_Clus_y, m_Clus_z, m_Clus_E; 
+  IntVec m_N2dshInClus, m_Clus_type;
   IntVec m_mcPdgid, m_mcNdaughter, m_mcNparent, m_mcStatus; 
   FloatVec m_mcPx, m_mcPy, m_mcPz, m_mcEn;
 

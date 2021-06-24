@@ -16,7 +16,7 @@ public:
   
   //initialize a CaloHitCreator
   MCParticleCreator( Settings& settings ){};
-  ~MCParticleCreator();
+  ~MCParticleCreator() {};
 
   StatusCode ReadSettings( Settings& settings ){ return StatusCode::SUCCESS; };
 

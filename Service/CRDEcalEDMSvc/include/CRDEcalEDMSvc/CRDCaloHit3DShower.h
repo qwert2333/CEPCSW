@@ -24,7 +24,6 @@ namespace CRDEcalEDM{
     TVector3 getShowerCenter() const;
     double getHitsE() const;
     double getShowerE() const;
-    bool   isEMShowerPre();
 
     double getExpEnergy(int& dlayer) const;
     TVector3 getExpPos(int& dlayer) const;
@@ -33,6 +32,7 @@ namespace CRDEcalEDM{
     void FitAxis(); 
     void AddShower(CRDEcalEDM::CRDCaloHit2DShower& shower);
     void MergeCluster(CRDEcalEDM::CRDCaloHit3DShower& clus);
+    void IdentifyCluster(); 
 
     inline bool operator == ( const CRDEcalEDM::CRDCaloHit3DShower &x) const {
       TVector3 vec = this->getHitCenter();
@@ -48,11 +48,12 @@ namespace CRDEcalEDM{
     void getFitPars(double& _alpha, double& _beta ) const { _alpha = alpha; _beta = beta; }
     int getBeginningDlayer() const; 
     int getEndDlayer() const;     
+    int getType()  { IdentifyCluster(); return type; }
 
 
     void setShowerVec( std::vector<CRDEcalEDM::CRDCaloHit2DShower>& _svec ) { ShowerinLayer = _svec;}
     void setCaloHits( std::vector<edm4hep::ConstCalorimeterHit>& _hits ) { CaloHits = _hits; }
-    void Clear() { ShowerinLayer.clear(); CaloHits.clear(); showerEnergy=0; hitsEnergy=0; showerMax=0; chi2=0; alpha=0; beta=0; axis.SetXYZ(0,0,0); }
+    void Clear() { ShowerinLayer.clear(); CaloHits.clear(); showerEnergy=0; hitsEnergy=0; showerMax=0; chi2=0; alpha=0; beta=0; axis.SetXYZ(0,0,0); type=-1; }
 
   private: 
     std::vector<CRDEcalEDM::CRDCaloHit2DShower> ShowerinLayer;
@@ -64,6 +65,7 @@ namespace CRDEcalEDM{
     double chi2;
     double alpha;
     double beta;
+    int    type;  //0: MIP shower.  1: EM shower.  2: hadronic shower
 
     TrackFitInEcal* track = new TrackFitInEcal(); 
 

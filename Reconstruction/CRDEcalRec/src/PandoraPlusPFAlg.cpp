@@ -252,12 +252,14 @@ StatusCode PandoraPlusPFAlg::initialize()
   t_recoPFO->Branch("recPFO_py", &m_recPFO_py);
   t_recoPFO->Branch("recPFO_pz", &m_recPFO_pz);
   t_recoPFO->Branch("recPFO_En", &m_recPFO_En);
+  t_recoPFO->Branch("recPFO_pid", &m_recPFO_pid);
   t_recoPFO->Branch("N3dclus", &m_N3dclus);
   t_recoPFO->Branch("N2dshInClus", &m_N2dshInClus);
-  t_recoPFO->Branch("Shower2D_x", &m_2DShower_x);
-  t_recoPFO->Branch("Shower2D_y", &m_2DShower_y);
-  t_recoPFO->Branch("Shower2D_z", &m_2DShower_z);
-  t_recoPFO->Branch("Shower2D_E", &m_2DShower_E);
+  t_recoPFO->Branch("Clus_x", &m_Clus_x);
+  t_recoPFO->Branch("Clus_y", &m_Clus_y);
+  t_recoPFO->Branch("Clus_z", &m_Clus_z);
+  t_recoPFO->Branch("Clus_E", &m_Clus_E);
+  t_recoPFO->Branch("Clus_type", &m_Clus_type);
   t_recoPFO->Branch("mcPdgid",     &m_mcPdgid);
   t_recoPFO->Branch("mcStatus",    &m_mcStatus);
   t_recoPFO->Branch("mcNdaughter", &m_mcNdaughter);
@@ -297,6 +299,9 @@ StatusCode PandoraPlusPFAlg::execute()
   m_pMCParticleCreator->CreateTrackMCParticleRelation();
   m_pMCParticleCreator->CreateEcalBarMCParticleRelation();
   m_pMCParticleCreator->CreateHcalHitsMCParticleRelation();
+
+  //Match track with Ecal super-cell.
+  m_pTrackCreator->MatchTrkEcalRelation( m_DataCol);
 
 
   //Perform PFA algorithm
@@ -366,8 +371,8 @@ StatusCode PandoraPlusPFAlg::execute()
   t_SimBar->Fill();
 
   //Save intermediate info
-  //Iteration0 info
-/*  std::vector<CRDEcalEDM::CRDCaloBlock> m_staveCol_iter0 = m_DataCol.BlockVec_iter0;
+/*  //Iteration0 info
+  std::vector<CRDEcalEDM::CRDCaloBlock> m_staveCol_iter0 = m_DataCol.BlockVec_iter0;
   std::vector<CRDEcalEDM::CRDCaloLayer> m_layerCol_iter0 = m_DataCol.LayerCol_iter0;
   for(int il=0;il<m_layerCol_iter0.size();il++){
     ClearIter0();
@@ -383,7 +388,7 @@ StatusCode PandoraPlusPFAlg::execute()
     m_Iter0_ly_NshowerY.push_back( m_layer.barShowerYCol.size());
     m_Iter0_ly_NclusterX.push_back( m_layer.barClusXCol.size());
     m_Iter0_ly_NclusterY.push_back( m_layer.barClusYCol.size());
-    m_Iter0_Nexpsh.push_back( tmp_barcol.getEMCandidateCol().size());
+    m_Iter0_Nexpsh.push_back( tmp_barcol.getNeuCandidateCol().size());
 
     for(int ib=0; ib<m_layer.barXCol.size(); ib++){
       m_Iter0_barx.push_back(m_layer.barXCol[ib].getPosition().x());
@@ -400,11 +405,11 @@ StatusCode PandoraPlusPFAlg::execute()
       m_Iter0_barslayer.push_back(m_layer.barYCol[ib].getSlayer());
     }
 
-    for(int ie=0; ie<tmp_barcol.getEMCandidateCol().size(); ie++){
-      m_Iter0_Expsh_x.push_back(tmp_barcol.getEMCandidateCol()[ie].ExpPos.x());
-      m_Iter0_Expsh_y.push_back(tmp_barcol.getEMCandidateCol()[ie].ExpPos.y());
-      m_Iter0_Expsh_z.push_back(tmp_barcol.getEMCandidateCol()[ie].ExpPos.z());
-      m_Iter0_Expsh_E.push_back(tmp_barcol.getEMCandidateCol()[ie].ExpEshower);
+    for(int ie=0; ie<tmp_barcol.getNeuCandidateCol().size(); ie++){
+      m_Iter0_Expsh_x.push_back(tmp_barcol.getNeuCandidateCol()[ie].ExpPos.x());
+      m_Iter0_Expsh_y.push_back(tmp_barcol.getNeuCandidateCol()[ie].ExpPos.y());
+      m_Iter0_Expsh_z.push_back(tmp_barcol.getNeuCandidateCol()[ie].ExpPos.z());
+      m_Iter0_Expsh_E.push_back(tmp_barcol.getNeuCandidateCol()[ie].ExpEshower);
     }
 
     for(int is=0; is<m_layer.barShowerXCol.size(); is++){
@@ -426,8 +431,17 @@ StatusCode PandoraPlusPFAlg::execute()
   t_dataColIter0->Fill();
   }
 */
-
   ClearIter0();
+  std::vector<CRDEcalEDM::CRDCaloBlock> m_blockCol_iter0 = m_DataCol.BlockVec_iter0;
+  for(int ib=0; ib<m_blockCol_iter0.size(); ib++){
+  CRDEcalEDM::CRDCaloBlock tmp_barcol = m_blockCol_iter0[ib];
+  for(int ie=0; ie<tmp_barcol.getNeuCandidateCol().size(); ie++){
+    m_Iter0_Expsh_x.push_back(tmp_barcol.getNeuCandidateCol()[ie].ExpPos.x());
+    m_Iter0_Expsh_y.push_back(tmp_barcol.getNeuCandidateCol()[ie].ExpPos.y());
+    m_Iter0_Expsh_z.push_back(tmp_barcol.getNeuCandidateCol()[ie].ExpPos.z());
+    m_Iter0_Expsh_E.push_back(tmp_barcol.getNeuCandidateCol()[ie].ExpEshower);
+  }}
+
   std::vector<CRDEcalEDM::CRDCaloLayer> m_layerCol_iter0 = m_DataCol.LayerCol_iter0;
   for(int il=0; il<m_layerCol_iter0.size(); il++){
     CRDEcalEDM::CRDCaloLayer m_layer = m_layerCol_iter0[il];
@@ -509,7 +523,7 @@ StatusCode PandoraPlusPFAlg::execute()
     m_Iter1_ly_NshowerY.push_back( m_layer.barShowerYCol.size() );
     m_Iter1_ly_NclusterX.push_back( m_layer.barClusXCol.size() );
     m_Iter1_ly_NclusterY.push_back( m_layer.barClusYCol.size() );
-    m_Iter1_Nexpsh.push_back( tmp_barcol.getEMCandidateCol().size() );
+    m_Iter1_Nexpsh.push_back( tmp_barcol.getNeuCandidateCol().size() );
 
     for(int ib=0; ib<m_layer.barXCol.size(); ib++){
       m_Iter1_barx.push_back(m_layer.barXCol[ib].getPosition().x());
@@ -526,11 +540,11 @@ StatusCode PandoraPlusPFAlg::execute()
       m_Iter1_barslayer.push_back(m_layer.barYCol[ib].getSlayer());
     }
 
-    for(int ie=0; ie<tmp_barcol.getEMCandidateCol().size(); ie++){
-      m_Iter1_Expsh_x.push_back(tmp_barcol.getEMCandidateCol()[ie].ExpPos.x());
-      m_Iter1_Expsh_y.push_back(tmp_barcol.getEMCandidateCol()[ie].ExpPos.y());
-      m_Iter1_Expsh_z.push_back(tmp_barcol.getEMCandidateCol()[ie].ExpPos.z());
-      m_Iter1_Expsh_E.push_back(tmp_barcol.getEMCandidateCol()[ie].ExpEshower);
+    for(int ie=0; ie<tmp_barcol.getNeuCandidateCol().size(); ie++){
+      m_Iter1_Expsh_x.push_back(tmp_barcol.getNeuCandidateCol()[ie].ExpPos.x());
+      m_Iter1_Expsh_y.push_back(tmp_barcol.getNeuCandidateCol()[ie].ExpPos.y());
+      m_Iter1_Expsh_z.push_back(tmp_barcol.getNeuCandidateCol()[ie].ExpPos.z());
+      m_Iter1_Expsh_E.push_back(tmp_barcol.getNeuCandidateCol()[ie].ExpEshower);
     }
 
     for(int is=0; is<m_layer.barShowerXCol.size(); is++){
@@ -553,6 +567,23 @@ StatusCode PandoraPlusPFAlg::execute()
   }
 */
   ClearIter1();
+  std::vector<CRDEcalEDM::CRDCaloBlock> m_blockCol_iter1 = m_DataCol.BlockVec_iter1;
+  for(int ib=0; ib<m_blockCol_iter1.size(); ib++){
+  CRDEcalEDM::CRDCaloBlock tmp_barcol = m_blockCol_iter1[ib];
+  for(int ie=0; ie<tmp_barcol.getNeuCandidateCol().size(); ie++){
+    m_Iter1_Expsh_x.push_back(tmp_barcol.getNeuCandidateCol()[ie].ExpPos.x());
+    m_Iter1_Expsh_y.push_back(tmp_barcol.getNeuCandidateCol()[ie].ExpPos.y());
+    m_Iter1_Expsh_z.push_back(tmp_barcol.getNeuCandidateCol()[ie].ExpPos.z());
+    m_Iter1_Expsh_E.push_back(tmp_barcol.getNeuCandidateCol()[ie].ExpEshower);
+  }
+  for(int ie=0; ie<tmp_barcol.getTrkCandidateCol().size(); ie++){
+    m_Iter1_Expsh_x.push_back(tmp_barcol.getTrkCandidateCol()[ie].ExpPos.x());
+    m_Iter1_Expsh_y.push_back(tmp_barcol.getTrkCandidateCol()[ie].ExpPos.y());
+    m_Iter1_Expsh_z.push_back(tmp_barcol.getTrkCandidateCol()[ie].ExpPos.z());
+    m_Iter1_Expsh_E.push_back(tmp_barcol.getTrkCandidateCol()[ie].ExpEshower);
+  }
+  }
+
   std::vector<CRDEcalEDM::CRDCaloLayer> m_layerCol_iter1 = m_DataCol.LayerCol_iter1;
   for(int il=0; il<m_layerCol_iter1.size(); il++){
     CRDEcalEDM::CRDCaloLayer m_layer = m_layerCol_iter1[il];
@@ -717,16 +748,18 @@ StatusCode PandoraPlusPFAlg::execute()
     m_recPFO_py.push_back(m_pfoCol[ipfo].getP4().Py());
     m_recPFO_pz.push_back(m_pfoCol[ipfo].getP4().Pz());
     m_recPFO_En.push_back(m_pfoCol[ipfo].getEnergy()); 
+    m_recPFO_pid.push_back(m_pfoCol[ipfo].getPdgID());
   }
 
   std::vector<CRDEcalEDM::CRDCaloHit3DShower> m_clus = m_DataCol.Clus3DCol;
   m_N3dclus = m_clus.size();
   for(int i=0;i<m_N3dclus;i++){ 
     m_N2dshInClus.push_back(m_clus[i].get2DShowers().size());
-    m_2DShower_x.push_back(m_clus[i].getShowerCenter().x());
-    m_2DShower_y.push_back(m_clus[i].getShowerCenter().y());
-    m_2DShower_z.push_back(m_clus[i].getShowerCenter().z());
-    m_2DShower_E.push_back(m_clus[i].getShowerE());
+    m_Clus_x.push_back(m_clus[i].getShowerCenter().x());
+    m_Clus_y.push_back(m_clus[i].getShowerCenter().y());
+    m_Clus_z.push_back(m_clus[i].getShowerCenter().z());
+    m_Clus_E.push_back(m_clus[i].getShowerE());
+    m_Clus_type.push_back(m_clus[i].getType());
   }
 
 
@@ -764,11 +797,12 @@ StatusCode PandoraPlusPFAlg::finalize()
   t_recoPFO->Write();
   m_wfile->Close();
 
-/*  delete m_pMCParticleCreator;
+  delete m_pMCParticleCreator;
   delete m_pTrackCreator;
   delete m_pVertexCreator;
   delete m_pEcalHitsCreator;
   delete m_pHcalHitsCreator;
+  delete m_pEcalClusterRec;
   delete m_pPfoCreator;
 
   delete m_pMCParticleCreatorSettings;
@@ -777,12 +811,10 @@ StatusCode PandoraPlusPFAlg::finalize()
   delete m_EcalHitsCreatorSettings;
   delete m_pHcalHitsCreatorSettings;
   delete m_pPfoCreatorSettings;
-
-  delete m_pEcalClusterRec;
   delete m_pEcalClusterRecSettings;
 
-  delete m_wfile, t_SimBar, t_PreRec, t_recoPFO;
-*/
+  delete m_wfile, t_SimBar, t_recoPFO, t_dataColIter0, t_dataColIter1, t_dataColIter2;
+
   info() << "Processed " << _nEvt << " events " << endmsg;
   return GaudiAlgorithm::finalize();
 }
@@ -809,10 +841,12 @@ void PandoraPlusPFAlg::ClearRecPFO(){
   m_recPFO_py.clear(); 
   m_recPFO_pz.clear(); 
   m_recPFO_En.clear(); 
-  m_2DShower_x.clear();
-  m_2DShower_y.clear();
-  m_2DShower_z.clear();
-  m_2DShower_E.clear();
+  m_recPFO_pid.clear();
+  m_Clus_x.clear();
+  m_Clus_y.clear();
+  m_Clus_z.clear();
+  m_Clus_E.clear();
+  m_Clus_type.clear();
   m_mcPdgid.clear(); 
   m_mcStatus.clear();
   m_mcNdaughter.clear(); 

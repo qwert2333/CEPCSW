@@ -16,7 +16,7 @@ public:
   
   //initialize a CaloHitCreator
   HcalHitsCreator( Settings& settings ){};
-  ~HcalHitsCreator();
+  ~HcalHitsCreator() {};
 
   StatusCode ReadSettings( Settings& settings ){ return StatusCode::SUCCESS; };
 

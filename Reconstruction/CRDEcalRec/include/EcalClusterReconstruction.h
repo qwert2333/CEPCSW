@@ -6,6 +6,7 @@
 #include "Algorithm/EnergySplittingAlg.h"
 #include "Algorithm/EnergyTimeMatchingAlg.h"
 #include "Algorithm/ConeClusteringAlg.h"
+#include "Algorithm/CandidateMakingAlg.h"
 #include "Algorithm/ClusterMergingAlg.h"
 
 class EcalClusterReconstruction {
@@ -17,7 +18,7 @@ public:
   };
 
   EcalClusterReconstruction() {};
-  ~EcalClusterReconstruction();
+  ~EcalClusterReconstruction() {};
 
   void Initialize();
   StatusCode RunAlgorithm( Settings& settings,  PandoraPlusDataCol& dataCol );
@@ -29,12 +30,14 @@ public:
   EnergySplittingAlg     *m_energysplittingAlg;
   EnergyTimeMatchingAlg  *m_etmatchingAlg;
   ConeClusteringAlg      *m_coneclusterAlg;
-  ClusterMergingAlg      *m_clustermergingAlg;
+  CandidateMakingAlg     *m_candidatemakingAlg;
+  ClusterMergingAlg      *m_clustermergingAlg; 
 
   EnergySplittingAlg::Settings    *m_ESAlgSettings;
   EnergyTimeMatchingAlg::Settings *m_ETAlgSettings;
   ConeClusteringAlg::Settings     *m_CCAlgSettings;
-  ClusterMergingAlg::Settings     *m_CMAlgSettings; 
+  CandidateMakingAlg::Settings    *m_CMAlgSettings; 
+  ClusterMergingAlg::Settings     *m_CLAlgSettings;  
 
 private: 
 

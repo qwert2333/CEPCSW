@@ -12,7 +12,7 @@ void PandoraPlusDataCol::PrintLayer(){
   for(int i=0;i<LayerCol.size();i++){
   double totE;
 
-/*  cout<<'\t'<<"BarX collection in layer #"<<i<<endl;
+  cout<<'\t'<<"BarX collection in layer #"<<i<<endl;
   totE=0;
   for(int j=0;j<LayerCol[i].barXCol.size();j++){
     printf(" \t Position: (%.2f, %.2f, %.2f), and Energy: %.4f \n", 
@@ -35,7 +35,8 @@ void PandoraPlusDataCol::PrintLayer(){
   }
   cout<<'\t'<<"Total energy in BarY: "<<totE<<endl;
   cout<<'\t'<<"------------------------------------------"<<endl;
-*/
+
+
   cout<<'\t'<<"ShowerX collection in layer #"<<i<<endl;
   totE=0;
   for(int j=0;j<LayerCol[i].barShowerXCol.size();j++){
@@ -78,8 +79,7 @@ void PandoraPlusDataCol::PrintShower(){
   double totE=0;
   for(int i=0;i<Shower2DCol.size();i++){
     cout<<'\t'<<Shower2DCol[i].getDlayer()<<'\t';
-    cout<<Shower2DCol[i].getPos().x()<<'\t'<<Shower2DCol[i].getPos().y()<<'\t'<<Shower2DCol[i].getPos().z()<<'\t';
-    cout<<Shower2DCol[i].getShowerE()<<endl;
+    printf( "(%.2f, %.2f, %.2f) \t%.4f \n", Shower2DCol[i].getPos().x(), Shower2DCol[i].getPos().y(), Shower2DCol[i].getPos().z(), Shower2DCol[i].getShowerE() );
     totE+=Shower2DCol[i].getShowerE();
   }
   cout<<"Total Energy: "<<totE<<endl;
@@ -109,6 +109,9 @@ void PandoraPlusDataCol::Print3DClus(){
     cout<<'\t'<<'\t'<<"2D shower depth: ";
     for(int j=0;j<GoodClus3DCol[i].get2DShowers().size();j++) cout<<GoodClus3DCol[i].get2DShowers()[j].getPos().x()<<'\t';
     cout<<endl;
+    cout<<'\t'<<'\t'<<"2D shower z: ";
+    for(int j=0;j<GoodClus3DCol[i].get2DShowers().size();j++) cout<<GoodClus3DCol[i].get2DShowers()[j].getPos().z()<<'\t';
+    cout<<endl;
   }
 
   cout<<"------------------------------------------------"<<endl;
@@ -122,6 +125,9 @@ void PandoraPlusDataCol::Print3DClus(){
     cout<<'\t'<<'\t'<<"2D shower depth: ";
     for(int j=0;j<BadClus3DCol[i].get2DShowers().size();j++) cout<<BadClus3DCol[i].get2DShowers()[j].getPos().x()<<'\t';
     cout<<endl;
+    cout<<'\t'<<'\t'<<"2D shower z: ";
+    for(int j=0;j<BadClus3DCol[i].get2DShowers().size();j++) cout<<BadClus3DCol[i].get2DShowers()[j].getPos().z()<<'\t';
+    cout<<endl;
   }
 
   cout<<"------------------------------------------------"<<endl;
@@ -134,6 +140,9 @@ void PandoraPlusDataCol::Print3DClus(){
             Clus3DCol[i].getAxis().x(), Clus3DCol[i].getAxis().y(), Clus3DCol[i].getAxis().z()  );
     cout<<'\t'<<'\t'<<"2D shower depth: ";
     for(int j=0;j<Clus3DCol[i].get2DShowers().size();j++) cout<<Clus3DCol[i].get2DShowers()[j].getPos().x()<<'\t';
+    cout<<endl;
+    cout<<'\t'<<'\t'<<"2D shower z: ";
+    for(int j=0;j<Clus3DCol[i].get2DShowers().size();j++) cout<<Clus3DCol[i].get2DShowers()[j].getPos().z()<<'\t';
     cout<<endl;
   }
   
@@ -159,10 +168,15 @@ void PandoraPlusDataCol::ClearTempCol(){
   BadClus3DCol_iter1.clear();
   Clus3DCol_iter1.clear();
 
+  BlockVec_iter2.clear();
+  LayerCol_iter2.clear();
+  Shower2DCol_iter2.clear();
+  GoodClus3DCol_iter2.clear();
+  BadClus3DCol_iter2.clear();
+  Clus3DCol_iter2.clear();
 }
 
 void PandoraPlusDataCol::Clear(){
-  Flag_Iter = 0; 
   ClearBlock();  
   ClearLayer();  
   ClearShower(); 

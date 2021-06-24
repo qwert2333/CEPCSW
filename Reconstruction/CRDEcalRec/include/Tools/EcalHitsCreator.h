@@ -17,7 +17,7 @@ public:
   
   //initialize a CaloHitCreator
   EcalHitsCreator( Settings& settings ){};
-  ~EcalHitsCreator();
+  ~EcalHitsCreator() {};
 
   StatusCode ReadSettings( Settings& settings ){ return StatusCode::SUCCESS; };
 

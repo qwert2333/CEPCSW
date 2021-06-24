@@ -16,7 +16,7 @@ public:
   
   //initialize a CaloHitCreator
   VertexCreator( Settings& settings ){};
-  ~VertexCreator();
+  ~VertexCreator() {};
 
   StatusCode ReadSettings( Settings& settings ){ return StatusCode::SUCCESS; };
 

@@ -13,13 +13,19 @@ public:
   public: 
     Settings(){};
     void SetInitialValue();
+    void SetUseCandidate( int _level ) { lv_useCandidate=_level; }
+    void SetUseChi2( bool _flag ) { UseChi2 = _flag; }
 
     double chi2Wi_E;
     double chi2Wi_T;
     double th_chi2;
     double sigmaE;
-    double sigmaPos;
-    double nMat;
+    double sigmaPos = 34.89;  //sqrt(10*10/12 + pow((Tres*C/(2*nMat)),2) )
+    double nMat = 2.15;
+    double Emip = 0.01;
+    int lv_useCandidate; //0: Don't use. 1: Use track and neutral candidates together. 2: Use track and neutral candidates separately. 
+    bool UseChi2; 
+    int Debug;
   };
 
   EnergyTimeMatchingAlg();
@@ -28,11 +34,22 @@ public:
 
   StatusCode RunAlgorithm( EnergyTimeMatchingAlg::Settings& m_settings, PandoraPlusDataCol& m_datasvc );
 
-  CRDEcalEDM::CRDCaloHit2DShower DigiHitsWithPos( CRDEcalEDM::CRDCaloBarShower& barShowerX,  CRDEcalEDM::CRDCaloBarShower& barShowerY  );
 
-  std::vector<CRDEcalEDM::CRDCaloHit2DShower> DigiHitsWithMatching( std::vector<CRDEcalEDM::CRDCaloBarShower>& barShowerXCol, std::vector<CRDEcalEDM::CRDCaloBarShower>& barShowerYCol );
 
-  std::vector<CRDEcalEDM::CRDCaloHit2DShower> DigiHitsWithMatchingL2( std::vector<CRDEcalEDM::CRDCaloBarShower>& barShowerXCol, std::vector<CRDEcalEDM::CRDCaloBarShower>& barShowerYCol );
+  StatusCode GetFullMatchedShowers( std::vector<CRDEcalEDM::CRDCaloBarShower>& barShowerXCol, std::vector<CRDEcalEDM::CRDCaloBarShower>& barShowerYCol, std::vector<CRDEcalEDM::CRDCaloHit2DShower>& outshCol );
+
+  StatusCode GetMatchedShowersL0( std::vector<CRDEcalEDM::CRDCaloBarShower>& barShowerXCol, std::vector<CRDEcalEDM::CRDCaloBarShower>& barShowerYCol, std::vector<CRDEcalEDM::CRDCaloHit2DShower>& outshCol );
+
+  StatusCode GetMatchedShowersL1( std::vector<CRDEcalEDM::CRDCaloBarShower>& barShowerXCol, std::vector<CRDEcalEDM::CRDCaloBarShower>& barShowerYCol, std::vector<CRDEcalEDM::CRDCaloHit2DShower>& outshCol );
+
+  StatusCode GetMatchedShowersL2( std::vector<CRDEcalEDM::CRDCaloBarShower>& barShowerXCol, std::vector<CRDEcalEDM::CRDCaloBarShower>& barShowerYCol, std::vector<CRDEcalEDM::CRDCaloHit2DShower>& outshCol );
+
+
+
+  StatusCode XYShowerMatchingL0( CRDEcalEDM::CRDCaloBarShower& barShowerX, CRDEcalEDM::CRDCaloBarShower& barShowerY, CRDEcalEDM::CRDCaloHit2DShower& outsh ); //1*1 case
+  StatusCode XYShowerMatchingL1( CRDEcalEDM::CRDCaloBarShower& barShower1, std::vector<CRDEcalEDM::CRDCaloBarShower>& barShowerNCol, std::vector<CRDEcalEDM::CRDCaloHit2DShower>& outshCol ); //1*N case without candidates
+  StatusCode XYShowerChi2Matching( std::vector<CRDEcalEDM::CRDCaloBarShower>& barShowerXCol, std::vector<CRDEcalEDM::CRDCaloBarShower>& barShowerYCol, std::vector<CRDEcalEDM::CRDCaloHit2DShower>& outshCol ); //M*N case without candidates
+
 
 
 

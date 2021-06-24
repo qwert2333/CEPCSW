@@ -16,10 +16,14 @@ public:
   public: 
     Settings() {};
     void SetInitialValue();
-    void SetValues( double _Sth_split=200, double _Eth_seedAbs=0.005, double _Eth_showerAbs=0.0, double _Eth_clusAbs=0.0,
-                    double _Eth_seedwnei=0., double _Eth_seedwtot=0., double _Eth_showerwtot=0., double _Eth_cluswtot=0., bool _isforced=true );
-    //void SetValues( double _Sth_split=200, double _Eth_seedAbs=0.02, double _Eth_showerAbs=0.03, double _Eth_clusAbs=0.03,
-    //                double _Eth_seedwnei=0.4, double _Eth_seedwtot=0., double _Eth_showerwtot=0.01, double _Eth_cluswtot=0.01, bool _isforced=true );
+    void SetValues( double _Sth_split=-1, double _Eth_seedAbs=0.005, double _Eth_showerAbs=0.0, double _Eth_clusAbs=0.0,
+                    double _Eth_seedwnei=0.45, double _Eth_seedwtot=0., double _Eth_showerwtot=0., double _Eth_cluswtot=0., 
+                    bool _usecandi=true, int _debug=0 );
+    void SetScndMomentThres( double _th ){ Sth_split = _th; }
+    void SetEseedThres( double _th ) { Eth_SeedAbs = _th; }
+    void SetEseedRel( double _th ) { Eth_SeedWithNeigh = _th; }
+    void SetUseCandidate( bool _flag ) { UseCandidate = _flag; }
+    void SetDebug(int _lv) { Debug=_lv; }
 
     double Sth_split;
     double Eth_SeedAbs;
@@ -30,8 +34,9 @@ public:
     double Eth_ShowerWithTot;
     double Eth_ClusterWithTot;
     double Etot;
+    int    Debug;
 
-    bool isForced;
+    bool UseCandidate;
     std::map<int, int> map_mode; // map<Dlayer, ForcedMode> 
 
   };
@@ -45,9 +50,9 @@ public:
 
   CRDEcalEDM::CRDCaloLayer ClusterinLayer( CRDEcalEDM::CRDCaloBlock& m_blocks);
 
-  std::vector<CRDEcalEDM::CRDCaloBarCluster> Clustering(std::vector<CRDEcalEDM::CRDCaloBar>& barCol);
+  bool Clustering( std::vector<CRDEcalEDM::CRDCaloBar>& barCol,  std::vector<CRDEcalEDM::CRDCaloBarCluster>& outClus);
 
-  bool ClusteringWithCandidate( std::vector<CRDEcalEDM::CRDCaloBar>& barCol,  std::vector<CRDEcalEDM::CRDCaloBarCluster>& outClus, const std::vector<CRDEcalEDM::CRDShowerCandidate>& m_CandiCol );
+  bool Clustering( std::vector<CRDEcalEDM::CRDCaloBar>& barCol,  std::vector<CRDEcalEDM::CRDCaloBarCluster>& outClus, const std::vector<CRDEcalEDM::CRDShowerCandidate>& m_CandiCol );
 
   std::vector<CRDEcalEDM::CRDShowerCandidate> CandidateInCluster( CRDEcalEDM::CRDCaloBarCluster& cluster, const std::vector<CRDEcalEDM::CRDShowerCandidate>& m_CandiCol);
 
@@ -59,8 +64,8 @@ public:
 
   std::vector<CRDEcalEDM::CRDCaloBar>  getNeighbors(CRDEcalEDM::CRDCaloBarCluster& m_cluster, CRDEcalEDM::CRDCaloBar& seed);
 
-  std::vector<CRDEcalEDM::CRDCaloBarShower>  ClusterSplitting( CRDEcalEDM::CRDCaloBarCluster& m_cluster);
-  std::vector<CRDEcalEDM::CRDCaloBarShower>  ClusterSplitting( CRDEcalEDM::CRDCaloBarCluster& m_cluster, const std::vector<CRDEcalEDM::CRDShowerCandidate>& m_candidates );
+  bool  ClusterSplitting( CRDEcalEDM::CRDCaloBarCluster& m_cluster, std::vector<CRDEcalEDM::CRDCaloBarShower>& outshCol  );
+  bool  ClusterSplitting( CRDEcalEDM::CRDCaloBarCluster& m_cluster, std::vector<CRDEcalEDM::CRDCaloBarShower>& outshCol, const std::vector<CRDEcalEDM::CRDShowerCandidate>& m_EMcandidates, const std::vector<CRDEcalEDM::CRDShowerCandidate>& m_Trkcandidates );
 
   bool MergeToClosestCluster( CRDEcalEDM::CRDCaloBarCluster& iclus, std::vector<CRDEcalEDM::CRDCaloBarCluster>& clusvec ); 
 

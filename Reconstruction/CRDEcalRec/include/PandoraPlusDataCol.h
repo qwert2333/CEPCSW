@@ -43,7 +43,6 @@ public:
   std::vector<CRDEcalEDM::CRDCaloHit3DShower> BadClus3DCol;
   std::vector<CRDEcalEDM::CRDCaloHit3DShower> Clus3DCol;
 
-  int Flag_Iter;
 
     //Temporary collections in iteration
     std::vector<CRDEcalEDM::CRDCaloBlock>       BlockVec_raw;
@@ -61,6 +60,13 @@ public:
     std::vector<CRDEcalEDM::CRDCaloHit3DShower> GoodClus3DCol_iter1;
     std::vector<CRDEcalEDM::CRDCaloHit3DShower> BadClus3DCol_iter1;
     std::vector<CRDEcalEDM::CRDCaloHit3DShower> Clus3DCol_iter1;
+
+    std::vector<CRDEcalEDM::CRDCaloBlock>       BlockVec_iter2;
+    std::vector<CRDEcalEDM::CRDCaloLayer>       LayerCol_iter2;
+    std::vector<CRDEcalEDM::CRDCaloHit2DShower> Shower2DCol_iter2;
+    std::vector<CRDEcalEDM::CRDCaloHit3DShower> GoodClus3DCol_iter2;
+    std::vector<CRDEcalEDM::CRDCaloHit3DShower> BadClus3DCol_iter2;
+    std::vector<CRDEcalEDM::CRDCaloHit3DShower> Clus3DCol_iter2;
 
 
   //PFO Collections
