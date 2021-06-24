@@ -14,7 +14,7 @@ Before run following commands, please make sure you setup the CVMFS:
 ```
 $ git clone git@github.com:cepc/CEPCSW.git
 $ cd CEPCSW
-$ git checkout dev-EcalRec-v04 # branch name
+$ git checkout dev-EcalRec-v05 # branch name
 $ source setup.sh
 $ ./build.sh
 $ ./run.sh Examples/options/helloalg.py
@@ -45,10 +45,7 @@ Keep the collection names compatible between the prototype and the existing CEPC
 * SETCollection
 
 
-## Update in branch dev-EcalRec-v04: CRD Ecal Reconstruction
-  * Update Ecal geometry: new cellID, 11 blocks in z-direction, less memory in simulation.
-  * Update Ecal digitalization for updated geometry (WARNING: would have conflict with previous version!)
-  * Add track, deal with MIP. 
-  * Now can deal with hadrons roughly, need optimization. 
+## Update in branch dev-EcalRec-v05: CRD Ecal Reconstruction
+  * Focus on hadron reconstruction in Ecal.
 
 
