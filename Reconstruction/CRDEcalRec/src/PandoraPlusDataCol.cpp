@@ -151,6 +151,35 @@ void PandoraPlusDataCol::Print3DClus(){
 
 }
 
+
+void PandoraPlusDataCol::PrintArborTree(){
+  cout<<"------------------------------------------------"<<endl;
+  cout<<"-------------Print out ArborTrees---------------"<<endl;
+  cout<<"------------------------------------------------"<<endl;
+
+  cout<<"Arbor TreeX number: "<<ArborTreeColX.size()<<endl;
+  cout<<"------------------------------------------------"<<endl;
+  cout<<"Loop TreeX:  "<<endl;
+  cout<<"  (Barycenter, Nnode):"<<endl;
+  for(int i=0; i<ArborTreeColX.size(); i++){
+    printf("     (%.2f, %.2f, %.2f, %d) \n", ArborTreeColX[i].GetBarycenter().x(), ArborTreeColX[i].GetBarycenter().y(), ArborTreeColX[i].GetBarycenter().z(), ArborTreeColX[i].GetNodes().size());
+  }
+  cout<<"------------------------------------------------"<<endl;
+  cout<<endl;
+
+  cout<<"Arbor TreeY number: "<<ArborTreeColY.size()<<endl;
+  cout<<"------------------------------------------------"<<endl;
+  cout<<"Loop TreeY:  "<<endl;
+  cout<<"  (Barycenter, Nnode):"<<endl;
+  for(int i=0; i<ArborTreeColY.size(); i++){
+    printf("     (%.2f, %.2f, %.2f, %d) \n", ArborTreeColY[i].GetBarycenter().x(), ArborTreeColY[i].GetBarycenter().y(), ArborTreeColY[i].GetBarycenter().z(), ArborTreeColY[i].GetNodes().size());
+  }
+
+  cout<<"------------------------------------------------"<<endl;
+  cout<<"--------------------End print-------------------"<<endl;
+
+}
+
 void PandoraPlusDataCol::ClearTempCol(){
   BlockVec_raw.clear();
 
@@ -184,5 +213,5 @@ void PandoraPlusDataCol::Clear(){
   ClearTrack();
   ClearPFO();    
   ClearTempCol();
-
+  ClearArbor();
 }

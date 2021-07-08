@@ -13,6 +13,7 @@ public:
   public: 
     Settings(){};
     void SetInitialValue();
+    void SetChi2Weight( double _chi2E, double _chi2T) { chi2Wi_E=_chi2E; chi2Wi_T=_chi2T; }
     void SetUseCandidate( int _level ) { lv_useCandidate=_level; }
     void SetUseChi2( bool _flag ) { UseChi2 = _flag; }
 

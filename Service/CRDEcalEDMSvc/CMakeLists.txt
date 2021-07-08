@@ -9,6 +9,8 @@ gaudi_add_library(CRDEcalEDMSvcLib
                           src/CRDCaloHit3DShower.cc
                           src/Track.cc
                           src/TrackFitInEcal.cpp
+                          src/CRDArborNode.cc
+                          src/CRDArborTree.cc
                   LINK DataHelperLib 
                        GearSvc
                        Gaudi::GaudiKernel 

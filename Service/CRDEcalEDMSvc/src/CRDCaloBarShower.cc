@@ -48,6 +48,11 @@ namespace CRDEcalEDM {
       return T2;
     }
 
+    int CRDCaloBarShower::getDlayer() const{
+      if(Bars.size()>0) return Bars[0].getDlayer();
+      else return -1;
+    }
+
     std::vector<CRDEcalEDM::CRDShowerCandidate> CRDCaloBarShower::getAllCandiCol() const{
       std::vector<CRDEcalEDM::CRDShowerCandidate> m_allcandi; m_allcandi.clear();
       m_allcandi = NeuCandidateCol;

@@ -11,6 +11,8 @@
 #include "CRDEcalEDMSvc/CRDShowerCandidate.h"
 #include "CRDEcalEDMSvc/CRDCaloHit2DShower.h"
 #include "CRDEcalEDMSvc/CRDCaloHit3DShower.h"
+#include "CRDEcalEDMSvc/CRDArborNode.h"
+#include "CRDEcalEDMSvc/CRDArborTree.h"
 #include "CRDEcalEDMSvc/PFObject.h"
 #include "CRDEcalEDMSvc/Track.h"
 
@@ -42,6 +44,11 @@ public:
   std::vector<CRDEcalEDM::CRDCaloHit3DShower> GoodClus3DCol;
   std::vector<CRDEcalEDM::CRDCaloHit3DShower> BadClus3DCol;
   std::vector<CRDEcalEDM::CRDCaloHit3DShower> Clus3DCol;
+
+  //Another reconstruction way: ArborTrees
+  std::vector<CRDEcalEDM::CRDArborTree>   ArborTreeColX;
+  std::vector<CRDEcalEDM::CRDArborTree>   ArborTreeColY;
+
 
 
     //Temporary collections in iteration
@@ -79,6 +86,7 @@ public:
   void PrintLayer();
   void PrintShower();
   void Print3DClus();
+  void PrintArborTree(); 
   void Clear();
   void ClearBlock()  { BlockVec.clear(); }
   void ClearLayer()  { LayerCol.clear(); }
@@ -87,7 +95,7 @@ public:
   void ClearPFO()    { PFOCol.clear(); }
   void ClearTrack()  { TrackCol.clear(); }
   void ClearTempCol(); 
-
+  void ClearArbor() { ArborTreeColX.clear(); ArborTreeColY.clear(); }
 
 };
 #endif

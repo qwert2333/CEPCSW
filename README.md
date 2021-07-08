@@ -47,5 +47,5 @@ Keep the collection names compatible between the prototype and the existing CEPC
 
 ## Update in branch dev-EcalRec-v05: CRD Ecal Reconstruction
   * Focus on hadron reconstruction in Ecal.
-
+  * NOTE: This branch has been abandoned. Arbor connection in 1D is accomplished, but matching them in 2D is hard to do. Please go to next version.  
 

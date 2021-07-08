@@ -59,7 +59,7 @@ static dd4hep::Ref_t create_detector(dd4hep::Detector& theDetector,
   int Nblock_z   = 11;                    //block number in z direction
   int Nblock_phi = 4;                     //block number in phi direction
   double barz_s0;                         //Crystal bar lenghth in sub-layer 0(phi direction). Depends on layer number. 
-  double barz_s1 = Z0/Nblock_z;           //Crystal bar lenghth in sub-layer 1(z direction, 46cm).
+  double barz_s1 = Z0/Nblock_z;           //Crystal bar lenghth in sub-layer 1(z direction, 42cm).
   int Nbar_phi;                           //Crystal bar number in each block, in phi direction.
   int Nbar_z = (int)barz_s1/bary;         //Crystal bar number in each block, in z direction.
   

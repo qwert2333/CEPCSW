@@ -390,7 +390,7 @@ std::vector<edm4hep::SimCalorimeterHit> CRDEcalDigiAlg::MergeHits(const edm4hep:
 
 double CRDEcalDigiAlg::GetBarLength(CRDEcalEDM::CRDCaloBar& bar){
 	//TODO: reading bar length from geosvc. 
-	if(bar.getSlayer()==1) return 418.18;
+	if(bar.getSlayer()==1) return 418.;
 	else return 470.-bar.getDlayer()*10.;
 }
 

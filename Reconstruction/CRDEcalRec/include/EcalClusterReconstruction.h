@@ -8,6 +8,7 @@
 #include "Algorithm/ConeClusteringAlg.h"
 #include "Algorithm/CandidateMakingAlg.h"
 #include "Algorithm/ClusterMergingAlg.h"
+#include "Algorithm/ArborClusteringAlg.h"
 
 class EcalClusterReconstruction {
 public: 
@@ -32,12 +33,15 @@ public:
   ConeClusteringAlg      *m_coneclusterAlg;
   CandidateMakingAlg     *m_candidatemakingAlg;
   ClusterMergingAlg      *m_clustermergingAlg; 
+  ArborClusteringAlg     *m_arborclusteringAlg; 
+
 
   EnergySplittingAlg::Settings    *m_ESAlgSettings;
   EnergyTimeMatchingAlg::Settings *m_ETAlgSettings;
   ConeClusteringAlg::Settings     *m_CCAlgSettings;
   CandidateMakingAlg::Settings    *m_CMAlgSettings; 
   ClusterMergingAlg::Settings     *m_CLAlgSettings;  
+  ArborClusteringAlg::Settings    *m_ACAlgSettings;
 
 private: 
 
