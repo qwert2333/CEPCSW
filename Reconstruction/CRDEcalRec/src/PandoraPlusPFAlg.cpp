@@ -57,8 +57,8 @@ StatusCode PandoraPlusPFAlg::initialize()
   std::string s_outfile = _filename;
   m_wfile = new TFile(s_outfile.c_str(), "recreate");
   t_SimBar = new TTree("SimBarHit", "SimBarHit");
-  t_ArborTree0 = new TTree("ArborTreeX", "ArborTreeX");
-  t_ArborTree1 = new TTree("ArborTreeY", "ArborTreeY");
+  t_ArborTree = new TTree("ArborTree", "ArborTree");
+  t_dataColIter0 = new TTree("dataColIter0", "dataColIter0");
   t_recoPFO = new TTree("RecPFO",  "RecPFO");
 
   t_SimBar->Branch("simBar_x", &m_simBar_x);
@@ -74,29 +74,40 @@ StatusCode PandoraPlusPFAlg::initialize()
   t_SimBar->Branch("simBar_stave", &m_simBar_stave);
   t_SimBar->Branch("simBar_slayer", &m_simBar_slayer);
 
-  t_ArborTree0->Branch("tree0_centx", &m_tree0_centx); 
-  t_ArborTree0->Branch("tree0_centy", &m_tree0_centy); 
-  t_ArborTree0->Branch("tree0_centz", &m_tree0_centz); 
-  t_ArborTree0->Branch("tree0_minLayer", &m_tree0_minLayer); 
-  t_ArborTree0->Branch("tree0_maxLayer", &m_tree0_maxLayer); 
-  t_ArborTree0->Branch("Nnode0", &m_Nnode0);
-  t_ArborTree0->Branch("node0x", &m_node0x);
-  t_ArborTree0->Branch("node0y", &m_node0y);
-  t_ArborTree0->Branch("node0z", &m_node0z);
-  t_ArborTree0->Branch("node0E", &m_node0E);
-  t_ArborTree0->Branch("node0Type", &m_node0Type);
+  t_ArborTree->Branch("tree_centx", &m_tree_centx); 
+  t_ArborTree->Branch("tree_centy", &m_tree_centy); 
+  t_ArborTree->Branch("tree_centz", &m_tree_centz); 
+  t_ArborTree->Branch("tree_minLayer", &m_tree_minLayer); 
+  t_ArborTree->Branch("tree_maxLayer", &m_tree_maxLayer); 
+  t_ArborTree->Branch("Nnode", &m_Nnode);
+  t_ArborTree->Branch("nodex", &m_nodex);
+  t_ArborTree->Branch("nodey", &m_nodey);
+  t_ArborTree->Branch("nodez", &m_nodez);
+  t_ArborTree->Branch("nodeE", &m_nodeE);
+  t_ArborTree->Branch("nodeType", &m_nodeType);
 
-  t_ArborTree1->Branch("tree1_centx", &m_tree1_centx);
-  t_ArborTree1->Branch("tree1_centy", &m_tree1_centy);
-  t_ArborTree1->Branch("tree1_centz", &m_tree1_centz);
-  t_ArborTree1->Branch("tree1_minLayer", &m_tree1_minLayer);
-  t_ArborTree1->Branch("tree1_maxLayer", &m_tree1_maxLayer);
-  t_ArborTree1->Branch("Nnode1", &m_Nnode1);
-  t_ArborTree1->Branch("node1x", &m_node1x);
-  t_ArborTree1->Branch("node1y", &m_node1y);
-  t_ArborTree1->Branch("node1z", &m_node1z);
-  t_ArborTree1->Branch("node1E", &m_node1E);
-  t_ArborTree1->Branch("node1Type", &m_node1Type);
+  t_dataColIter0->Branch("Ngoodclus", &m_Iter0_Ngoodclus );
+  t_dataColIter0->Branch("Nbadclus", &m_Iter0_Nbadclus );
+  t_dataColIter0->Branch("clus_Nly", &m_Iter0_clus_Nly );
+  t_dataColIter0->Branch("clus_x", &m_Iter0_clus_x );
+  t_dataColIter0->Branch("clus_y", &m_Iter0_clus_y );
+  t_dataColIter0->Branch("clus_z", &m_Iter0_clus_z );
+  t_dataColIter0->Branch("clus_E", &m_Iter0_clus_E );
+  t_dataColIter0->Branch("clus_px", &m_Iter0_clus_px );
+  t_dataColIter0->Branch("clus_py", &m_Iter0_clus_py );
+  t_dataColIter0->Branch("clus_pz", &m_Iter0_clus_pz );
+  t_dataColIter0->Branch("clus_chi2", &m_Iter0_clus_chi2 );
+  t_dataColIter0->Branch("clus_aveE", &m_Iter0_clus_aveE );
+  t_dataColIter0->Branch("clus_stdDevE", &m_Iter0_clus_stdDevE );
+  t_dataColIter0->Branch("clus_start", &m_Iter0_clus_start);
+  t_dataColIter0->Branch("clus_end", &m_Iter0_clus_end);
+  t_dataColIter0->Branch("clus_alpha", &m_Iter0_clus_alpha);
+  t_dataColIter0->Branch("clus_beta", &m_Iter0_clus_beta);
+  t_dataColIter0->Branch("clus_showermax", &m_Iter0_clus_showermax);
+  t_dataColIter0->Branch("gclus_2dshx", &m_Iter0_gclus_2dshx );
+  t_dataColIter0->Branch("gclus_2dshy", &m_Iter0_gclus_2dshy );
+  t_dataColIter0->Branch("gclus_2dshz", &m_Iter0_gclus_2dshz );
+  t_dataColIter0->Branch("gclus_2dshE", &m_Iter0_gclus_2dshE );
 
   t_recoPFO->Branch("Npfo", &m_Npfo);
   t_recoPFO->Branch("recPFO_px", &m_recPFO_px);
@@ -120,6 +131,7 @@ StatusCode PandoraPlusPFAlg::initialize()
   t_recoPFO->Branch("mcPz", &m_mcPz);
   t_recoPFO->Branch("mcEn", &m_mcEn);
   t_recoPFO->Branch("Nmc",  &m_Nmc);
+  t_recoPFO->Branch("scndM", &m_scndM);
 
   return GaudiAlgorithm::initialize();
 }
@@ -162,7 +174,7 @@ StatusCode PandoraPlusPFAlg::execute()
 
 
   //std::cout<<"Reconstruction is done. Create PFO"<<std::endl;
-  //m_pPfoCreator->CreatePFO( m_DataCol ); 
+  m_pPfoCreator->CreatePFO( m_DataCol ); 
 
 
   //PFA algorithm is end!
@@ -214,50 +226,85 @@ StatusCode PandoraPlusPFAlg::execute()
   }
   t_SimBar->Fill();
 
-  //Save Arbor Tree Info
-  std::vector<CRDEcalEDM::CRDArborTree> m_treeColX = m_DataCol.ArborTreeColX;
-  for(int it=0; it<m_treeColX.size(); it++){
-    ClearTree0();
+  //Save Cluster info
+  m_Iter0_Ngoodclus = m_DataCol.Clus3DCol.size();
+  std::vector<CRDEcalEDM::CRDCaloHit3DShower> m_3dclusCol_iter0 = m_DataCol.Clus3DCol;
+  for(int icl=0; icl<m_3dclusCol_iter0.size(); icl++){
+  ClearIter();
+    CRDEcalEDM::CRDCaloHit3DShower m_clus = m_3dclusCol_iter0[icl];
+    m_clus.FitProfile(); 
+    m_Iter0_clus_Nly.push_back(m_clus.get2DShowers().size());
+    m_Iter0_clus_x.push_back(m_clus.getShowerCenter().x());
+    m_Iter0_clus_y.push_back(m_clus.getShowerCenter().y());
+    m_Iter0_clus_z.push_back(m_clus.getShowerCenter().z());
+    m_Iter0_clus_E.push_back(m_clus.getShowerE());
+    m_Iter0_clus_px.push_back(m_clus.getAxis().x());
+    m_Iter0_clus_py.push_back(m_clus.getAxis().y());
+    m_Iter0_clus_pz.push_back(m_clus.getAxis().z());
+    m_Iter0_clus_chi2.push_back(m_clus.getChi2()); 
+    m_Iter0_clus_aveE.push_back(m_clus.getAveE());
+    m_Iter0_clus_stdDevE.push_back(m_clus.getStdDevE());
+    m_Iter0_clus_alpha.push_back(m_clus.getFitAlpha());
+    m_Iter0_clus_beta.push_back(m_clus.getFitBeta());
 
-    m_tree0_centx = m_treeColX[it].GetBarycenter().x(); 
-    m_tree0_centy = m_treeColX[it].GetBarycenter().y(); 
-    m_tree0_centz = m_treeColX[it].GetBarycenter().z();
-    m_tree0_minLayer = (float)m_treeColX[it].GetMinDlayer();  
-    m_tree0_maxLayer = (float)m_treeColX[it].GetMaxDlayer();  
-    m_Nnode0 = m_treeColX[it].GetNodes().size(); 
-    for(int in=0; in<m_Nnode0; in++){
-      m_node0x.push_back( m_treeColX[it].GetNodes()[in]->GetPosition().x() );
-      m_node0y.push_back( m_treeColX[it].GetNodes()[in]->GetPosition().y() );
-      m_node0z.push_back( m_treeColX[it].GetNodes()[in]->GetPosition().z() );
-      m_node0E.push_back( m_treeColX[it].GetNodes()[in]->GetEnergy() );
-      m_node0Type.push_back( m_treeColX[it].GetNodes()[in]->GetType() );
-    }    
-    t_ArborTree0->Fill();
-  }
-
-  std::vector<CRDEcalEDM::CRDArborTree> m_treeColY = m_DataCol.ArborTreeColY;
-  for(int it=0; it<m_treeColY.size(); it++){
-    ClearTree1();
-
-    m_tree1_centx = m_treeColY[it].GetBarycenter().x();
-    m_tree1_centy = m_treeColY[it].GetBarycenter().y();
-    m_tree1_centz = m_treeColY[it].GetBarycenter().z();
-    m_tree1_minLayer = (float)m_treeColY[it].GetMinDlayer();
-    m_tree1_maxLayer = (float)m_treeColY[it].GetMaxDlayer();
-    m_Nnode1 = m_treeColY[it].GetNodes().size();
-    for(int in=0; in<m_Nnode1; in++){
-      m_node1x.push_back( m_treeColY[it].GetNodes()[in]->GetPosition().x() );
-      m_node1y.push_back( m_treeColY[it].GetNodes()[in]->GetPosition().y() );
-      m_node1z.push_back( m_treeColY[it].GetNodes()[in]->GetPosition().z() );
-      m_node1E.push_back( m_treeColY[it].GetNodes()[in]->GetEnergy() );
-      m_node1Type.push_back( m_treeColY[it].GetNodes()[in]->GetType() );
+    //std::vector<double> m_widthVec = m_clus.getClusterWidth();
+    m_Iter0_clus_showermax.push_back(m_clus.getMaxWidth());
+    std::vector<double> m_EnVec = m_clus.getEnInLayer(); 
+    int startLayer = 0; 
+    for(int i=0; i<m_EnVec.size(); i++){
+      if(m_EnVec[i]<0.1) continue; 
+      startLayer=i; 
+      break; 
     }
-    t_ArborTree1->Fill();
+    m_Iter0_clus_start.push_back(startLayer);
+    m_Iter0_clus_end.push_back(m_clus.getEndDlayer());
+
+    for(int ig=0; ig<m_clus.get2DShowers().size(); ig++){
+      m_Iter0_gclus_2dshx.push_back(m_clus.get2DShowers()[ig].getPos().x() );
+      m_Iter0_gclus_2dshy.push_back(m_clus.get2DShowers()[ig].getPos().y() );
+      m_Iter0_gclus_2dshz.push_back(m_clus.get2DShowers()[ig].getPos().z() );
+      m_Iter0_gclus_2dshE.push_back(m_clus.get2DShowers()[ig].getShowerE() );
+    }
+  t_dataColIter0->Fill();
   }
 
-  
-  //Save PFO information
+  //Save second moment in each layer
   ClearRecPFO();
+  m_scndM.resize(14);
+  std::vector<CRDEcalEDM::CRDCaloHit2DShower> m_2DshowerCol = m_DataCol.Shower2DCol;
+  std::map<int, std::vector<CRDEcalEDM::CRDCaloHit2DShower> > m_orderedShower; m_orderedShower.clear(); 
+  for(int is=0;is<m_2DshowerCol.size();is++){
+    m_orderedShower[m_2DshowerCol[is].getDlayer()].push_back(m_2DshowerCol[is]);
+  }
+  for(int il=0; il<14; il++){
+    std::vector<CRDEcalEDM::CRDCaloHit2DShower> m_showers = m_orderedShower[il];
+    if(m_showers.size()==0) { m_scndM[il]=0; continue; }
+    if(m_showers.size()==1) { m_scndM[il]=m_showers[0].getHitsWidth(); continue; }
+
+    std::vector<edm4hep::ConstCalorimeterHit> m_hits; m_hits.clear(); 
+    double totE = 0;
+    for(int is=0; is<m_showers.size(); is++){
+      std::vector<edm4hep::ConstCalorimeterHit> m_calohits = m_showers[is].getCaloHits(); 
+      m_hits.insert(m_hits.end(), m_calohits.begin(), m_calohits.end() );
+      totE += m_showers[is].getHitsE();
+    }
+
+    TVector3 cent(0., 0., 0.);
+    for(int i=0;i<m_hits.size();i++){
+      TVector3 pos(m_hits[i].getPosition().x, m_hits[i].getPosition().y, m_hits[i].getPosition().z);
+      cent += pos* (m_hits[i].getEnergy()/totE);
+    }
+
+    double width=0;
+    for(int i=0;i<m_hits.size();i++){
+      TVector3 pos(m_hits[i].getPosition().x, m_hits[i].getPosition().y, m_hits[i].getPosition().z);
+      double r2 = (pos-cent).Mag2();
+      width += r2*m_hits[i].getEnergy()/totE;
+    }
+    m_scndM[il] = width; 
+  }  
+
+  //Save PFO
   std::vector< CRDEcalEDM::PFObject > m_pfoCol = m_DataCol.PFOCol;
   m_Npfo = m_pfoCol.size(); 
   for(int ipfo=0;ipfo<m_Npfo;ipfo++){
@@ -308,8 +355,8 @@ StatusCode PandoraPlusPFAlg::finalize()
 
   m_wfile->cd();
   t_SimBar->Write();
-  t_ArborTree0->Write();
-  t_ArborTree1->Write();
+  t_ArborTree->Write();
+  t_dataColIter0->Write();
   t_recoPFO->Write();
   m_wfile->Close();
 
@@ -329,7 +376,7 @@ StatusCode PandoraPlusPFAlg::finalize()
   delete m_pPfoCreatorSettings;
   delete m_pEcalClusterRecSettings;
 
-  delete m_wfile, t_SimBar, t_recoPFO, t_ArborTree0, t_ArborTree1; 
+  delete m_wfile, t_SimBar, t_recoPFO, t_ArborTree, t_dataColIter0;
 
   info() << "Processed " << _nEvt << " events " << endmsg;
   return GaudiAlgorithm::finalize();
@@ -352,32 +399,43 @@ void PandoraPlusPFAlg::ClearBar(){
 }
 
 
-void PandoraPlusPFAlg::ClearTree0(){
-  m_tree0_centx = -99.;
-  m_tree0_centy = -99.;
-  m_tree0_centz = -99.;
-  m_tree0_minLayer = -99.;
-  m_tree0_maxLayer = -99.;
-  m_Nnode0 = -99; 
-  m_node0x.clear(); 
-  m_node0y.clear(); 
-  m_node0z.clear(); 
-  m_node0E.clear(); 
-  m_node0Type.clear(); 
+void PandoraPlusPFAlg::ClearTree(){
+  m_tree_centx = -99.;
+  m_tree_centy = -99.;
+  m_tree_centz = -99.;
+  m_tree_minLayer = -99.;
+  m_tree_maxLayer = -99.;
+  m_Nnode = -99; 
+  m_nodex.clear(); 
+  m_nodey.clear(); 
+  m_nodez.clear(); 
+  m_nodeE.clear(); 
+  m_nodeType.clear(); 
 }
 
-void PandoraPlusPFAlg::ClearTree1(){
-  m_tree1_centx = -99.;
-  m_tree1_centy = -99.;
-  m_tree1_centz = -99.;
-  m_tree1_minLayer = -99.;
-  m_tree1_maxLayer = -99.;
-  m_Nnode1 = -99;
-  m_node1x.clear();
-  m_node1y.clear();
-  m_node1z.clear();
-  m_node1E.clear();
-  m_node1Type.clear();
+void PandoraPlusPFAlg::ClearIter(){
+  m_Iter0_Ngoodclus=-99;
+  m_Iter0_Nbadclus=-99;
+  m_Iter0_clus_Nly.clear();
+  m_Iter0_clus_x.clear();
+  m_Iter0_clus_y.clear();
+  m_Iter0_clus_z.clear();
+  m_Iter0_clus_E.clear();
+  m_Iter0_clus_px.clear();
+  m_Iter0_clus_py.clear();
+  m_Iter0_clus_pz.clear();
+  m_Iter0_clus_chi2.clear(); 
+  m_Iter0_clus_aveE.clear();
+  m_Iter0_clus_stdDevE.clear();
+  m_Iter0_clus_start.clear(); 
+  m_Iter0_clus_end.clear(); 
+  m_Iter0_clus_alpha.clear();
+  m_Iter0_clus_beta.clear();
+  m_Iter0_clus_showermax.clear();
+  m_Iter0_gclus_2dshx.clear();
+  m_Iter0_gclus_2dshy.clear();
+  m_Iter0_gclus_2dshz.clear();
+  m_Iter0_gclus_2dshE.clear();
 }
 
 void PandoraPlusPFAlg::ClearRecPFO(){
@@ -403,6 +461,7 @@ void PandoraPlusPFAlg::ClearRecPFO(){
   m_Npfo=-99;
   m_Nmc=-99;
   m_N3dclus=-99;
+  m_scndM.clear(); 
 }
 
 #endif

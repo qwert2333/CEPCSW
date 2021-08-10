@@ -7,6 +7,7 @@
 void CandidateMakingAlg::Settings::SetInitialValue(){
   Debug=0;
   UseTrk = false; 
+  EndLayer = 15; 
 }
 
 StatusCode CandidateMakingAlg::Initialize(){
@@ -38,6 +39,7 @@ StatusCode CandidateMakingAlg::RunAlgorithm(CandidateMakingAlg::Settings& m_sett
   if(m_datacol.TrackCol.size()!=0 && settings.UseTrk){
     for(int ib=0; ib<m_datacol.BlockVec.size(); ib++){
       CRDEcalEDM::CRDCaloBlock m_block = m_datacol.BlockVec[ib];
+      if( m_block.getDlayer()>settings.EndLayer ) continue; 
       std::vector<CRDEcalEDM::CRDShowerCandidate> m_exptrkvec; m_exptrkvec.clear();
       for(int it=0; it<m_block.getTrkCol().size(); it++){
         CRDEcalEDM::CRDShowerCandidate m_trksh; m_trksh.Clear();
@@ -57,9 +59,8 @@ StatusCode CandidateMakingAlg::RunAlgorithm(CandidateMakingAlg::Settings& m_sett
   //Update CaloBlock with Shower Candidate
   for(int ib=0; ib<m_datacol.BlockVec.size(); ib++){
 
-    bool f_match = false; 
-    for(int jb=0; jb<m_blockVec.size(); jb++) if(m_datacol.BlockVec[ib]==m_blockVec[jb]){ f_match=true; break; } 
-    if(!f_match) continue;  //This layer doesn't have candidate. 
+    std::vector<CRDEcalEDM::CRDCaloBlock>::iterator iter = find(m_blockVec.begin(), m_blockVec.end(), m_datacol.BlockVec[ib]);
+    if(iter == m_blockVec.end() ) continue; //This layer doesn't have candidate.
 
     std::vector<CRDEcalEDM::CRDShowerCandidate> m_expshvec; m_expshvec.clear(); 
     for(int icl=0; icl<m_goodClus.size(); icl++){
@@ -74,17 +75,22 @@ StatusCode CandidateMakingAlg::RunAlgorithm(CandidateMakingAlg::Settings& m_sett
 
       //Overlap removal: remove the neutral candidate overlapped with track candidate.
       bool f_overlap = false; 
+      CRDEcalEDM::CRDShowerCandidate overlappedCandi; overlappedCandi.Clear(); 
       for(int icd=0; icd<m_datacol.BlockVec[ib].getTrkCandidateCol().size(); icd++){
         CRDEcalEDM::CRDShowerCandidate m_trkCandi = m_datacol.BlockVec[ib].getTrkCandidateCol()[icd];
-        if( (m_neush.ExpPos-m_trkCandi.ExpPos).Mag()<10 ){ f_overlap=true; break; }
+        if( (m_neush.ExpPos-m_trkCandi.ExpPos).Mag()<10 ){ f_overlap=true; overlappedCandi=m_trkCandi; break; }
       }
-      if(f_overlap) continue; 
-
+      if(f_overlap){ 
+        if(settings.Debug>1) printf("One neutral candidate is overlapped with a trk candidate: NeuCandidate(%.2f, %.2f, %.2f), TrkCandidate(%.2f, %.2f, %.2f). \n", 
+                                    m_neush.ExpPos.x(), m_neush.ExpPos.y(), m_neush.ExpPos.z(), 
+                                    overlappedCandi.ExpPos.x(), overlappedCandi.ExpPos.y(), overlappedCandi.ExpPos.z() );
+        continue; 
+      }
       m_expshvec.push_back(m_neush);
     }
 
     m_datacol.BlockVec[ib].setNeuCandidateCol(m_expshvec);
-    if(settings.Debug>0)cout<<"  Block #"<<ib<<": NeuCandidate number = "<<m_datacol.BlockVec[ib].getNeuCandidateCol().size()<<endl;
+    if(settings.Debug>0) cout<<"  Block #"<<ib<<": NeuCandidate number = "<<m_datacol.BlockVec[ib].getNeuCandidateCol().size()<<endl;
   }
 
 
@@ -124,11 +130,9 @@ std::vector<CRDEcalEDM::CRDCaloBlock> CandidateMakingAlg::GetBlocksNeedModificat
   //Clear the duplicated blocks
   std::vector<CRDEcalEDM::CRDCaloBlock> vec_outblock; vec_outblock.clear();
   for(int ib=0; ib<vec_blocks.size(); ib++){
-    bool f_exist = false;
-    for(int jb=0; jb<vec_outblock.size(); jb++)
-      if(vec_blocks[ib]==vec_outblock[jb]) { f_exist=true; break; }
-
-    if(!f_exist) vec_outblock.push_back(vec_blocks[ib]);
+    int m_Dlayer = vec_blocks[ib].getDlayer(); 
+    std::vector<CRDEcalEDM::CRDCaloBlock>::iterator iter = find(vec_outblock.begin(), vec_outblock.end(), vec_blocks[ib]);
+    if( iter==vec_outblock.end() && m_Dlayer<=settings.EndLayer ) vec_outblock.push_back(vec_blocks[ib]);
   }
 
   return vec_outblock;

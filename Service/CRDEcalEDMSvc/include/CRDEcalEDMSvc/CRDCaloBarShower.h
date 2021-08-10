@@ -20,13 +20,13 @@ namespace CRDEcalEDM {
     double getE()  const;
     double getT1() const;
     double getT2() const;
+    double getWidth() const; 
     int getDlayer() const;
     std::vector<CRDEcalEDM::CRDCaloBar> getBars() const { return Bars; }
     CRDEcalEDM::CRDCaloBar getSeed() const { return Seed; }
     std::vector<CRDEcalEDM::CRDShowerCandidate> getTrkCandiCol() const { return TrkCandidateCol; }
     std::vector<CRDEcalEDM::CRDShowerCandidate> getNeuCandiCol() const { return NeuCandidateCol; }
     std::vector<CRDEcalEDM::CRDShowerCandidate> getAllCandiCol() const; 
-
 
     void setBars(std::vector<CRDEcalEDM::CRDCaloBar> _bars){ Bars = _bars; }
     void addBar(CRDEcalEDM::CRDCaloBar _bar) { Bars.push_back(_bar); }

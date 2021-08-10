@@ -17,7 +17,7 @@ public:
     Settings() {};
     void SetInitialValue();
     void SetValues( double _Sth_split=-1, double _Eth_seedAbs=0.005, double _Eth_showerAbs=0.0, double _Eth_clusAbs=0.0,
-                    double _Eth_seedwnei=0.45, double _Eth_seedwtot=0., double _Eth_showerwtot=0., double _Eth_cluswtot=0., 
+                    double _Eth_seedwnei=0.5, double _Eth_seedwtot=0., double _Eth_showerwtot=0., double _Eth_cluswtot=0., 
                     bool _usecandi=true, int _debug=0 );
     void SetScndMomentThres( double _th ){ Sth_split = _th; }
     void SetEseedThres( double _th ) { Eth_SeedAbs = _th; }

@@ -5,9 +5,9 @@
 
 namespace CRDEcalEDM{
 
-  CRDArborNode::CRDArborNode( CRDEcalEDM::CRDCaloBarShower _shower ){
-    barShower = _shower; 
-    En = _shower.getE();
+  CRDArborNode::CRDArborNode( CRDEcalEDM::CRDCaloHit2DShower _shower ){
+    shower = _shower; 
+    En = _shower.getShowerE();
     pos.SetXYZ( _shower.getPos().x(), _shower.getPos().y(), _shower.getPos().z() );
     Type = 0;
     parentNodes.clear(); 

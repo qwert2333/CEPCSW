@@ -46,10 +46,10 @@ public:
   StatusCode GetMatchedShowersL2( std::vector<CRDEcalEDM::CRDCaloBarShower>& barShowerXCol, std::vector<CRDEcalEDM::CRDCaloBarShower>& barShowerYCol, std::vector<CRDEcalEDM::CRDCaloHit2DShower>& outshCol );
 
 
-
   StatusCode XYShowerMatchingL0( CRDEcalEDM::CRDCaloBarShower& barShowerX, CRDEcalEDM::CRDCaloBarShower& barShowerY, CRDEcalEDM::CRDCaloHit2DShower& outsh ); //1*1 case
   StatusCode XYShowerMatchingL1( CRDEcalEDM::CRDCaloBarShower& barShower1, std::vector<CRDEcalEDM::CRDCaloBarShower>& barShowerNCol, std::vector<CRDEcalEDM::CRDCaloHit2DShower>& outshCol ); //1*N case without candidates
-  StatusCode XYShowerChi2Matching( std::vector<CRDEcalEDM::CRDCaloBarShower>& barShowerXCol, std::vector<CRDEcalEDM::CRDCaloBarShower>& barShowerYCol, std::vector<CRDEcalEDM::CRDCaloHit2DShower>& outshCol ); //M*N case without candidates
+  StatusCode XYShowerChi2Matching( std::vector<CRDEcalEDM::CRDCaloBarShower>& barShowerXCol, std::vector<CRDEcalEDM::CRDCaloBarShower>& barShowerYCol, std::vector<CRDEcalEDM::CRDCaloHit2DShower>& outshCol ); //N*N case without candidates
+  StatusCode XYShowerChi2MatchingL1( std::vector<CRDEcalEDM::CRDCaloBarShower>& barShowerXCol, std::vector<CRDEcalEDM::CRDCaloBarShower>& barShowerYCol, std::vector<CRDEcalEDM::CRDCaloHit2DShower>& outshCol ); //M*N case without candidates
 
 
 

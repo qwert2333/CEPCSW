@@ -33,10 +33,29 @@ namespace CRDEcalEDM{
     return en;
   }
 
+  double CRDCaloHit2DShower::getHitsWidth() const{
+    TVector3 cent(0., 0., 0.); 
+    double totE = getHitsE(); 
+    for(int i=0;i<CaloHits.size();i++){
+      TVector3 pos(CaloHits[i].getPosition().x, CaloHits[i].getPosition().y, CaloHits[i].getPosition().z);
+      cent += pos* (CaloHits[i].getEnergy()/totE); 
+    }
+
+    double width=0; 
+    for(int i=0;i<CaloHits.size();i++){
+      TVector3 pos(CaloHits[i].getPosition().x, CaloHits[i].getPosition().y, CaloHits[i].getPosition().z);
+      double r2 = (pos-cent).Mag2(); 
+      width += r2*CaloHits[i].getEnergy()/totE;
+    }
+
+    return width; 
+  }
+
   void CRDCaloHit2DShower::setCandidateType( int _flag ){
     if(_flag==1)      { m_isTrkShower=true; m_isNeuShower=false; }
     else if(_flag==0) { m_isTrkShower=false; m_isNeuShower=true; }
     else              { m_isTrkShower=false; m_isNeuShower=false;}
   }
+
 };
 #endif

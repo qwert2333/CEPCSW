@@ -1,6 +1,7 @@
 #ifndef _CRD_ARBORTREE_
 #define _CRD_ARBORTREE_
 #include "CRDEcalEDMSvc/CRDArborNode.h"
+#include "CRDEcalEDMSvc/CRDCaloHit3DShower.h"
 #include "TVector3.h"
 
 namespace CRDEcalEDM{
@@ -16,9 +17,14 @@ namespace CRDEcalEDM{
     inline bool operator == (const CRDArborTree &x) const{
       return Nodes == x.GetNodes(); 
     }
-    void Clear() { Nodes.clear(); pBarycent.SetXYZ(0.,0.,0.); } 
+    void Clear() { 
+      for(int i=0; i<Nodes.size(); i++) delete Nodes[i];
+      Nodes.clear(); 
+      pBarycent.SetXYZ(0.,0.,0.); 
+    } 
 
     std::vector<CRDEcalEDM::CRDArborNode*> GetNodes() const { return Nodes; }
+    std::vector<CRDEcalEDM::CRDArborNode*> GetNodes(int Layer) const; 
     CRDEcalEDM::CRDArborNode* GetRootNode() const; 
     int GetMinDlayer() const; 
     int GetMaxDlayer() const;
@@ -35,6 +41,7 @@ namespace CRDEcalEDM{
     void NodeClassification(); 
 
     void PrintTree() const; 
+    CRDCaloHit3DShower ConvertTreeToCluster() const; 
 
   private: 
     std::vector<CRDEcalEDM::CRDArborNode*> Nodes; 

@@ -42,6 +42,9 @@ StatusCode EnergyTimeMatchingAlg::RunAlgorithm( EnergyTimeMatchingAlg::Settings&
 
     }
     m_datacol.Shower2DCol = m_2DshowerCol; 
+
+//m_datacol.PrintLayer();
+//m_datacol.PrintShower();
     return StatusCode::SUCCESS;
   }
 
@@ -60,13 +63,17 @@ StatusCode EnergyTimeMatchingAlg::RunAlgorithm( EnergyTimeMatchingAlg::Settings&
       else if(showerXCol.size()==1) XYShowerMatchingL1( showerXCol[0], showerYCol, m_showerinlayer);
       else if(showerYCol.size()==1) XYShowerMatchingL1( showerYCol[0], showerXCol, m_showerinlayer);
       else if(showerXCol.size()==showerYCol.size()) XYShowerChi2Matching( showerXCol, showerYCol, m_showerinlayer);
-      else GetFullMatchedShowers( showerXCol, showerYCol, m_showerinlayer );
+      else XYShowerChi2MatchingL1( showerXCol, showerYCol, m_showerinlayer );
+      //else GetFullMatchedShowers( showerXCol, showerYCol, m_showerinlayer );
 
       for(int is=0; is<m_showerinlayer.size(); is++) m_showerinlayer[is].setCandidateType(0);
 
       m_2DshowerCol.insert( m_2DshowerCol.end(), m_showerinlayer.begin(), m_showerinlayer.end() );
     }
     m_datacol.Shower2DCol = m_2DshowerCol;
+
+//m_datacol.PrintLayer();
+//m_datacol.PrintShower();
     return StatusCode::SUCCESS;
   }
 
@@ -140,6 +147,10 @@ StatusCode EnergyTimeMatchingAlg::RunAlgorithm( EnergyTimeMatchingAlg::Settings&
   }
 
   m_datacol.Shower2DCol = m_2DshowerCol;
+
+m_datacol.PrintLayer();
+m_datacol.PrintShower();
+
   return StatusCode::SUCCESS;
 }
 
@@ -450,4 +461,109 @@ StatusCode EnergyTimeMatchingAlg::XYShowerChi2Matching(
   return StatusCode::SUCCESS;
 }
 
+
+StatusCode EnergyTimeMatchingAlg::XYShowerChi2MatchingL1(
+           std::vector<CRDEcalEDM::CRDCaloBarShower>& barShowerXCol,
+           std::vector<CRDEcalEDM::CRDCaloBarShower>& barShowerYCol,
+           std::vector<CRDEcalEDM::CRDCaloHit2DShower>& outshCol )
+{
+  outshCol.clear();
+
+  const int NshowerX = barShowerXCol.size();
+  const int NshowerY = barShowerYCol.size();
+
+  double chi2[NshowerX][NshowerY];
+  double chi2_E[NshowerX][NshowerY];
+  double chi2_tx[NshowerX][NshowerY];
+  double chi2_ty[NshowerX][NshowerY];  
+
+  double wi_E = settings.chi2Wi_E/(settings.chi2Wi_E + settings.chi2Wi_T);
+  double wi_T = settings.chi2Wi_T/(settings.chi2Wi_E + settings.chi2Wi_T);
+
+  TVector3 m_vec(0,0,0);
+  double rotAngle = -(barShowerXCol[0].getBars())[0].getModule()*PI/4.;
+  TVector3 Cblock((barShowerXCol[0].getBars())[0].getPosition().x(), (barShowerXCol[0].getBars())[0].getPosition().y(), (barShowerYCol[0].getBars())[0].getPosition().z());
+  Cblock.RotateZ(rotAngle);
+
+  map<double, pair<int, int> > m_chi2Map; m_chi2Map.clear(); 
+
+  for(int ix=0;ix<NshowerX;ix++){
+  for(int iy=0;iy<NshowerY;iy++){
+    CRDEcalEDM::CRDCaloBarShower showerX = barShowerXCol[ix];
+    CRDEcalEDM::CRDCaloBarShower showerY = barShowerYCol[iy];
+
+    double Ex = showerX.getE();
+    double Ey = showerY.getE();
+    chi2_E[ix][iy] = pow(fabs(Ex-Ey)/settings.sigmaE, 2);
+
+    double PosTx = C*(showerY.getT1()-showerY.getT2())/(2*settings.nMat) + showerY.getPos().z();
+    chi2_tx[ix][iy] = pow( fabs(PosTx-showerX.getPos().z())/settings.sigmaPos, 2 );
+
+    double PosTy = C*(showerX.getT1()-showerX.getT2())/(2*settings.nMat);
+    m_vec.SetXYZ(showerY.getPos().x(), showerY.getPos().y(), showerY.getPos().z());
+    m_vec.RotateZ(rotAngle);
+    chi2_ty[ix][iy] = pow( fabs(PosTy - (m_vec-Cblock).x() )/settings.sigmaPos, 2);
+
+    chi2[ix][iy] = chi2_E[ix][iy]*wi_E + (chi2_tx[ix][iy]+chi2_ty[ix][iy])*wi_T ;
+
+    pair<int, int> p1(ix, iy);
+    m_chi2Map[chi2[ix][iy]] = p1;
+  }}
+
+  pair<int, int> lastpair; 
+  vector<pair<int, int>> indexVec; indexVec.clear(); 
+  map<double, pair<int, int> >::iterator iter = m_chi2Map.begin(); 
+
+  for(iter; iter!=m_chi2Map.end(); iter++){
+    pair<int, int> indexpair = iter->second; 
+    bool inLine = false; 
+    bool isLast = false; 
+    for(int i=0; i<indexVec.size(); i++){
+      if( indexVec.size() == min(NshowerX, NshowerY)-1 ) {lastpair = indexpair; isLast=true;  break; }
+      if( indexpair.first == indexVec[i].first || indexpair.second == indexVec[i].second ) { inLine=true; break; }
+    }
+    if(isLast) break;
+    if(inLine) continue; 
+    indexVec.push_back(indexpair);
+  }
+  if( indexVec.size()!=min(NshowerX, NshowerY)-1 ) 
+    cout<<"ERROR in XYShowerChi2MatchingL1: found pair size "<<indexVec.size()<<" does not equal to min shower size -1 "<<min(NshowerX, NshowerY)-1<<endl;
+
+
+  vector<CRDEcalEDM::CRDCaloBarShower> leftShowers; leftShowers.clear(); 
+  for(int i=0; i<max(NshowerX, NshowerY); i++){
+    bool fl_exist = false; 
+    for(int j=0; j<indexVec.size(); j++){
+      int m_index = NshowerX>NshowerY ? indexVec[j].first : indexVec[j].second;
+      if(i==m_index){ fl_exist = true; break; } 
+    }
+    if(!fl_exist){
+       CRDEcalEDM::CRDCaloBarShower m_shower = NshowerX>NshowerY ? barShowerXCol[i] : barShowerYCol[i] ;
+       leftShowers.push_back(m_shower);
+    }
+  }
+  if(leftShowers.size() != fabs( NshowerX-NshowerY )+1 ) 
+    cout<<"ERROR in XYShowerChi2MatchingL1: Last pair number "<<leftShowers.size()<<" does not equal to shower difference "<<fabs( NshowerX-NshowerY )+1<<endl;
+
+
+  for(int ip=0; ip<indexVec.size(); ip++){
+    CRDEcalEDM::CRDCaloBarShower showerX = barShowerXCol[indexVec[ip].first];
+    CRDEcalEDM::CRDCaloBarShower showerY = barShowerYCol[indexVec[ip].second];
+
+    CRDEcalEDM::CRDCaloHit2DShower tmp_shower; tmp_shower.Clear();
+    XYShowerMatchingL0(showerX, showerY, tmp_shower);
+    outshCol.push_back(tmp_shower);
+  }
+
+
+  std::vector<CRDEcalEDM::CRDCaloHit2DShower> m_showerinlayer; m_showerinlayer.clear();   
+  int ilast = NshowerX<NshowerY ? lastpair.first : lastpair.second; 
+  CRDEcalEDM::CRDCaloBarShower m_shower = NshowerX<NshowerY ? barShowerXCol[ilast] : barShowerYCol[ilast] ;
+  XYShowerMatchingL1( m_shower, leftShowers, m_showerinlayer);
+
+  outshCol.insert(outshCol.end(), m_showerinlayer.begin(), m_showerinlayer.end());
+
+  return StatusCode::SUCCESS;
+
+}
 #endif

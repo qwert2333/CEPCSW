@@ -4,8 +4,8 @@
 #include "Algorithm/ClusterMergingAlg.h"
 
 void ClusterMergingAlg::Settings::SetInitialValue(){
-  axis_Angle = PI/12.; 
-  relP_Angle = PI/12.; 
+  axis_Angle = PI/10.; 
+  relP_Angle = PI/5.; 
   skipLayer = 3;
   fl_MergeGoodClus = true;
   fl_MergeBadClus = true;
@@ -22,6 +22,8 @@ StatusCode ClusterMergingAlg::RunAlgorithm( ClusterMergingAlg::Settings& m_setti
 
   std::vector<CRDEcalEDM::CRDCaloHit3DShower> m_goodClusCol = m_datacol.GoodClus3DCol; 
   std::vector<CRDEcalEDM::CRDCaloHit3DShower> m_badClusCol  = m_datacol.BadClus3DCol; 
+  if(settings.Debug>0) std::cout<<"GoodCluster number: "<<m_goodClusCol.size()<<"  BadCluster number: "<<m_badClusCol.size()<<std::endl;
+
   //std::vector<CRDEcalEDM::Track>              m_trkCol  = dataCol.TrackCol;
 
   //Merge 2 good clusters with several criteria
@@ -31,10 +33,10 @@ StatusCode ClusterMergingAlg::RunAlgorithm( ClusterMergingAlg::Settings& m_setti
     CRDEcalEDM::CRDCaloHit3DShower m_clus = m_goodClusCol[ic]; 
     for(int jc=ic+1; jc<m_goodClusCol.size(); jc++){
       CRDEcalEDM::CRDCaloHit3DShower p_clus = m_goodClusCol[jc];
-
+      double minRelAngle = min( (m_clus.getShowerCenter()-p_clus.getShowerCenter()).Angle(m_clus.getAxis()), (m_clus.getShowerCenter()-p_clus.getShowerCenter()).Angle(p_clus.getAxis()) );
       if( !(p_clus.getBeginningDlayer()>m_clus.getEndDlayer() || m_clus.getBeginningDlayer()>p_clus.getEndDlayer()) ) continue;
       if( sin( m_clus.getAxis().Angle(p_clus.getAxis()) ) < sin(settings.axis_Angle) && 
-          sin( (m_clus.getShowerCenter()-p_clus.getShowerCenter()).Angle( m_clus.getAxis() )) < sin(settings.relP_Angle) &&
+          sin( minRelAngle ) < sin(settings.relP_Angle) &&
           p_clus.getBeginningDlayer()-m_clus.getEndDlayer() <= settings.skipLayer 
         ) {
         m_goodClusCol[ic].MergeCluster( m_goodClusCol[jc] ); 

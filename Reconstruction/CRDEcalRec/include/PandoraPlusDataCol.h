@@ -46,9 +46,8 @@ public:
   std::vector<CRDEcalEDM::CRDCaloHit3DShower> Clus3DCol;
 
   //Another reconstruction way: ArborTrees
-  std::vector<CRDEcalEDM::CRDArborTree>   ArborTreeColX;
-  std::vector<CRDEcalEDM::CRDArborTree>   ArborTreeColY;
-
+  std::vector<CRDEcalEDM::CRDArborTree>   ArborTreeCol;
+  std::vector<CRDEcalEDM::CRDArborNode*>  IsoNodes;
 
 
     //Temporary collections in iteration
@@ -95,7 +94,7 @@ public:
   void ClearPFO()    { PFOCol.clear(); }
   void ClearTrack()  { TrackCol.clear(); }
   void ClearTempCol(); 
-  void ClearArbor() { ArborTreeColX.clear(); ArborTreeColY.clear(); }
+  void ClearArbor() { ArborTreeCol.clear(); }
 
 };
 #endif

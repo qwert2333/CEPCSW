@@ -4,6 +4,7 @@
 #include "CRDEcalEDMSvc/CRDCaloBarShower.h"
 #include "CRDEcalEDMSvc/CRDShowerCandidate.h"
 #include "edm4hep/CalorimeterHit.h"
+#include "edm4hep/Vector3f.h"
 #include "TVector3.h"
 
 namespace CRDEcalEDM{
@@ -25,6 +26,9 @@ namespace CRDEcalEDM{
     int getStave()  const { return stave;  }
     int getDlayer() const { return dlayer; }
     int getPart()   const { return part;   }
+    double getWidthX() const { return barShowerX.getWidth(); }
+    double getWidthY() const { return barShowerY.getWidth(); }
+    double getHitsWidth() const; 
     CRDEcalEDM::CRDCaloBarShower getShowerX() const { return barShowerX; }
     CRDEcalEDM::CRDCaloBarShower getShowerY() const { return barShowerY; }
     std::vector<edm4hep::ConstCalorimeterHit> getCaloHits() const { return CaloHits; }

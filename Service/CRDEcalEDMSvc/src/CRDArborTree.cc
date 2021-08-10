@@ -14,6 +14,15 @@ namespace CRDEcalEDM{
     if(_rootCol.size()==1) return _rootCol[0]; 
   };
 
+
+  std::vector<CRDEcalEDM::CRDArborNode*> CRDArborTree::GetNodes(int Layer) const{
+    std::vector<CRDEcalEDM::CRDArborNode*> m_nodes; m_nodes.clear(); 
+    for(int in=0; in<Nodes.size(); in++) 
+      if(Nodes[in]->GetDlayer() == Layer) m_nodes.push_back(Nodes[in]);
+    return m_nodes; 
+  }
+
+
   int CRDArborTree::GetMinDlayer() const{
     int min=999; 
     for(int i=0; i<Nodes.size(); i++)
@@ -22,11 +31,12 @@ namespace CRDEcalEDM{
     return min; 
   };
 
+
   int CRDArborTree::GetMaxDlayer() const{
     int max=-999;
     for(int i=0; i<Nodes.size(); i++)
       if( Nodes[i]->GetDlayer()>max && Nodes[i]->GetDlayer()>0 ) max = Nodes[i]->GetDlayer();
-    if(max<=0){ std::cout<<"Error in GetMinDlayer: Did not get maximum Dlayer. "<<std::endl; return -1;}
+    if(max<=0){ std::cout<<"Error in GetMaxDlayer: Did not get maximum Dlayer. "<<std::endl; return -1;}
     return max;
   };
 
@@ -84,9 +94,9 @@ namespace CRDEcalEDM{
 
   void CRDArborTree::CleanConnection( std::vector< std::pair<CRDEcalEDM::CRDArborNode*, CRDEcalEDM::CRDArborNode*> >& _connectionCol){
     for(int i=0; i<_connectionCol.size(); i++){
-std::cout<<"CleanConnection: #"<<i<<", daughter and parent node: "<<std::endl;
-printf("(%.2f, %.2f, %.2f, %d) \t", _connectionCol[i].first->GetPosition().x(), _connectionCol[i].first->GetPosition().y(), _connectionCol[i].first->GetPosition().z(), _connectionCol[i].first->GetType());
-printf("(%.2f, %.2f, %.2f, %d) \n", _connectionCol[i].second->GetPosition().x(), _connectionCol[i].second->GetPosition().y(), _connectionCol[i].second->GetPosition().z(), _connectionCol[i].second->GetType());
+//std::cout<<"CleanConnection: #"<<i<<", daughter and parent node: "<<std::endl;
+//printf("(%.2f, %.2f, %.2f, %d) \t", _connectionCol[i].first->GetPosition().x(), _connectionCol[i].first->GetPosition().y(), _connectionCol[i].first->GetPosition().z(), _connectionCol[i].first->GetType());
+//printf("(%.2f, %.2f, %.2f, %d) \n", _connectionCol[i].second->GetPosition().x(), _connectionCol[i].second->GetPosition().y(), _connectionCol[i].second->GetPosition().z(), _connectionCol[i].second->GetType());
 
 //      _connectionCol[i].first->DisconnectDaughter( _connectionCol[i].second );
       _connectionCol[i].first->DisconnectParent  ( _connectionCol[i].second );
@@ -109,12 +119,21 @@ printf("(%.2f, %.2f, %.2f, %d) \n", _connectionCol[i].second->GetPosition().x(),
   };
 
   void CRDArborTree::PrintTree() const{
+    std::cout<<"N node: "<<Nodes.size()<<std::endl;
     std::cout<<"Nodes in this tree: (x, y, z, Type)"<<std::endl;
     for(int i=0; i<Nodes.size(); i++)
-      printf("(%.2f, %.2f, %.2f, %d) \t", Nodes[i]->GetPosition().x(), Nodes[i]->GetPosition().y(), Nodes[i]->GetPosition().z(), Nodes[i]->GetType());
+      printf("(%.2f, %.2f, %.2f, %d) \n", Nodes[i]->GetPosition().x(), Nodes[i]->GetPosition().y(), Nodes[i]->GetPosition().z(), Nodes[i]->GetType());
     std::cout<<std::endl;
   };
 
+  CRDCaloHit3DShower CRDArborTree::ConvertTreeToCluster() const{
+    CRDEcalEDM::CRDCaloHit3DShower m_clus; m_clus.Clear();
+    for(int in=0; in<Nodes.size(); in++){
+      CRDEcalEDM::CRDCaloHit2DShower m_shower = Nodes[in]->GetOriginShower();
+      m_clus.AddShower( m_shower );
+    }
+    return m_clus; 
+  };
 
   bool CRDArborTree::compLayer( CRDEcalEDM::CRDArborNode* node1, CRDEcalEDM::CRDArborNode* node2 ) { return node1->GetDlayer()>node2->GetDlayer(); }
 

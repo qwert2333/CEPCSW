@@ -107,14 +107,18 @@ protected:
   TTree* t_SimBar;
   FloatVec m_simBar_x, m_simBar_y, m_simBar_z, m_simBar_T1, m_simBar_T2, m_simBar_Q1, m_simBar_Q2, m_simBar_dlayer, m_simBar_part, m_simBar_stave, m_simBar_slayer, m_simBar_module;
 
-  TTree* t_ArborTree0;
-  TTree* t_ArborTree1;
-  int m_Nnode0, m_Nnode1; 
-  float m_tree0_centx, m_tree0_centy, m_tree0_centz, m_tree0_minLayer, m_tree0_maxLayer; 
-  float m_tree1_centx, m_tree1_centy, m_tree1_centz, m_tree1_minLayer, m_tree1_maxLayer; 
-  FloatVec m_node0x, m_node0y, m_node0z, m_node0Type, m_node0E;
-  FloatVec m_node1x, m_node1y, m_node1z, m_node1Type, m_node1E;
+  TTree* t_ArborTree;
+  int m_Nnode;
+  float m_tree_centx, m_tree_centy, m_tree_centz, m_tree_minLayer, m_tree_maxLayer; 
+  FloatVec m_nodex, m_nodey, m_nodez, m_nodeType, m_nodeE;
 
+  TTree* t_dataColIter0;
+  int      m_Iter0_Ngoodclus, m_Iter0_Nbadclus;
+  IntVec   m_Iter0_clus_Nly, m_Iter0_clus_start, m_Iter0_clus_end; 
+  FloatVec m_Iter0_clus_x, m_Iter0_clus_y, m_Iter0_clus_z, m_Iter0_clus_E;
+  FloatVec m_Iter0_clus_px, m_Iter0_clus_py, m_Iter0_clus_pz, m_Iter0_clus_chi2, m_Iter0_clus_aveE, m_Iter0_clus_stdDevE;
+  FloatVec m_Iter0_clus_alpha, m_Iter0_clus_beta, m_Iter0_clus_showermax;   
+  FloatVec m_Iter0_gclus_2dshx, m_Iter0_gclus_2dshy, m_Iter0_gclus_2dshz, m_Iter0_gclus_2dshE;
 
   //Stage2: check reconstructed result
   TTree *t_recoPFO;
@@ -125,11 +129,13 @@ protected:
   IntVec m_N2dshInClus, m_Clus_type;
   IntVec m_mcPdgid, m_mcNdaughter, m_mcNparent, m_mcStatus; 
   FloatVec m_mcPx, m_mcPy, m_mcPz, m_mcEn;
+  FloatVec m_scndM; 
+
 
   void ClearBar();
   void ClearRecPFO(); 
-  void ClearTree0();
-  void ClearTree1();
+  void ClearTree();
+  void ClearIter();
 
 };
 #endif

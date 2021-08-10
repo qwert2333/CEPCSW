@@ -92,7 +92,7 @@ StatusCode CRDEcalDigiAlg::initialize()
 	m_edmsvc = service<ICRDEcalEDMSvc>("CRDEcalEDMSvc");
 	if ( !m_edmsvc )  throw "CRDEcalDigiAlg :Failed to find CRDEcalEDMSvc ...";
 
-	rndm.SetSeed(_seed);
+	//rndm.SetSeed(_seed);
 	std::cout<<"CRDEcalDigiAlg::initialize"<<std::endl;
 	return GaudiAlgorithm::initialize();
 }
@@ -105,6 +105,7 @@ StatusCode CRDEcalDigiAlg::execute()
 
   m_edmsvc->ClearSystem(); 
 	Clear();
+	rndm.SetSeed(_seed); //temporary for debug! Put it in initialize() later! 
 
  	const edm4hep::SimCalorimeterHitCollection* SimHitCol =  r_SimCaloCol.get();
 

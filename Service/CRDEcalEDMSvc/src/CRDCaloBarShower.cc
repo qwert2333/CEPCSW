@@ -48,6 +48,28 @@ namespace CRDEcalEDM {
       return T2;
     }
 
+    double CRDCaloBarShower::getWidth() const{
+      dd4hep::Position centPos = getPos(); 
+      double Etot = getE(); 
+      double sigmax=0; 
+      double sigmay=0; 
+      double sigmaz=0; 
+      for(int i=0; i<Bars.size(); i++){
+        double wi = Bars[i].getEnergy()/Etot;
+        sigmax += wi*(Bars[i].getPosition().x()-centPos.x())*(Bars[i].getPosition().x()-centPos.x());
+        sigmay += wi*(Bars[i].getPosition().y()-centPos.y())*(Bars[i].getPosition().y()-centPos.y());
+        sigmaz += wi*(Bars[i].getPosition().z()-centPos.z())*(Bars[i].getPosition().z()-centPos.z());
+      }
+
+      if(sigmaz!=0) return sigmaz;  //sLayer=1, bars along z-axis. 
+      else if(sigmax==0 && sigmaz==0) return sigmay; //Module 2, 6
+      else if(sigmay==0 && sigmaz==0) return sigmax; //Module 0, 4
+      else if(sigmax!=0 && sigmay!=0 && sigmaz==0) return sqrt(sigmax*sigmax+sigmay*sigmay); //Module 1, 3, 5, 7; 
+      else return 0.; 
+
+    }
+
+
     int CRDCaloBarShower::getDlayer() const{
       if(Bars.size()>0) return Bars[0].getDlayer();
       else return -1;
@@ -59,6 +81,8 @@ namespace CRDEcalEDM {
       m_allcandi.insert(m_allcandi.end(), TrkCandidateCol.begin(), TrkCandidateCol.end());
       return m_allcandi;
     }
+
+
 
 };
 #endif

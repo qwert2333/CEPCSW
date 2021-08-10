@@ -6,13 +6,30 @@
 
 void ArborClusteringAlg::Settings::SetInitialValue(){
 
-     Rth_link = 40;  // Node distance threshold when linking nodes.
-     wiB = 1;
-     wiF = 1;
-     pTheta = 1;
-     pR = 1;
-     pE = 1; 
-     Rth_nbrRoot = 40; // Root node distance threshold when merging neighbor trees.
+    Rth_value = 40; 
+    Rth_slope = 0.5; 
+
+    wiB = 1;
+    wiF = 1;
+    pTheta = 1;
+    pR = 1;
+    pE = 1; 
+    Rth_nbrRoot = 40; // Root node distance threshold when merging neighbor trees.
+    Debug = 0; 
+}
+
+void ArborClusteringAlg::Settings::PrintSettings() const{
+  std::cout<<"  ArborClusteringAlg Settings: "<<std::endl;
+  std::cout<<"Rth_value: "<<'\t'<<Rth_value<<std::endl; 
+  std::cout<<"Rth_slope: "<<'\t'<<Rth_slope<<std::endl; 
+  std::cout<<"wiB: "<<'\t'<<wiB<<std::endl; 
+  std::cout<<"wiF: "<<'\t'<<wiF<<std::endl; 
+  std::cout<<"pTheta: "<<'\t'<<pTheta<<std::endl; 
+  std::cout<<"pR: "<<'\t'<<pR<<std::endl; 
+  std::cout<<"pE: "<<'\t'<<pE<<std::endl; 
+  std::cout<<"Rth_nbrRoot: "<<'\t'<<Rth_nbrRoot<<std::endl; 
+  std::cout<<"Debug: "<<'\t'<<Debug<<std::endl; 
+
 }
 
 StatusCode ArborClusteringAlg::Initialize(){
@@ -23,95 +40,145 @@ StatusCode ArborClusteringAlg::Initialize(){
 StatusCode ArborClusteringAlg::RunAlgorithm( ArborClusteringAlg::Settings& m_settings, PandoraPlusDataCol& m_datacol ){
   settings = m_settings;
 
-  std::vector<CRDEcalEDM::CRDCaloLayer> layers = m_datacol.LayerCol;
-  if(layers.size()==0){ std::cout<<"Warning: Empty input in ArborClusteringAlg! Please check previous algorithm!"<<std::endl; return StatusCode::SUCCESS; }
+  std::vector<CRDEcalEDM::CRDCaloHit2DShower> m_2DshowerCol = m_datacol.Shower2DCol;
+  if(m_2DshowerCol.size()==0){ std::cout<<"Warning: Empty input in ArborClusteringAlg. Please check previous algorithm!"<<endl;  return StatusCode::SUCCESS; }
 
-  std::map<int, std::vector<CRDEcalEDM::CRDArborNode> > m_orderedNodesX;  m_orderedNodesX.clear(); //map<layer, showers>
-  std::map<int, std::vector<CRDEcalEDM::CRDArborNode> > m_orderedNodesY;  m_orderedNodesY.clear(); //map<layer, showers>
+//m_datacol.PrintShower(); 
+
+  std::map<int, std::vector<CRDEcalEDM::CRDArborNode*> > m_orderedNodes;  m_orderedNodes.clear(); //map<layer, showers>
 
   //Transform showers to nodes, order the nodes by layer. 
-  for(int il=0; il<layers.size(); il++){
-    CRDEcalEDM::CRDCaloLayer m_layer = layers[il];
-    int m_dlayer = m_layer.getDlayer();
-    std::vector<CRDEcalEDM::CRDCaloBarShower> m_showerX = m_layer.barShowerXCol; 
-    std::vector<CRDEcalEDM::CRDCaloBarShower> m_showerY = m_layer.barShowerYCol; 
-
-    for(int is=0; is<m_showerX.size(); is++){
-      CRDEcalEDM::CRDArborNode m_node; m_node.Clear();
-      TVector3 m_pos( m_showerX[is].getPos().x(), m_showerX[is].getPos().y(), m_showerX[is].getPos().z() );
-      m_node.SetPosition( m_pos );
-      m_node.SetRefDir( m_pos );
-      m_node.SetEnergy( m_showerX[is].getE() );
-      m_node.SetOriginBarShower( m_showerX[is] );
-      m_orderedNodesX[m_dlayer].push_back(m_node);
-    }
-    for(int is=0; is<m_showerY.size(); is++){
-      CRDEcalEDM::CRDArborNode m_node; m_node.Clear();
-      TVector3 m_pos( m_showerY[is].getPos().x(), m_showerY[is].getPos().y(), m_showerY[is].getPos().z() );
-      m_node.SetPosition( m_pos );
-      m_node.SetRefDir( m_pos );
-      m_node.SetEnergy( m_showerY[is].getE() );
-      m_node.SetOriginBarShower( m_showerY[is] );
-      m_orderedNodesY[m_dlayer].push_back(m_node);
-    }
+  for(int is=0; is<m_2DshowerCol.size(); is++ ){
+    int m_dlayer = m_2DshowerCol[is].getDlayer();
+    //CRDEcalEDM::CRDArborNode m_node(m_2DshowerCol[is]);
+    CRDEcalEDM::CRDArborNode* m_node = new CRDEcalEDM::CRDArborNode(m_2DshowerCol[is]);
+    m_orderedNodes[m_dlayer].push_back(m_node);
   }
 
+  int NtotNodes=0; 
+  std::map<int, std::vector<CRDEcalEDM::CRDArborNode*> >::iterator iter_count = m_orderedNodes.begin(); 
+  for(iter_count; iter_count!=m_orderedNodes.end(); iter_count++){
+    NtotNodes += iter_count->second.size(); 
+  }
+  if(settings.Debug>=1) std::cout<<"Total node size: "<<NtotNodes<<std::endl; 
+
+/*
 std::cout<<"Print ordered nodes: "<<std::endl;
-for(auto iter=m_orderedNodesX.begin(); iter!=m_orderedNodesX.end(); iter++){
+for(auto iter=m_orderedNodes.begin(); iter!=m_orderedNodes.end(); iter++){
   std::cout<<"#Layer: "<<iter->first<<'\t';
   for(int i=0; i<iter->second.size(); i++) printf("(%.2f, %.2f, %.2f, %d) \t", iter->second[i].GetPosition().x(), iter->second[i].GetPosition().y(), iter->second[i].GetPosition().z(), iter->second[i].GetType());
   std::cout<<std::endl;
 }
-
-  std::vector<CRDEcalEDM::CRDArborTree> m_ArborTreeColX; m_ArborTreeColX.clear();
-  std::vector<CRDEcalEDM::CRDArborTree> m_ArborTreeColY; m_ArborTreeColY.clear();
-  std::vector<CRDEcalEDM::CRDArborNode*> m_isoNodesX; m_isoNodesX.clear();
-  std::vector<CRDEcalEDM::CRDArborNode*> m_isoNodesY; m_isoNodesY.clear();
+*/
+  std::vector<CRDEcalEDM::CRDArborTree> m_ArborTreeCol; m_ArborTreeCol.clear();
+  std::vector<CRDEcalEDM::CRDArborNode*> m_isoNodes; m_isoNodes.clear();
   
 
   //Build tree
-  InitArborTree(m_orderedNodesX, m_ArborTreeColX, m_isoNodesX);
-//  InitArborTree(m_orderedNodesY, m_ArborTreeColY, m_isoNodesY);
+  InitArborTree(m_orderedNodes, m_ArborTreeCol, m_isoNodes);
 
-  std::vector<CRDEcalEDM::CRDArborTree> tmpTreesX; tmpTreesX.clear();
-  MergeConnectedTrees( m_ArborTreeColX, tmpTreesX );
-  m_ArborTreeColX.clear(); m_ArborTreeColX = tmpTreesX;
+  if(settings.Debug>=1) std::cout<<"Initial Ntrees = "<<m_ArborTreeCol.size()<<std::endl;
+  if(settings.Debug>=2){
+    for(int it=0; it<m_ArborTreeCol.size(); it++) m_ArborTreeCol[it].PrintTree();
+    std::cout<<"Print Isolated Nodes: "<<std::endl;
+    for(int i=0; i<m_isoNodes.size(); i++)
+      printf("(%.2f, %.2f, %.2f, %d) \n", m_isoNodes[i]->GetPosition().x(), m_isoNodes[i]->GetPosition().y(), m_isoNodes[i]->GetPosition().z(), m_isoNodes[i]->GetType());
+    std::cout<<std::endl;
+  }  
+
+
+  std::vector<CRDEcalEDM::CRDArborTree> tmpTrees; tmpTrees.clear();
+  MergeConnectedTrees( m_ArborTreeCol, tmpTrees );
+  m_ArborTreeCol.clear(); m_ArborTreeCol = tmpTrees;
+
+  if(settings.Debug>=1) std::cout<<"After ConnectedTree merging: Ntree = "<<m_ArborTreeCol.size()<<std::endl;
+  if(settings.Debug>=2){
+    for(int it=0; it<m_ArborTreeCol.size(); it++) m_ArborTreeCol[it].PrintTree();
+    std::cout<<"Print Isolated Nodes: "<<std::endl;
+    for(int i=0; i<m_isoNodes.size(); i++)
+      printf("(%.2f, %.2f, %.2f, %d) \n", m_isoNodes[i]->GetPosition().x(), m_isoNodes[i]->GetPosition().y(), m_isoNodes[i]->GetPosition().z(), m_isoNodes[i]->GetType());
+    std::cout<<std::endl;
+  }
 
   //Clean connection
-  for(int it=0; it<m_ArborTreeColX.size(); it++) CleanConnection(m_ArborTreeColX[it]);
-//  for(int it=0; it<m_ArborTreeColY.size(); it++) CleanConnection(m_ArborTreeColY[it]);
+  for(int it=0; it<m_ArborTreeCol.size(); it++) CleanConnection(m_ArborTreeCol[it]);
 
-std::cout<<"After connection cleaning: Ntree = "<<m_ArborTreeColX.size()<<std::endl;
-for(int it=0; it<m_ArborTreeColX.size(); it++) m_ArborTreeColX[it].PrintTree();
+  if(settings.Debug>=1) std::cout<<"After connection cleaning: Ntree = "<<m_ArborTreeCol.size()<<std::endl;
+  if(settings.Debug>=2){ 
+    for(int it=0; it<m_ArborTreeCol.size(); it++) m_ArborTreeCol[it].PrintTree();
+    std::cout<<"Print Isolated Nodes: "<<std::endl;
+    for(int i=0; i<m_isoNodes.size(); i++)
+      printf("(%.2f, %.2f, %.2f, %d) \n", m_isoNodes[i]->GetPosition().x(), m_isoNodes[i]->GetPosition().y(), m_isoNodes[i]->GetPosition().z(), m_isoNodes[i]->GetType());
+    std::cout<<std::endl;
+  }
 
-/*
-  //Depart trees after cleaning connection
-  std::vector<CRDEcalEDM::CRDArborTree> tmpTreesX; tmpTreesX.clear(); 
-  std::vector<CRDEcalEDM::CRDArborTree> tmpTreesY; tmpTreesY.clear(); 
-  for(int it=0; it<m_ArborTreeColX.size(); it++) DepartArborTree(m_ArborTreeColX[it], tmpTreesX, m_isoNodesX);
-  for(int it=0; it<m_ArborTreeColY.size(); it++) DepartArborTree(m_ArborTreeColY[it], tmpTreesY, m_isoNodesY);
-  m_ArborTreeColX.clear(); m_ArborTreeColX = tmpTreesX; 
-  m_ArborTreeColY.clear(); m_ArborTreeColY = tmpTreesY; 
-  
+  //Depart trees after connection cleaning. 
+  std::vector<CRDEcalEDM::CRDArborTree> m_departedTrees; m_departedTrees.clear(); 
+  for(int it=0; it<m_ArborTreeCol.size(); it++){ 
+    tmpTrees.clear(); 
+    DepartArborTree(m_ArborTreeCol[it], tmpTrees, m_isoNodes);
+    m_departedTrees.insert(m_departedTrees.end(), tmpTrees.begin(), tmpTrees.end());
+    //m_ArborTreeCol.clear(); m_ArborTreeCol = tmpTrees; 
+  }
+  m_ArborTreeCol.clear(); m_ArborTreeCol = m_departedTrees; m_departedTrees.clear(); 
+
+  if(settings.Debug>=1) std::cout<<"After DepartArborTree: Ntree = "<<m_ArborTreeCol.size()<<std::endl;
+  if(settings.Debug>=2){ 
+    for(int it=0; it<m_ArborTreeCol.size(); it++) m_ArborTreeCol[it].PrintTree();
+    std::cout<<"Print Isolated Nodes: "<<std::endl;
+    for(int i=0; i<m_isoNodes.size(); i++)
+      printf("(%.2f, %.2f, %.2f, %d) \n", m_isoNodes[i]->GetPosition().x(), m_isoNodes[i]->GetPosition().y(), m_isoNodes[i]->GetPosition().z(), m_isoNodes[i]->GetType());
+    std::cout<<std::endl;
+  }
 
   //Merge Neighbor tree (roots are close within the same layer)
-  tmpTreesX.clear(); tmpTreesY.clear(); 
-  MergeNeighborTree(m_ArborTreeColX, tmpTreesX);
-  MergeNeighborTree(m_ArborTreeColY, tmpTreesY);
-  m_ArborTreeColX.clear(); m_ArborTreeColX = tmpTreesX;
-  m_ArborTreeColY.clear(); m_ArborTreeColY = tmpTreesY;  
+  //tmpTrees.clear();
+  //MergeNeighborTree(m_ArborTreeCol, tmpTrees);
+  //m_ArborTreeCol.clear(); m_ArborTreeCol = tmpTrees;
 
-  //Merge small structures
-  tmpTreesX.clear(); tmpTreesY.clear();
-  MergeBranches(m_ArborTreeColX, tmpTreesX); 
-  MergeBranches(m_ArborTreeColY, tmpTreesY); 
-  m_ArborTreeColX.clear(); m_ArborTreeColX = tmpTreesX;
-  m_ArborTreeColY.clear(); m_ArborTreeColY = tmpTreesY;
+  m_datacol.ArborTreeCol = m_ArborTreeCol; 
+  m_datacol.IsoNodes = m_isoNodes; 
+
+  int Nnodes_end = 0; 
+  for(int it=0; it<m_ArborTreeCol.size(); it++) Nnodes_end += m_ArborTreeCol[it].GetNodes().size(); 
+  Nnodes_end += m_isoNodes.size(); 
+  if(settings.Debug>=1) std::cout<<"At the end: Node size = "<<NtotNodes<<std::endl;
+  if(Nnodes_end != NtotNodes) 
+    std::cout<<"WARNING!  ArborClusteringAlg: Initial node size("<<NtotNodes<<") is not equal to final node size("<<Nnodes_end<<")! May have memory leakage! "<<std::endl; 
+/*  
+  std::vector<CRDEcalEDM::CRDArborTree> m_goodTreeCol; m_goodTreeCol.clear(); 
+  std::vector<CRDEcalEDM::CRDArborTree> m_badTreeCol; m_badTreeCol.clear();
+  for(int it=0; it<m_ArborTreeCol.size(); it++){
+    if( (m_ArborTreeCol[it].GetMaxDlayer()-m_ArborTreeCol[it].GetMinDlayer()) >= settings.th_GoodTreeLevel &&
+         m_ArborTreeCol[it].GetNodes().size()>=settings.th_GoodTreeNodes)
+      m_goodTreeCol.push_back( m_ArborTreeCol[it] );
+    else m_badTreeCol.push_back( m_ArborTreeCol[it] );
+  }
+
+
+  //Save tree into CRDCaloHit3DShower
+  std::vector<CRDEcalEDM::CRDCaloHit3DShower> m_goodClusterCol;  m_goodClusterCol.clear();
+  std::vector<CRDEcalEDM::CRDCaloHit3DShower> m_badClusterCol;  m_badClusterCol.clear();
+  std::vector<CRDEcalEDM::CRDCaloHit3DShower> m_ClusterCol;  m_ClusterCol.clear();
+  for(int it=0; it<m_goodTreeCol.size(); it++)
+    m_goodClusterCol.push_back( m_goodTreeCol[it].ConvertTreeToCluster() );  
+  for(int it=0; it<m_badTreeCol.size(); it++)
+    m_badClusterCol.push_back( m_badTreeCol[it].ConvertTreeToCluster() );
+
+  for(int in=0; in<m_isoNodes.size(); in++){
+    CRDEcalEDM::CRDCaloHit3DShower clus_isonodes; 
+    CRDEcalEDM::CRDCaloHit2DShower m_shower = m_isoNodes[in]->GetOriginShower();
+    clus_isonodes.AddShower( m_shower );
+    m_badClusterCol.push_back( clus_isonodes );
+  }
+    
+  for(int it=0; it<m_ArborTreeCol.size(); it++)
+    m_ClusterCol.push_back( m_ArborTreeCol[it].ConvertTreeToCluster() );
+
+  m_datacol.GoodClus3DCol = m_goodClusterCol;
+  m_datacol.BadClus3DCol = m_badClusterCol;
+  m_datacol.Clus3DCol = m_ClusterCol; 
 */
-
-  m_datacol.ArborTreeColX = m_ArborTreeColX; 
-  m_datacol.ArborTreeColY = m_ArborTreeColY; 
-
   return StatusCode::SUCCESS;
 }
 
@@ -121,78 +188,86 @@ StatusCode ArborClusteringAlg::ClearAlgorithm() {
 }
 
 
-StatusCode ArborClusteringAlg::InitArborTree( std::map<int, std::vector<CRDEcalEDM::CRDArborNode> >& m_orderedNodes, 
+StatusCode ArborClusteringAlg::InitArborTree( std::map<int, std::vector<CRDEcalEDM::CRDArborNode*> >& m_orderedNodes, 
                                               std::vector<CRDEcalEDM::CRDArborTree>& m_treeCol,
                                               std::vector<CRDEcalEDM::CRDArborNode*>& m_isoNodes )
 {
 
-std::cout<<"Ordered node collection size: "<<m_orderedNodes.size()<<std::endl;
-std::cout<<"  Layer(Nnode): ";
-for(auto iter = m_orderedNodes.begin(); iter!=m_orderedNodes.end(); iter++) std::cout<<iter->first<<"("<<iter->second.size()<<")  ";
-std::cout<<std::endl;
+//std::cout<<"Ordered node collection size: "<<m_orderedNodes.size()<<std::endl;
+//std::cout<<"  Layer(Nnode): ";
+//for(auto iter = m_orderedNodes.begin(); iter!=m_orderedNodes.end(); iter++) std::cout<<iter->first<<"("<<iter->second.size()<<")  ";
+//std::cout<<std::endl;
 
   if( m_orderedNodes.size()==0 ) return StatusCode::SUCCESS;
   m_treeCol.clear();
   m_isoNodes.clear();
 
-  std::map<int, std::vector<CRDEcalEDM::CRDArborNode> >::iterator iter = m_orderedNodes.begin();
+  std::map<int, std::vector<CRDEcalEDM::CRDArborNode*> >::iterator iter = m_orderedNodes.begin();
 
   //Nodes in First layer: initialize the trees. 
-  //std::vector<CRDEcalEDM::CRDArborNode> m_nodesFstLayer = iter->second;
 
   for(int is=0; is<iter->second.size(); is++){
-std::cout<<"#Layer: "<<iter->first<<", Nnode: "<<iter->second.size()<<endl;
+//std::cout<<"#Layer: "<<iter->first<<", Nnode: "<<iter->second.size()<<endl;
+    int m_dlayer = iter->first; 
+    double Rth = settings.Rth_value + (double)m_dlayer * settings.Rth_slope; 
     CRDEcalEDM::CRDArborTree m_tree; 
 
-    std::vector<CRDEcalEDM::CRDArborNode>* m_nextLayer = &m_orderedNodes[iter->first+1]; 
-std::cout<<" Next layer node size: "<<m_nextLayer->size()<<std::endl;
+    std::vector<CRDEcalEDM::CRDArborNode*>* m_nextLayer = &m_orderedNodes[iter->first+1]; 
     for(int js=0; js<m_nextLayer->size(); js++)
-      if( (iter->second[is].GetPosition()-m_nextLayer->at(js).GetPosition()).Mag()<settings.Rth_link ) 
-        iter->second[is].ConnectDaughter( &(m_nextLayer->at(js)) ); 
+      if( (iter->second[is]->GetPosition()-m_nextLayer->at(js)->GetPosition()).Mag()<Rth ) 
+        iter->second[is]->ConnectDaughter( (m_nextLayer->at(js)) ); 
 
-    m_tree.AddNode( &(iter->second[is]) );
-    m_tree.AddNode( iter->second[is].GetDaughterNodes() );
+    m_tree.AddNode( (iter->second[is]) );
+    m_tree.AddNode( iter->second[is]->GetDaughterNodes() );
     m_treeCol.push_back( m_tree );
   }
   iter++;
-std::cout<<"End tree seeding. Tree number: "<< m_treeCol.size()<<", Next layer: "<<iter->first<<std::endl;
-for(int it=0; it<m_treeCol.size(); it++) m_treeCol[it].PrintTree();
+//std::cout<<"End tree seeding. Tree number: "<< m_treeCol.size()<<", Next layer: "<<iter->first<<std::endl;
+//for(int it=0; it<m_treeCol.size(); it++) m_treeCol[it].PrintTree();
 
   //In later layers
   for(iter; iter!=m_orderedNodes.end(); iter++){
-std::cout<<"  #Layer: "<<iter->first<<", Nnode: "<<iter->second.size()<<", Present Ntrees: "<<m_treeCol.size()<<std::endl;
-for(int it=0; it<m_treeCol.size(); it++) m_treeCol[it].PrintTree();
+
+//std::cout<<"  #Layer: "<<iter->first<<", Nnode: "<<iter->second.size()<<", Present Ntrees: "<<m_treeCol.size()<<std::endl;
+//for(int it=0; it<m_treeCol.size(); it++) m_treeCol[it].PrintTree();
 
     int iLayer = iter->first;
+    double Rth = settings.Rth_value + (double)iLayer * settings.Rth_slope;
 
     for(int in=0; in<iter->second.size(); in++){
-      CRDEcalEDM::CRDArborNode* m_node = &iter->second[in];
+      CRDEcalEDM::CRDArborNode* m_node = iter->second[in];
+//printf("    #Node: (%.2f, %.2f, %.2f) \n", m_node->GetPosition().x(),  m_node->GetPosition().y(),  m_node->GetPosition().z());
       //Loop all trees:
       for(int it=0; it<m_treeCol.size(); it++){
+//std::cout<<"    Loop in tree: "<<std::endl;
+//m_treeCol[it].PrintTree();
+//std::cout<<"    Node in this tree: "<<m_node->isInTree(m_treeCol[it])<<std::endl; 
         //If node in this tree: 
         if( m_node->isInTree(m_treeCol[it]) ){          
           //Get daughter nodes and add them in tree
-          std::vector<CRDEcalEDM::CRDArborNode>* m_nextLayer = &m_orderedNodes[iLayer+1];
+          std::vector<CRDEcalEDM::CRDArborNode*>* m_nextLayer = &m_orderedNodes[iLayer+1];
           for(int jn=0; jn<m_nextLayer->size(); jn++)
-            if( (m_node->GetPosition()-m_nextLayer->at(jn).GetPosition()).Mag()<settings.Rth_link ) 
-              m_node->ConnectDaughter( &(m_nextLayer->at(jn)) );
+            if( (m_node->GetPosition()-m_nextLayer->at(jn)->GetPosition()).Mag()<Rth ) 
+              m_node->ConnectDaughter( (m_nextLayer->at(jn)) );
           m_treeCol[it].AddNode( m_node->GetDaughterNodes() );
           break;
         }
       }//end loop trees
+//std::cout<<"End loop nodes in this layer! "<<std::endl; 
+//std::cout<<std::endl;
     } //end loop nodes in this layer
 
     //if collection is not empty, create a new tree.
 
     for(int in=0; in<iter->second.size(); in++){
-      CRDEcalEDM::CRDArborNode* m_node = &iter->second[in];
-      if( m_node->GetDaughterNodes().size()==0 ){
+      CRDEcalEDM::CRDArborNode* m_node = iter->second[in];
+      if( m_node->GetDaughterNodes().size()==0 && m_node->GetParentNodes().size()==0){
         CRDEcalEDM::CRDArborTree m_tree;
         m_tree.AddNode( m_node );
-        std::vector<CRDEcalEDM::CRDArborNode>* m_nextLayer = &m_orderedNodes[iLayer+1];
+        std::vector<CRDEcalEDM::CRDArborNode*>* m_nextLayer = &m_orderedNodes[iLayer+1];
         for(int jn=0; jn<m_nextLayer->size(); jn++)
-          if( (m_node->GetPosition() - m_nextLayer->at(jn).GetPosition()).Mag()<settings.Rth_link ) 
-            m_node->ConnectDaughter( &(m_nextLayer->at(jn)) );        
+          if( (m_node->GetPosition() - m_nextLayer->at(jn)->GetPosition()).Mag()<Rth ) 
+            m_node->ConnectDaughter( (m_nextLayer->at(jn)) );        
         m_tree.AddNode( m_node->GetDaughterNodes() );
         m_treeCol.push_back( m_tree );
       }
@@ -200,7 +275,16 @@ for(int it=0; it<m_treeCol.size(); it++) m_treeCol[it].PrintTree();
 
   }//end loop all nodes.
 
-std::cout<<"End loop nodes"<<std::endl;
+//std::cout<<"End loop all nodes! Print all trees: "<<std::endl;
+//for(int it=0; it<m_treeCol.size(); it++) m_treeCol[it].PrintTree();
+
+  int NtotNodes=0;
+//  for(int it=0; it<m_treeCol.size(); it++){
+//    NtotNodes += m_treeCol[it].GetNodes().size();
+//  }
+//  std::cout<<"Total nodes before picking out isoNodes: "<<NtotNodes<<std::endl;
+//  std::cout<<"Print all trees: "<<std::endl;
+//  for(int it=0; it<m_treeCol.size(); it++) m_treeCol[it].PrintTree();
 
   //Loop treeCol, pickout isoNodes, update the orderedNodes.
   for(int it=0; it<m_treeCol.size(); it++){
@@ -212,7 +296,14 @@ std::cout<<"End loop nodes"<<std::endl;
       it--;
     }
   }
-std::cout<<"Final tree size: "<<m_treeCol.size()<<"  Isolated note size: "<< m_isoNodes.size()<<std::endl;
+
+  NtotNodes=0;
+  for(int it=0; it<m_treeCol.size(); it++){
+    NtotNodes += m_treeCol[it].GetNodes().size();
+  }
+//std::cout<<"Final tree size: "<<m_treeCol.size(); 
+//std::cout<<"  Total nodes in tree: "<<NtotNodes; 
+//std::cout<<"  Isolated note size: "<< m_isoNodes.size()<<std::endl;
 
   return StatusCode::SUCCESS;
 }
@@ -237,7 +328,6 @@ StatusCode ArborClusteringAlg::MergeConnectedTrees( std::vector<CRDEcalEDM::CRDA
     break;
   }
 
-
   //Check if other nodes in this tree. If not, create a new tree. 
   for(int it=0; it<m_inTreeCol.size(); it++){
     std::vector<CRDEcalEDM::CRDArborNode*> m_nodeCol = m_inTreeCol[it].GetNodes();
@@ -253,7 +343,7 @@ StatusCode ArborClusteringAlg::MergeConnectedTrees( std::vector<CRDEcalEDM::CRDA
     }
 
   }
-std::cout<<"Ntrees before: "<<m_inTreeCol.size()<<", Ntrees after: "<<m_outTreeCol.size()<<std::endl;
+//std::cout<<"Ntrees before: "<<m_inTreeCol.size()<<", Ntrees after: "<<m_outTreeCol.size()<<std::endl;
 
   return StatusCode::SUCCESS;
 }
@@ -262,14 +352,14 @@ std::cout<<"Ntrees before: "<<m_inTreeCol.size()<<", Ntrees after: "<<m_outTreeC
 StatusCode ArborClusteringAlg::CleanConnection( CRDEcalEDM::CRDArborTree& m_tree ){
 
   m_tree.SortNodes(); 
-std::cout<<"First node: Layer="<<m_tree.GetNodes()[0]->GetDlayer()<<" Type="<<m_tree.GetNodes()[0]->GetType()<<std::endl;
+//std::cout<<"First node: Layer="<<m_tree.GetNodes()[0]->GetDlayer()<<" Type="<<m_tree.GetNodes()[0]->GetType()<<std::endl;
 
   std::vector<CRDEcalEDM::CRDArborNode*> m_nodeCol = m_tree.GetNodes();
   std::vector< std::pair<CRDEcalEDM::CRDArborNode*, CRDEcalEDM::CRDArborNode*> > m_connectorCol; m_connectorCol.clear();  
   for(int in=0; in<m_nodeCol.size(); in++){
     if(in==0 && m_nodeCol[in]->GetDaughterNodes().size()!=0 ){ std::cout<<"WARNING in ArborClusteringAlg: Last node still have daughters! Check it!"<<std::endl; continue; }
 
-std::cout<<"#Layer: "<<m_nodeCol[in]->GetDlayer()<<" Parent size:"<<m_nodeCol[in]->GetParentNodes().size()<<", Daughter size: "<<m_nodeCol[in]->GetDaughterNodes().size()<<std::endl;
+//std::cout<<"#Layer: "<<m_nodeCol[in]->GetDlayer()<<" Parent size:"<<m_nodeCol[in]->GetParentNodes().size()<<", Daughter size: "<<m_nodeCol[in]->GetDaughterNodes().size()<<std::endl;
 
     //Get the connection with minimum kappa order
     TVector3 Cref = m_nodeCol[in]->GetRefDir(settings.wiF, settings.wiB);
@@ -278,7 +368,8 @@ std::cout<<"#Layer: "<<m_nodeCol[in]->GetDlayer()<<" Parent size:"<<m_nodeCol[in
     double deltaEmax = -999.; 
     CRDEcalEDM::CRDArborNode* m_foundnode = nullptr;
     std::vector<CRDEcalEDM::CRDArborNode*> m_parentNodes = m_nodeCol[in]->GetParentNodes();
-    if(m_parentNodes.size()==0) continue; 
+    if(m_parentNodes.size()<=1) continue; 
+
     for(int ip=0; ip<m_parentNodes.size(); ip++){
       TVector3 relP = m_nodeCol[in]->GetPosition() - m_parentNodes[ip]->GetPosition();
       if(relP.Mag()>deltaMax) deltaMax = relP.Mag();
@@ -293,10 +384,10 @@ std::cout<<"#Layer: "<<m_nodeCol[in]->GetDlayer()<<" Parent size:"<<m_nodeCol[in
       double deltaE = fabs( m_nodeCol[in]->GetEnergy()-m_parentNodes[ip]->GetEnergy() ); 
 
       double kappa = pow(theta, settings.pTheta) * pow(deltaR/deltaMax, settings.pR ) * pow(deltaE/deltaEmax, settings.pE ); 
-std::cout<<"   Node kappa order: "<<theta<<"  "<<deltaR<<"  "<<kappa<<std::endl;
+//std::cout<<"   Node kappa order: "<<theta<<"  "<<deltaR<<"  "<<kappa<<std::endl;
       if(kappa<kappaMin) { kappaMin=kappa; m_foundnode=m_parentNodes[ip]; }
     }
-std::cout<<"  Min Kappa order: "<<kappaMin<<std::endl;
+//std::cout<<"  Min Kappa order: "<<kappaMin<<std::endl;
     if( m_foundnode==nullptr ){ std::cout<<"WARNING in ArborClusteringAlg: Did not find minimum kappa order!"<<std::endl; continue; }
 
     //Save two nodes into connector collection
@@ -304,13 +395,13 @@ std::cout<<"  Min Kappa order: "<<kappaMin<<std::endl;
       if(m_parentNodes[ip]==m_foundnode) continue; 
       std::pair<CRDEcalEDM::CRDArborNode*, CRDEcalEDM::CRDArborNode*> m_connector;
       m_connector.first  = m_nodeCol[in]; 
-      m_connector.second = m_foundnode; 
+      m_connector.second = m_parentNodes[ip]; 
       m_connectorCol.push_back( m_connector );
     }
   }
 
   //Clean the connections in tree
-std::cout<<" Connection size: "<<m_connectorCol.size()<<std::endl;
+//std::cout<<" Connection size: "<<m_connectorCol.size()<<std::endl;
 
   m_tree.CleanConnection( m_connectorCol );
   m_tree.NodeClassification(); 
@@ -318,18 +409,27 @@ std::cout<<" Connection size: "<<m_connectorCol.size()<<std::endl;
   return StatusCode::SUCCESS;
 }
 
-/*
+
 StatusCode ArborClusteringAlg::DepartArborTree( CRDEcalEDM::CRDArborTree& m_tree, 
                                                 std::vector<CRDEcalEDM::CRDArborTree>& m_departedTrees,
                                                 std::vector<CRDEcalEDM::CRDArborNode*>& m_isoNodes ) 
 {
+//std::cout<<std::endl;
+//std::cout<<"ArborClusteringAlg::DepartArborTree  Input tree node size: "<<m_tree.GetNodes().size()<<std::endl;
+//std::cout<<"ArborClusteringAlg::DepartArborTree  Input isonode size: "<<m_isoNodes.size()<<std::endl;
 
-  std::vector<CRDEcalEDM::CRDArborNode> m_rootNodes; m_rootNodes.clear(); 
+  std::vector<CRDEcalEDM::CRDArborNode*> m_rootNodes; m_rootNodes.clear(); 
   for(int in=0; in<m_tree.GetNodes().size(); in++){
-    CRDEcalEDM::CRDArborNode m_node = m_tree.GetNodes()[in];
-    if(m_node.GetType()==0){ m_isoNodes.push_back(m_node); m_tree.CleanNode(m_node); }
-    if(m_node.GetType()==4 && m_node.GetType()==5) m_rootNodes.push_back(m_node); 
+    CRDEcalEDM::CRDArborNode* m_node = m_tree.GetNodes()[in];
+//printf("  Debug: Loop in node: (%.2f, %.2f, %.2f, %d) \n", m_node->GetPosition().x(), m_node->GetPosition().y(), m_node->GetPosition().z(), m_node->GetType() );
+    if(m_node->GetType()==0){ m_isoNodes.push_back(m_node); m_tree.CleanNode(m_node); in--; }
+    if(m_node->GetType()==4 || m_node->GetType()==5) m_rootNodes.push_back(m_node); 
+//std::cout<<"  Debug: Iso node size: "<<m_isoNodes.size()<<"  Root node size: "<<m_rootNodes.size()<<std::endl;
   }
+//std::cout<<"ArborClusteringAlg::DepartArborTree  isonode size after classification: "<<m_isoNodes.size()<<std::endl;
+//std::cout<<"ArborClusteringAlg::DepartArborTree  tree node size after classification: "<<m_tree.GetNodes().size()<<std::endl;
+//std::cout<<"ArborClusteringAlg::DepartArborTree  Root node size: "<<m_rootNodes.size()<<std::endl;
+//std::cout<<std::endl;
 
   //Only one tree: 
   if( m_rootNodes.size()<=1 ){ 
@@ -353,9 +453,9 @@ StatusCode ArborClusteringAlg::DepartArborTree( CRDEcalEDM::CRDArborTree& m_tree
 StatusCode ArborClusteringAlg::MergeNeighborTree( std::vector<CRDEcalEDM::CRDArborTree>& m_inTreeCol, 
                                                   std::vector<CRDEcalEDM::CRDArborTree>& m_outTreeCol )
 {
-  if(m_inTreeCol.size()<=1) return StatusCode::SUCCESS;
+  if(m_inTreeCol.size()<=1){ m_outTreeCol=m_inTreeCol; return StatusCode::SUCCESS; }
 
-  std::vector<CRDEcalEDM::CRDArborNode> m_rootCol; m_rootCol.clear();
+  std::vector<CRDEcalEDM::CRDArborNode*> m_rootCol; m_rootCol.clear();
   m_rootCol.resize(m_inTreeCol.size());
   for(int it=0; it<m_inTreeCol.size(); it++)
     m_rootCol[it] = m_inTreeCol[it].GetRootNode();
@@ -363,8 +463,8 @@ StatusCode ArborClusteringAlg::MergeNeighborTree( std::vector<CRDEcalEDM::CRDArb
   //Merge trees whose root nodes are in the same layer and close to each other. 
   for(int in=0; in<m_rootCol.size(); in++){
   for(int jn=in+1; jn<m_rootCol.size(); jn++){
-    if( m_rootCol[in].GetDlayer() != m_rootCol[jn].GetDlayer() ) continue; 
-    if( (m_rootCol[in].GetPosition()-m_rootCol[jn].GetPosition()).Mag()<settings.Rth_nbrRoot ){
+    if( m_rootCol[in]->GetDlayer() != m_rootCol[jn]->GetDlayer() ) continue; 
+    if( (m_rootCol[in]->GetPosition()-m_rootCol[jn]->GetPosition()).Mag()<settings.Rth_nbrRoot ){
       CRDEcalEDM::CRDArborTree m_newTree;
       m_newTree.AddNode( m_inTreeCol[in].GetNodes() );
       m_newTree.AddNode( m_inTreeCol[jn].GetNodes() );
@@ -375,29 +475,32 @@ StatusCode ArborClusteringAlg::MergeNeighborTree( std::vector<CRDEcalEDM::CRDArb
   return StatusCode::SUCCESS;
 }
 
-
+/*
 StatusCode ArborClusteringAlg::MergeBranches( std::vector<CRDEcalEDM::CRDArborTree>& m_inTreeCol, 
-                                              std::vector<CRDEcalEDM::CRDArborTree>& m_outTreeCol)
+                                              std::vector<CRDEcalEDM::CRDArborTree>& m_goodTreeCol, 
+                                              std::vector<CRDEcalEDM::CRDArborTree>& m_badTreeCol)
 {
-  if(m_inTreeCol.size()<=1) return StatusCode::SUCCESS;
+  if(m_inTreeCol.size()==0) return StatusCode::SUCCESS; 
 
-  std::vector<CRDEcalEDM::CRDArborTree> m_goodTreeCol; m_goodTreeCol.clear();
-  std::vector<CRDEcalEDM::CRDArborTree> m_badTreeCol; m_badTreeCol.clear();
+  m_goodTreeCol.clear(); m_badTreeCol.clear(); 
 
   for(int it=0; it<m_inTreeCol.size(); it++){
-    if( m_inTreeCol[it].GetNodes().size()<=3 || (m_inTreeCol[it].GetMaxDlayer()-m_inTreeCol[it].GetMinDlayer())<=2 ) m_badTreeCol.push_back( m_inTreeCol[it] );  
-    else m_goodTreeCol.push_back( m_inTreeCol[it] );
+    if( (m_inTreeCol[it].GetMaxDlayer()-m_inTreeCol[it].GetMinDlayer()) >= settings.fl_GoodTreeLevel && 
+         m_inTreeCol[it].GetNodes().size()>=settings.th_GoodTreeNodes) 
+      m_goodTreeCol.push_back( m_inTreeCol[it] ); 
+    else m_badTreeCol.push_back( m_inTreeCol[it] );
   }
 
-  for(int it=0; it<m_badTreeCol.size(); it++){
-    CRDEcalEDM::CRDArborTree m_tree = GetClosestTree( m_badTreeCol[it], m_goodTreeCol );
-    std::vector<CRDEcalEDM::CRDArborTree>::iterator iter = find(m_goodTreeCol.begin(), m_goodTreeCol.end(), m_tree);
-    if( iter==m_goodTreeCol.end() ) { cout<<"Warning in MergeBranches: Tree Merging Fail!"<<std::endl; continue; }
+//std::cout<<"  ArborClusteringAlg::MergeBranches  Ngoodtrees: "<<m_goodTreeCol.size()<<"  Nbadtrees: "<<m_badTreeCol.size()<<std::endl;
 
-    iter->AddNode( m_badTreeCol[it].GetNodes() );
-  }
+//  for(int it=0; it<m_badTreeCol.size(); it++){
+//    CRDEcalEDM::CRDArborTree m_tree = GetClosestTree( m_badTreeCol[it], m_goodTreeCol );
+//    std::vector<CRDEcalEDM::CRDArborTree>::iterator iter = find(m_goodTreeCol.begin(), m_goodTreeCol.end(), m_tree);
+//    if( iter==m_goodTreeCol.end() ) { cout<<"Warning in MergeBranches: Tree Merging Fail!"<<std::endl; continue; }
 
-  m_outTreeCol = m_goodTreeCol; 
+//    iter->AddNode( m_badTreeCol[it].GetNodes() );
+//  }
+
 
   return StatusCode::SUCCESS;
 }
@@ -421,5 +524,4 @@ CRDEcalEDM::CRDArborTree ArborClusteringAlg::GetClosestTree( CRDEcalEDM::CRDArbo
   return m_tree; 
 }
 */
-
 #endif

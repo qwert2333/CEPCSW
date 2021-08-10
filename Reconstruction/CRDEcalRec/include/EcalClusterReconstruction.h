@@ -9,6 +9,7 @@
 #include "Algorithm/CandidateMakingAlg.h"
 #include "Algorithm/ClusterMergingAlg.h"
 #include "Algorithm/ArborClusteringAlg.h"
+#include "Algorithm/ArborTreeMergingAlg.h"
 
 class EcalClusterReconstruction {
 public: 
@@ -34,6 +35,7 @@ public:
   CandidateMakingAlg     *m_candidatemakingAlg;
   ClusterMergingAlg      *m_clustermergingAlg; 
   ArborClusteringAlg     *m_arborclusteringAlg; 
+  ArborTreeMergingAlg    *m_arbortreemergingAlg; 
 
 
   EnergySplittingAlg::Settings    *m_ESAlgSettings;
@@ -42,6 +44,7 @@ public:
   CandidateMakingAlg::Settings    *m_CMAlgSettings; 
   ClusterMergingAlg::Settings     *m_CLAlgSettings;  
   ArborClusteringAlg::Settings    *m_ACAlgSettings;
+  ArborTreeMergingAlg::Settings   *m_AMAlgSettings; 
 
 private: 
 

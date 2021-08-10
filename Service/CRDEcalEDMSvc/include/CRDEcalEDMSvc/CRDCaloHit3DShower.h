@@ -32,7 +32,7 @@ namespace CRDEcalEDM{
     void FitAxis(); 
     void AddShower(CRDEcalEDM::CRDCaloHit2DShower& shower);
     void MergeCluster(CRDEcalEDM::CRDCaloHit3DShower& clus);
-    void IdentifyCluster(); 
+    //void IdentifyCluster(); 
 
     inline bool operator == ( const CRDEcalEDM::CRDCaloHit3DShower &x) const {
       TVector3 vec = this->getHitCenter();
@@ -42,17 +42,28 @@ namespace CRDEcalEDM{
 
     std::vector<CRDEcalEDM::CRDCaloHit2DShower> get2DShowers() const { return ShowerinLayer; }
     std::vector<edm4hep::ConstCalorimeterHit> getCaloHits() const { return CaloHits; }
+    double getFitAlpha() const { return alpha; }
+    double getFitBeta() const { return beta; }
     double getShowerMax() const {return showerMax; }
     double getChi2() const { return chi2; }
     TVector3 getAxis() const { return axis; }
     void getFitPars(double& _alpha, double& _beta ) const { _alpha = alpha; _beta = beta; }
     int getBeginningDlayer() const; 
-    int getEndDlayer() const;     
-    int getType()  { IdentifyCluster(); return type; }
+    int getEndDlayer() const;
+
+    std::vector<double> getEnInLayer() const; 
+    int getMaxELayer() const; 
+    double getAveE() const; 
+    double getStdDevE() const; 
+
+    std::vector<double> getClusterWidth() const;
+    double getMaxWidth() const; 
+    int getType() const { return type; }
 
 
     void setShowerVec( std::vector<CRDEcalEDM::CRDCaloHit2DShower>& _svec ) { ShowerinLayer = _svec;}
     void setCaloHits( std::vector<edm4hep::ConstCalorimeterHit>& _hits ) { CaloHits = _hits; }
+    void setType( int _t ) { type = _t; }
     void Clear() { ShowerinLayer.clear(); CaloHits.clear(); showerEnergy=0; hitsEnergy=0; showerMax=0; chi2=0; alpha=0; beta=0; axis.SetXYZ(0,0,0); type=-1; }
 
   private: 

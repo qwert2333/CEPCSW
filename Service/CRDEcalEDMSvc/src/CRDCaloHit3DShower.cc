@@ -6,6 +6,8 @@
 #include "TH1.h"
 #include "TF1.h"
 #include "TVector3.h"
+#include "TCanvas.h"
+#include <map>
 
 namespace CRDEcalEDM{
 
@@ -107,6 +109,114 @@ namespace CRDEcalEDM{
   }
 
 
+  std::vector<double> CRDCaloHit3DShower::getEnInLayer() const{
+    map<int, double> orderedEn; orderedEn.clear();
+    for(int il=0; il<ShowerinLayer.size(); il++){
+      map<int, double>::iterator iter = orderedEn.find(ShowerinLayer[il].getDlayer());
+      if(iter==orderedEn.end()) orderedEn[ShowerinLayer[il].getDlayer()] = ShowerinLayer[il].getShowerE();
+      else orderedEn[ShowerinLayer[il].getDlayer()] += ShowerinLayer[il].getShowerE();
+    }
+
+    std::vector<double> m_EnInLayer; m_EnInLayer.clear();
+    m_EnInLayer.resize(14); 
+    for(int il=0; il<14; il++){
+      if( orderedEn.find(il)==orderedEn.end() )  m_EnInLayer[il]=0;
+      else m_EnInLayer[il] = orderedEn[il];
+    }
+
+    return m_EnInLayer; 
+  }
+
+
+  int CRDCaloHit3DShower::getMaxELayer() const{
+
+    std::vector<double> m_EnVec = getEnInLayer(); 
+
+    int m_maxL=-1; 
+    double maxE = -99; 
+    for(int i=0; i<14; i++)
+      if(m_EnVec[i]>maxE) { maxE=m_EnVec[i]; m_maxL=i; }
+    
+    return m_maxL; 
+    
+  }
+
+
+  double CRDCaloHit3DShower::getAveE() const{
+    double sumE = getShowerE(); 
+    std::vector<double> m_EnVec = getEnInLayer();
+    int count=0; 
+    for(int i=0; i<14; i++)
+      if(m_EnVec[i]!=0) count++; 
+
+    return sumE/(double)count; 
+  }
+
+
+  double CRDCaloHit3DShower::getStdDevE() const{
+    double aveE = getAveE();     
+    std::vector<double> m_EnVec = getEnInLayer();
+    double sumE2=0; 
+    int count=0; 
+    for(int i=0; i<14; i++){
+      if( m_EnVec[i]==0 ) continue; 
+      sumE2 += (m_EnVec[i]-aveE)*(m_EnVec[i]-aveE); 
+      count++; 
+    }
+
+    double StdDev = sqrt( sumE2/(double)count );
+    return StdDev; 
+  }
+
+
+  std::vector<double> CRDCaloHit3DShower::getClusterWidth() const{
+    std::vector<double> widthVec; widthVec.clear(); 
+    widthVec.resize(14);
+
+    std::map<int, std::vector<CRDEcalEDM::CRDCaloHit2DShower> > m_orderedShower; m_orderedShower.clear();
+    for(int is=0;is<ShowerinLayer.size();is++){
+      m_orderedShower[ShowerinLayer[is].getDlayer()].push_back(ShowerinLayer[is]);
+    }
+    for(int il=0; il<14; il++){
+      std::vector<CRDEcalEDM::CRDCaloHit2DShower> m_showers = m_orderedShower[il];
+      if(m_showers.size()==0) { widthVec[il]=0; continue; }
+      if(m_showers.size()==1) { widthVec[il]=m_showers[0].getHitsWidth(); continue; }
+
+      std::vector<edm4hep::ConstCalorimeterHit> m_hits; m_hits.clear();
+      double totE = 0;
+      for(int is=0; is<m_showers.size(); is++){
+        std::vector<edm4hep::ConstCalorimeterHit> m_calohits = m_showers[is].getCaloHits();
+        m_hits.insert(m_hits.end(), m_calohits.begin(), m_calohits.end() );
+        totE += m_showers[is].getHitsE();
+      }
+
+      TVector3 cent(0., 0., 0.);
+      for(int i=0;i<m_hits.size();i++){
+        TVector3 pos(m_hits[i].getPosition().x, m_hits[i].getPosition().y, m_hits[i].getPosition().z);
+        cent += pos* (m_hits[i].getEnergy()/totE);
+      }
+
+      double width=0;
+      for(int i=0;i<m_hits.size();i++){
+        TVector3 pos(m_hits[i].getPosition().x, m_hits[i].getPosition().y, m_hits[i].getPosition().z);
+        double r2 = (pos-cent).Mag2();
+        width += r2*m_hits[i].getEnergy()/totE;
+      }
+      widthVec[il] = width;
+    }    
+
+    return widthVec; 
+  }
+
+
+  double CRDCaloHit3DShower::getMaxWidth() const{
+    double re_width = -99; 
+    std::vector<double> widthVec = getClusterWidth();    
+    re_width = *std::max_element(widthVec.begin(), widthVec.end());
+    return re_width; 
+  }
+
+
   void CRDCaloHit3DShower::FitProfile(){
     FitAxis();
     edm4hep::ConstCalorimeterHit initHit = getClusterInitialHit();
@@ -114,7 +224,9 @@ namespace CRDEcalEDM{
     TVector3 vec_axis = axis;
     double X0=11.2; //unit: mm
 
-    TH1D *h_hitz = new TH1D("h_hitz", "h_hitz", 28,0,28);
+    //TCanvas *c1 = new TCanvas(); 
+    //c1->cd(); 
+    TH1D *h_hitz = new TH1D("h_hitz", "h_hitz", 14,0,28);
     for(int i=0;i<CaloHits.size();i++){
        TVector3 vec_ihit(CaloHits[i].getPosition().x, CaloHits[i].getPosition().y, CaloHits[i].getPosition().z);
        TVector3 vec_rel = vec_ihit-vec_init;
@@ -126,13 +238,19 @@ namespace CRDEcalEDM{
     func->SetParName(2, "E0");
     func->SetParameter(0, 4.8);
     func->SetParameter(1, 0.5);
-    func->SetParameter(2, 30);
-    h_hitz->Fit("fc1","","",0,25);
+    func->SetParameter(2, 10);
+    h_hitz->Fit("fc1","Q","",0,25);
 
     chi2 = func->GetChisquare()/func->GetNDF();
     alpha = func->GetParameter(0);
     beta = func->GetParameter(1);
     showerMax = (alpha-1)/beta;
+
+    //h_hitz->Draw("same");
+    //func->Draw("same"); 
+    //c1->SaveAs("/cefs/higgs/guofy/cepcsoft/CEPCSW_v6/run/CheckClusterMerge/plots/Longi.C");
+    //delete c1;
+    delete h_hitz; 
   }
 
 
@@ -191,7 +309,7 @@ namespace CRDEcalEDM{
   }
 
 
-  void CRDCaloHit3DShower::IdentifyCluster(){
+/*  void CRDCaloHit3DShower::IdentifyCluster(){
     const int Nlayer = ShowerinLayer.size(); 
     double En[Nlayer] = {0};
     double sumE = 0;
@@ -205,12 +323,12 @@ namespace CRDEcalEDM{
       sumE2 += (En[i]-aveE)*(En[i]-aveE);
     double StdDev = sqrt( sumE2/Nlayer );
 
-
     if(ShowerinLayer.size()>=10 && fabs((aveE-0.02)/0.02)<0.2 && StdDev<0.4 ) type = 0; 
     else if( chi2<5 && ShowerinLayer.size() >5 ) type = 1; 
     else type = 2;  
 
   }
+*/
 
 };
 #endif

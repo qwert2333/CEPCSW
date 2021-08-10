@@ -15,9 +15,11 @@ public:
   public: 
     Settings() {};
     void SetInitialValue();
-    void SetDebug(int _level)  { Debug  =_level; }
-    void SetUseTrk( bool _fl ) { UseTrk = _fl;   }
+    void SetDebug(int _level)   { Debug  =_level; }
+    void SetUseTrk( bool _fl )  { UseTrk = _fl;   }
+    void SetEndLayer( int _ly ) { EndLayer = _ly; }
 
+    int  EndLayer; 
     int  Debug;
     bool UseTrk; 
   };

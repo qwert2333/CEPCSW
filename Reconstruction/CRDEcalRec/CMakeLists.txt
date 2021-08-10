@@ -9,6 +9,7 @@ gaudi_add_module(CRDEcalRec
                          src/Algorithm/CandidateMakingAlg.cpp
                          src/Algorithm/ClusterMergingAlg.cpp
                          src/Algorithm/ArborClusteringAlg.cpp
+                         src/Algorithm/ArborTreeMergingAlg.cpp
                          src/Tools/PFOCreator.cpp
                  LINK k4FWCore::k4FWCore
                       GearSvc
