@@ -14,7 +14,7 @@ Before run following commands, please make sure you setup the CVMFS:
 ```
 $ git clone git@github.com:cepc/CEPCSW.git
 $ cd CEPCSW
-$ git checkout dev-EcalRec-v06 # branch name
+$ git checkout dev-EcalRec-v07 # branch name
 $ source setup.sh
 $ ./build.sh
 $ ./run.sh Examples/options/helloalg.py
@@ -45,8 +45,9 @@ Keep the collection names compatible between the prototype and the existing CEPC
 * SETCollection
 
 
-## Update in branch dev-EcalRec-v06: CRD Ecal Reconstruction
-  * Use Arbor to connect 2D showers, build hadronic clusters. 
+## Update in branch dev-EcalRec-v07: CRD Ecal Reconstruction
+  * Re-organize ECAL reconstruction: move EDM into Reconstruction/CRDEcalRec.
+  * Consider cluster ID, deal with photon and hadron separately. 
 
 
 
