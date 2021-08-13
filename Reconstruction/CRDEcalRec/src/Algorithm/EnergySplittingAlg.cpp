@@ -115,14 +115,14 @@ bool EnergySplittingAlg::Clustering( std::vector<CRDEcalEDM::CRDCaloBar>& barCol
                                      std::vector<CRDEcalEDM::CRDCaloBarCluster>& outClus)
 {
   if(barCol.size()==0) return false;
-  const std::vector<CRDEcalEDM::CRDShowerCandidate> emptyCol(0);
+  const std::vector<CRDEcalEDM::CRDShadowCluster> emptyCol(0);
   return Clustering( barCol, outClus, emptyCol );
 }
 
 
 bool EnergySplittingAlg::Clustering( std::vector<CRDEcalEDM::CRDCaloBar>& barCol, 
                                      std::vector<CRDEcalEDM::CRDCaloBarCluster>& outClus,  
-                                     const std::vector<CRDEcalEDM::CRDShowerCandidate>& m_CandiCol )
+                                     const std::vector<CRDEcalEDM::CRDShadowCluster>& m_CandiCol )
 {
 
   if(settings.Debug>1) std::cout<<"Bar Clustering: barCol size = "<<barCol.size()<<std::endl;
@@ -188,7 +188,7 @@ bool EnergySplittingAlg::Clustering( std::vector<CRDEcalEDM::CRDCaloBar>& barCol
 }
 
 
-std::vector<CRDEcalEDM::CRDCaloBar> EnergySplittingAlg::GetMatchedSeeds( std::vector<CRDEcalEDM::CRDCaloBar>& seeds, const std::vector<CRDEcalEDM::CRDShowerCandidate>& m_CandiCol ) {
+std::vector<CRDEcalEDM::CRDCaloBar> EnergySplittingAlg::GetMatchedSeeds( std::vector<CRDEcalEDM::CRDCaloBar>& seeds, const std::vector<CRDEcalEDM::CRDShadowCluster>& m_CandiCol ) {
 
   std::vector<CRDEcalEDM::CRDCaloBar> m_matchedseeds; m_matchedseeds.clear();
 
@@ -232,9 +232,9 @@ std::vector<CRDEcalEDM::CRDCaloBar> EnergySplittingAlg::GetMatchedSeeds( std::ve
 }
 
 
-std::vector<CRDEcalEDM::CRDShowerCandidate> EnergySplittingAlg::CandidateInCluster( CRDEcalEDM::CRDCaloBarCluster& cluster, const std::vector<CRDEcalEDM::CRDShowerCandidate>& m_CandiCol){
+std::vector<CRDEcalEDM::CRDShadowCluster> EnergySplittingAlg::CandidateInCluster( CRDEcalEDM::CRDCaloBarCluster& cluster, const std::vector<CRDEcalEDM::CRDShadowCluster>& m_CandiCol){
 
-  std::vector<CRDEcalEDM::CRDShowerCandidate> out_expsh; out_expsh.clear(); 
+  std::vector<CRDEcalEDM::CRDShadowCluster> out_expsh; out_expsh.clear(); 
   double xmin, xmax, ymin, ymax, zmin, zmax; 
   cluster.getGlobalRange(xmin, ymin, zmin, xmax, ymax, zmax);
 
@@ -252,11 +252,11 @@ std::vector<CRDEcalEDM::CRDShowerCandidate> EnergySplittingAlg::CandidateInClust
 
 
 std::vector<CRDEcalEDM::CRDCaloBar>  EnergySplittingAlg::findSeeds( CRDEcalEDM::CRDCaloBarCluster& m_cluster){
-  const std::vector<CRDEcalEDM::CRDShowerCandidate> emptyCol(0); 
+  const std::vector<CRDEcalEDM::CRDShadowCluster> emptyCol(0); 
   return findSeeds(m_cluster, emptyCol, false);
 }
 
-std::vector<CRDEcalEDM::CRDCaloBar>  EnergySplittingAlg::findSeeds( CRDEcalEDM::CRDCaloBarCluster& m_cluster, const std::vector<CRDEcalEDM::CRDShowerCandidate>& m_CandiCol, bool f_force ){
+std::vector<CRDEcalEDM::CRDCaloBar>  EnergySplittingAlg::findSeeds( CRDEcalEDM::CRDCaloBarCluster& m_cluster, const std::vector<CRDEcalEDM::CRDShadowCluster>& m_CandiCol, bool f_force ){
 
 
   std::vector<CRDEcalEDM::CRDCaloBar> m_seeds; m_seeds.clear();
@@ -408,8 +408,8 @@ bool EnergySplittingAlg::ClusterSplitting( CRDEcalEDM::CRDCaloBarCluster& m_clus
 
 bool EnergySplittingAlg::ClusterSplitting( CRDEcalEDM::CRDCaloBarCluster& m_cluster, 
                                            std::vector<CRDEcalEDM::CRDCaloBarShower>& outshCol, 
-                                           const std::vector<CRDEcalEDM::CRDShowerCandidate>& m_Neucandidates, 
-                                           const std::vector<CRDEcalEDM::CRDShowerCandidate>& m_Trkcandidates  )
+                                           const std::vector<CRDEcalEDM::CRDShadowCluster>& m_Neucandidates, 
+                                           const std::vector<CRDEcalEDM::CRDShadowCluster>& m_Trkcandidates  )
 {
   std::vector<CRDEcalEDM::CRDCaloBarShower> m_showers; m_showers.clear();
   bool f_succ = ClusterSplitting( m_cluster, m_showers );

@@ -3,7 +3,7 @@
 
 #include "k4FWCore/DataHandle.h"
 #include "PandoraPlusDataCol.h"
-#include "CRDEcalEDMSvc/ICRDEcalEDMSvc.h"
+#include "CRDEcalSvc/ICRDEcalSvc.h"
 
 class EcalHitsCreator{
 
@@ -21,7 +21,7 @@ public:
 
   StatusCode ReadSettings( Settings& settings ){ return StatusCode::SUCCESS; };
 
-  StatusCode GetEcalBars(PandoraPlusDataCol& dataCol , ICRDEcalEDMSvc& m_svc ){ 
+  StatusCode GetEcalBars(PandoraPlusDataCol& dataCol , ICRDEcalSvc& m_svc ){ 
     m_svc.getDigiSystem( dataCol.BlockVec );  
     return StatusCode::SUCCESS;
   };

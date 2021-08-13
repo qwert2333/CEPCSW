@@ -30,9 +30,9 @@ public:
 
   StatusCode RunAlgorithm( ConeClusteringAlg::Settings& settings, PandoraPlusDataCol& m_datacol);
 
-  StatusCode LongiConeLinking( std::map<int, std::vector<CRDEcalEDM::CRDCaloHit2DShower> >& orderedShower, std::vector<CRDEcalEDM::CRDCaloHit3DShower>& ClusterCol );
+  StatusCode LongiConeLinking( std::map<int, std::vector<CRDEcalEDM::CRDCaloHit2DShower> >& orderedShower, std::vector<CRDEcalEDM::CRDCaloHit3DCluster>& ClusterCol );
 
-  int CheckClusterQuality(CRDEcalEDM::CRDCaloHit3DShower& clus);
+  int CheckClusterQuality(CRDEcalEDM::CRDCaloHit3DCluster& clus);
 
 
   Settings settings;

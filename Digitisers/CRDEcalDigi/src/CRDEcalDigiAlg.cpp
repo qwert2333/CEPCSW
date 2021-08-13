@@ -89,8 +89,8 @@ StatusCode CRDEcalDigiAlg::initialize()
 		return StatusCode::FAILURE;
 	}
 	
-	m_edmsvc = service<ICRDEcalEDMSvc>("CRDEcalEDMSvc");
-	if ( !m_edmsvc )  throw "CRDEcalDigiAlg :Failed to find CRDEcalEDMSvc ...";
+	m_edmsvc = service<ICRDEcalSvc>("CRDEcalSvc");
+	if ( !m_edmsvc )  throw "CRDEcalDigiAlg :Failed to find CRDEcalSvc ...";
 
 	//rndm.SetSeed(_seed);
 	std::cout<<"CRDEcalDigiAlg::initialize"<<std::endl;

@@ -4,7 +4,8 @@ gaudi_add_module(CRDEcalDigi
                  LINK k4FWCore::k4FWCore
                       GearSvc
                       DetInterface
-                      CRDEcalEDMSvcLib
+                      CRDEcalSvcLib
+                      CRDEcalRecLib
                       Gaudi::GaudiKernel
                       Gaudi::GaudiAlgLib 
                       ${CLHEP_LIBRARIES}

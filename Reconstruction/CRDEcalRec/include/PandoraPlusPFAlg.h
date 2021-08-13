@@ -4,7 +4,7 @@
 #include "k4FWCore/DataHandle.h"
 #include "GaudiAlg/GaudiAlgorithm.h"
 #include "PandoraPlusDataCol.h"
-#include "CRDEcalEDMSvc/ICRDEcalEDMSvc.h"
+#include "CRDEcalSvc/ICRDEcalSvc.h"
 #include "DetInterface/IGeomSvc.h"
 #include "Tools/MCParticleCreator.h"
 #include "Tools/TrackCreator.h"
@@ -48,7 +48,7 @@ protected:
 
 
   //Services
-  SmartIF<ICRDEcalEDMSvc> m_edmsvc;
+  SmartIF<ICRDEcalSvc> m_edmsvc;
 
 
   //DataCollection

@@ -31,11 +31,11 @@ public:
   StatusCode RunAlgorithm( ClusterMergingAlg::Settings& m_settings, PandoraPlusDataCol& m_datacol);
   StatusCode ClearAlgorithm(); 
 
-  bool MergeToGoodCluster( std::vector<CRDEcalEDM::CRDCaloHit3DShower>& goodClusCol,  CRDEcalEDM::CRDCaloHit3DShower& badClus, bool ForceMerging);
+  bool MergeToGoodCluster( std::vector<CRDEcalEDM::CRDCaloHit3DCluster>& goodClusCol,  CRDEcalEDM::CRDCaloHit3DCluster& badClus, bool ForceMerging);
 
-  CRDEcalEDM::CRDCaloHit3DShower GetClosestGoodCluster( std::vector<CRDEcalEDM::CRDCaloHit3DShower>& goodClusCol,  CRDEcalEDM::CRDCaloHit3DShower& badClus );
+  CRDEcalEDM::CRDCaloHit3DCluster GetClosestGoodCluster( std::vector<CRDEcalEDM::CRDCaloHit3DCluster>& goodClusCol,  CRDEcalEDM::CRDCaloHit3DCluster& badClus );
 
-  static bool compBegin( CRDEcalEDM::CRDCaloHit3DShower& clus1, CRDEcalEDM::CRDCaloHit3DShower& clus2 ) { return clus1.getBeginningDlayer()<clus2.getBeginningDlayer(); }
+  static bool compBegin( CRDEcalEDM::CRDCaloHit3DCluster& clus1, CRDEcalEDM::CRDCaloHit3DCluster& clus2 ) { return clus1.getBeginningDlayer()<clus2.getBeginningDlayer(); }
 
   Settings settings;
 

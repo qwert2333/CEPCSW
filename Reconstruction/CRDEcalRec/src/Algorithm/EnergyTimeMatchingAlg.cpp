@@ -229,13 +229,13 @@ StatusCode EnergyTimeMatchingAlg::GetMatchedShowersL1(
   if(barShowerXCol.size()==0 || barShowerYCol.size()==0) return StatusCode::FAILURE;
 
   for(int is=0; is<barShowerXCol.size(); is++){
-    std::vector<CRDEcalEDM::CRDShowerCandidate> m_candiCol = barShowerXCol[is].getAllCandiCol();
+    std::vector<CRDEcalEDM::CRDShadowCluster> m_candiCol = barShowerXCol[is].getAllCandiCol();
     std::vector<CRDEcalEDM::CRDCaloBarShower> m_shCol; m_shCol.clear(); 
 
     for(int js=0; js<barShowerYCol.size(); js++){
       if(barShowerYCol[js].getAllCandiCol().size()!=1) continue;
 
-      CRDEcalEDM::CRDShowerCandidate m_Ycandi = barShowerYCol[js].getAllCandiCol()[0];
+      CRDEcalEDM::CRDShadowCluster m_Ycandi = barShowerYCol[js].getAllCandiCol()[0];
       bool f_matched = false; 
 
       for(int ic=0; ic<m_candiCol.size(); ic++)

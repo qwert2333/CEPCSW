@@ -9,9 +9,9 @@
 #include "edm4hep/CalorimeterHitCollection.h"
 #include "edm4hep/SimCalorimeterHitCollection.h"
 #include "edm4hep/MCRecoCaloAssociationCollection.h"
-#include "CRDEcalEDMSvc/ICRDEcalEDMSvc.h"
-#include "CRDEcalEDMSvc/CRDCaloBlock.h"
-#include "CRDEcalEDMSvc/CRDCaloStep.h"
+#include "CRDEcalSvc/ICRDEcalSvc.h"
+#include "Objects/CRDCaloBlock.h"
+#include "Objects/CRDCaloStep.h"
 
 #include <DDRec/DetectorData.h>
 #include <DDRec/CellIDPositionConverter.h>
@@ -61,7 +61,7 @@ public:
 protected:
 
   SmartIF<IGeomSvc> m_geosvc;
-  SmartIF<ICRDEcalEDMSvc> m_edmsvc;
+  SmartIF<ICRDEcalSvc> m_edmsvc;
   typedef std::vector<float> FloatVec;
 
 	int _nEvt ;

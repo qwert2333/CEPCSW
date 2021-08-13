@@ -52,20 +52,20 @@ public:
 
   bool Clustering( std::vector<CRDEcalEDM::CRDCaloBar>& barCol,  std::vector<CRDEcalEDM::CRDCaloBarCluster>& outClus);
 
-  bool Clustering( std::vector<CRDEcalEDM::CRDCaloBar>& barCol,  std::vector<CRDEcalEDM::CRDCaloBarCluster>& outClus, const std::vector<CRDEcalEDM::CRDShowerCandidate>& m_CandiCol );
+  bool Clustering( std::vector<CRDEcalEDM::CRDCaloBar>& barCol,  std::vector<CRDEcalEDM::CRDCaloBarCluster>& outClus, const std::vector<CRDEcalEDM::CRDShadowCluster>& m_CandiCol );
 
-  std::vector<CRDEcalEDM::CRDShowerCandidate> CandidateInCluster( CRDEcalEDM::CRDCaloBarCluster& cluster, const std::vector<CRDEcalEDM::CRDShowerCandidate>& m_CandiCol);
+  std::vector<CRDEcalEDM::CRDShadowCluster> CandidateInCluster( CRDEcalEDM::CRDCaloBarCluster& cluster, const std::vector<CRDEcalEDM::CRDShadowCluster>& m_CandiCol);
 
-  std::vector<CRDEcalEDM::CRDCaloBar> GetMatchedSeeds( std::vector<CRDEcalEDM::CRDCaloBar>& seeds, const std::vector<CRDEcalEDM::CRDShowerCandidate>& m_CandiCol );
+  std::vector<CRDEcalEDM::CRDCaloBar> GetMatchedSeeds( std::vector<CRDEcalEDM::CRDCaloBar>& seeds, const std::vector<CRDEcalEDM::CRDShadowCluster>& m_CandiCol );
 
   std::vector<CRDEcalEDM::CRDCaloBar>  findSeeds( CRDEcalEDM::CRDCaloBarCluster& m_cluster);
 
-  std::vector<CRDEcalEDM::CRDCaloBar>  findSeeds( CRDEcalEDM::CRDCaloBarCluster& m_cluster, const std::vector<CRDEcalEDM::CRDShowerCandidate>& m_CandiCol, bool f_force );
+  std::vector<CRDEcalEDM::CRDCaloBar>  findSeeds( CRDEcalEDM::CRDCaloBarCluster& m_cluster, const std::vector<CRDEcalEDM::CRDShadowCluster>& m_CandiCol, bool f_force );
 
   std::vector<CRDEcalEDM::CRDCaloBar>  getNeighbors(CRDEcalEDM::CRDCaloBarCluster& m_cluster, CRDEcalEDM::CRDCaloBar& seed);
 
   bool  ClusterSplitting( CRDEcalEDM::CRDCaloBarCluster& m_cluster, std::vector<CRDEcalEDM::CRDCaloBarShower>& outshCol  );
-  bool  ClusterSplitting( CRDEcalEDM::CRDCaloBarCluster& m_cluster, std::vector<CRDEcalEDM::CRDCaloBarShower>& outshCol, const std::vector<CRDEcalEDM::CRDShowerCandidate>& m_EMcandidates, const std::vector<CRDEcalEDM::CRDShowerCandidate>& m_Trkcandidates );
+  bool  ClusterSplitting( CRDEcalEDM::CRDCaloBarCluster& m_cluster, std::vector<CRDEcalEDM::CRDCaloBarShower>& outshCol, const std::vector<CRDEcalEDM::CRDShadowCluster>& m_EMcandidates, const std::vector<CRDEcalEDM::CRDShadowCluster>& m_Trkcandidates );
 
   bool MergeToClosestCluster( CRDEcalEDM::CRDCaloBarCluster& iclus, std::vector<CRDEcalEDM::CRDCaloBarCluster>& clusvec ); 
 

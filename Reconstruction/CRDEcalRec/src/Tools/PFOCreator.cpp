@@ -17,7 +17,7 @@ StatusCode PFOCreator::CreatePFO(PandoraPlusDataCol& dataCol){
   dataCol.ClearPFO();
   //Photon and charged particle now.
 
-  std::vector<CRDEcalEDM::CRDCaloHit3DShower> m_clusCol = dataCol.Clus3DCol;
+  std::vector<CRDEcalEDM::CRDCaloHit3DCluster> m_clusCol = dataCol.Clus3DCol;
   std::vector<CRDEcalEDM::Track>              m_trkCol  = dataCol.TrackCol;
 
 

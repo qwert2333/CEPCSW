@@ -19,8 +19,8 @@ StatusCode CandidateMakingAlg::Initialize(){
 StatusCode CandidateMakingAlg::RunAlgorithm(CandidateMakingAlg::Settings& m_settings, PandoraPlusDataCol& m_datacol){
   settings = m_settings;
 
-  std::vector<CRDEcalEDM::CRDCaloHit3DShower> m_goodClus = m_datacol.GoodClus3DCol;
-  std::vector<CRDEcalEDM::CRDCaloHit3DShower> m_badClus  = m_datacol.BadClus3DCol;
+  std::vector<CRDEcalEDM::CRDCaloHit3DCluster> m_goodClus = m_datacol.GoodClus3DCol;
+  std::vector<CRDEcalEDM::CRDCaloHit3DCluster> m_badClus  = m_datacol.BadClus3DCol;
   if(settings.Debug>1) { m_datacol.PrintLayer(); m_datacol.PrintShower(); m_datacol.Print3DClus(); }
 
   for(int ib=0;ib<m_datacol.BlockVec.size(); ib++){ m_datacol.BlockVec[ib].ClearNeuCandidate(); m_datacol.BlockVec[ib].ClearTrkCandidate(); }
@@ -40,9 +40,9 @@ StatusCode CandidateMakingAlg::RunAlgorithm(CandidateMakingAlg::Settings& m_sett
     for(int ib=0; ib<m_datacol.BlockVec.size(); ib++){
       CRDEcalEDM::CRDCaloBlock m_block = m_datacol.BlockVec[ib];
       if( m_block.getDlayer()>settings.EndLayer ) continue; 
-      std::vector<CRDEcalEDM::CRDShowerCandidate> m_exptrkvec; m_exptrkvec.clear();
+      std::vector<CRDEcalEDM::CRDShadowCluster> m_exptrkvec; m_exptrkvec.clear();
       for(int it=0; it<m_block.getTrkCol().size(); it++){
-        CRDEcalEDM::CRDShowerCandidate m_trksh; m_trksh.Clear();
+        CRDEcalEDM::CRDShadowCluster m_trksh; m_trksh.Clear();
         m_trksh.Dlayer = m_block.getDlayer();
         m_trksh.ExpEshower = 0.01;
         m_trksh.ExpDepth = m_block.getDlayer();
@@ -62,9 +62,9 @@ StatusCode CandidateMakingAlg::RunAlgorithm(CandidateMakingAlg::Settings& m_sett
     std::vector<CRDEcalEDM::CRDCaloBlock>::iterator iter = find(m_blockVec.begin(), m_blockVec.end(), m_datacol.BlockVec[ib]);
     if(iter == m_blockVec.end() ) continue; //This layer doesn't have candidate.
 
-    std::vector<CRDEcalEDM::CRDShowerCandidate> m_expshvec; m_expshvec.clear(); 
+    std::vector<CRDEcalEDM::CRDShadowCluster> m_expshvec; m_expshvec.clear(); 
     for(int icl=0; icl<m_goodClus.size(); icl++){
-      CRDEcalEDM::CRDShowerCandidate m_neush; m_neush.Clear();
+      CRDEcalEDM::CRDShadowCluster m_neush; m_neush.Clear();
       m_neush.Dlayer = m_datacol.BlockVec[ib].getDlayer();
       m_neush.Type = 0; 
       m_neush.ExpEshower = m_goodClus[icl].getExpEnergy(m_neush.Dlayer);
@@ -75,9 +75,9 @@ StatusCode CandidateMakingAlg::RunAlgorithm(CandidateMakingAlg::Settings& m_sett
 
       //Overlap removal: remove the neutral candidate overlapped with track candidate.
       bool f_overlap = false; 
-      CRDEcalEDM::CRDShowerCandidate overlappedCandi; overlappedCandi.Clear(); 
+      CRDEcalEDM::CRDShadowCluster overlappedCandi; overlappedCandi.Clear(); 
       for(int icd=0; icd<m_datacol.BlockVec[ib].getTrkCandidateCol().size(); icd++){
-        CRDEcalEDM::CRDShowerCandidate m_trkCandi = m_datacol.BlockVec[ib].getTrkCandidateCol()[icd];
+        CRDEcalEDM::CRDShadowCluster m_trkCandi = m_datacol.BlockVec[ib].getTrkCandidateCol()[icd];
         if( (m_neush.ExpPos-m_trkCandi.ExpPos).Mag()<10 ){ f_overlap=true; overlappedCandi=m_trkCandi; break; }
       }
       if(f_overlap){ 
@@ -100,7 +100,7 @@ StatusCode CandidateMakingAlg::RunAlgorithm(CandidateMakingAlg::Settings& m_sett
 
 
 
-std::vector<CRDEcalEDM::CRDCaloBlock> CandidateMakingAlg::GetBlocksNeedModification( std::vector<CRDEcalEDM::CRDCaloHit3DShower>& m_goodClus, std::vector<CRDEcalEDM::CRDCaloHit3DShower>& m_badClus ){
+std::vector<CRDEcalEDM::CRDCaloBlock> CandidateMakingAlg::GetBlocksNeedModification( std::vector<CRDEcalEDM::CRDCaloHit3DCluster>& m_goodClus, std::vector<CRDEcalEDM::CRDCaloHit3DCluster>& m_badClus ){
   
   std::vector<CRDEcalEDM::CRDCaloBlock> vec_blocks; vec_blocks.clear();
   //Case0: no good cluster: Do nothing, skip this event. 

@@ -3,18 +3,18 @@
 #include <iostream>
 #include <map>
 
-#include "CRDEcalEDMSvc/CRDCaloBar.h"
-#include "CRDEcalEDMSvc/CRDCaloBlock.h"
-#include "CRDEcalEDMSvc/CRDCaloBarShower.h"
-#include "CRDEcalEDMSvc/CRDCaloBarCluster.h"
-#include "CRDEcalEDMSvc/CRDCaloLayer.h"
-#include "CRDEcalEDMSvc/CRDShowerCandidate.h"
-#include "CRDEcalEDMSvc/CRDCaloHit2DShower.h"
-#include "CRDEcalEDMSvc/CRDCaloHit3DShower.h"
-#include "CRDEcalEDMSvc/CRDArborNode.h"
-#include "CRDEcalEDMSvc/CRDArborTree.h"
-#include "CRDEcalEDMSvc/PFObject.h"
-#include "CRDEcalEDMSvc/Track.h"
+#include "Objects/CRDCaloBar.h"
+#include "Objects/CRDCaloBlock.h"
+#include "Objects/CRDCaloBarShower.h"
+#include "Objects/CRDCaloBarCluster.h"
+#include "Objects/CRDCaloLayer.h"
+#include "Objects/CRDShadowCluster.h"
+#include "Objects/CRDCaloHit2DShower.h"
+#include "Objects/CRDCaloHit3DCluster.h"
+#include "Objects/CRDArborNode.h"
+#include "Objects/CRDArborTree.h"
+#include "Objects/PFObject.h"
+#include "Objects/Track.h"
 
 #include "k4FWCore/DataHandle.h"
 #include "edm4hep/MCParticleCollection.h"
@@ -41,9 +41,9 @@ public:
   std::vector<CRDEcalEDM::CRDCaloBlock>       BlockVec;  //All fired crystal bars, grouped as blocks 
   std::vector<CRDEcalEDM::CRDCaloLayer>       LayerCol;  //Results of EnergySplittingAlg
   std::vector<CRDEcalEDM::CRDCaloHit2DShower> Shower2DCol;
-  std::vector<CRDEcalEDM::CRDCaloHit3DShower> GoodClus3DCol;
-  std::vector<CRDEcalEDM::CRDCaloHit3DShower> BadClus3DCol;
-  std::vector<CRDEcalEDM::CRDCaloHit3DShower> Clus3DCol;
+  std::vector<CRDEcalEDM::CRDCaloHit3DCluster> GoodClus3DCol;
+  std::vector<CRDEcalEDM::CRDCaloHit3DCluster> BadClus3DCol;
+  std::vector<CRDEcalEDM::CRDCaloHit3DCluster> Clus3DCol;
 
   //Another reconstruction way: ArborTrees
   std::vector<CRDEcalEDM::CRDArborTree>   ArborTreeCol;
@@ -56,23 +56,23 @@ public:
     std::vector<CRDEcalEDM::CRDCaloBlock>       BlockVec_iter0;
     std::vector<CRDEcalEDM::CRDCaloLayer>       LayerCol_iter0; 
     std::vector<CRDEcalEDM::CRDCaloHit2DShower> Shower2DCol_iter0;
-    std::vector<CRDEcalEDM::CRDCaloHit3DShower> GoodClus3DCol_iter0;
-    std::vector<CRDEcalEDM::CRDCaloHit3DShower> BadClus3DCol_iter0;
-    std::vector<CRDEcalEDM::CRDCaloHit3DShower> Clus3DCol_iter0;
+    std::vector<CRDEcalEDM::CRDCaloHit3DCluster> GoodClus3DCol_iter0;
+    std::vector<CRDEcalEDM::CRDCaloHit3DCluster> BadClus3DCol_iter0;
+    std::vector<CRDEcalEDM::CRDCaloHit3DCluster> Clus3DCol_iter0;
 
     std::vector<CRDEcalEDM::CRDCaloBlock>       BlockVec_iter1;
     std::vector<CRDEcalEDM::CRDCaloLayer>       LayerCol_iter1;
     std::vector<CRDEcalEDM::CRDCaloHit2DShower> Shower2DCol_iter1;
-    std::vector<CRDEcalEDM::CRDCaloHit3DShower> GoodClus3DCol_iter1;
-    std::vector<CRDEcalEDM::CRDCaloHit3DShower> BadClus3DCol_iter1;
-    std::vector<CRDEcalEDM::CRDCaloHit3DShower> Clus3DCol_iter1;
+    std::vector<CRDEcalEDM::CRDCaloHit3DCluster> GoodClus3DCol_iter1;
+    std::vector<CRDEcalEDM::CRDCaloHit3DCluster> BadClus3DCol_iter1;
+    std::vector<CRDEcalEDM::CRDCaloHit3DCluster> Clus3DCol_iter1;
 
     std::vector<CRDEcalEDM::CRDCaloBlock>       BlockVec_iter2;
     std::vector<CRDEcalEDM::CRDCaloLayer>       LayerCol_iter2;
     std::vector<CRDEcalEDM::CRDCaloHit2DShower> Shower2DCol_iter2;
-    std::vector<CRDEcalEDM::CRDCaloHit3DShower> GoodClus3DCol_iter2;
-    std::vector<CRDEcalEDM::CRDCaloHit3DShower> BadClus3DCol_iter2;
-    std::vector<CRDEcalEDM::CRDCaloHit3DShower> Clus3DCol_iter2;
+    std::vector<CRDEcalEDM::CRDCaloHit3DCluster> GoodClus3DCol_iter2;
+    std::vector<CRDEcalEDM::CRDCaloHit3DCluster> BadClus3DCol_iter2;
+    std::vector<CRDEcalEDM::CRDCaloHit3DCluster> Clus3DCol_iter2;
 
 
   //PFO Collections

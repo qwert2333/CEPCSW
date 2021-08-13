@@ -64,7 +64,7 @@ StatusCode ArborTreeMergingAlg::RunAlgorithm( ArborTreeMergingAlg::Settings& m_s
       if( m_layer<m_goodTreeCol[it]->GetMinDlayer() )   m_nodePos = m_goodTreeCol[it]->GetNodes().back()->GetPosition(); 
       if( m_layer>m_goodTreeCol[it]->GetMaxDlayer() )   m_nodePos = m_goodTreeCol[it]->GetNodes().front()->GetPosition(); 
 
-      CRDEcalEDM::CRDCaloHit3DShower m_clus = m_goodTreeCol[it]->ConvertTreeToCluster(); 
+      CRDEcalEDM::CRDCaloHit3DCluster m_clus = m_goodTreeCol[it]->ConvertTreeToCluster(); 
       m_clus.FitAxis(); 
       TVector3 m_treeAxis = m_clus.getAxis(); 
 
@@ -82,17 +82,17 @@ StatusCode ArborTreeMergingAlg::RunAlgorithm( ArborTreeMergingAlg::Settings& m_s
   }
   }
 
-  //Save Trees into CRDCaloHit3DShower
-  std::vector<CRDEcalEDM::CRDCaloHit3DShower> m_goodClusterCol;  m_goodClusterCol.clear();
-  std::vector<CRDEcalEDM::CRDCaloHit3DShower> m_badClusterCol;  m_badClusterCol.clear();
-  std::vector<CRDEcalEDM::CRDCaloHit3DShower> m_ClusterCol;  m_ClusterCol.clear();
+  //Save Trees into CRDCaloHit3DCluster
+  std::vector<CRDEcalEDM::CRDCaloHit3DCluster> m_goodClusterCol;  m_goodClusterCol.clear();
+  std::vector<CRDEcalEDM::CRDCaloHit3DCluster> m_badClusterCol;  m_badClusterCol.clear();
+  std::vector<CRDEcalEDM::CRDCaloHit3DCluster> m_ClusterCol;  m_ClusterCol.clear();
   for(int it=0; it<m_goodTreeCol.size(); it++)
     m_goodClusterCol.push_back( m_goodTreeCol[it]->ConvertTreeToCluster() );
   for(int it=0; it<m_badTreeCol.size(); it++)
     m_badClusterCol.push_back( m_badTreeCol[it]->ConvertTreeToCluster() );
 
   for(int in=0; in<m_isoNodes.size(); in++){
-    CRDEcalEDM::CRDCaloHit3DShower clus_isonodes;
+    CRDEcalEDM::CRDCaloHit3DCluster clus_isonodes;
     CRDEcalEDM::CRDCaloHit2DShower m_shower = m_isoNodes[in]->GetOriginShower();
     clus_isonodes.AddShower( m_shower );
     m_badClusterCol.push_back( clus_isonodes );

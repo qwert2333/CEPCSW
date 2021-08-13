@@ -47,8 +47,8 @@ StatusCode PandoraPlusPFAlg::initialize()
 
 
   //Initialize services
-  m_edmsvc = service<ICRDEcalEDMSvc>("CRDEcalEDMSvc");
-  if ( !m_edmsvc )  throw "CRDEcalDigiAlg :Failed to find CRDEcalEDMSvc ...";
+  m_edmsvc = service<ICRDEcalSvc>("CRDEcalSvc");
+  if ( !m_edmsvc )  throw "CRDEcalDigiAlg :Failed to find CRDEcalSvc ...";
 	
   rndm.SetSeed(_seed);
   std::cout<<"PandoraPlusPFAlg::initialize"<<std::endl;
@@ -228,10 +228,10 @@ StatusCode PandoraPlusPFAlg::execute()
 
   //Save Cluster info
   m_Iter0_Ngoodclus = m_DataCol.Clus3DCol.size();
-  std::vector<CRDEcalEDM::CRDCaloHit3DShower> m_3dclusCol_iter0 = m_DataCol.Clus3DCol;
+  std::vector<CRDEcalEDM::CRDCaloHit3DCluster> m_3dclusCol_iter0 = m_DataCol.Clus3DCol;
   for(int icl=0; icl<m_3dclusCol_iter0.size(); icl++){
   ClearIter();
-    CRDEcalEDM::CRDCaloHit3DShower m_clus = m_3dclusCol_iter0[icl];
+    CRDEcalEDM::CRDCaloHit3DCluster m_clus = m_3dclusCol_iter0[icl];
     m_clus.FitProfile(); 
     m_Iter0_clus_Nly.push_back(m_clus.get2DShowers().size());
     m_Iter0_clus_x.push_back(m_clus.getShowerCenter().x());
@@ -315,7 +315,7 @@ StatusCode PandoraPlusPFAlg::execute()
     m_recPFO_pid.push_back(m_pfoCol[ipfo].getPdgID());
   }
 
-  std::vector<CRDEcalEDM::CRDCaloHit3DShower> m_clus = m_DataCol.Clus3DCol;
+  std::vector<CRDEcalEDM::CRDCaloHit3DCluster> m_clus = m_DataCol.Clus3DCol;
   m_N3dclus = m_clus.size();
   for(int i=0;i<m_N3dclus;i++){ 
     m_N2dshInClus.push_back(m_clus[i].get2DShowers().size());

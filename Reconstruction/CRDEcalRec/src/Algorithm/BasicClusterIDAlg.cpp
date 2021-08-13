@@ -1,7 +1,7 @@
 #ifndef _BASICCLUSTERID_ALG_C
 #define _BASICCLUSTERID_ALG_C
 
-#include "Algorithm/"
+#include "Algorithm/BasicClusterIDAlg.h"
 
 void BasicClusterIDAlg::Settings::SetInitialValue(){
 
