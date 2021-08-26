@@ -6,6 +6,10 @@
 
 void ArborClusteringAlg::Settings::SetInitialValue(){
 
+    clusType="";
+
+    Lth_start = 2; 
+    Rth_start = 30; 
     Rth_value = 40; 
     Rth_slope = 0.5; 
 
@@ -40,9 +44,17 @@ StatusCode ArborClusteringAlg::Initialize(){
 StatusCode ArborClusteringAlg::RunAlgorithm( ArborClusteringAlg::Settings& m_settings, PandoraPlusDataCol& m_datacol ){
   settings = m_settings;
 
-  std::vector<CRDEcalEDM::CRDCaloHit2DShower> m_2DshowerCol = m_datacol.Shower2DCol;
-  if(m_2DshowerCol.size()==0){ std::cout<<"Warning: Empty input in ArborClusteringAlg. Please check previous algorithm!"<<endl;  return StatusCode::SUCCESS; }
+  std::vector<CRDEcalEDM::CRDCaloHit2DShower> m_2DshowerCol; m_2DshowerCol.clear();
+  if( settings.clusType=="MIP" )     m_2DshowerCol = m_datacol.MIPShower2DCol;
+  else if( settings.clusType=="EM" ) m_2DshowerCol = m_datacol.EMShower2DCol;
+  else m_2DshowerCol = m_datacol.Shower2DCol;
 
+
+  if(m_2DshowerCol.size()==0){ 
+    std::cout<<"Warning: Empty input in ArborClusteringAlg. Please check previous algorithm!"<<endl;  
+    m_datacol.ClearArbor(); 
+    return StatusCode::SUCCESS; 
+  }
 //m_datacol.PrintShower(); 
 
   std::map<int, std::vector<CRDEcalEDM::CRDArborNode*> > m_orderedNodes;  m_orderedNodes.clear(); //map<layer, showers>
@@ -145,40 +157,7 @@ for(auto iter=m_orderedNodes.begin(); iter!=m_orderedNodes.end(); iter++){
   if(settings.Debug>=1) std::cout<<"At the end: Node size = "<<NtotNodes<<std::endl;
   if(Nnodes_end != NtotNodes) 
     std::cout<<"WARNING!  ArborClusteringAlg: Initial node size("<<NtotNodes<<") is not equal to final node size("<<Nnodes_end<<")! May have memory leakage! "<<std::endl; 
-/*  
-  std::vector<CRDEcalEDM::CRDArborTree> m_goodTreeCol; m_goodTreeCol.clear(); 
-  std::vector<CRDEcalEDM::CRDArborTree> m_badTreeCol; m_badTreeCol.clear();
-  for(int it=0; it<m_ArborTreeCol.size(); it++){
-    if( (m_ArborTreeCol[it].GetMaxDlayer()-m_ArborTreeCol[it].GetMinDlayer()) >= settings.th_GoodTreeLevel &&
-         m_ArborTreeCol[it].GetNodes().size()>=settings.th_GoodTreeNodes)
-      m_goodTreeCol.push_back( m_ArborTreeCol[it] );
-    else m_badTreeCol.push_back( m_ArborTreeCol[it] );
-  }
 
-
-  //Save tree into CRDCaloHit3DCluster
-  std::vector<CRDEcalEDM::CRDCaloHit3DCluster> m_goodClusterCol;  m_goodClusterCol.clear();
-  std::vector<CRDEcalEDM::CRDCaloHit3DCluster> m_badClusterCol;  m_badClusterCol.clear();
-  std::vector<CRDEcalEDM::CRDCaloHit3DCluster> m_ClusterCol;  m_ClusterCol.clear();
-  for(int it=0; it<m_goodTreeCol.size(); it++)
-    m_goodClusterCol.push_back( m_goodTreeCol[it].ConvertTreeToCluster() );  
-  for(int it=0; it<m_badTreeCol.size(); it++)
-    m_badClusterCol.push_back( m_badTreeCol[it].ConvertTreeToCluster() );
-
-  for(int in=0; in<m_isoNodes.size(); in++){
-    CRDEcalEDM::CRDCaloHit3DCluster clus_isonodes; 
-    CRDEcalEDM::CRDCaloHit2DShower m_shower = m_isoNodes[in]->GetOriginShower();
-    clus_isonodes.AddShower( m_shower );
-    m_badClusterCol.push_back( clus_isonodes );
-  }
-    
-  for(int it=0; it<m_ArborTreeCol.size(); it++)
-    m_ClusterCol.push_back( m_ArborTreeCol[it].ConvertTreeToCluster() );
-
-  m_datacol.GoodClus3DCol = m_goodClusterCol;
-  m_datacol.BadClus3DCol = m_badClusterCol;
-  m_datacol.Clus3DCol = m_ClusterCol; 
-*/
   return StatusCode::SUCCESS;
 }
 
@@ -205,13 +184,14 @@ StatusCode ArborClusteringAlg::InitArborTree( std::map<int, std::vector<CRDEcalE
   std::map<int, std::vector<CRDEcalEDM::CRDArborNode*> >::iterator iter = m_orderedNodes.begin();
 
   //Nodes in First layer: initialize the trees. 
-
   for(int is=0; is<iter->second.size(); is++){
 //std::cout<<"#Layer: "<<iter->first<<", Nnode: "<<iter->second.size()<<endl;
     int m_dlayer = iter->first; 
-    double Rth = settings.Rth_value + (double)m_dlayer * settings.Rth_slope; 
-    CRDEcalEDM::CRDArborTree m_tree; 
+    double Rth; 
+    if(m_dlayer<=settings.Lth_start) Rth = settings.Rth_start; 
+    else Rth = settings.Rth_value + (double)m_dlayer * settings.Rth_slope; 
 
+    CRDEcalEDM::CRDArborTree m_tree; 
     std::vector<CRDEcalEDM::CRDArborNode*>* m_nextLayer = &m_orderedNodes[iter->first+1]; 
     for(int js=0; js<m_nextLayer->size(); js++)
       if( (iter->second[is]->GetPosition()-m_nextLayer->at(js)->GetPosition()).Mag()<Rth ) 
@@ -231,8 +211,10 @@ StatusCode ArborClusteringAlg::InitArborTree( std::map<int, std::vector<CRDEcalE
 //std::cout<<"  #Layer: "<<iter->first<<", Nnode: "<<iter->second.size()<<", Present Ntrees: "<<m_treeCol.size()<<std::endl;
 //for(int it=0; it<m_treeCol.size(); it++) m_treeCol[it].PrintTree();
 
-    int iLayer = iter->first;
-    double Rth = settings.Rth_value + (double)iLayer * settings.Rth_slope;
+    int m_dlayer = iter->first;
+    double Rth;
+    if(m_dlayer<=settings.Lth_start) Rth = settings.Rth_start;
+    else Rth = settings.Rth_value + (double)m_dlayer * settings.Rth_slope;
 
     for(int in=0; in<iter->second.size(); in++){
       CRDEcalEDM::CRDArborNode* m_node = iter->second[in];
@@ -245,7 +227,7 @@ StatusCode ArborClusteringAlg::InitArborTree( std::map<int, std::vector<CRDEcalE
         //If node in this tree: 
         if( m_node->isInTree(m_treeCol[it]) ){          
           //Get daughter nodes and add them in tree
-          std::vector<CRDEcalEDM::CRDArborNode*>* m_nextLayer = &m_orderedNodes[iLayer+1];
+          std::vector<CRDEcalEDM::CRDArborNode*>* m_nextLayer = &m_orderedNodes[m_dlayer+1];
           for(int jn=0; jn<m_nextLayer->size(); jn++)
             if( (m_node->GetPosition()-m_nextLayer->at(jn)->GetPosition()).Mag()<Rth ) 
               m_node->ConnectDaughter( (m_nextLayer->at(jn)) );
@@ -264,7 +246,7 @@ StatusCode ArborClusteringAlg::InitArborTree( std::map<int, std::vector<CRDEcalE
       if( m_node->GetDaughterNodes().size()==0 && m_node->GetParentNodes().size()==0){
         CRDEcalEDM::CRDArborTree m_tree;
         m_tree.AddNode( m_node );
-        std::vector<CRDEcalEDM::CRDArborNode*>* m_nextLayer = &m_orderedNodes[iLayer+1];
+        std::vector<CRDEcalEDM::CRDArborNode*>* m_nextLayer = &m_orderedNodes[m_dlayer+1];
         for(int jn=0; jn<m_nextLayer->size(); jn++)
           if( (m_node->GetPosition() - m_nextLayer->at(jn)->GetPosition()).Mag()<Rth ) 
             m_node->ConnectDaughter( (m_nextLayer->at(jn)) );        

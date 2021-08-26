@@ -41,6 +41,8 @@ public:
   std::vector<CRDEcalEDM::CRDCaloBlock>       BlockVec;  //All fired crystal bars, grouped as blocks 
   std::vector<CRDEcalEDM::CRDCaloLayer>       LayerCol;  //Results of EnergySplittingAlg
   std::vector<CRDEcalEDM::CRDCaloHit2DShower> Shower2DCol;
+  std::vector<CRDEcalEDM::CRDCaloHit2DShower> MIPShower2DCol; 
+  std::vector<CRDEcalEDM::CRDCaloHit2DShower> EMShower2DCol; 
   std::vector<CRDEcalEDM::CRDCaloHit3DCluster> GoodClus3DCol;
   std::vector<CRDEcalEDM::CRDCaloHit3DCluster> BadClus3DCol;
   std::vector<CRDEcalEDM::CRDCaloHit3DCluster> Clus3DCol;
@@ -89,12 +91,12 @@ public:
   void Clear();
   void ClearBlock()  { BlockVec.clear(); }
   void ClearLayer()  { LayerCol.clear(); }
-  void ClearShower() { Shower2DCol.clear(); }
+  void ClearShower() { Shower2DCol.clear(); MIPShower2DCol.clear(); EMShower2DCol.clear(); }
   void ClearCluster(){ GoodClus3DCol.clear(); BadClus3DCol.clear(); Clus3DCol.clear(); }
   void ClearPFO()    { PFOCol.clear(); }
   void ClearTrack()  { TrackCol.clear(); }
   void ClearTempCol(); 
-  void ClearArbor() { ArborTreeCol.clear(); }
+  void ClearArbor() { ArborTreeCol.clear(); IsoNodes.clear(); }
 
 };
 #endif

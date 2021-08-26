@@ -5,11 +5,14 @@ void ArborTreeMergingAlg::Settings::SetInitialValue(){
 
     th_Nsigma = 2; 
     th_daughterR = 40.; 
-    th_GoodTreeLevel = 3;
+    th_GoodTreeLayer1 = 6;
+    th_GoodTreeLayer2 = 3;
     th_GoodTreeNodes = 10;
     th_MergeR = 100; 
     th_MergeTheta = PI/10.;
     fl_MergeTrees = true; 
+    fl_overwrite = true;
+    clusType = "";
 }
 
 StatusCode ArborTreeMergingAlg::Initialize(){
@@ -20,16 +23,34 @@ StatusCode ArborTreeMergingAlg::Initialize(){
 StatusCode ArborTreeMergingAlg::RunAlgorithm( ArborTreeMergingAlg::Settings& m_settings, PandoraPlusDataCol& m_datacol){
   settings = m_settings; 
 
-  std::vector<CRDEcalEDM::CRDCaloHit2DShower> m_2DshowerCol = m_datacol.Shower2DCol;
+  std::vector<CRDEcalEDM::CRDCaloHit2DShower> m_2DshowerCol; m_2DshowerCol.clear();
+  if( settings.clusType=="MIP" )      m_2DshowerCol = m_datacol.MIPShower2DCol;
+  else if( settings.clusType=="EM")  m_2DshowerCol = m_datacol.EMShower2DCol;
+  else m_2DshowerCol = m_datacol.Shower2DCol;
   std::vector<CRDEcalEDM::CRDArborTree> m_ArborTreeCol = m_datacol.ArborTreeCol; 
   std::vector<CRDEcalEDM::CRDArborNode*> m_isoNodes = m_datacol.IsoNodes; 
+
+  if(m_2DshowerCol.size()==0){ 
+    std::cout<<"Warning: Empty input in ArborTreeMergingAlg. Please check previous algorithm!"<<endl;  
+//std::cout<<"  Tree size: "<<m_ArborTreeCol.size()<<"  isoNode size: "<<m_isoNodes.size()<<std::endl;
+//  std::cout<<"Print Tree: "<<std::endl;
+//  for(int it=0; it<m_ArborTreeCol.size(); it++) m_ArborTreeCol[it].PrintTree();
+//  std::cout<<"Print Isolated Nodes: "<<std::endl;
+//  for(int i=0; i<m_isoNodes.size(); i++)
+//    printf("(%.2f, %.2f, %.2f, %d) \n", m_isoNodes[i]->GetPosition().x(), m_isoNodes[i]->GetPosition().y(), m_isoNodes[i]->GetPosition().z(), m_isoNodes[i]->GetType());
+    for(int i=0; i<m_ArborTreeCol.size(); i++) { m_ArborTreeCol[i].Clear(); }
+    for(int i=0; i<m_isoNodes.size(); i++)    { delete m_isoNodes[i]; }
+    return StatusCode::SUCCESS; 
+  }
+
 
   //Classify good and bad Tree.
   std::vector<CRDEcalEDM::CRDArborTree*> m_goodTreeCol; m_goodTreeCol.clear();
   std::vector<CRDEcalEDM::CRDArborTree*> m_badTreeCol; m_badTreeCol.clear();
   for(int it=0; it<m_ArborTreeCol.size(); it++){
-    if( (m_ArborTreeCol[it].GetMaxDlayer()-m_ArborTreeCol[it].GetMinDlayer()) >= settings.th_GoodTreeLevel &&
-         m_ArborTreeCol[it].GetNodes().size()>=settings.th_GoodTreeNodes)
+    if(  ( (m_ArborTreeCol[it].GetMaxDlayer()-m_ArborTreeCol[it].GetMinDlayer()) >= settings.th_GoodTreeLayer1 ) ||
+         ( (m_ArborTreeCol[it].GetMaxDlayer()-m_ArborTreeCol[it].GetMinDlayer()) >= settings.th_GoodTreeLayer2 &&
+         m_ArborTreeCol[it].GetNodes().size()>=settings.th_GoodTreeNodes) )
       m_goodTreeCol.push_back( &m_ArborTreeCol[it] );
     else m_badTreeCol.push_back( &m_ArborTreeCol[it] );
   }
@@ -86,11 +107,11 @@ StatusCode ArborTreeMergingAlg::RunAlgorithm( ArborTreeMergingAlg::Settings& m_s
   std::vector<CRDEcalEDM::CRDCaloHit3DCluster> m_goodClusterCol;  m_goodClusterCol.clear();
   std::vector<CRDEcalEDM::CRDCaloHit3DCluster> m_badClusterCol;  m_badClusterCol.clear();
   std::vector<CRDEcalEDM::CRDCaloHit3DCluster> m_ClusterCol;  m_ClusterCol.clear();
+
   for(int it=0; it<m_goodTreeCol.size(); it++)
     m_goodClusterCol.push_back( m_goodTreeCol[it]->ConvertTreeToCluster() );
   for(int it=0; it<m_badTreeCol.size(); it++)
     m_badClusterCol.push_back( m_badTreeCol[it]->ConvertTreeToCluster() );
-
   for(int in=0; in<m_isoNodes.size(); in++){
     CRDEcalEDM::CRDCaloHit3DCluster clus_isonodes;
     CRDEcalEDM::CRDCaloHit2DShower m_shower = m_isoNodes[in]->GetOriginShower();
@@ -98,25 +119,28 @@ StatusCode ArborTreeMergingAlg::RunAlgorithm( ArborTreeMergingAlg::Settings& m_s
     m_badClusterCol.push_back( clus_isonodes );
   }
 
-  for(int it=0; it<m_ArborTreeCol.size(); it++)
-    m_ClusterCol.push_back( m_ArborTreeCol[it].ConvertTreeToCluster() );
+  m_ClusterCol.insert(m_ClusterCol.end(), m_goodClusterCol.begin(), m_goodClusterCol.end());
+  m_ClusterCol.insert(m_ClusterCol.end(), m_badClusterCol.begin(), m_badClusterCol.end());
 
-  m_datacol.GoodClus3DCol = m_goodClusterCol;
-  m_datacol.BadClus3DCol = m_badClusterCol;
-  m_datacol.Clus3DCol = m_ClusterCol;
+  //std::cout<<"Print Good Tree: "<<std::endl;
+  //for(int it=0; it<m_goodTreeCol.size(); it++) m_goodTreeCol[it]->PrintTree();
+  //std::cout<<"Print Bad Tree: "<<std::endl;
+  //for(int it=0; it<m_badTreeCol.size(); it++) m_badTreeCol[it]->PrintTree();
+  //std::cout<<"Print Isolated Nodes: "<<std::endl;
+  //for(int i=0; i<m_isoNodes.size(); i++)
+  //  printf("(%.2f, %.2f, %.2f, %d) \n", m_isoNodes[i]->GetPosition().x(), m_isoNodes[i]->GetPosition().y(), m_isoNodes[i]->GetPosition().z(), m_isoNodes[i]->GetType());  
+  //cout<<"After convertion: goodClus: "<<m_goodClusterCol.size()<<"  badClus: "<<m_badClusterCol.size()<<"  total: "<<m_ClusterCol.size()<<std::endl;
 
-//  std::cout<<"Print Good Tree: "<<std::endl;
-//  for(int it=0; it<m_goodTreeCol.size(); it++) m_goodTreeCol[it]->PrintTree();
-//  std::cout<<"Print Bad Tree: "<<std::endl;
-//  for(int it=0; it<m_badTreeCol.size(); it++) m_badTreeCol[it]->PrintTree();
-//  std::cout<<"Print Isolated Nodes: "<<std::endl;
-//  for(int i=0; i<m_isoNodes.size(); i++) 
-//    printf("(%.2f, %.2f, %.2f, %d) \n", m_isoNodes[i]->GetPosition().x(), m_isoNodes[i]->GetPosition().y(), m_isoNodes[i]->GetPosition().z(), m_isoNodes[i]->GetType());
+
+  if(settings.fl_overwrite) m_datacol.ClearCluster(); 
+  m_datacol.GoodClus3DCol.insert(m_datacol.GoodClus3DCol.end(), m_goodClusterCol.begin(), m_goodClusterCol.end() );
+  m_datacol.BadClus3DCol.insert( m_datacol.BadClus3DCol.end(),  m_badClusterCol.begin(), m_badClusterCol.end() );
+  m_datacol.Clus3DCol.insert( m_datacol.Clus3DCol.end(), m_ClusterCol.begin(), m_ClusterCol.end() );
 
   //Clear nodes pointer. 
   for(int i=0; i<m_goodTreeCol.size(); i++) { m_goodTreeCol[i]->Clear(); }
-  for(int i=0; i<m_badTreeCol.size(); i++) { m_badTreeCol[i]->Clear(); }
-  for(int i=0; i<m_isoNodes.size(); i++)     { delete m_isoNodes[i]; }
+  for(int i=0; i<m_badTreeCol.size(); i++)  { m_badTreeCol[i]->Clear(); }
+  for(int i=0; i<m_isoNodes.size(); i++)    { delete m_isoNodes[i]; }
 
   return StatusCode::SUCCESS;
 }

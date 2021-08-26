@@ -4,11 +4,12 @@
 #include "Algorithm/ClusterMergingAlg.h"
 
 void ClusterMergingAlg::Settings::SetInitialValue(){
-  axis_Angle = PI/10.; 
+  axis_Angle = PI/6.; 
   relP_Angle = PI/5.; 
   skipLayer = 3;
   fl_MergeGoodClus = true;
   fl_MergeBadClus = true;
+  fl_MergeEMTail = true; 
   Debug = 0;
 };
 
@@ -22,10 +23,18 @@ StatusCode ClusterMergingAlg::RunAlgorithm( ClusterMergingAlg::Settings& m_setti
 
   std::vector<CRDEcalEDM::CRDCaloHit3DCluster> m_goodClusCol = m_datacol.GoodClus3DCol; 
   std::vector<CRDEcalEDM::CRDCaloHit3DCluster> m_badClusCol  = m_datacol.BadClus3DCol; 
-  if(settings.Debug>0) std::cout<<"GoodCluster number: "<<m_goodClusCol.size()<<"  BadCluster number: "<<m_badClusCol.size()<<std::endl;
+  if(settings.Debug>0){ 
+    int Ntots = 0; 
+    for(int is=0; is<m_goodClusCol.size(); is++) Ntots += m_goodClusCol[is].get2DShowers().size(); 
+    std::cout<<"GoodCluster number: "<<m_goodClusCol.size()<<"  Total showers in good cluster: "<<Ntots<<std::endl;
+    Ntots = 0; 
+    for(int is=0; is<m_badClusCol.size(); is++) Ntots += m_badClusCol[is].get2DShowers().size(); 
+    std::cout<<"BadCluster number: "<<m_badClusCol.size()<<"  Total showers in bad cluster: "<<Ntots<<std::endl;
+  }
 
   //std::vector<CRDEcalEDM::Track>              m_trkCol  = dataCol.TrackCol;
 
+cout<<"  Initial good cluster size: "<<m_goodClusCol.size()<<endl;
   //Merge 2 good clusters with several criteria
   if(settings.fl_MergeGoodClus){
   std::sort(m_goodClusCol.begin(), m_goodClusCol.end(), compBegin); 
@@ -33,10 +42,12 @@ StatusCode ClusterMergingAlg::RunAlgorithm( ClusterMergingAlg::Settings& m_setti
     CRDEcalEDM::CRDCaloHit3DCluster m_clus = m_goodClusCol[ic]; 
     for(int jc=ic+1; jc<m_goodClusCol.size(); jc++){
       CRDEcalEDM::CRDCaloHit3DCluster p_clus = m_goodClusCol[jc];
-      double minRelAngle = min( (m_clus.getShowerCenter()-p_clus.getShowerCenter()).Angle(m_clus.getAxis()), (m_clus.getShowerCenter()-p_clus.getShowerCenter()).Angle(p_clus.getAxis()) );
+      double minRelAngle = min( sin((m_clus.getShowerCenter()-p_clus.getShowerCenter()).Angle(m_clus.getAxis())), 
+                                sin((m_clus.getShowerCenter()-p_clus.getShowerCenter()).Angle(p_clus.getAxis())) );
       if( !(p_clus.getBeginningDlayer()>m_clus.getEndDlayer() || m_clus.getBeginningDlayer()>p_clus.getEndDlayer()) ) continue;
+
       if( sin( m_clus.getAxis().Angle(p_clus.getAxis()) ) < sin(settings.axis_Angle) && 
-          sin( minRelAngle ) < sin(settings.relP_Angle) &&
+          minRelAngle < sin(settings.relP_Angle) &&
           p_clus.getBeginningDlayer()-m_clus.getEndDlayer() <= settings.skipLayer 
         ) {
         m_goodClusCol[ic].MergeCluster( m_goodClusCol[jc] ); 
@@ -59,8 +70,9 @@ StatusCode ClusterMergingAlg::RunAlgorithm( ClusterMergingAlg::Settings& m_setti
   //Case3: others
 
   //Merge bad clusters into closest good cluster
-  if(settings.fl_MergeBadClus)
+  if(settings.fl_MergeBadClus){
     for(int icl=0;icl<m_badClusCol.size();icl++) if(!MergeToGoodCluster(m_goodClusCol, m_badClusCol[icl], true))  cout<<"WARNING: Cluster merging fail!"<<endl;
+  }
 
   //Merge 2 good clusters with several criteria
   if(settings.fl_MergeGoodClus){
@@ -71,8 +83,10 @@ StatusCode ClusterMergingAlg::RunAlgorithm( ClusterMergingAlg::Settings& m_setti
       CRDEcalEDM::CRDCaloHit3DCluster p_clus = m_goodClusCol[jc];
       if( !(p_clus.getBeginningDlayer()>m_clus.getEndDlayer() || m_clus.getBeginningDlayer()>p_clus.getEndDlayer()) ) continue;
 
+      double minRelAngle = min( sin((m_clus.getShowerCenter()-p_clus.getShowerCenter()).Angle(m_clus.getAxis())), 
+                                sin((m_clus.getShowerCenter()-p_clus.getShowerCenter()).Angle(p_clus.getAxis())) );
       if( sin( m_clus.getAxis().Angle(p_clus.getAxis()) ) < sin(settings.axis_Angle) &&
-          sin( (m_clus.getShowerCenter()-p_clus.getShowerCenter()).Angle( m_clus.getAxis() )) < sin(settings.relP_Angle) &&
+          minRelAngle < sin(settings.relP_Angle) &&
           p_clus.getBeginningDlayer()-m_clus.getEndDlayer() <= settings.skipLayer
         ) {
         m_goodClusCol[ic].MergeCluster( m_goodClusCol[jc] );
@@ -82,8 +96,26 @@ StatusCode ClusterMergingAlg::RunAlgorithm( ClusterMergingAlg::Settings& m_setti
       }
     }
   }}
+
+
+  //Merge EM cluster tail into EM core by profile
+  if(settings.fl_MergeEMTail){
+  for(int ic=0; ic<m_goodClusCol.size() && m_goodClusCol.size()>1; ic++){
+    m_goodClusCol[ic].IdentifyCluster();
+    if(m_goodClusCol[ic].getType()!=1) continue; 
+    m_goodClusCol[ic].FitProfile(); 
+    for(int jc=ic+1; jc<m_goodClusCol.size(); jc++){
+      if( fabs(m_goodClusCol[ic].getFitExpEn()-m_goodClusCol[ic].getShowerE()-m_goodClusCol[jc].getShowerE()) < fabs(m_goodClusCol[ic].getFitExpEn()-m_goodClusCol[ic].getShowerE()) ){
+        m_goodClusCol[ic].MergeCluster( m_goodClusCol[jc] );
+        m_goodClusCol.erase(m_goodClusCol.begin()+jc);
+        ic--; jc--;
+        break;
+      }
+    }  
+  }}
+
   m_datacol.GoodClus3DCol = m_goodClusCol;
-  m_datacol.Clus3DCol = m_goodClusCol;
+  if(settings.fl_MergeBadClus || settings.fl_MergeGoodClus) m_datacol.Clus3DCol = m_goodClusCol;
 
 
   return StatusCode::SUCCESS;

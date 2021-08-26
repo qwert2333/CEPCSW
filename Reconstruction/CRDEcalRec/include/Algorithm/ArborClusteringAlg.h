@@ -12,21 +12,27 @@ public:
   public: 
     Settings() {};
     void SetInitialValue(); 
-    void SetRnodeThres( double _value, double _slope ) { Rth_value=_value; Rth_slope=_slope; }
+    void SetRthStart( int _ly, double _rth ) { Lth_start=_ly; Rth_start=_rth; }
+    void SetRthPars( double _value, double _slope ) { Rth_value=_value; Rth_slope=_slope; }
     void SetRefWeight( double _wiF, double _wiB ) { wiF=_wiF; wiB=_wiB; }
     void SetKappaOrderWeight( double _w1, double _w2, double _w3 ) { pTheta=_w1; pR=_w2; pE=_w3; }
     void SetRseedThres( double _th) { Rth_nbrRoot=_th; }
     void SetDebug( int _debug) { Debug=_debug; }
     void PrintSettings() const; 
+    void SetClusterType(string _st) { clusType=_st; }
 
+    int Lth_start; 
+    double Rth_start;  // Node distance pars: in first Lth_start layers, Rth = Rth_start. 
     double Rth_value;  
-    double Rth_slope;  // Node distance pars when linking nodes. R = Rth_value + Rth_slope * Dlayer
+    double Rth_slope;  // Node distance pars: in later layers (L>Lth_start), Rth = Rth_value + Rth_slope * Dlayer
 
     double wiB;
     double wiF;
     double pTheta;
     double pR;
     double pE; 
+
+    string clusType; 
 
     double Rth_nbrRoot; // Root node distance threshold when merging neighbor trees. 
     int Debug;

@@ -12,7 +12,10 @@ public:
   public: 
     Settings(){};
 
-    void SetInitialValue(); 
+    void SetInitialValue();
+    void SetDepartShower(bool _fl) { fl_departShower=_fl; }
+ 
+    bool fl_departShower; 
 
   };
 

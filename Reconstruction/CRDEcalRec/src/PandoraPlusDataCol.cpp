@@ -11,7 +11,7 @@ void PandoraPlusDataCol::PrintLayer(){
   cout<<"Loop print all layers: "<<endl;
   for(int i=0;i<LayerCol.size();i++){
   double totE;
-
+/*
   cout<<'\t'<<"BarX collection in layer #"<<i<<endl;
   totE=0;
   for(int j=0;j<LayerCol[i].barXCol.size();j++){
@@ -35,7 +35,7 @@ void PandoraPlusDataCol::PrintLayer(){
   }
   cout<<'\t'<<"Total energy in BarY: "<<totE<<endl;
   cout<<'\t'<<"------------------------------------------"<<endl;
-
+*/
 
   cout<<'\t'<<"ShowerX collection in layer #"<<i<<endl;
   totE=0;

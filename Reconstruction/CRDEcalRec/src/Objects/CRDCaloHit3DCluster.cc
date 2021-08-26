@@ -239,11 +239,14 @@ namespace CRDEcalEDM{
     func->SetParameter(0, 4.8);
     func->SetParameter(1, 0.5);
     func->SetParameter(2, 10);
+//    func->SetParLimits(0, 2, 7);
+//    func->SetParLimits(1, 0.3, 0.7);
     h_hitz->Fit("fc1","Q","",0,25);
 
     chi2 = func->GetChisquare()/func->GetNDF();
     alpha = func->GetParameter(0);
     beta = func->GetParameter(1);
+    ExpEn = func->GetParameter(2);
     showerMax = (alpha-1)/beta;
 
     //h_hitz->Draw("same");
@@ -309,26 +312,15 @@ namespace CRDEcalEDM{
   }
 
 
-/*  void CRDCaloHit3DCluster::IdentifyCluster(){
-    const int Nlayer = ShowerinLayer.size(); 
-    double En[Nlayer] = {0};
-    double sumE = 0;
-    for(int i=0; i<Nlayer; i++){ 
-      En[i] = ShowerinLayer[i].getShowerE(); 
-      sumE += En[i];
-    }
-    double aveE = sumE/Nlayer; 
-    double sumE2 = 0;
-    for(int i=0; i<Nlayer; i++)
-      sumE2 += (En[i]-aveE)*(En[i]-aveE);
-    double StdDev = sqrt( sumE2/Nlayer );
+  void CRDCaloHit3DCluster::IdentifyCluster(){
+    double stdDevE = getStdDevE(); 
 
-    if(ShowerinLayer.size()>=10 && fabs((aveE-0.02)/0.02)<0.2 && StdDev<0.4 ) type = 0; 
-    else if( chi2<5 && ShowerinLayer.size() >5 ) type = 1; 
+    if( stdDevE<0.05 ) type = 0; 
+    else if( stdDevE>0.2 ) type = 1; 
     else type = 2;  
 
   }
-*/
+
 
 };
 #endif

@@ -14,8 +14,9 @@ void ConeClusteringAlg::Settings::SetInitialValue(){
   th_ConeTheta_l2 = PI/10.;  
   th_ConeR_l2 = 30.; //30mm
   th_ClusChi2 = 10e17;
-  fl_GoodClusLevel = 1;
+  fl_GoodClusLevel = 2;
   fl_UseCandidate=0; 
+  clusType = ""; 
 }
 
 void ConeClusteringAlg::Settings::SetConeValue( double _coneTheta_l1, double _coneR_l1, double _coneTheta_l2, double _coneR_l2){
@@ -32,10 +33,17 @@ StatusCode ConeClusteringAlg::Initialize(){
 
 StatusCode ConeClusteringAlg::RunAlgorithm( ConeClusteringAlg::Settings& m_settings, PandoraPlusDataCol& m_datacol){
   settings = m_settings;
-  std::vector<CRDEcalEDM::CRDCaloHit2DShower> m_2DshowerCol = m_datacol.Shower2DCol;
-  if(m_2DshowerCol.size()==0){ std::cout<<"Warning: Empty input in ConeClusteringAlg. Please check previous algorithm!"<<endl;  return StatusCode::SUCCESS; }
 
-//cout<<"ConeClusteringAlg: 2D shower size: "<<m_2DshowerCol.size()<<endl;
+  std::vector<CRDEcalEDM::CRDCaloHit2DShower> m_2DshowerCol; m_2DshowerCol.clear();
+  if( settings.clusType=="MIP" )     m_2DshowerCol = m_datacol.MIPShower2DCol;
+  else if( settings.clusType=="EM" ) m_2DshowerCol = m_datacol.EMShower2DCol;
+  else m_2DshowerCol = m_datacol.Shower2DCol;
+
+  if(m_2DshowerCol.size()==0){ 
+    std::cout<<"Warning: Empty input in ConeClusteringAlg. Please check previous algorithm!"<<endl;  
+    if(settings.fl_overwrite) m_datacol.ClearCluster();
+    return StatusCode::SUCCESS; 
+  }
 
   std::vector<CRDEcalEDM::CRDCaloHit3DCluster> m_trkClusterCol;  m_trkClusterCol.clear();
   std::vector<CRDEcalEDM::CRDCaloHit3DCluster> m_neuClusterCol;  m_neuClusterCol.clear();
@@ -67,18 +75,18 @@ StatusCode ConeClusteringAlg::RunAlgorithm( ConeClusteringAlg::Settings& m_setti
   std::vector< CRDEcalEDM::CRDCaloHit3DCluster >  goodClus;
   std::vector< CRDEcalEDM::CRDCaloHit3DCluster >  badClus;
   for(int icl=0; icl<m_ClusterCol.size(); icl++){
-    if(CheckClusterQuality(m_ClusterCol[icl]) >= settings.fl_GoodClusLevel) goodClus.push_back(m_ClusterCol[icl]);
+    //if(CheckClusterQuality(m_ClusterCol[icl]) >= settings.fl_GoodClusLevel) goodClus.push_back(m_ClusterCol[icl]);
+    if( m_ClusterCol[icl].get2DShowers().size() >= settings.fl_GoodClusLevel) goodClus.push_back(m_ClusterCol[icl]);
     else badClus.push_back(m_ClusterCol[icl]);
   }
 
 //cout<<"  Good cluster: "<<goodClus.size()<<endl;
 //cout<<"  Bad cluster: "<<badClus.size()<<endl;
 
-  m_datacol.GoodClus3DCol = goodClus;
-  m_datacol.BadClus3DCol = badClus;
-
-  //Merge the bad clusters into closest good cluster
-  m_datacol.Clus3DCol = m_ClusterCol; 
+  if(settings.fl_overwrite) m_datacol.ClearCluster();
+  m_datacol.GoodClus3DCol.insert(m_datacol.GoodClus3DCol.end(), goodClus.begin(), goodClus.end() );
+  m_datacol.BadClus3DCol.insert( m_datacol.BadClus3DCol.end(),  badClus.begin(), badClus.end() );
+  m_datacol.Clus3DCol.insert( m_datacol.Clus3DCol.end(), m_ClusterCol.begin(), m_ClusterCol.end() );
 
   return StatusCode::SUCCESS;
 }

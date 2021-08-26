@@ -31,7 +31,7 @@ gaudi_add_module(CRDEcalRec
                          src/Algorithm/ArborClusteringAlg.cpp
                          src/Algorithm/ArborTreeMergingAlg.cpp
                          src/Algorithm/BasicClusterIDAlg.cpp
-                         src/Algorithm/CandidateMakingAlg.cpp
+                         src/Algorithm/ShadowMakingAlg.cpp
                          src/Algorithm/ClusterMergingAlg.cpp
                          src/Algorithm/ConeClusteringAlg.cpp
                          src/Algorithm/EnergySplittingAlg.cpp

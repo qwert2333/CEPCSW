@@ -8,7 +8,7 @@
 
 using namespace CRDEcalEDM;
 
-class CandidateMakingAlg{
+class ShadowMakingAlg{
 
 public: 
   class Settings{
@@ -24,9 +24,9 @@ public:
     bool UseTrk; 
   };
 
-  CandidateMakingAlg() {};
+  ShadowMakingAlg() {};
   StatusCode Initialize();
-  StatusCode RunAlgorithm( CandidateMakingAlg::Settings& m_settings, PandoraPlusDataCol& m_datacol);
+  StatusCode RunAlgorithm( ShadowMakingAlg::Settings& m_settings, PandoraPlusDataCol& m_datacol);
   StatusCode ClearAlgorithm(); 
 
   std::vector<CRDEcalEDM::CRDCaloBlock> GetBlocksNeedModification( std::vector<CRDEcalEDM::CRDCaloHit3DCluster>& m_goodClus, std::vector<CRDEcalEDM::CRDCaloHit3DCluster>& m_badClus );

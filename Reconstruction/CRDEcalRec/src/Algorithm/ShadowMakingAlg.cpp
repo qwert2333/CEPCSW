@@ -1,22 +1,22 @@
 #ifndef _CANDIDATEMAKING_ALG_C
 #define _CANDIDATEMAKING_ALG_C
 
-#include "Algorithm/CandidateMakingAlg.h"
+#include "Algorithm/ShadowMakingAlg.h"
 #include <set>
 
-void CandidateMakingAlg::Settings::SetInitialValue(){
+void ShadowMakingAlg::Settings::SetInitialValue(){
   Debug=0;
   UseTrk = false; 
   EndLayer = 15; 
 }
 
-StatusCode CandidateMakingAlg::Initialize(){
+StatusCode ShadowMakingAlg::Initialize(){
 
   //Initialize settings
   return StatusCode::SUCCESS;
 }
 
-StatusCode CandidateMakingAlg::RunAlgorithm(CandidateMakingAlg::Settings& m_settings, PandoraPlusDataCol& m_datacol){
+StatusCode ShadowMakingAlg::RunAlgorithm(ShadowMakingAlg::Settings& m_settings, PandoraPlusDataCol& m_datacol){
   settings = m_settings;
 
   std::vector<CRDEcalEDM::CRDCaloHit3DCluster> m_goodClus = m_datacol.GoodClus3DCol;
@@ -100,7 +100,7 @@ StatusCode CandidateMakingAlg::RunAlgorithm(CandidateMakingAlg::Settings& m_sett
 
 
 
-std::vector<CRDEcalEDM::CRDCaloBlock> CandidateMakingAlg::GetBlocksNeedModification( std::vector<CRDEcalEDM::CRDCaloHit3DCluster>& m_goodClus, std::vector<CRDEcalEDM::CRDCaloHit3DCluster>& m_badClus ){
+std::vector<CRDEcalEDM::CRDCaloBlock> ShadowMakingAlg::GetBlocksNeedModification( std::vector<CRDEcalEDM::CRDCaloHit3DCluster>& m_goodClus, std::vector<CRDEcalEDM::CRDCaloHit3DCluster>& m_badClus ){
   
   std::vector<CRDEcalEDM::CRDCaloBlock> vec_blocks; vec_blocks.clear();
   //Case0: no good cluster: Do nothing, skip this event. 
@@ -141,7 +141,7 @@ std::vector<CRDEcalEDM::CRDCaloBlock> CandidateMakingAlg::GetBlocksNeedModificat
 }
 
 
-StatusCode CandidateMakingAlg::ClearAlgorithm(){
+StatusCode ShadowMakingAlg::ClearAlgorithm(){
 
 
   return StatusCode::SUCCESS;

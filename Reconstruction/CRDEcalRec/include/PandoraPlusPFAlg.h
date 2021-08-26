@@ -113,11 +113,15 @@ protected:
   FloatVec m_nodex, m_nodey, m_nodez, m_nodeType, m_nodeE;
 
   TTree* t_dataColIter0;
+  //Cluster basic info
   int      m_Iter0_Ngoodclus, m_Iter0_Nbadclus;
-  IntVec   m_Iter0_clus_Nly, m_Iter0_clus_start, m_Iter0_clus_end; 
   FloatVec m_Iter0_clus_x, m_Iter0_clus_y, m_Iter0_clus_z, m_Iter0_clus_E;
-  FloatVec m_Iter0_clus_px, m_Iter0_clus_py, m_Iter0_clus_pz, m_Iter0_clus_chi2, m_Iter0_clus_aveE, m_Iter0_clus_stdDevE;
-  FloatVec m_Iter0_clus_alpha, m_Iter0_clus_beta, m_Iter0_clus_showermax;   
+  FloatVec m_Iter0_clus_px, m_Iter0_clus_py, m_Iter0_clus_pz; 
+  //----Cluster ID info
+  IntVec   m_Iter0_clus_Nly, m_Iter0_clus_Nsh, m_Iter0_clus_start, m_Iter0_clus_end, m_Iter0_clus_maxELayer, m_Iter0_clus_maxWidthLayer; 
+  FloatVec m_Iter0_clus_aveE, m_Iter0_clus_stdDevE, m_Iter0_clus_maxE, m_Iter0_clus_maxWidth;
+  FloatVec m_Iter0_clus_alpha, m_Iter0_clus_beta, m_Iter0_clus_chi2;
+  //----Showers in cluster
   FloatVec m_Iter0_gclus_2dshx, m_Iter0_gclus_2dshy, m_Iter0_gclus_2dshz, m_Iter0_gclus_2dshE;
 
   //Stage2: check reconstructed result

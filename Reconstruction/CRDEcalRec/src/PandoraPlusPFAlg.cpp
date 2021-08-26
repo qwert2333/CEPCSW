@@ -88,7 +88,6 @@ StatusCode PandoraPlusPFAlg::initialize()
 
   t_dataColIter0->Branch("Ngoodclus", &m_Iter0_Ngoodclus );
   t_dataColIter0->Branch("Nbadclus", &m_Iter0_Nbadclus );
-  t_dataColIter0->Branch("clus_Nly", &m_Iter0_clus_Nly );
   t_dataColIter0->Branch("clus_x", &m_Iter0_clus_x );
   t_dataColIter0->Branch("clus_y", &m_Iter0_clus_y );
   t_dataColIter0->Branch("clus_z", &m_Iter0_clus_z );
@@ -96,14 +95,20 @@ StatusCode PandoraPlusPFAlg::initialize()
   t_dataColIter0->Branch("clus_px", &m_Iter0_clus_px );
   t_dataColIter0->Branch("clus_py", &m_Iter0_clus_py );
   t_dataColIter0->Branch("clus_pz", &m_Iter0_clus_pz );
-  t_dataColIter0->Branch("clus_chi2", &m_Iter0_clus_chi2 );
-  t_dataColIter0->Branch("clus_aveE", &m_Iter0_clus_aveE );
-  t_dataColIter0->Branch("clus_stdDevE", &m_Iter0_clus_stdDevE );
+
+  t_dataColIter0->Branch("clus_Nly", &m_Iter0_clus_Nly );
+  t_dataColIter0->Branch("clus_Nsh", &m_Iter0_clus_Nsh );
   t_dataColIter0->Branch("clus_start", &m_Iter0_clus_start);
   t_dataColIter0->Branch("clus_end", &m_Iter0_clus_end);
+  t_dataColIter0->Branch("clus_maxELayer", &m_Iter0_clus_maxELayer);
+  t_dataColIter0->Branch("clus_maxWidthLayer", &m_Iter0_clus_maxWidthLayer);
+  t_dataColIter0->Branch("clus_aveE", &m_Iter0_clus_aveE );
+  t_dataColIter0->Branch("clus_stdDevE", &m_Iter0_clus_stdDevE );
+  t_dataColIter0->Branch("clus_maxE", &m_Iter0_clus_maxE);
+  t_dataColIter0->Branch("clus_maxWidth", &m_Iter0_clus_maxWidth);
   t_dataColIter0->Branch("clus_alpha", &m_Iter0_clus_alpha);
   t_dataColIter0->Branch("clus_beta", &m_Iter0_clus_beta);
-  t_dataColIter0->Branch("clus_showermax", &m_Iter0_clus_showermax);
+  t_dataColIter0->Branch("clus_chi2", &m_Iter0_clus_chi2 );
   t_dataColIter0->Branch("gclus_2dshx", &m_Iter0_gclus_2dshx );
   t_dataColIter0->Branch("gclus_2dshy", &m_Iter0_gclus_2dshy );
   t_dataColIter0->Branch("gclus_2dshz", &m_Iter0_gclus_2dshz );
@@ -233,7 +238,6 @@ StatusCode PandoraPlusPFAlg::execute()
   ClearIter();
     CRDEcalEDM::CRDCaloHit3DCluster m_clus = m_3dclusCol_iter0[icl];
     m_clus.FitProfile(); 
-    m_Iter0_clus_Nly.push_back(m_clus.get2DShowers().size());
     m_Iter0_clus_x.push_back(m_clus.getShowerCenter().x());
     m_Iter0_clus_y.push_back(m_clus.getShowerCenter().y());
     m_Iter0_clus_z.push_back(m_clus.getShowerCenter().z());
@@ -241,23 +245,40 @@ StatusCode PandoraPlusPFAlg::execute()
     m_Iter0_clus_px.push_back(m_clus.getAxis().x());
     m_Iter0_clus_py.push_back(m_clus.getAxis().y());
     m_Iter0_clus_pz.push_back(m_clus.getAxis().z());
-    m_Iter0_clus_chi2.push_back(m_clus.getChi2()); 
-    m_Iter0_clus_aveE.push_back(m_clus.getAveE());
-    m_Iter0_clus_stdDevE.push_back(m_clus.getStdDevE());
-    m_Iter0_clus_alpha.push_back(m_clus.getFitAlpha());
-    m_Iter0_clus_beta.push_back(m_clus.getFitBeta());
 
-    //std::vector<double> m_widthVec = m_clus.getClusterWidth();
-    m_Iter0_clus_showermax.push_back(m_clus.getMaxWidth());
+    //ClusterID variables
+    std::vector<double> m_widthVec = m_clus.getClusterWidth();
     std::vector<double> m_EnVec = m_clus.getEnInLayer(); 
-    int startLayer = 0; 
+    int startLayer = 0;
+    int maxELayer = 0;
+    int maxWidthLayer = 0; 
+    int NfiredLayer = 0; 
+    double maxE=-99; 
+    double maxWidth=-99;
+    bool f_found = false; 
     for(int i=0; i<m_EnVec.size(); i++){
-      if(m_EnVec[i]<0.1) continue; 
-      startLayer=i; 
-      break; 
+      if( m_EnVec[i]>0 ) NfiredLayer++;  
+      if(!f_found && m_EnVec[i]>0.1) { startLayer=i; f_found==true; }
+      if(m_EnVec[i]>maxE) { maxE=m_EnVec[i]; maxELayer=i; }
     }
+    for(int i=0; i<m_widthVec.size(); i++)
+      if(m_widthVec[i]>maxWidth) { maxWidth=m_widthVec[i]; maxWidthLayer=i; }
+    
+
+    m_Iter0_clus_Nly.push_back(NfiredLayer);
+    m_Iter0_clus_Nsh.push_back(m_clus.get2DShowers().size());
     m_Iter0_clus_start.push_back(startLayer);
     m_Iter0_clus_end.push_back(m_clus.getEndDlayer());
+    m_Iter0_clus_maxELayer.push_back(maxELayer);
+    m_Iter0_clus_maxWidthLayer.push_back(maxWidthLayer);
+    m_Iter0_clus_aveE.push_back(m_clus.getAveE());
+    m_Iter0_clus_stdDevE.push_back(m_clus.getStdDevE());
+    m_Iter0_clus_maxE.push_back(maxE);
+    m_Iter0_clus_maxWidth.push_back(maxWidth);
+    m_Iter0_clus_alpha.push_back(m_clus.getFitAlpha());
+    m_Iter0_clus_beta.push_back(m_clus.getFitBeta());
+    m_Iter0_clus_chi2.push_back(m_clus.getChi2()); 
+
 
     for(int ig=0; ig<m_clus.get2DShowers().size(); ig++){
       m_Iter0_gclus_2dshx.push_back(m_clus.get2DShowers()[ig].getPos().x() );
@@ -323,7 +344,11 @@ StatusCode PandoraPlusPFAlg::execute()
     m_Clus_y.push_back(m_clus[i].getShowerCenter().y());
     m_Clus_z.push_back(m_clus[i].getShowerCenter().z());
     m_Clus_E.push_back(m_clus[i].getShowerE());
-    m_Clus_type.push_back(m_clus[i].getType());
+    int m_type = -1; 
+    if(m_clus[i].getStdDevE()<0.05) m_type = 0; 
+    else if(m_clus[i].getStdDevE()>0.5) m_type = 1; 
+    else m_type = 2; 
+    m_Clus_type.push_back(m_type);
   }
 
 
@@ -416,7 +441,6 @@ void PandoraPlusPFAlg::ClearTree(){
 void PandoraPlusPFAlg::ClearIter(){
   m_Iter0_Ngoodclus=-99;
   m_Iter0_Nbadclus=-99;
-  m_Iter0_clus_Nly.clear();
   m_Iter0_clus_x.clear();
   m_Iter0_clus_y.clear();
   m_Iter0_clus_z.clear();
@@ -424,14 +448,19 @@ void PandoraPlusPFAlg::ClearIter(){
   m_Iter0_clus_px.clear();
   m_Iter0_clus_py.clear();
   m_Iter0_clus_pz.clear();
-  m_Iter0_clus_chi2.clear(); 
-  m_Iter0_clus_aveE.clear();
-  m_Iter0_clus_stdDevE.clear();
+  m_Iter0_clus_Nly.clear();
+  m_Iter0_clus_Nsh.clear(); 
   m_Iter0_clus_start.clear(); 
   m_Iter0_clus_end.clear(); 
+  m_Iter0_clus_maxELayer.clear();
+  m_Iter0_clus_maxWidthLayer.clear();
+  m_Iter0_clus_aveE.clear();
+  m_Iter0_clus_stdDevE.clear();
+  m_Iter0_clus_maxE.clear();
+  m_Iter0_clus_maxWidth.clear();
   m_Iter0_clus_alpha.clear();
   m_Iter0_clus_beta.clear();
-  m_Iter0_clus_showermax.clear();
+  m_Iter0_clus_chi2.clear(); 
   m_Iter0_gclus_2dshx.clear();
   m_Iter0_gclus_2dshy.clear();
   m_Iter0_gclus_2dshz.clear();

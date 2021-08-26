@@ -23,13 +23,16 @@ StatusCode PFOCreator::CreatePFO(PandoraPlusDataCol& dataCol){
 
   std::vector<CRDEcalEDM::PFObject> m_pfoCol; m_pfoCol.clear();
   for(int icl=0;icl<m_clusCol.size();icl++){
+    m_clusCol[icl].IdentifyCluster();
     CRDEcalEDM::PFObject m_pfo; m_pfo.Clear();
     m_pfo.setEcalShower(m_clusCol[icl]);
     for(int it=0; it<m_trkCol.size(); it++){
       double clus_x = m_clusCol[icl].getShowerCenter().x();
       double var = (m_trkCol[it].getD0()*cos( m_trkCol[it].getPhi0() ) - clus_x)/sin( m_trkCol[it].getPhi0() );
       TVector3 trk_pos = m_trkCol[it].getProspectPos(var);
-      if( (trk_pos - m_clusCol[icl].getShowerCenter()).Mag() < 10 ){ m_pfo.setTrack( m_trkCol[it] ); break; }
+      bool b_matchtrk = ( ( m_clusCol[icl].getType()!=2 && ((trk_pos - m_clusCol[icl].getShowerCenter()).Mag()<10) ) ||
+                          ( m_clusCol[icl].getType()==2 && ((trk_pos - m_clusCol[icl].getShowerCenter()).Mag()<30) )  );
+      if( b_matchtrk ){ m_pfo.setTrack( m_trkCol[it] ); break; }
     }
 
     if(m_pfo.ContainTrack() && m_clusCol[icl].getType()==0  ) { //MIP, Set as Muon.
