@@ -16,6 +16,7 @@ public:
     void SetInitialValue(); 
     void SetGoodTreeLevel(int _ly1, int _ly2, int _node) { th_GoodTreeLayer1=_ly1; th_GoodTreeLayer2=_ly2; th_GoodTreeNodes=_node; }
     void SetMergeTrees(bool _fl) { fl_MergeTrees=_fl; }
+    void SetMergeTreePars(double _Rth, double _Tth) { th_MergeR=_Rth; th_MergeTheta=_Tth; }
     void SetOverwrite(bool _fl) { fl_overwrite=_fl; }
     void SetClusterType(string _st) { clusType=_st; }
 

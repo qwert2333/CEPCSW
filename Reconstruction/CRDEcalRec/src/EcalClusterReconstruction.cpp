@@ -78,8 +78,9 @@ StatusCode EcalClusterReconstruction::RunAlgorithm( EcalClusterReconstruction::S
 //  m_arborclusteringAlg ->RunAlgorithm( *m_ACAlgSettings, dataCol );
 //  m_arbortreemergingAlg->RunAlgorithm( *m_AMAlgSettings, dataCol );
 //dataCol.PrintShower();
+//dataCol.Print3DClus(); 
 
-
+/*
 std::cout<<"   Before cluster ID and depart: shower col size = "<<dataCol.Shower2DCol.size()<<std::endl;
 std::cout<<"                                 good cluster size = "<<dataCol.GoodClus3DCol.size();
 std::cout<<", bad cluster size = "<<dataCol.BadClus3DCol.size();
@@ -87,14 +88,14 @@ std::cout<<", total cluster size = "<<dataCol.Clus3DCol.size()<<std::endl;
 std::cout<<"  Good cluster stdDevE: "; 
 for(int ig=0 ;ig<dataCol.GoodClus3DCol.size(); ig++) std::cout<<dataCol.GoodClus3DCol[ig].getStdDevE()<<'\t';
 std::cout<<std::endl;
-
+*/
 
   m_CIDAlgSettings->SetDepartShower(true);
   m_clusteridAlg->RunAlgorithm( *m_CIDAlgSettings, dataCol );
 
-std::cout<<"    MIP shower col size: "<<dataCol.MIPShower2DCol.size()<<std::endl;
-std::cout<<"    EM shower col size: "<<dataCol.EMShower2DCol.size()<<std::endl;
-std::cout<<"    other shower col size: "<<dataCol.Shower2DCol.size()<<std::endl;
+//std::cout<<"    MIP shower col size: "<<dataCol.MIPShower2DCol.size()<<std::endl;
+//std::cout<<"    EM shower col size: "<<dataCol.EMShower2DCol.size()<<std::endl;
+//std::cout<<"    other shower col size: "<<dataCol.Shower2DCol.size()<<std::endl;
 //dataCol.Print3DClus(); 
 
 
@@ -104,9 +105,9 @@ std::cout<<"    other shower col size: "<<dataCol.Shower2DCol.size()<<std::endl;
   m_CCAlgSettings->SetUseCandidate(1);
   m_CCAlgSettings->SetOverwrite(true);
   m_coneclusterAlg->RunAlgorithm( *m_CCAlgSettings, dataCol);
-std::cout<<"  After clustering MIP: good cluster size = "<<dataCol.GoodClus3DCol.size();
-std::cout<<", bad cluster size = "<<dataCol.BadClus3DCol.size();
-std::cout<<", total cluster size = "<<dataCol.Clus3DCol.size()<<std::endl;
+//std::cout<<"  After clustering MIP: good cluster size = "<<dataCol.GoodClus3DCol.size();
+//std::cout<<", bad cluster size = "<<dataCol.BadClus3DCol.size();
+//std::cout<<", total cluster size = "<<dataCol.Clus3DCol.size()<<std::endl;
 
 
   m_CCAlgSettings->SetClusterType("EM");
@@ -114,9 +115,9 @@ std::cout<<", total cluster size = "<<dataCol.Clus3DCol.size()<<std::endl;
   m_CCAlgSettings->SetGoodClusLevel(4);
   m_CCAlgSettings->SetOverwrite(false);
   m_coneclusterAlg->RunAlgorithm( *m_CCAlgSettings, dataCol);  
-std::cout<<"  After clustering EM: good cluster size = "<<dataCol.GoodClus3DCol.size();
-std::cout<<", bad cluster size = "<<dataCol.BadClus3DCol.size();
-std::cout<<", total cluster size = "<<dataCol.Clus3DCol.size()<<std::endl;
+//std::cout<<"  After clustering EM: good cluster size = "<<dataCol.GoodClus3DCol.size();
+//std::cout<<", bad cluster size = "<<dataCol.BadClus3DCol.size();
+//std::cout<<", total cluster size = "<<dataCol.Clus3DCol.size()<<std::endl;
 
 
   m_ACAlgSettings->SetClusterType("");
@@ -125,12 +126,14 @@ std::cout<<", total cluster size = "<<dataCol.Clus3DCol.size()<<std::endl;
   m_ACAlgSettings->SetKappaOrderWeight(2, 1, 0);
   m_AMAlgSettings->SetClusterType("");
   m_AMAlgSettings->SetGoodTreeLevel(5, 4, 10);
+  m_AMAlgSettings->SetMergeTrees(false);
+  m_AMAlgSettings->SetMergeTreePars(40, PI/10.);
   m_AMAlgSettings->SetOverwrite(false);
   m_arborclusteringAlg ->RunAlgorithm( *m_ACAlgSettings,  dataCol );
   m_arbortreemergingAlg->RunAlgorithm( *m_AMAlgSettings,  dataCol );
-std::cout<<"  After clustering other: good cluster size = "<<dataCol.GoodClus3DCol.size();
-std::cout<<", bad cluster size = "<<dataCol.BadClus3DCol.size();
-std::cout<<", total cluster size = "<<dataCol.Clus3DCol.size()<<std::endl;
+//std::cout<<"  After clustering other: good cluster size = "<<dataCol.GoodClus3DCol.size();
+//std::cout<<", bad cluster size = "<<dataCol.BadClus3DCol.size();
+//std::cout<<", total cluster size = "<<dataCol.Clus3DCol.size()<<std::endl;
 
 //dataCol.Print3DClus(); 
 

@@ -8,7 +8,7 @@ void ArborTreeMergingAlg::Settings::SetInitialValue(){
     th_GoodTreeLayer1 = 6;
     th_GoodTreeLayer2 = 3;
     th_GoodTreeNodes = 10;
-    th_MergeR = 100; 
+    th_MergeR = 50; 
     th_MergeTheta = PI/10.;
     fl_MergeTrees = true; 
     fl_overwrite = true;
@@ -43,25 +43,36 @@ StatusCode ArborTreeMergingAlg::RunAlgorithm( ArborTreeMergingAlg::Settings& m_s
     return StatusCode::SUCCESS; 
   }
 
+//std::cout<<"  Tree size: "<<m_ArborTreeCol.size()<<"  isoNode size: "<<m_isoNodes.size()<<std::endl;
+//  std::cout<<"Print Tree: "<<std::endl;
+//  for(int it=0; it<m_ArborTreeCol.size(); it++) m_ArborTreeCol[it].PrintTree();
+//  std::cout<<"Print Isolated Nodes: "<<std::endl;
+//  for(int i=0; i<m_isoNodes.size(); i++)
+//    printf("(%.2f, %.2f, %.2f, %d) \n", m_isoNodes[i]->GetPosition().x(), m_isoNodes[i]->GetPosition().y(), m_isoNodes[i]->GetPosition().z(), m_isoNodes[i]->GetType());
+
 
   //Classify good and bad Tree.
   std::vector<CRDEcalEDM::CRDArborTree*> m_goodTreeCol; m_goodTreeCol.clear();
   std::vector<CRDEcalEDM::CRDArborTree*> m_badTreeCol; m_badTreeCol.clear();
   for(int it=0; it<m_ArborTreeCol.size(); it++){
+//std::cout<<"    MinDlayer: "<<m_ArborTreeCol[it].GetMinDlayer()<<", MaxDlayer: "<<m_ArborTreeCol[it].GetMaxDlayer()<<", Node size: "<<m_ArborTreeCol[it].GetNodes().size()<<std::endl;
+
     if(  ( (m_ArborTreeCol[it].GetMaxDlayer()-m_ArborTreeCol[it].GetMinDlayer()) >= settings.th_GoodTreeLayer1 ) ||
          ( (m_ArborTreeCol[it].GetMaxDlayer()-m_ArborTreeCol[it].GetMinDlayer()) >= settings.th_GoodTreeLayer2 &&
          m_ArborTreeCol[it].GetNodes().size()>=settings.th_GoodTreeNodes) )
       m_goodTreeCol.push_back( &m_ArborTreeCol[it] );
     else m_badTreeCol.push_back( &m_ArborTreeCol[it] );
   }
+//std::cout<<"  Good tree size: "<<m_goodTreeCol.size()<<", Bad tree size: "<<m_badTreeCol.size()<<std::endl;
 
   if(settings.fl_MergeTrees){
   std::map<CRDEcalEDM::CRDArborNode*, CRDEcalEDM::CRDArborTree*> m_svtx; m_svtx.clear();
   //Type 1 secondary vertex: large variation in variance. 
   GetSecondaryVtxT1(m_ArborTreeCol, m_2DshowerCol, m_svtx);
   //Type 2 secondary vertex: branch node in a tree & large distance between daughter nodes.
-  GetSecondaryVtxT2(m_ArborTreeCol, m_svtx);
+  //GetSecondaryVtxT2(m_ArborTreeCol, m_svtx);
 
+//std::cout<<"  Vtx size: "<<m_svtx.size()<<std::endl;
   //Merge clusters pointing to the vertex. 
   std::map<CRDEcalEDM::CRDArborNode*, CRDEcalEDM::CRDArborTree*>::iterator iter = m_svtx.begin(); 
   for(iter; iter!=m_svtx.end(); iter++){
@@ -74,16 +85,16 @@ StatusCode ArborTreeMergingAlg::RunAlgorithm( ArborTreeMergingAlg::Settings& m_s
 //printf("vtx: (%.2f, %.2f, %.2f) (Layer %d) \n", m_vtxPos.x(), m_vtxPos.y(), m_vtxPos.z(), m_layer);
 
     for(int it=0; it<m_goodTreeCol.size(); it++){
+//std::cout<<"  MinDlayer: "<<m_goodTreeCol[it]->GetMinDlayer()<<", MaxDlayer: "<<m_goodTreeCol[it]->GetMaxDlayer()<<std::endl;
       if( m_goodTreeCol[it]->GetMinDlayer()<0      || m_goodTreeCol[it]->GetMaxDlayer()<0 ||  
           (m_layer>m_goodTreeCol[it]->GetMinDlayer() && m_layer<m_goodTreeCol[it]->GetMaxDlayer()) ) continue; 
 
       m_goodTreeCol[it]->SortNodes();  //Sort from outer layer to inner layer. 
-      //std::vector<CRDEcalEDM::CRDArborNode*> m_nodesInTree; m_nodesInTree.clear(); 
-      //m_nodesInTree = m_goodTreeCol[it]->GetNodes(); 
+//m_goodTreeCol[it]->PrintTree();
 
       TVector3 m_nodePos; 
-      if( m_layer<m_goodTreeCol[it]->GetMinDlayer() )   m_nodePos = m_goodTreeCol[it]->GetNodes().back()->GetPosition(); 
-      if( m_layer>m_goodTreeCol[it]->GetMaxDlayer() )   m_nodePos = m_goodTreeCol[it]->GetNodes().front()->GetPosition(); 
+      if( m_layer<=m_goodTreeCol[it]->GetMinDlayer() )   m_nodePos = m_goodTreeCol[it]->GetNodes().back()->GetPosition(); 
+      if( m_layer>=m_goodTreeCol[it]->GetMaxDlayer() )   m_nodePos = m_goodTreeCol[it]->GetNodes().front()->GetPosition(); 
 
       CRDEcalEDM::CRDCaloHit3DCluster m_clus = m_goodTreeCol[it]->ConvertTreeToCluster(); 
       m_clus.FitAxis(); 
@@ -103,6 +114,19 @@ StatusCode ArborTreeMergingAlg::RunAlgorithm( ArborTreeMergingAlg::Settings& m_s
   }
   }
 
+
+  //Re-classify trees after merging: 
+  for(int it=0; it<m_badTreeCol.size(); it++){
+    if(  ( (m_badTreeCol[it]->GetMaxDlayer()-m_badTreeCol[it]->GetMinDlayer()) >= settings.th_GoodTreeLayer1 ) ||
+         ( (m_badTreeCol[it]->GetMaxDlayer()-m_badTreeCol[it]->GetMinDlayer()) >= settings.th_GoodTreeLayer2 &&
+         m_badTreeCol[it]->GetNodes().size()>=settings.th_GoodTreeNodes) ){
+      m_goodTreeCol.push_back( m_badTreeCol[it] );
+      m_badTreeCol.erase( m_badTreeCol.begin()+it );
+      it--; 
+    }
+  }
+
+//std::cout<<"  Good tree size: "<<m_goodTreeCol.size()<<", Bad tree size: "<<m_badTreeCol.size()<<std::endl;
   //Save Trees into CRDCaloHit3DCluster
   std::vector<CRDEcalEDM::CRDCaloHit3DCluster> m_goodClusterCol;  m_goodClusterCol.clear();
   std::vector<CRDEcalEDM::CRDCaloHit3DCluster> m_badClusterCol;  m_badClusterCol.clear();
@@ -122,14 +146,14 @@ StatusCode ArborTreeMergingAlg::RunAlgorithm( ArborTreeMergingAlg::Settings& m_s
   m_ClusterCol.insert(m_ClusterCol.end(), m_goodClusterCol.begin(), m_goodClusterCol.end());
   m_ClusterCol.insert(m_ClusterCol.end(), m_badClusterCol.begin(), m_badClusterCol.end());
 
-  //std::cout<<"Print Good Tree: "<<std::endl;
-  //for(int it=0; it<m_goodTreeCol.size(); it++) m_goodTreeCol[it]->PrintTree();
-  //std::cout<<"Print Bad Tree: "<<std::endl;
-  //for(int it=0; it<m_badTreeCol.size(); it++) m_badTreeCol[it]->PrintTree();
-  //std::cout<<"Print Isolated Nodes: "<<std::endl;
-  //for(int i=0; i<m_isoNodes.size(); i++)
-  //  printf("(%.2f, %.2f, %.2f, %d) \n", m_isoNodes[i]->GetPosition().x(), m_isoNodes[i]->GetPosition().y(), m_isoNodes[i]->GetPosition().z(), m_isoNodes[i]->GetType());  
-  //cout<<"After convertion: goodClus: "<<m_goodClusterCol.size()<<"  badClus: "<<m_badClusterCol.size()<<"  total: "<<m_ClusterCol.size()<<std::endl;
+//  std::cout<<"Print Good Tree: "<<std::endl;
+//  for(int it=0; it<m_goodTreeCol.size(); it++) m_goodTreeCol[it]->PrintTree();
+//  std::cout<<"Print Bad Tree: "<<std::endl;
+//  for(int it=0; it<m_badTreeCol.size(); it++) m_badTreeCol[it]->PrintTree();
+//  std::cout<<"Print Isolated Nodes: "<<std::endl;
+//  for(int i=0; i<m_isoNodes.size(); i++)
+//    printf("(%.2f, %.2f, %.2f, %d) \n", m_isoNodes[i]->GetPosition().x(), m_isoNodes[i]->GetPosition().y(), m_isoNodes[i]->GetPosition().z(), m_isoNodes[i]->GetType());  
+//  cout<<"After convertion: goodClus: "<<m_goodClusterCol.size()<<"  badClus: "<<m_badClusterCol.size()<<"  total: "<<m_ClusterCol.size()<<std::endl;
 
 
   if(settings.fl_overwrite) m_datacol.ClearCluster(); 
