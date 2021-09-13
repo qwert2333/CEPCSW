@@ -90,12 +90,14 @@ for(int ig=0 ;ig<dataCol.GoodClus3DCol.size(); ig++) std::cout<<dataCol.GoodClus
 std::cout<<std::endl;
 */
 
+std::cout<<"ECalRec: clusterID"<<std::endl;
   m_CIDAlgSettings->SetDepartShower(true);
   m_clusteridAlg->RunAlgorithm( *m_CIDAlgSettings, dataCol );
 
-//std::cout<<"    MIP shower col size: "<<dataCol.MIPShower2DCol.size()<<std::endl;
-//std::cout<<"    EM shower col size: "<<dataCol.EMShower2DCol.size()<<std::endl;
-//std::cout<<"    other shower col size: "<<dataCol.Shower2DCol.size()<<std::endl;
+/*
+std::cout<<"    MIP shower col size: "<<dataCol.MIPShower2DCol.size()<<std::endl;
+std::cout<<"    EM shower col size: "<<dataCol.EMShower2DCol.size()<<std::endl;
+std::cout<<"    other shower col size: "<<dataCol.Shower2DCol.size()<<std::endl;
 //dataCol.Print3DClus(); 
 
 
@@ -136,9 +138,10 @@ std::cout<<std::endl;
 //std::cout<<", total cluster size = "<<dataCol.Clus3DCol.size()<<std::endl;
 
 //dataCol.Print3DClus(); 
-
-  m_CLAlgSettings->SetMergeGoodCluster(true);
-  m_CLAlgSettings->SetMergeBadCluster(true);
+*/
+std::cout<<"EcalRec: Cluster merging"<<std::endl;
+  m_CLAlgSettings->SetMergeGoodCluster(false);
+  m_CLAlgSettings->SetMergeBadCluster(false);
   m_CLAlgSettings->SetMergeEMTail(false);
   m_clustermergingAlg  ->RunAlgorithm( *m_CLAlgSettings, dataCol );
 

@@ -109,6 +109,8 @@ StatusCode PandoraPlusPFAlg::initialize()
   t_dataColIter0->Branch("clus_alpha", &m_Iter0_clus_alpha);
   t_dataColIter0->Branch("clus_beta", &m_Iter0_clus_beta);
   t_dataColIter0->Branch("clus_chi2", &m_Iter0_clus_chi2 );
+  t_dataColIter0->Branch("clus_BDT", &m_Iter0_clus_BDTvalue );
+  t_dataColIter0->Branch("clus_type", &m_Iter0_clus_type );
   t_dataColIter0->Branch("gclus_2dshx", &m_Iter0_gclus_2dshx );
   t_dataColIter0->Branch("gclus_2dshy", &m_Iter0_gclus_2dshy );
   t_dataColIter0->Branch("gclus_2dshz", &m_Iter0_gclus_2dshz );
@@ -178,7 +180,7 @@ StatusCode PandoraPlusPFAlg::execute()
   m_pEcalClusterRec->ClearAlgorithm();
 
 
-  //std::cout<<"Reconstruction is done. Create PFO"<<std::endl;
+  std::cout<<"Reconstruction is done. Create PFO"<<std::endl;
   m_pPfoCreator->CreatePFO( m_DataCol ); 
 
 
@@ -278,7 +280,8 @@ StatusCode PandoraPlusPFAlg::execute()
     m_Iter0_clus_alpha.push_back(m_clus.getFitAlpha());
     m_Iter0_clus_beta.push_back(m_clus.getFitBeta());
     m_Iter0_clus_chi2.push_back(m_clus.getChi2()); 
-
+    m_Iter0_clus_BDTvalue.push_back(m_clus.getBDTValue());
+    m_Iter0_clus_type.push_back(m_clus.getType());
 
     for(int ig=0; ig<m_clus.get2DShowers().size(); ig++){
       m_Iter0_gclus_2dshx.push_back(m_clus.get2DShowers()[ig].getPos().x() );
@@ -344,11 +347,7 @@ StatusCode PandoraPlusPFAlg::execute()
     m_Clus_y.push_back(m_clus[i].getShowerCenter().y());
     m_Clus_z.push_back(m_clus[i].getShowerCenter().z());
     m_Clus_E.push_back(m_clus[i].getShowerE());
-    int m_type = -1; 
-    if(m_clus[i].getStdDevE()<0.05) m_type = 0; 
-    else if(m_clus[i].getStdDevE()>0.5) m_type = 1; 
-    else m_type = 2; 
-    m_Clus_type.push_back(m_type);
+    m_Clus_type.push_back(m_clus[i].getType());
   }
 
 
@@ -461,6 +460,8 @@ void PandoraPlusPFAlg::ClearIter(){
   m_Iter0_clus_alpha.clear();
   m_Iter0_clus_beta.clear();
   m_Iter0_clus_chi2.clear(); 
+  m_Iter0_clus_BDTvalue.clear(); 
+  m_Iter0_clus_type.clear(); 
   m_Iter0_gclus_2dshx.clear();
   m_Iter0_gclus_2dshy.clear();
   m_Iter0_gclus_2dshz.clear();

@@ -69,6 +69,8 @@ StatusCode PFOCreator::CreatePFO(PandoraPlusDataCol& dataCol){
 
     m_pfoCol.push_back(m_pfo);
   }
+  dataCol.Clus3DCol = m_clusCol; 
+  dataCol.TrackCol = m_trkCol; 
   dataCol.PFOCol = m_pfoCol;
   return StatusCode::SUCCESS;
 };

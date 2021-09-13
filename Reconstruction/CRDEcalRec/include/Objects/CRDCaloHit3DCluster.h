@@ -12,12 +12,20 @@
 #include "TVector3.h"
 #include "TString.h"
 
+#include "TMVA/Tools.h"
+#include "TMVA/Reader.h"
+
 using namespace std;
+
+namespace TMVA {
+  class Reader;
+}
+
 namespace CRDEcalEDM{
 
   class CRDCaloHit3DCluster{
   public:
-    CRDCaloHit3DCluster(){};
+    CRDCaloHit3DCluster();
 
     edm4hep::ConstCalorimeterHit getClusterInitialHit() const; 
     TVector3 getHitCenter() const;
@@ -42,13 +50,12 @@ namespace CRDEcalEDM{
 
     std::vector<CRDEcalEDM::CRDCaloHit2DShower> get2DShowers() const { return ShowerinLayer; }
     std::vector<edm4hep::ConstCalorimeterHit> getCaloHits() const { return CaloHits; }
-    double getFitAlpha() const { return alpha; }
-    double getFitBeta() const { return beta; }
+    float getFitAlpha() const { return alpha; }
+    float getFitBeta() const { return beta; }
     double getFitExpEn() const {return ExpEn; }
-    double getShowerMax() const {return showerMax; }
-    double getChi2() const { return chi2; }
+    float getChi2() const { return chi2; }
     TVector3 getAxis() const { return axis; }
-    void getFitPars(double& _alpha, double& _beta ) const { _alpha = alpha; _beta = beta; }
+    void getFitPars(float& _alpha, float& _beta ) const { _alpha = alpha; _beta = beta; }
     int getBeginningDlayer() const; 
     int getEndDlayer() const;
 
@@ -60,12 +67,12 @@ namespace CRDEcalEDM{
     std::vector<double> getClusterWidth() const;
     double getMaxWidth() const; 
     int getType() const { return type; }
-
+    double getBDTValue() const { return ID_BDT; }
 
     void setShowerVec( std::vector<CRDEcalEDM::CRDCaloHit2DShower>& _svec ) { ShowerinLayer = _svec;}
     void setCaloHits( std::vector<edm4hep::ConstCalorimeterHit>& _hits ) { CaloHits = _hits; }
     void setType( int _t ) { type = _t; }
-    void Clear() { ShowerinLayer.clear(); CaloHits.clear(); showerEnergy=0; hitsEnergy=0; showerMax=0; chi2=0; alpha=0; beta=0; ExpEn=0; axis.SetXYZ(0,0,0); type=-1; }
+    void Clear() { ShowerinLayer.clear(); CaloHits.clear(); showerEnergy=0; hitsEnergy=0; chi2=0; alpha=0; beta=0; ExpEn=0; axis.SetXYZ(0,0,0); type=-1; ID_BDT=-999; }
 
   private: 
     std::vector<CRDEcalEDM::CRDCaloHit2DShower> ShowerinLayer;
@@ -73,15 +80,21 @@ namespace CRDEcalEDM{
     TVector3 axis;
     double showerEnergy;
     double hitsEnergy;
-    double showerMax;
-    double chi2;
-    double alpha;
-    double beta;
+    float chi2;
+    float alpha;
+    float beta;
     int    type;  //0: MIP shower.  1: EM shower.  2: hadronic shower
+    double ID_BDT;
     double ExpEn; 
 
     TrackFitInEcal* track = new TrackFitInEcal(); 
 
+    float Lend; 
+    float LmaxWidth; 
+    float LmaxE;
+    float maxEnergy; 
+    float maxWidth; 
+    TMVA::Reader *reader = new TMVA::Reader("Silent");  
   };
 };
 #endif

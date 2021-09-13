@@ -11,6 +11,7 @@ gaudi_add_library(CRDEcalRecLib
                           src/Objects/Track.cc
                           src/Objects/TrackFitInEcal.cpp
                   LINK    k4FWCore::k4FWCore
+                          ROOT::TMVA
                           GearSvc
                           DetInterface
                           Gaudi::GaudiKernel
@@ -20,6 +21,7 @@ gaudi_add_library(CRDEcalRecLib
                           ${GSL_LIBRARIES}
                           ${LCIO_LIBRARIES}
                           ${ROOT_LIBRARIES}
+                          ${TMVA_LIBRARIES}
                           EDM4HEP::edm4hep EDM4HEP::edm4hepDict
 
 )
