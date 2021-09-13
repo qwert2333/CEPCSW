@@ -46,8 +46,7 @@ Keep the collection names compatible between the prototype and the existing CEPC
 
 
 ## Update in branch dev-EcalRec-v07: CRD Ecal Reconstruction
-  * Re-organize ECAL reconstruction: move EDM into Reconstruction/CRDEcalRec.
-  * Consider cluster ID, deal with photon and hadron separately. 
+  * Add a TMVA BDT model for clusterID. But need further tuning and optimization. 
 
 
 
