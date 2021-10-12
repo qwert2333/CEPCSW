@@ -26,6 +26,7 @@ namespace CRDEcalEDM{
   class CRDCaloHit3DCluster{
   public:
     CRDCaloHit3DCluster();
+    //~CRDCaloHit3DCluster(){ delete track;}
 
     edm4hep::ConstCalorimeterHit getClusterInitialHit() const; 
     TVector3 getHitCenter() const;
@@ -94,7 +95,7 @@ namespace CRDEcalEDM{
     float LmaxE;
     float maxEnergy; 
     float maxWidth; 
-    TMVA::Reader *reader = new TMVA::Reader("Silent");  
+    //TMVA::Reader *reader = new TMVA::Reader("Silent");  
   };
 };
 #endif

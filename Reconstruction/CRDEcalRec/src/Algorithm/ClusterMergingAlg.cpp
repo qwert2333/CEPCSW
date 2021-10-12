@@ -34,7 +34,6 @@ StatusCode ClusterMergingAlg::RunAlgorithm( ClusterMergingAlg::Settings& m_setti
 
   //std::vector<CRDEcalEDM::Track>              m_trkCol  = dataCol.TrackCol;
 
-cout<<"  Initial good cluster size: "<<m_goodClusCol.size()<<endl;
   //Merge 2 good clusters with several criteria
   if(settings.fl_MergeGoodClus){
   std::sort(m_goodClusCol.begin(), m_goodClusCol.end(), compBegin); 

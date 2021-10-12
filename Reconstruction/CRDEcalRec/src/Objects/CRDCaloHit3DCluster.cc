@@ -14,7 +14,8 @@ namespace CRDEcalEDM{
 
  CRDCaloHit3DCluster:: CRDCaloHit3DCluster(){
     type=-1; 
-    ID_BDT=-99;
+
+/*    ID_BDT=-99;
 
     reader->AddVariable( "Lend", &Lend );
     reader->AddVariable( "LmaxWidth", &LmaxWidth );
@@ -25,6 +26,7 @@ namespace CRDEcalEDM{
     reader->AddVariable( "beta", &beta );
     reader->AddVariable( "chi2", &chi2 );
     reader->BookMVA("BDT","/cefs/higgs/guofy/cepcsoft/CEPCSW_v9/Reconstruction/CRDEcalRec/include/Objects/TMVA_CID_BDTG.weights.xml");
+*/
   }
 
   //Get the initial hit in this shower. defined as closest to IP. 
@@ -327,7 +329,20 @@ namespace CRDEcalEDM{
 
 
   void CRDCaloHit3DCluster::IdentifyCluster(){
-    FitProfile(); 
+    float Lstart=0; 
+    bool f_found = false;
+    double stdDevE = getStdDevE();
+    std::vector<double> m_EnVec = getEnInLayer();
+    for(int i=0; i<m_EnVec.size(); i++){
+      if(!f_found && m_EnVec[i]>0.1) { Lstart=i; f_found==true; }
+      if(m_EnVec[i]>maxEnergy) { maxEnergy=m_EnVec[i]; LmaxE=(float)i; }
+    }
+
+    if(Lstart==0 && Lend>12) {type = 0; return; }  //MIP
+    else if(stdDevE>0.2) {type = 1; return; }  //EM
+    else {type = 2; return; }  //Had
+
+/*    FitProfile(); 
     std::vector<double> m_widthVec = getClusterWidth();
     std::vector<double> m_EnVec = getEnInLayer();
 
@@ -349,30 +364,26 @@ namespace CRDEcalEDM{
     beta = getFitBeta();
     chi2 = 1.;
 
-    if(Lstart==0 && Lend>12) {type = 0; return; }  //MIP
 
+    //TMVA::Reader *reader = new TMVA::Reader();
+    //reader->AddVariable( "Lend", &Lend );
+    //reader->AddVariable( "LmaxWidth", &LmaxWidth );
+    //reader->AddVariable( "LmaxE", &LmaxE );
+    //reader->AddVariable( "maxE", &maxEnergy );
+    //reader->AddVariable( "maxWidth", &maxWidth );
+    //reader->AddVariable( "alpha", &alpha );
+    //reader->AddVariable( "beta", &beta );
+    //reader->AddVariable( "chi2", &chi2 );
 
-/*    //TMVA::Reader *reader = new TMVA::Reader();
-    reader->AddVariable( "Lend", &Lend );
-    reader->AddVariable( "LmaxWidth", &LmaxWidth );
-    reader->AddVariable( "LmaxE", &LmaxE );
-    reader->AddVariable( "maxE", &maxEnergy );
-    reader->AddVariable( "maxWidth", &maxWidth );
-    reader->AddVariable( "alpha", &alpha );
-    reader->AddVariable( "beta", &beta );
-    reader->AddVariable( "chi2", &chi2 );
+    //reader->BookMVA("BDT","/cefs/higgs/guofy/cepcsoft/CEPCSW_v9/Reconstruction/CRDEcalRec/include/Objects/TMVA_CID_BDTG.weights.xml");
 
-    reader->BookMVA("BDT","/cefs/higgs/guofy/cepcsoft/CEPCSW_v9/Reconstruction/CRDEcalRec/include/Objects/TMVA_CID_BDTG.weights.xml");
-*/
-std::cout<<"Cluster Identify: Evaluate BDT"<<std::endl;
-printf("BDT input: %.2f, %.2f, %.2f, %.2f, %.2f, %.2f, %.2f, %.2f \n", Lend, LmaxWidth, LmaxE, maxEnergy, maxWidth, alpha, beta, chi2);
     ID_BDT = reader->EvaluateMVA("BDT");
-std::cout<<"BDT value: "<<ID_BDT<<std::endl;    
 
     if(ID_BDT>-0.04) type = 1; //Gam
     else type = 2;   //Had
 
     //delete reader; 
+*/
   }
 
 

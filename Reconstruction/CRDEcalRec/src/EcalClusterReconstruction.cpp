@@ -26,6 +26,7 @@ void EcalClusterReconstruction::Initialize(){
 StatusCode EcalClusterReconstruction::RunAlgorithm( EcalClusterReconstruction::Settings& settings,  PandoraPlusDataCol& dataCol ){
 
 
+std::cout<<"Start preparation"<<std::endl;
   //Iteration 0: pre-treatment, get initial level candidates
   m_ESAlgSettings->SetInitialValue();
   m_ETAlgSettings->SetInitialValue(); 
@@ -47,20 +48,8 @@ StatusCode EcalClusterReconstruction::RunAlgorithm( EcalClusterReconstruction::S
   m_shadowmakingAlg   ->RunAlgorithm( *m_CMAlgSettings, dataCol );
   //m_clustermergingAlg ->RunAlgorithm( *m_CLAlgSettings, dataCol );
 
-    dataCol.BlockVec_iter0       = dataCol.BlockVec;
-    dataCol.LayerCol_iter0       = dataCol.LayerCol;
-    dataCol.Shower2DCol_iter0    = dataCol.Shower2DCol;
-    dataCol.GoodClus3DCol_iter0  = dataCol.GoodClus3DCol;
-    dataCol.BadClus3DCol_iter0   = dataCol.BadClus3DCol;
-    dataCol.Clus3DCol_iter0      = dataCol.Clus3DCol;
-
-//dataCol.PrintLayer();
-//dataCol.PrintShower();
-//dataCol.Print3DClus(); 
-//for(int ib=0; ib<dataCol.BlockVec.size(); ib++){ cout<<"  Block #"<<ib<<'\n';  dataCol.BlockVec[ib].PrintCandidates(); }
-
   //Iteration 
-//std::cout<<"Start iteration"<<std::endl;
+  //std::cout<<"Start iteration"<<std::endl;
 
   dataCol.ClearLayer();
   dataCol.ClearShower();
@@ -80,17 +69,17 @@ StatusCode EcalClusterReconstruction::RunAlgorithm( EcalClusterReconstruction::S
 //dataCol.PrintShower();
 //dataCol.Print3DClus(); 
 
-/*
-std::cout<<"   Before cluster ID and depart: shower col size = "<<dataCol.Shower2DCol.size()<<std::endl;
-std::cout<<"                                 good cluster size = "<<dataCol.GoodClus3DCol.size();
-std::cout<<", bad cluster size = "<<dataCol.BadClus3DCol.size();
-std::cout<<", total cluster size = "<<dataCol.Clus3DCol.size()<<std::endl;
-std::cout<<"  Good cluster stdDevE: "; 
-for(int ig=0 ;ig<dataCol.GoodClus3DCol.size(); ig++) std::cout<<dataCol.GoodClus3DCol[ig].getStdDevE()<<'\t';
-std::cout<<std::endl;
-*/
 
-std::cout<<"ECalRec: clusterID"<<std::endl;
+//std::cout<<"   Before cluster ID and depart: shower col size = "<<dataCol.Shower2DCol.size()<<std::endl;
+//std::cout<<"                                 good cluster size = "<<dataCol.GoodClus3DCol.size();
+//std::cout<<", bad cluster size = "<<dataCol.BadClus3DCol.size();
+//std::cout<<", total cluster size = "<<dataCol.Clus3DCol.size()<<std::endl;
+//std::cout<<"  Good cluster stdDevE: "; 
+//for(int ig=0 ;ig<dataCol.GoodClus3DCol.size(); ig++) std::cout<<dataCol.GoodClus3DCol[ig].getStdDevE()<<'\t';
+//std::cout<<std::endl;
+
+
+//std::cout<<"ECalRec: clusterID"<<std::endl;
   m_CIDAlgSettings->SetDepartShower(true);
   m_clusteridAlg->RunAlgorithm( *m_CIDAlgSettings, dataCol );
 
@@ -99,7 +88,7 @@ std::cout<<"    MIP shower col size: "<<dataCol.MIPShower2DCol.size()<<std::endl
 std::cout<<"    EM shower col size: "<<dataCol.EMShower2DCol.size()<<std::endl;
 std::cout<<"    other shower col size: "<<dataCol.Shower2DCol.size()<<std::endl;
 //dataCol.Print3DClus(); 
-
+*/
 
   m_CCAlgSettings->SetClusterType("MIP");
   m_CCAlgSettings->SetConeValue(PI/4., 50., PI/6., 30.);
@@ -138,25 +127,12 @@ std::cout<<"    other shower col size: "<<dataCol.Shower2DCol.size()<<std::endl;
 //std::cout<<", total cluster size = "<<dataCol.Clus3DCol.size()<<std::endl;
 
 //dataCol.Print3DClus(); 
-*/
-std::cout<<"EcalRec: Cluster merging"<<std::endl;
-  m_CLAlgSettings->SetMergeGoodCluster(false);
-  m_CLAlgSettings->SetMergeBadCluster(false);
+
+//std::cout<<"EcalRec: Cluster merging"<<std::endl;
+  m_CLAlgSettings->SetMergeGoodCluster(true);
+  m_CLAlgSettings->SetMergeBadCluster(true);
   m_CLAlgSettings->SetMergeEMTail(false);
   m_clustermergingAlg  ->RunAlgorithm( *m_CLAlgSettings, dataCol );
-
-  //Cluster ID
-  //Shadow cluster making
-  
-  //Next iteration: 
-  //Cluster splitting
-  //E-T matching (chi2 and shadow cluster)
-  //clustering (with shadow cluster)
-  //Identify MIP & EM
-  //mask MIP and EM
-  //clustering others again
-  //cluster merging (hadrons only)
-  //End. 
 
 
   return StatusCode::SUCCESS;

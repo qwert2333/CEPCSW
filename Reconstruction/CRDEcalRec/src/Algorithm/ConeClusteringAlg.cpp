@@ -97,26 +97,27 @@ StatusCode ConeClusteringAlg::LongiConeLinking(
   std::vector<CRDEcalEDM::CRDCaloHit3DCluster>& ClusterCol)
 {
   if(orderedShower.size()==0) return StatusCode::SUCCESS;
+//cout<<"Start LongiConeLinking: orderedShower.size = "<<orderedShower.size()<<endl;
 
    std::map<int, std::vector<CRDEcalEDM::CRDCaloHit2DShower>>::iterator iter = orderedShower.begin();
   //In first layer: initial clusters. All showers in the first layer are regarded as cluster seed.
   //cluster initial direction = R.
   std::vector<CRDEcalEDM::CRDCaloHit2DShower> ShowersinFirstLayer;  ShowersinFirstLayer.clear();
   ShowersinFirstLayer = iter->second;
+//cout<<" First layer: "<<iter->first<<", shower size: "<<ShowersinFirstLayer.size()<<endl;
+//printf("%.2f, %.2f,%.2f,%.2f \n", ShowersinFirstLayer[2].getPos().x(), ShowersinFirstLayer[2].getPos().y(), ShowersinFirstLayer[2].getPos().z(), ShowersinFirstLayer[2].getShowerE());
   for(int i=0;i<ShowersinFirstLayer.size(); i++){
-    CRDEcalEDM::CRDCaloHit3DCluster m_clus;
+    CRDEcalEDM::CRDCaloHit3DCluster m_clus; m_clus.Clear(); 
     m_clus.AddShower(ShowersinFirstLayer[i]);
     ClusterCol.push_back(m_clus);
   }
   iter++;
 
-//cout<<"    LongiConeLinking: Cluster seed in first layer: "<<ClusterCol.size()<<endl;
 
   //Use different cone angle for 1->2/2->3 and 3->n case
   //Loop later layers
   for(iter;iter!=orderedShower.end();iter++){
     std::vector<CRDEcalEDM::CRDCaloHit2DShower> ShowersinLayer = iter->second;
-//cout<<"    In Layer: "<<iter->first<<"  Shower size: "<<ShowersinLayer.size()<<endl;
     for(int is=0; is<ShowersinLayer.size(); is++){
       CRDEcalEDM::CRDCaloHit2DShower m_shower = ShowersinLayer[is];
       for(int ic=0; ic<ClusterCol.size(); ic++ ){

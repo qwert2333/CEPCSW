@@ -107,22 +107,21 @@ protected:
   TTree* t_SimBar;
   FloatVec m_simBar_x, m_simBar_y, m_simBar_z, m_simBar_T1, m_simBar_T2, m_simBar_Q1, m_simBar_Q2, m_simBar_dlayer, m_simBar_part, m_simBar_stave, m_simBar_slayer, m_simBar_module;
 
-  TTree* t_ArborTree;
-  int m_Nnode;
-  float m_tree_centx, m_tree_centy, m_tree_centz, m_tree_minLayer, m_tree_maxLayer; 
-  FloatVec m_nodex, m_nodey, m_nodez, m_nodeType, m_nodeE;
+  //Stage1: check 
+  TTree *t_Layers;
+  int m_NshowerX, m_NshowerY, m_dlayer, m_module, m_stave, m_part; 
+  FloatVec m_barShowerX_x, m_barShowerX_y, m_barShowerX_z, m_barShowerX_E;
+  FloatVec m_barShowerY_x, m_barShowerY_y, m_barShowerY_z, m_barShowerY_E;
 
-  TTree* t_dataColIter0;
-  //Cluster basic info
-  int      m_Iter0_Ngoodclus, m_Iter0_Nbadclus;
-  FloatVec m_Iter0_clus_x, m_Iter0_clus_y, m_Iter0_clus_z, m_Iter0_clus_E;
-  FloatVec m_Iter0_clus_px, m_Iter0_clus_py, m_Iter0_clus_pz; 
-  //----Cluster ID info
-  IntVec   m_Iter0_clus_Nly, m_Iter0_clus_Nsh, m_Iter0_clus_start, m_Iter0_clus_end, m_Iter0_clus_maxELayer, m_Iter0_clus_maxWidthLayer, m_Iter0_clus_type; 
-  FloatVec m_Iter0_clus_aveE, m_Iter0_clus_stdDevE, m_Iter0_clus_maxE, m_Iter0_clus_maxWidth;
-  FloatVec m_Iter0_clus_alpha, m_Iter0_clus_beta, m_Iter0_clus_chi2, m_Iter0_clus_BDTvalue;
-  //----Showers in cluster
-  FloatVec m_Iter0_gclus_2dshx, m_Iter0_gclus_2dshy, m_Iter0_gclus_2dshz, m_Iter0_gclus_2dshE;
+  TTree *t_Showers;
+  int m_Nshower2D; 
+  IntVec m_shower2D_dlayer, m_shower2D_part, m_shower2D_stave, m_shower2D_module, m_shower2D_type; 
+  FloatVec m_shower2D_x, m_shower2D_y, m_shower2D_z, m_shower2D_E;
+
+  TTree *t_Clusters;
+  int m_Ngoodclus, m_Nbadclus, m_Nclus; 
+  IntVec m_clus_type, m_clus_Nlayer, m_clus_Nshower;
+  FloatVec m_clus_x, m_clus_y, m_clus_z, m_clus_E;
 
   //Stage2: check reconstructed result
   TTree *t_recoPFO;
@@ -138,8 +137,9 @@ protected:
 
   void ClearBar();
   void ClearRecPFO(); 
-  void ClearTree();
-  void ClearIter();
+  void ClearLayerTree(); 
+  void ClearShowerTree(); 
+  void ClearClusterTree(); 
 
 };
 #endif
