@@ -14,23 +14,23 @@ namespace CRDEcalEDM{
     return false;
   }
 
-  std::vector<CRDEcalEDM::CRDShadowCluster> CRDCaloBlock::getAllCandidateCol() const{
+  std::vector<CRDEcalEDM::CRDShadowCluster> CRDCaloBlock::getAllShadowClusCol() const{
     std::vector<CRDEcalEDM::CRDShadowCluster> m_allcandi; m_allcandi.clear();
-    m_allcandi = NeuCandidateCol; 
-    m_allcandi.insert(m_allcandi.end(), TrkCandidateCol.begin(), TrkCandidateCol.end());
+    m_allcandi = NeuShadowClusCol; 
+    m_allcandi.insert(m_allcandi.end(), TrkShadowClusCol.begin(), TrkShadowClusCol.end());
     return m_allcandi; 
   }
 
 
-  void CRDCaloBlock::PrintCandidates() const{
-    std::cout<<"    Track Candidate: # "<<TrkCandidateCol.size()<<std::endl;
-    for(int ic=0; ic<TrkCandidateCol.size(); ic++)
+  void CRDCaloBlock::PrintShadowClus() const{
+    std::cout<<"    Track ShadowClus: # "<<TrkShadowClusCol.size()<<std::endl;
+    for(int ic=0; ic<TrkShadowClusCol.size(); ic++)
     printf("\t  #%d: (%.3f, %.3f, %.3f), type = %d \n", 
-           ic, TrkCandidateCol[ic].ExpPos.x(), TrkCandidateCol[ic].ExpPos.y(), TrkCandidateCol[ic].ExpPos.z(), TrkCandidateCol[ic].Type);
-    std::cout<<"    Neutral Candidate: # "<<NeuCandidateCol.size()<<std::endl;
-    for(int ic=0; ic<NeuCandidateCol.size(); ic++)
+           ic, TrkShadowClusCol[ic].ExpPos.x(), TrkShadowClusCol[ic].ExpPos.y(), TrkShadowClusCol[ic].ExpPos.z(), TrkShadowClusCol[ic].Type);
+    std::cout<<"    Neutral ShadowClus: # "<<NeuShadowClusCol.size()<<std::endl;
+    for(int ic=0; ic<NeuShadowClusCol.size(); ic++)
     printf("\t  #%d: (%.3f, %.3f, %.3f), type = %d \n",
-           ic, NeuCandidateCol[ic].ExpPos.x(), NeuCandidateCol[ic].ExpPos.y(), NeuCandidateCol[ic].ExpPos.z(), NeuCandidateCol[ic].Type);
+           ic, NeuShadowClusCol[ic].ExpPos.x(), NeuShadowClusCol[ic].ExpPos.y(), NeuShadowClusCol[ic].ExpPos.z(), NeuShadowClusCol[ic].Type);
     
   }
 

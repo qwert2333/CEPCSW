@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<lccdd>
+
+  <includes>
+    <gdmlFile  ref="elements.xml"/>
+    <gdmlFile  ref="materials.xml"/>
+  </includes>
+
+  <define>
+    <constant name="world_size" value="30*m"/>
+    <constant name="world_x" value="world_size"/>
+    <constant name="world_y" value="world_size"/>
+    <constant name="world_z" value="world_size"/>
+    <constant name="bar_x" value="10*mm"/>   <!--Crystal size in R direction-->
+    <constant name="bar_y" value="10*mm"/>   <!--Crystal size in z/phi direction (z for odd layer, phi for even layer)-->
+    <constant name="ecalbarrel_inner_radius" value="1800*mm"/>
+    <constant name="ecalbarrel_thickness"    value="280*mm"/>    <!--Must be n*bar_x! -->
+    <constant name="ecalbarrel_zlength"      value="4510*mm"/>   <!--Must be n*bar_y! -->
+
+    <constant name="Field_nominal_value" value="3*tesla"/>
+    <constant name="Field_outer_nominal_value" value="-1.3*tesla"/>
+    <constant name="Solenoid_inner_radius" value="2330*mm"/>
+    <constant name="Solenoid_outer_radius" value="2480*mm"/>
+    <constant name="Solenoid_half_length" value="3830*mm"/>
+    <constant name="SolenoidCoil_half_length" value="3800*mm"/>
+    <constant name="SolenoidCoil_radius" value="2351*mm"/>
+    <constant name="SolenoidCoil_center_radius" value="(Solenoid_inner_radius+Solenoid_outer_radius)/2"/>
+    <constant name="Yoke_barrel_inner_radius" value="3660*mm"/>
+
+    <include ref="detector_types.xml"/>
+  </define>
+
+  <display>
+    <vis name="Invisible" showDaughters="false" visible="false"/>
+    <vis name="InvisibleWithChildren" showDaughters="true" visible="false"/>
+    <vis name="VisibleRed"  r="1.0" g="0.0" b="0.0" showDaughters="true" visible="true"/>
+    <vis name="VisibleBlue" r="0.0" g="0.0" b="1.0" showDaughters="false" visible="true"/>
+    <vis name="VisibleGreen" alpha="1.0" r="0.0" g="1.0" b="0.0" drawingStyle="solid" lineStyle="solid" showDaughters="true" visible="true"/>
+  </display>
+
+  <detectors>
+    <detector id="31" name="ECalBarrel" type="CRDEcalBarrel_v01" readout="CaloHitsCollection" vis="Invisible" sensitive="true">
+      <type_flags type=" DetType_CALORIMETER + DetType_BARREL + DetType_ELECTROMAGNETIC " />
+      <!-- Use cm as unit if you want to use Pandora for reconstruction -->
+    </detector>
+  </detectors>
+  
+  <readouts>
+    <readout name="CaloHitsCollection">
+      <segmentation type="NoSegmentation"/> 
+
+      <!--segmentation type="CartesianGridXYZ"
+                    grid_size_x="1*cm"
+                    grid_size_y="1*cm"
+                    grid_size_z="1*cm"/-->
+      <id>system:5,module:3,stave:4,dlayer:5,part:3,slayer:32:2,bar:6</id>
+      <!--id>system:5,module:3,layer:6,block:8,bar:10</id-->
+    </readout>
+  </readouts>
+
+  <fields>
+    <field name="InnerSolenoid" type="solenoid"
+           inner_field="Field_nominal_value"
+           outer_field="0"
+           zmax="SolenoidCoil_half_length"
+           inner_radius="SolenoidCoil_center_radius"
+           outer_radius="Solenoid_outer_radius">
+    </field>
+    <field name="OuterSolenoid" type="solenoid"
+           inner_field="0"
+           outer_field="Field_outer_nominal_value"
+           zmax="SolenoidCoil_half_length"
+           inner_radius="Solenoid_outer_radius"
+           outer_radius="Yoke_barrel_inner_radius">
+    </field>
+  </fields>
+
+
+</lccdd>

@@ -1,5 +1,5 @@
-#ifndef _CRD_EXPEMSHOWER_
-#define _CRD_EXPEMSHOWER_
+#ifndef _CRD_SHADOWCLUS_H
+#define _CRD_SHADOWCLUS_H
 
 namespace CRDEcalEDM {
 
@@ -8,7 +8,7 @@ namespace CRDEcalEDM {
   public: 
 
     CRDShadowCluster(){}; 
-    void Clear(){  Dlayer=0; ExpEshower=0; ExpEseed=0; ExpDepth=0; ExpPos.SetXYZ(0,0,0);  }
+    void Clear(){  Dlayer=0; ExpEshower=0; ExpEseed=0; ExpDepth=0; ExpPos.SetXYZ(0,0,0); slayer=-1; }
 
     inline bool operator == (const CRDShadowCluster &x) const{
       return ( Dlayer==x.Dlayer  &&
@@ -26,6 +26,7 @@ namespace CRDEcalEDM {
     double ExpDepth;
     TVector3 ExpPos;
     int Type;  //1 for track-type, 0 for neutral-type
+    int slayer; 
 
   };
 

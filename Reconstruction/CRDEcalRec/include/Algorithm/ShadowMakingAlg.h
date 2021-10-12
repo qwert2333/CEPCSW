@@ -1,37 +1,33 @@
-#ifndef _CANDIDATEMAKING_ALG_H
-#define _CANDIDATEMAKING_ALG_H
+#ifndef _SHADOWMAKING_ALG_H
+#define _SHADOWMAKING_ALG_H
 
 #include "PandoraPlusDataCol.h"
-#include "Algorithm/EnergySplittingAlg.h"
-#include "Algorithm/EnergyTimeMatchingAlg.h"
-#include "Algorithm/ConeClusteringAlg.h"
 
 using namespace CRDEcalEDM;
 
 class ShadowMakingAlg{
-
 public: 
+
   class Settings{
   public: 
     Settings() {};
     void SetInitialValue();
-    void SetDebug(int _level)   { Debug  =_level; }
-    void SetUseTrk( bool _fl )  { UseTrk = _fl;   }
-    void SetEndLayer( int _ly ) { EndLayer = _ly; }
+    bool fl_UseTrack; 
+    int EndLayer; 
+    int th_GoodLayer; 
 
-    int  EndLayer; 
-    int  Debug;
-    bool UseTrk; 
   };
 
-  ShadowMakingAlg() {};
+  ShadowMakingAlg(){};
+  ~ShadowMakingAlg(){};
+
   StatusCode Initialize();
   StatusCode RunAlgorithm( ShadowMakingAlg::Settings& m_settings, PandoraPlusDataCol& m_datacol);
-  StatusCode ClearAlgorithm(); 
+  StatusCode ClearAlgorithm();
 
-  std::vector<CRDEcalEDM::CRDCaloBlock> GetBlocksNeedModification( std::vector<CRDEcalEDM::CRDCaloHit3DCluster>& m_goodClus, std::vector<CRDEcalEDM::CRDCaloHit3DCluster>& m_badClus );
+  std::vector<CRDEcalEDM::CRDCaloBlock> GetBlocksNeedModification( CRDEcalEDM::CRDCaloHitLongiCluster& m_clus );
 
-  Settings settings;
+  Settings settings; 
 
 
 };

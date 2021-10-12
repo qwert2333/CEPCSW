@@ -14,8 +14,9 @@ public:
     Settings(){};
     void SetInitialValue();
     void SetChi2Weight( double _chi2E, double _chi2T) { chi2Wi_E=_chi2E; chi2Wi_T=_chi2T; }
-    void SetUseCandidate( int _level ) { lv_useCandidate=_level; }
-    void SetUseChi2( bool _flag ) { UseChi2 = _flag; }
+    void SetUseShadowCluster( bool _flag ) { fl_useShadowClus=_flag; }
+    void SetUseChi2( bool _flag ) { fl_UseChi2 = _flag; }
+    void SetDebug( int _debug) { Debug=_debug; }
 
     double chi2Wi_E;
     double chi2Wi_T;
@@ -24,8 +25,8 @@ public:
     double sigmaPos = 34.89;  //sqrt(10*10/12 + pow((Tres*C/(2*nMat)),2) )
     double nMat = 2.15;
     double Emip = 0.01;
-    int lv_useCandidate; //0: Don't use. 1: Use track and neutral candidates together. 2: Use track and neutral candidates separately. 
-    bool UseChi2; 
+    bool fl_useShadowClus;
+    bool fl_UseChi2; 
     int Debug;
   };
 
@@ -37,19 +38,19 @@ public:
 
 
 
-  StatusCode GetFullMatchedShowers( std::vector<CRDEcalEDM::CRDCaloBarShower>& barShowerXCol, std::vector<CRDEcalEDM::CRDCaloBarShower>& barShowerYCol, std::vector<CRDEcalEDM::CRDCaloHit2DShower>& outshCol );
+  StatusCode GetFullMatchedShowers( std::vector<CRDEcalEDM::CRDCaloBarShower>& barShowerXCol, std::vector<CRDEcalEDM::CRDCaloBarShower>& barShowerYCol, std::vector<CRDEcalEDM::CRDCaloHitTransShower>& outshCol );
 
-  StatusCode GetMatchedShowersL0( std::vector<CRDEcalEDM::CRDCaloBarShower>& barShowerXCol, std::vector<CRDEcalEDM::CRDCaloBarShower>& barShowerYCol, std::vector<CRDEcalEDM::CRDCaloHit2DShower>& outshCol );
+  StatusCode GetMatchedShowersL0( std::vector<CRDEcalEDM::CRDCaloBarShower>& barShowerXCol, std::vector<CRDEcalEDM::CRDCaloBarShower>& barShowerYCol, std::vector<CRDEcalEDM::CRDCaloHitTransShower>& outshCol );
 
-  StatusCode GetMatchedShowersL1( std::vector<CRDEcalEDM::CRDCaloBarShower>& barShowerXCol, std::vector<CRDEcalEDM::CRDCaloBarShower>& barShowerYCol, std::vector<CRDEcalEDM::CRDCaloHit2DShower>& outshCol );
+  StatusCode GetMatchedShowersL1( std::vector<CRDEcalEDM::CRDCaloBarShower>& barShowerXCol, std::vector<CRDEcalEDM::CRDCaloBarShower>& barShowerYCol, std::vector<CRDEcalEDM::CRDCaloHitTransShower>& outshCol );
 
-  StatusCode GetMatchedShowersL2( std::vector<CRDEcalEDM::CRDCaloBarShower>& barShowerXCol, std::vector<CRDEcalEDM::CRDCaloBarShower>& barShowerYCol, std::vector<CRDEcalEDM::CRDCaloHit2DShower>& outshCol );
+  StatusCode GetMatchedShowersL2( std::vector<CRDEcalEDM::CRDCaloBarShower>& barShowerXCol, std::vector<CRDEcalEDM::CRDCaloBarShower>& barShowerYCol, std::vector<CRDEcalEDM::CRDCaloHitTransShower>& outshCol );
 
 
-  StatusCode XYShowerMatchingL0( CRDEcalEDM::CRDCaloBarShower& barShowerX, CRDEcalEDM::CRDCaloBarShower& barShowerY, CRDEcalEDM::CRDCaloHit2DShower& outsh ); //1*1 case
-  StatusCode XYShowerMatchingL1( CRDEcalEDM::CRDCaloBarShower& barShower1, std::vector<CRDEcalEDM::CRDCaloBarShower>& barShowerNCol, std::vector<CRDEcalEDM::CRDCaloHit2DShower>& outshCol ); //1*N case without candidates
-  StatusCode XYShowerChi2Matching( std::vector<CRDEcalEDM::CRDCaloBarShower>& barShowerXCol, std::vector<CRDEcalEDM::CRDCaloBarShower>& barShowerYCol, std::vector<CRDEcalEDM::CRDCaloHit2DShower>& outshCol ); //N*N case without candidates
-  StatusCode XYShowerChi2MatchingL1( std::vector<CRDEcalEDM::CRDCaloBarShower>& barShowerXCol, std::vector<CRDEcalEDM::CRDCaloBarShower>& barShowerYCol, std::vector<CRDEcalEDM::CRDCaloHit2DShower>& outshCol ); //M*N case without candidates
+  StatusCode XYShowerMatchingL0( CRDEcalEDM::CRDCaloBarShower& barShowerX, CRDEcalEDM::CRDCaloBarShower& barShowerY, CRDEcalEDM::CRDCaloHitTransShower& outsh ); //1*1 case
+  StatusCode XYShowerMatchingL1( CRDEcalEDM::CRDCaloBarShower& barShower1, std::vector<CRDEcalEDM::CRDCaloBarShower>& barShowerNCol, std::vector<CRDEcalEDM::CRDCaloHitTransShower>& outshCol ); //1*N case without shadow cluster
+  StatusCode XYShowerChi2Matching( std::vector<CRDEcalEDM::CRDCaloBarShower>& barShowerXCol, std::vector<CRDEcalEDM::CRDCaloBarShower>& barShowerYCol, std::vector<CRDEcalEDM::CRDCaloHitTransShower>& outshCol ); //N*N case without shadow cluster
+  StatusCode XYShowerChi2MatchingL1( std::vector<CRDEcalEDM::CRDCaloBarShower>& barShowerXCol, std::vector<CRDEcalEDM::CRDCaloBarShower>& barShowerYCol, std::vector<CRDEcalEDM::CRDCaloHitTransShower>& outshCol ); //M*N case without shadow cluster
 
 
 

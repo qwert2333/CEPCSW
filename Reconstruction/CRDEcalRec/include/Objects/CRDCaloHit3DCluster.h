@@ -5,7 +5,7 @@
 #include "edm4hep/CalorimeterHit.h"
 #include "edm4hep/CalorimeterHitCollection.h"
 #include "edm4hep/SimCalorimeterHitCollection.h"
-#include "Objects/CRDCaloHit2DShower.h"
+#include "Objects/CRDCaloHitTransShower.h"
 #include "Objects/TrackFitInEcal.h"
 
 #include "TMath.h"
@@ -30,7 +30,7 @@ namespace CRDEcalEDM{
 
     void FitProfile();
     void FitAxis(); 
-    void AddShower(CRDEcalEDM::CRDCaloHit2DShower& shower);
+    void AddShower(CRDEcalEDM::CRDCaloHitTransShower& shower);
     void MergeCluster(CRDEcalEDM::CRDCaloHit3DCluster& clus);
     void IdentifyCluster(); 
 
@@ -40,7 +40,7 @@ namespace CRDEcalEDM{
       return ( vec==x.getHitCenter() && En==x.getHitsE());
     }
 
-    std::vector<CRDEcalEDM::CRDCaloHit2DShower> get2DShowers() const { return ShowerinLayer; }
+    std::vector<CRDEcalEDM::CRDCaloHitTransShower> get2DShowers() const { return ShowerinLayer; }
     std::vector<edm4hep::ConstCalorimeterHit> getCaloHits() const { return CaloHits; }
     double getFitAlpha() const { return alpha; }
     double getFitBeta() const { return beta; }
@@ -62,13 +62,13 @@ namespace CRDEcalEDM{
     int getType() const { return type; }
 
 
-    void setShowerVec( std::vector<CRDEcalEDM::CRDCaloHit2DShower>& _svec ) { ShowerinLayer = _svec;}
+    void setShowerVec( std::vector<CRDEcalEDM::CRDCaloHitTransShower>& _svec ) { ShowerinLayer = _svec;}
     void setCaloHits( std::vector<edm4hep::ConstCalorimeterHit>& _hits ) { CaloHits = _hits; }
     void setType( int _t ) { type = _t; }
     void Clear() { ShowerinLayer.clear(); CaloHits.clear(); showerEnergy=0; hitsEnergy=0; showerMax=0; chi2=0; alpha=0; beta=0; ExpEn=0; axis.SetXYZ(0,0,0); type=-1; }
 
   private: 
-    std::vector<CRDEcalEDM::CRDCaloHit2DShower> ShowerinLayer;
+    std::vector<CRDEcalEDM::CRDCaloHitTransShower> ShowerinLayer;
     std::vector<edm4hep::ConstCalorimeterHit> CaloHits;
     TVector3 axis;
     double showerEnergy;

@@ -69,20 +69,21 @@ namespace CRDEcalEDM {
 
     }
 
-
-    int CRDCaloBarShower::getDlayer() const{
-      if(Bars.size()>0) return Bars[0].getDlayer();
-      else return -1;
-    }
-
     std::vector<CRDEcalEDM::CRDShadowCluster> CRDCaloBarShower::getAllCandiCol() const{
       std::vector<CRDEcalEDM::CRDShadowCluster> m_allcandi; m_allcandi.clear();
-      m_allcandi = NeuCandidateCol;
-      m_allcandi.insert(m_allcandi.end(), TrkCandidateCol.begin(), TrkCandidateCol.end());
+      m_allcandi = NeuShadowClusCol;
+      m_allcandi.insert(m_allcandi.end(), TrkShadowClusCol.begin(), TrkShadowClusCol.end());
       return m_allcandi;
     }
 
-
+    void CRDCaloBarShower::setIDInfo(){
+      if(Bars.size()==0) return; 
+      module = Bars[0].getModule(); 
+      stave = Bars[0].getStave();
+      part = Bars[0].getPart(); 
+      dlayer = Bars[0].getDlayer(); 
+      slayer = Bars[0].getSlayer(); 
+    }
 
 };
 #endif

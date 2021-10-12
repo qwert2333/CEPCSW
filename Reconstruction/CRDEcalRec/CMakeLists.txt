@@ -1,12 +1,11 @@
 # Modules
 gaudi_add_library(CRDEcalRecLib
-                  SOURCES src/Objects/CRDArborNode.cc
-                          src/Objects/CRDArborTree.cc
-                          src/Objects/CRDCaloBar.cc
+                  SOURCES src/Objects/CRDCaloBar.cc
                           src/Objects/CRDCaloBarCluster.cc
                           src/Objects/CRDCaloBarShower.cc
                           src/Objects/CRDCaloBlock.cc
-                          src/Objects/CRDCaloHit2DShower.cc
+                          src/Objects/CRDCaloHitTransShower.cc
+                          src/Objects/CRDCaloHitLongiCluster.cc
                           src/Objects/CRDCaloHit3DCluster.cc
                           src/Objects/Track.cc
                           src/Objects/TrackFitInEcal.cpp
@@ -28,14 +27,13 @@ gaudi_add_module(CRDEcalRec
                  SOURCES src/PandoraPlusPFAlg.cpp
                          src/EcalClusterReconstruction.cpp
                          src/PandoraPlusDataCol.cpp
-                         src/Algorithm/ArborClusteringAlg.cpp
-                         src/Algorithm/ArborTreeMergingAlg.cpp
-                         src/Algorithm/BasicClusterIDAlg.cpp
-                         src/Algorithm/ShadowMakingAlg.cpp
-                         src/Algorithm/ClusterMergingAlg.cpp
-                         src/Algorithm/ConeClusteringAlg.cpp
                          src/Algorithm/EnergySplittingAlg.cpp
+                         src/Algorithm/ConeClustering2DAlg.cpp
+                         src/Algorithm/ShadowMakingAlg.cpp
                          src/Algorithm/EnergyTimeMatchingAlg.cpp
+                         src/Algorithm/ConeClusteringAlg.cpp
+                         src/Algorithm/BasicClusterIDAlg.cpp
+                         src/Algorithm/ClusterMergingAlg.cpp
                          src/Tools/PFOCreator.cpp
                  LINK    CRDEcalRecLib
                          CRDEcalSvcLib

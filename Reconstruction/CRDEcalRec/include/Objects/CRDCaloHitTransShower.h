@@ -1,5 +1,5 @@
-#ifndef _CRD_CALOHIT_2DSHOWER_H
-#define _CRD_CALOHIT_2DSHOWER_H
+#ifndef _CRD_CALOHIT_TRANSSHOWER_H
+#define _CRD_CALOHIT_TRANSSHOWER_H
 #include <vector>
 #include "Objects/CRDCaloBarShower.h"
 #include "Objects/CRDShadowCluster.h"
@@ -9,10 +9,10 @@
 
 namespace CRDEcalEDM{
 
-  class CRDCaloHit2DShower{
+  class CRDCaloHitTransShower{
   public: 	
-    CRDCaloHit2DShower(CRDEcalEDM::CRDCaloBarShower _bars1, CRDEcalEDM::CRDCaloBarShower _bars2, std::vector<edm4hep::ConstCalorimeterHit> _hits ); 
-    CRDCaloHit2DShower(){};
+    CRDCaloHitTransShower(CRDEcalEDM::CRDCaloBarShower _bars1, CRDEcalEDM::CRDCaloBarShower _bars2, std::vector<edm4hep::ConstCalorimeterHit> _hits ); 
+    CRDCaloHitTransShower(){};
 
 
     void Clear(){
@@ -32,15 +32,15 @@ namespace CRDEcalEDM{
     CRDEcalEDM::CRDCaloBarShower getShowerX() const { return barShowerX; }
     CRDEcalEDM::CRDCaloBarShower getShowerY() const { return barShowerY; }
     std::vector<edm4hep::ConstCalorimeterHit> getCaloHits() const { return CaloHits; }
-    CRDEcalEDM::CRDShadowCluster getCandidate() const { return Candidate; }
+    CRDEcalEDM::CRDShadowCluster getShadowClus() const { return ShadowClus; }
     bool isTrkShower() const { return m_isTrkShower; }
     bool isNeuShower() const { return m_isNeuShower; }
 
     void setBarShowers( CRDEcalEDM::CRDCaloBarShower _bar1, CRDEcalEDM::CRDCaloBarShower _bar2){ barShowerX=_bar1; barShowerY=_bar2; }
     void setCaloHits( std::vector<edm4hep::ConstCalorimeterHit> _hits) { CaloHits=_hits; }
     void setIDInfo( int _m, int _s, int _d, int _p ){ module=_m; stave=_s; dlayer=_d; part=_p; } 
-    void setCandidate( CRDEcalEDM::CRDShadowCluster _candi ) { Candidate = _candi; }
-    void setCandidateType( int _flag );  //1 for track-type, 0 for non-track-type.
+    void setShadowClus( CRDEcalEDM::CRDShadowCluster _candi ) { ShadowClus = _candi; }
+    void setShadowClusType( int _flag );  //1 for track-type, 0 for non-track-type.
 
   private:
     int module;
@@ -52,7 +52,7 @@ namespace CRDEcalEDM{
     CRDEcalEDM::CRDCaloBarShower barShowerX;
     CRDEcalEDM::CRDCaloBarShower barShowerY;
     std::vector<edm4hep::ConstCalorimeterHit> CaloHits;
-    CRDEcalEDM::CRDShadowCluster Candidate; 
+    CRDEcalEDM::CRDShadowCluster ShadowClus; 
   };
 
 };

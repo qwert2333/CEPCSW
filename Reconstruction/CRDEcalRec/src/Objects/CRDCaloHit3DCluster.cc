@@ -173,12 +173,12 @@ namespace CRDEcalEDM{
     std::vector<double> widthVec; widthVec.clear(); 
     widthVec.resize(14);
 
-    std::map<int, std::vector<CRDEcalEDM::CRDCaloHit2DShower> > m_orderedShower; m_orderedShower.clear();
+    std::map<int, std::vector<CRDEcalEDM::CRDCaloHitTransShower> > m_orderedShower; m_orderedShower.clear();
     for(int is=0;is<ShowerinLayer.size();is++){
       m_orderedShower[ShowerinLayer[is].getDlayer()].push_back(ShowerinLayer[is]);
     }
     for(int il=0; il<14; il++){
-      std::vector<CRDEcalEDM::CRDCaloHit2DShower> m_showers = m_orderedShower[il];
+      std::vector<CRDEcalEDM::CRDCaloHitTransShower> m_showers = m_orderedShower[il];
       if(m_showers.size()==0) { widthVec[il]=0; continue; }
       if(m_showers.size()==1) { widthVec[il]=m_showers[0].getHitsWidth(); continue; }
 
@@ -296,7 +296,7 @@ namespace CRDEcalEDM{
   } 
   }
 
-  void CRDCaloHit3DCluster::AddShower(CRDEcalEDM::CRDCaloHit2DShower& shower){
+  void CRDCaloHit3DCluster::AddShower(CRDEcalEDM::CRDCaloHitTransShower& shower){
     ShowerinLayer.push_back(shower);
     std::vector<edm4hep::ConstCalorimeterHit> m_hits = shower.getCaloHits();
     CaloHits.insert(CaloHits.end(), m_hits.begin(), m_hits.end());

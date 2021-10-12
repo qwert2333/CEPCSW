@@ -15,7 +15,6 @@ void ConeClusteringAlg::Settings::SetInitialValue(){
   th_ConeR_l2 = 30.; //30mm
   th_ClusChi2 = 10e17;
   fl_GoodClusLevel = 2;
-  fl_UseCandidate=0; 
   clusType = ""; 
 }
 
@@ -34,7 +33,7 @@ StatusCode ConeClusteringAlg::Initialize(){
 StatusCode ConeClusteringAlg::RunAlgorithm( ConeClusteringAlg::Settings& m_settings, PandoraPlusDataCol& m_datacol){
   settings = m_settings;
 
-  std::vector<CRDEcalEDM::CRDCaloHit2DShower> m_2DshowerCol; m_2DshowerCol.clear();
+  std::vector<CRDEcalEDM::CRDCaloHitTransShower> m_2DshowerCol; m_2DshowerCol.clear();
   if( settings.clusType=="MIP" )     m_2DshowerCol = m_datacol.MIPShower2DCol;
   else if( settings.clusType=="EM" ) m_2DshowerCol = m_datacol.EMShower2DCol;
   else m_2DshowerCol = m_datacol.Shower2DCol;
@@ -48,14 +47,15 @@ StatusCode ConeClusteringAlg::RunAlgorithm( ConeClusteringAlg::Settings& m_setti
   std::vector<CRDEcalEDM::CRDCaloHit3DCluster> m_trkClusterCol;  m_trkClusterCol.clear();
   std::vector<CRDEcalEDM::CRDCaloHit3DCluster> m_neuClusterCol;  m_neuClusterCol.clear();
 
-  std::map<int, std::vector<CRDEcalEDM::CRDCaloHit2DShower> > m_orderedTrkShower;  m_orderedTrkShower.clear(); //map<layer, showers>
-  std::map<int, std::vector<CRDEcalEDM::CRDCaloHit2DShower> > m_orderedNeuShower;  m_orderedNeuShower.clear(); //map<layer, showers>
+  std::map<int, std::vector<CRDEcalEDM::CRDCaloHitTransShower> > m_orderedTrkShower;  m_orderedTrkShower.clear(); //map<layer, showers>
+  std::map<int, std::vector<CRDEcalEDM::CRDCaloHitTransShower> > m_orderedNeuShower;  m_orderedNeuShower.clear(); //map<layer, showers>
   for(int is=0;is<m_2DshowerCol.size();is++){
-    if(settings.fl_UseCandidate==0) m_orderedNeuShower[m_2DshowerCol[is].getDlayer()].push_back(m_2DshowerCol[is]);
-    else{
-      if(m_2DshowerCol[is].isTrkShower()) m_orderedTrkShower[m_2DshowerCol[is].getDlayer()].push_back(m_2DshowerCol[is]);
-      else m_orderedNeuShower[m_2DshowerCol[is].getDlayer()].push_back(m_2DshowerCol[is]);
-    }
+    //if(settings.fl_UseCandidate==0) 
+    m_orderedNeuShower[m_2DshowerCol[is].getDlayer()].push_back(m_2DshowerCol[is]);
+    //else{
+    //  if(m_2DshowerCol[is].isTrkShower()) m_orderedTrkShower[m_2DshowerCol[is].getDlayer()].push_back(m_2DshowerCol[is]);
+    //  else m_orderedNeuShower[m_2DshowerCol[is].getDlayer()].push_back(m_2DshowerCol[is]);
+    //}
   }
 
 //cout<<"  Ordered NeuShower size: "<<m_orderedNeuShower.size()<<endl;
@@ -63,13 +63,13 @@ StatusCode ConeClusteringAlg::RunAlgorithm( ConeClusteringAlg::Settings& m_setti
 
   //Longitudinal linking
   LongiConeLinking( m_orderedNeuShower, m_neuClusterCol );
-  if(settings.fl_UseCandidate>0 && m_orderedTrkShower.size()>0) LongiConeLinking( m_orderedTrkShower, m_trkClusterCol ); 
+  //if(settings.fl_UseCandidate>0 && m_orderedTrkShower.size()>0) LongiConeLinking( m_orderedTrkShower, m_trkClusterCol ); 
 
   std::vector<CRDEcalEDM::CRDCaloHit3DCluster> m_ClusterCol;  m_ClusterCol.clear();
   m_ClusterCol.insert(m_ClusterCol.end(), m_neuClusterCol.begin(), m_neuClusterCol.end() );
   if(m_trkClusterCol.size()>0) m_ClusterCol.insert(m_ClusterCol.end(), m_trkClusterCol.begin(), m_trkClusterCol.end() );
 
-//cout<<"  Cluster size: "<<m_ClusterCol.size()<<endl;
+cout<<"  Cluster size: "<<m_ClusterCol.size()<<endl;
 
   //Check cluster quality.
   std::vector< CRDEcalEDM::CRDCaloHit3DCluster >  goodClus;
@@ -80,8 +80,8 @@ StatusCode ConeClusteringAlg::RunAlgorithm( ConeClusteringAlg::Settings& m_setti
     else badClus.push_back(m_ClusterCol[icl]);
   }
 
-//cout<<"  Good cluster: "<<goodClus.size()<<endl;
-//cout<<"  Bad cluster: "<<badClus.size()<<endl;
+cout<<"  Good cluster: "<<goodClus.size()<<endl;
+cout<<"  Bad cluster: "<<badClus.size()<<endl;
 
   if(settings.fl_overwrite) m_datacol.ClearCluster();
   m_datacol.GoodClus3DCol.insert(m_datacol.GoodClus3DCol.end(), goodClus.begin(), goodClus.end() );
@@ -93,15 +93,15 @@ StatusCode ConeClusteringAlg::RunAlgorithm( ConeClusteringAlg::Settings& m_setti
 
 
 StatusCode ConeClusteringAlg::LongiConeLinking(
-  std::map<int, std::vector<CRDEcalEDM::CRDCaloHit2DShower> >& orderedShower, 
+  std::map<int, std::vector<CRDEcalEDM::CRDCaloHitTransShower> >& orderedShower, 
   std::vector<CRDEcalEDM::CRDCaloHit3DCluster>& ClusterCol)
 {
   if(orderedShower.size()==0) return StatusCode::SUCCESS;
 
-   std::map<int, std::vector<CRDEcalEDM::CRDCaloHit2DShower>>::iterator iter = orderedShower.begin();
+   std::map<int, std::vector<CRDEcalEDM::CRDCaloHitTransShower>>::iterator iter = orderedShower.begin();
   //In first layer: initial clusters. All showers in the first layer are regarded as cluster seed.
   //cluster initial direction = R.
-  std::vector<CRDEcalEDM::CRDCaloHit2DShower> ShowersinFirstLayer;  ShowersinFirstLayer.clear();
+  std::vector<CRDEcalEDM::CRDCaloHitTransShower> ShowersinFirstLayer;  ShowersinFirstLayer.clear();
   ShowersinFirstLayer = iter->second;
   for(int i=0;i<ShowersinFirstLayer.size(); i++){
     CRDEcalEDM::CRDCaloHit3DCluster m_clus;
@@ -115,13 +115,13 @@ StatusCode ConeClusteringAlg::LongiConeLinking(
   //Use different cone angle for 1->2/2->3 and 3->n case
   //Loop later layers
   for(iter;iter!=orderedShower.end();iter++){
-    std::vector<CRDEcalEDM::CRDCaloHit2DShower> ShowersinLayer = iter->second;
+    std::vector<CRDEcalEDM::CRDCaloHitTransShower> ShowersinLayer = iter->second;
 //cout<<"    In Layer: "<<iter->first<<"  Shower size: "<<ShowersinLayer.size()<<endl;
     for(int is=0; is<ShowersinLayer.size(); is++){
-      CRDEcalEDM::CRDCaloHit2DShower m_shower = ShowersinLayer[is];
+      CRDEcalEDM::CRDCaloHitTransShower m_shower = ShowersinLayer[is];
       for(int ic=0; ic<ClusterCol.size(); ic++ ){
         int m_N2dshs = ClusterCol[ic].get2DShowers().size();
-        CRDEcalEDM::CRDCaloHit2DShower shower_in_clus = ClusterCol[ic].get2DShowers().back();
+        CRDEcalEDM::CRDCaloHitTransShower shower_in_clus = ClusterCol[ic].get2DShowers().back();
         dd4hep::Position relR = m_shower.getPos()-shower_in_clus.getPos();
         TVector3 relR_vec(relR.x(), relR.y(), relR.z());
         if(  (m_N2dshs<3  && m_N2dshs>0 && relR_vec.Angle(ClusterCol[ic].getAxis())< settings.th_ConeTheta_l1 && relR_vec.Mag()< settings.th_ConeR_l1) ||
@@ -167,13 +167,13 @@ int ConeClusteringAlg::CheckClusterQuality(CRDEcalEDM::CRDCaloHit3DCluster& clus
 
   //Criterion2: first 3 layser should satisfy: (E2/E1>3 && E3/E2>1.2) || (E3/E2>2). 
   bool isSeed;
-  std::vector<CRDEcalEDM::CRDCaloHit2DShower> m_2Dshowers = clus.get2DShowers();
-  std::map<int, CRDEcalEDM::CRDCaloHit2DShower > m_orderedShower;  //map<layer, showers>
+  std::vector<CRDEcalEDM::CRDCaloHitTransShower> m_2Dshowers = clus.get2DShowers();
+  std::map<int, CRDEcalEDM::CRDCaloHitTransShower > m_orderedShower;  //map<layer, showers>
   for(int is=0;is<m_2Dshowers.size();is++){
      m_orderedShower[m_2Dshowers[is].getDlayer()] = m_2Dshowers[is];
   }
-  std::map<int, CRDEcalEDM::CRDCaloHit2DShower>::iterator iter = m_orderedShower.begin();
-  CRDEcalEDM::CRDCaloHit2DShower showerbegin[3];
+  std::map<int, CRDEcalEDM::CRDCaloHitTransShower>::iterator iter = m_orderedShower.begin();
+  CRDEcalEDM::CRDCaloHitTransShower showerbegin[3];
   showerbegin[0] = iter->second;  iter++; 
   showerbegin[1] = iter->second;  iter++; 
   showerbegin[2] = iter->second;

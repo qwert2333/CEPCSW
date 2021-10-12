@@ -8,8 +8,8 @@ void EnergyTimeMatchingAlg::Settings::SetInitialValue(){
   chi2Wi_T = 10;
   th_chi2  = -1;
   sigmaE   = 0.10;
-  lv_useCandidate = 0; 
-  UseChi2 = false;
+  fl_useShadowClus = 0;
+  fl_UseChi2 = false;
   Debug = 0;
 }
 
@@ -27,15 +27,15 @@ StatusCode EnergyTimeMatchingAlg::RunAlgorithm( EnergyTimeMatchingAlg::Settings&
 
   std::vector<CRDEcalEDM::CRDCaloLayer> layers = m_datacol.LayerCol;
   if(layers.size()==0){ std::cout<<"Warning: Empty input in EnergyTimeMatchingAlg! Please check previous algorithm!"<<std::endl; return StatusCode::SUCCESS; }
-  std::vector<CRDEcalEDM::CRDCaloHit2DShower> m_2DshowerCol; m_2DshowerCol.clear();
+  std::vector<CRDEcalEDM::CRDCaloHitTransShower> m_2DshowerCol; m_2DshowerCol.clear();
 
-  //Don't use candidate or chi2 matching, Save all combinations for 3D clustering. 
-  if(settings.lv_useCandidate==0 && !settings.UseChi2){
+  //Don't use shadow cluster or chi2 matching, Save all combinations for 3D clustering. 
+  if(!settings.fl_useShadowClus && !settings.fl_UseChi2){
     for(int il=0;il<layers.size();il++){
       std::vector<CRDEcalEDM::CRDCaloBarShower> showerXCol = layers[il].barShowerXCol;
       std::vector<CRDEcalEDM::CRDCaloBarShower> showerYCol = layers[il].barShowerYCol;
 
-      std::vector<CRDEcalEDM::CRDCaloHit2DShower> m_showerinlayer; m_showerinlayer.clear(); 
+      std::vector<CRDEcalEDM::CRDCaloHitTransShower> m_showerinlayer; m_showerinlayer.clear(); 
       GetFullMatchedShowers( showerXCol, showerYCol, m_showerinlayer );
 
       m_2DshowerCol.insert( m_2DshowerCol.end(), m_showerinlayer.begin(), m_showerinlayer.end() );
@@ -49,16 +49,16 @@ StatusCode EnergyTimeMatchingAlg::RunAlgorithm( EnergyTimeMatchingAlg::Settings&
   }
 
 
-  //Not use candidate: ET chi2 matching
-  if(settings.lv_useCandidate == 0 && settings.UseChi2){
+  //Not use shadow cluster: ET chi2 matching
+  if(!settings.fl_useShadowClus && settings.fl_UseChi2){
     for(int il=0;il<layers.size();il++){
 
       std::vector<CRDEcalEDM::CRDCaloBarShower> showerXCol = layers[il].barShowerXCol;
       std::vector<CRDEcalEDM::CRDCaloBarShower> showerYCol = layers[il].barShowerYCol;
       if(showerXCol.size()==0 || showerYCol.size()==0) continue;
 
-      std::vector<CRDEcalEDM::CRDCaloHit2DShower> m_showerinlayer; m_showerinlayer.clear();
-      CRDEcalEDM::CRDCaloHit2DShower tmp_shower; tmp_shower.Clear(); 
+      std::vector<CRDEcalEDM::CRDCaloHitTransShower> m_showerinlayer; m_showerinlayer.clear();
+      CRDEcalEDM::CRDCaloHitTransShower tmp_shower; tmp_shower.Clear(); 
       if(showerXCol.size()==1 && showerYCol.size()==1){ XYShowerMatchingL0( showerXCol[0], showerYCol[0], tmp_shower ); m_showerinlayer.push_back(tmp_shower); }
       else if(showerXCol.size()==1) XYShowerMatchingL1( showerXCol[0], showerYCol, m_showerinlayer);
       else if(showerYCol.size()==1) XYShowerMatchingL1( showerYCol[0], showerXCol, m_showerinlayer);
@@ -66,7 +66,7 @@ StatusCode EnergyTimeMatchingAlg::RunAlgorithm( EnergyTimeMatchingAlg::Settings&
       else XYShowerChi2MatchingL1( showerXCol, showerYCol, m_showerinlayer );
       //else GetFullMatchedShowers( showerXCol, showerYCol, m_showerinlayer );
 
-      for(int is=0; is<m_showerinlayer.size(); is++) m_showerinlayer[is].setCandidateType(0);
+      for(int is=0; is<m_showerinlayer.size(); is++) m_showerinlayer[is].setShadowClusType(0);
 
       m_2DshowerCol.insert( m_2DshowerCol.end(), m_showerinlayer.begin(), m_showerinlayer.end() );
     }
@@ -78,8 +78,8 @@ StatusCode EnergyTimeMatchingAlg::RunAlgorithm( EnergyTimeMatchingAlg::Settings&
   }
 
 
-  //Use candidate
-//cout<<"EnergyTimeMatchingAlg:: Use candidate to match X/Y."<<endl;
+  //Use shadow cluster
+//cout<<"EnergyTimeMatchingAlg:: Use shadow cluster to match X/Y."<<endl;
   for(int il=0;il<layers.size();il++){ 
 //cout<<"EnergyTimeMatchingAlg: Matching Layer dlayer = "<< layers[il].getDlayer()<<endl;
     std::vector<CRDEcalEDM::CRDCaloBarShower> showerXCol; showerXCol.clear(); 
@@ -89,27 +89,27 @@ StatusCode EnergyTimeMatchingAlg::RunAlgorithm( EnergyTimeMatchingAlg::Settings&
 
     for(int is=0; is<layers[il].barShowerXCol.size(); is++){
       if( layers[il].barShowerXCol[is].getAllCandiCol().size()==0 ){
-        //std::cout<<"WARNING: No candidate in this showerX! "<<std::endl;
+        //std::cout<<"WARNING: No shadow cluster in this showerX! "<<std::endl;
         m_shX_noCandi.push_back(layers[il].barShowerXCol[is]);
       }
       else showerXCol.push_back(layers[il].barShowerXCol[is]);
     }
     for(int is=0; is<layers[il].barShowerYCol.size(); is++){
       if( layers[il].barShowerYCol[is].getAllCandiCol().size()==0 ){
-        //std::cout<<"WARNING: No candidate in this showerY! "<<std::endl;
+        //std::cout<<"WARNING: No shadow cluster in this showerY! "<<std::endl;
         m_shY_noCandi.push_back(layers[il].barShowerYCol[is]);
       }
       else showerYCol.push_back(layers[il].barShowerYCol[is]);
     }
 
-//cout<<"  Candidate shower number:  X:"<<showerXCol.size()<<"  Y:"<<showerYCol.size()<<endl;
-//cout<<"    Candidate size X: "; for(int ic=0; ic<showerXCol.size(); ic++) printf("%d(%d)  ", showerXCol[ic].getTrkCandiCol().size(), showerXCol[ic].getNeuCandiCol().size()); 
+//cout<<"  ShadowClus shower number:  X:"<<showerXCol.size()<<"  Y:"<<showerYCol.size()<<endl;
+//cout<<"    ShadowClus size X: "; for(int ic=0; ic<showerXCol.size(); ic++) printf("%d(%d)  ", showerXCol[ic].getTrkCandiCol().size(), showerXCol[ic].getNeuCandiCol().size()); 
 //cout<<" | Y: "; for(int ic=0; ic<showerYCol.size(); ic++) printf("%d(%d)  ", showerYCol[ic].getTrkCandiCol().size(), showerYCol[ic].getNeuCandiCol().size() );  cout<<endl;
-//cout<<"  No Candidate shower number:  X:"<<m_shX_noCandi.size()<<"  Y:"<<m_shY_noCandi.size()<<endl;
+//cout<<"  No ShadowClus shower number:  X:"<<m_shX_noCandi.size()<<"  Y:"<<m_shY_noCandi.size()<<endl;
 
-    //Pre: matching showers without candidate
+    //Pre: matching showers without shadow cluster
     if(m_shX_noCandi.size()!=0 && m_shY_noCandi.size()!=0){
-      std::vector<CRDEcalEDM::CRDCaloHit2DShower> m_showerinlayer; m_showerinlayer.clear();
+      std::vector<CRDEcalEDM::CRDCaloHitTransShower> m_showerinlayer; m_showerinlayer.clear();
       GetFullMatchedShowers( m_shX_noCandi, m_shY_noCandi, m_showerinlayer );
 
       m_2DshowerCol.insert( m_2DshowerCol.end(), m_showerinlayer.begin(), m_showerinlayer.end() );
@@ -119,7 +119,7 @@ StatusCode EnergyTimeMatchingAlg::RunAlgorithm( EnergyTimeMatchingAlg::Settings&
 
 
     //Level 0: pickout 1*1 case.
-    std::vector<CRDEcalEDM::CRDCaloHit2DShower> m_lv0showerinlayer; m_lv0showerinlayer.clear(); 
+    std::vector<CRDEcalEDM::CRDCaloHitTransShower> m_lv0showerinlayer; m_lv0showerinlayer.clear(); 
     GetMatchedShowersL0( showerXCol, showerYCol, m_lv0showerinlayer  );
 
     m_2DshowerCol.insert( m_2DshowerCol.end(), m_lv0showerinlayer.begin(), m_lv0showerinlayer.end() );
@@ -128,7 +128,7 @@ StatusCode EnergyTimeMatchingAlg::RunAlgorithm( EnergyTimeMatchingAlg::Settings&
 
 
     //Level 1: pickout 1*N case.
-    std::vector<CRDEcalEDM::CRDCaloHit2DShower> m_lv1showerinlayer; m_lv1showerinlayer.clear();
+    std::vector<CRDEcalEDM::CRDCaloHitTransShower> m_lv1showerinlayer; m_lv1showerinlayer.clear();
     GetMatchedShowersL1( showerXCol, showerYCol, m_lv1showerinlayer );
     GetMatchedShowersL1( showerYCol, showerXCol, m_lv1showerinlayer );
 
@@ -138,7 +138,7 @@ StatusCode EnergyTimeMatchingAlg::RunAlgorithm( EnergyTimeMatchingAlg::Settings&
 
 
     //Level 2: M*N case. Need to solve a matrix. WIP.
-    std::vector<CRDEcalEDM::CRDCaloHit2DShower> m_lv2showerinlayer; m_lv2showerinlayer.clear();
+    std::vector<CRDEcalEDM::CRDCaloHitTransShower> m_lv2showerinlayer; m_lv2showerinlayer.clear();
     GetMatchedShowersL2( showerXCol, showerYCol, m_lv2showerinlayer );
 
 //cout<<"  After LV2. Shower number: "<<showerXCol.size()<<"  "<<showerYCol.size()<<endl;
@@ -148,8 +148,8 @@ StatusCode EnergyTimeMatchingAlg::RunAlgorithm( EnergyTimeMatchingAlg::Settings&
 
   m_datacol.Shower2DCol = m_2DshowerCol;
 
-m_datacol.PrintLayer();
-m_datacol.PrintShower();
+//m_datacol.PrintLayer();
+//m_datacol.PrintShower();
 
   return StatusCode::SUCCESS;
 }
@@ -158,16 +158,16 @@ m_datacol.PrintShower();
 StatusCode EnergyTimeMatchingAlg::GetFullMatchedShowers( 
            std::vector<CRDEcalEDM::CRDCaloBarShower>& barShowerXCol, 
            std::vector<CRDEcalEDM::CRDCaloBarShower>& barShowerYCol, 
-           std::vector<CRDEcalEDM::CRDCaloHit2DShower>& outshCol )
+           std::vector<CRDEcalEDM::CRDCaloHitTransShower>& outshCol )
 {
   outshCol.clear(); 
 
   for(int is=0;is<barShowerXCol.size();is++){
   for(int js=0;js<barShowerYCol.size();js++){
     if(barShowerXCol[is].getBars().size()==0 || barShowerYCol[js].getBars().size()==0) continue;
-    CRDEcalEDM::CRDCaloHit2DShower tmp_shower; tmp_shower.Clear();
+    CRDEcalEDM::CRDCaloHitTransShower tmp_shower; tmp_shower.Clear();
     XYShowerMatchingL0(barShowerXCol[is], barShowerYCol[js], tmp_shower);
-    tmp_shower.setCandidateType(0); 
+    tmp_shower.setShadowClusType(0); 
     outshCol.push_back(tmp_shower);
   }}
 
@@ -178,7 +178,7 @@ StatusCode EnergyTimeMatchingAlg::GetFullMatchedShowers(
 StatusCode EnergyTimeMatchingAlg::GetMatchedShowersL0(
            std::vector<CRDEcalEDM::CRDCaloBarShower>& barShowerXCol,
            std::vector<CRDEcalEDM::CRDCaloBarShower>& barShowerYCol,
-           std::vector<CRDEcalEDM::CRDCaloHit2DShower>& outshCol )
+           std::vector<CRDEcalEDM::CRDCaloHitTransShower>& outshCol )
 {
 //cout<<"  EnergyTimeMatchingAlg::GetMatchedShowersL0"<<endl;
 
@@ -205,11 +205,11 @@ StatusCode EnergyTimeMatchingAlg::GetMatchedShowersL0(
 
   //Match in pairVec.
   for(int ip=0; ip<m_showerpairCol.size(); ip++){
-    CRDEcalEDM::CRDCaloHit2DShower tmp_shower; tmp_shower.Clear();
+    CRDEcalEDM::CRDCaloHitTransShower tmp_shower; tmp_shower.Clear();
     XYShowerMatchingL0(m_showerpairCol[ip].first, m_showerpairCol[ip].second, tmp_shower);   
 
-    tmp_shower.setCandidate(m_showerpairCol[ip].first.getAllCandiCol()[0]);
-    tmp_shower.setCandidateType( m_showerpairCol[ip].first.getAllCandiCol()[0].Type ); 
+    tmp_shower.setShadowClus(m_showerpairCol[ip].first.getAllCandiCol()[0]);
+    tmp_shower.setShadowClusType( m_showerpairCol[ip].first.getAllCandiCol()[0].Type ); 
 
     outshCol.push_back(tmp_shower);
   }
@@ -221,7 +221,7 @@ StatusCode EnergyTimeMatchingAlg::GetMatchedShowersL0(
 StatusCode EnergyTimeMatchingAlg::GetMatchedShowersL1(
            std::vector<CRDEcalEDM::CRDCaloBarShower>& barShowerXCol,
            std::vector<CRDEcalEDM::CRDCaloBarShower>& barShowerYCol,
-           std::vector<CRDEcalEDM::CRDCaloHit2DShower>& outshCol )
+           std::vector<CRDEcalEDM::CRDCaloHitTransShower>& outshCol )
 {
 //cout<<"  EnergyTimeMatchingAlg::GetMatchedShowersL1"<<endl;
 
@@ -257,12 +257,12 @@ StatusCode EnergyTimeMatchingAlg::GetMatchedShowersL1(
 //cout<<"  GetMatchedShowersL1: pair number: "<<m_showerpairCol.size()<<endl;
 
   for(int ip=0; ip<m_showerpairCol.size(); ip++){
-    std::vector<CRDEcalEDM::CRDCaloHit2DShower> tmp_showerCol; tmp_showerCol.clear();
+    std::vector<CRDEcalEDM::CRDCaloHitTransShower> tmp_showerCol; tmp_showerCol.clear();
     XYShowerMatchingL1(m_showerpairCol[ip].first, m_showerpairCol[ip].second, tmp_showerCol);
 
     for(int is=0; is<tmp_showerCol.size(); is++ ) {
-      tmp_showerCol[is].setCandidate( m_showerpairCol[ip].second[is].getAllCandiCol()[0] );
-      tmp_showerCol[is].setCandidateType( m_showerpairCol[ip].second[is].getAllCandiCol()[0].Type );
+      tmp_showerCol[is].setShadowClus( m_showerpairCol[ip].second[is].getAllCandiCol()[0] );
+      tmp_showerCol[is].setShadowClusType( m_showerpairCol[ip].second[is].getAllCandiCol()[0].Type );
     }
 
     outshCol.insert( outshCol.end(), tmp_showerCol.begin(), tmp_showerCol.end() );
@@ -275,7 +275,7 @@ StatusCode EnergyTimeMatchingAlg::GetMatchedShowersL1(
 StatusCode EnergyTimeMatchingAlg::GetMatchedShowersL2(
            std::vector<CRDEcalEDM::CRDCaloBarShower>& barShowerXCol,
            std::vector<CRDEcalEDM::CRDCaloBarShower>& barShowerYCol,
-           std::vector<CRDEcalEDM::CRDCaloHit2DShower>& outshCol )
+           std::vector<CRDEcalEDM::CRDCaloHitTransShower>& outshCol )
 {
   outshCol.clear();
 
@@ -290,9 +290,9 @@ StatusCode EnergyTimeMatchingAlg::GetMatchedShowersL2(
 StatusCode EnergyTimeMatchingAlg::XYShowerMatchingL0( 
              CRDEcalEDM::CRDCaloBarShower& barShowerX, 
              CRDEcalEDM::CRDCaloBarShower& barShowerY, 
-             CRDEcalEDM::CRDCaloHit2DShower& outsh)
+             CRDEcalEDM::CRDCaloHitTransShower& outsh)
 {
-  CRDEcalEDM::CRDCaloHit2DShower m_2dshower; m_2dshower.Clear();
+  CRDEcalEDM::CRDCaloHitTransShower m_2dshower; m_2dshower.Clear();
 
   std::vector<edm4hep::ConstCalorimeterHit> m_digiCol; m_digiCol.clear();
   int NbarsX = barShowerX.getBars().size();
@@ -344,7 +344,7 @@ StatusCode EnergyTimeMatchingAlg::XYShowerMatchingL0(
 StatusCode EnergyTimeMatchingAlg::XYShowerMatchingL1(
              CRDEcalEDM::CRDCaloBarShower& shower1,
              std::vector<CRDEcalEDM::CRDCaloBarShower>& showerNCol,
-             std::vector<CRDEcalEDM::CRDCaloHit2DShower>& outshCol)
+             std::vector<CRDEcalEDM::CRDCaloHitTransShower>& outshCol)
 {
   outshCol.clear(); 
 
@@ -371,7 +371,7 @@ StatusCode EnergyTimeMatchingAlg::XYShowerMatchingL1(
     m_splitshower1.setBars( m_wibars );
     m_splitshower1.setSeed( m_wiseed );
 
-    CRDEcalEDM::CRDCaloHit2DShower m_shower; m_shower.Clear();
+    CRDEcalEDM::CRDCaloHitTransShower m_shower; m_shower.Clear();
     if(_slayer==0 ) XYShowerMatchingL0( m_splitshower1, showerNCol[is], m_shower);
     else            XYShowerMatchingL0( showerNCol[is], m_splitshower1, m_shower);
     outshCol.push_back( m_shower );
@@ -384,7 +384,7 @@ StatusCode EnergyTimeMatchingAlg::XYShowerMatchingL1(
 StatusCode EnergyTimeMatchingAlg::XYShowerChi2Matching(
            std::vector<CRDEcalEDM::CRDCaloBarShower>& barShowerXCol,
            std::vector<CRDEcalEDM::CRDCaloBarShower>& barShowerYCol,
-           std::vector<CRDEcalEDM::CRDCaloHit2DShower>& outshCol )
+           std::vector<CRDEcalEDM::CRDCaloHitTransShower>& outshCol )
 {
   outshCol.clear(); 
   if(barShowerXCol.size() != barShowerYCol.size() ) return StatusCode::FAILURE;
@@ -453,7 +453,7 @@ StatusCode EnergyTimeMatchingAlg::XYShowerChi2Matching(
     CRDEcalEDM::CRDCaloBarShower showerX = barShowerXCol[Index[i].first];
     CRDEcalEDM::CRDCaloBarShower showerY = barShowerYCol[Index[i].second];
 
-    CRDEcalEDM::CRDCaloHit2DShower tmp_shower; tmp_shower.Clear();
+    CRDEcalEDM::CRDCaloHitTransShower tmp_shower; tmp_shower.Clear();
     XYShowerMatchingL0(showerX, showerY, tmp_shower);
     outshCol.push_back(tmp_shower);
   }
@@ -465,7 +465,7 @@ StatusCode EnergyTimeMatchingAlg::XYShowerChi2Matching(
 StatusCode EnergyTimeMatchingAlg::XYShowerChi2MatchingL1(
            std::vector<CRDEcalEDM::CRDCaloBarShower>& barShowerXCol,
            std::vector<CRDEcalEDM::CRDCaloBarShower>& barShowerYCol,
-           std::vector<CRDEcalEDM::CRDCaloHit2DShower>& outshCol )
+           std::vector<CRDEcalEDM::CRDCaloHitTransShower>& outshCol )
 {
   outshCol.clear();
 
@@ -550,13 +550,13 @@ StatusCode EnergyTimeMatchingAlg::XYShowerChi2MatchingL1(
     CRDEcalEDM::CRDCaloBarShower showerX = barShowerXCol[indexVec[ip].first];
     CRDEcalEDM::CRDCaloBarShower showerY = barShowerYCol[indexVec[ip].second];
 
-    CRDEcalEDM::CRDCaloHit2DShower tmp_shower; tmp_shower.Clear();
+    CRDEcalEDM::CRDCaloHitTransShower tmp_shower; tmp_shower.Clear();
     XYShowerMatchingL0(showerX, showerY, tmp_shower);
     outshCol.push_back(tmp_shower);
   }
 
 
-  std::vector<CRDEcalEDM::CRDCaloHit2DShower> m_showerinlayer; m_showerinlayer.clear();   
+  std::vector<CRDEcalEDM::CRDCaloHitTransShower> m_showerinlayer; m_showerinlayer.clear();   
   int ilast = NshowerX<NshowerY ? lastpair.first : lastpair.second; 
   CRDEcalEDM::CRDCaloBarShower m_shower = NshowerX<NshowerY ? barShowerXCol[ilast] : barShowerYCol[ilast] ;
   XYShowerMatchingL1( m_shower, leftShowers, m_showerinlayer);

@@ -17,12 +17,12 @@ namespace CRDEcalEDM {
       barYCol.clear();
       barShowerXCol.clear();
       barShowerYCol.clear();
-      NeuCandidateCol.clear();
-      TrkCandidateCol.clear();
+      NeuShadowClusCol.clear();
+      TrkShadowClusCol.clear();
       trkCol.clear();
     }
-    void ClearNeuCandidate() { NeuCandidateCol.clear(); }
-    void ClearTrkCandidate() { TrkCandidateCol.clear(); }
+    void ClearNeuShadowClus() { NeuShadowClusCol.clear(); }
+    void ClearTrkShadowClus() { TrkShadowClusCol.clear(); }
 
     inline bool operator == (const CRDCaloBlock &x) const{
       return ( module == x.module  &&
@@ -41,23 +41,25 @@ namespace CRDEcalEDM {
     std::vector<CRDEcalEDM::CRDCaloBarShower> getShowerXCol() const { return barShowerXCol; }
     std::vector<CRDEcalEDM::CRDCaloBarShower> getShowerYCol() const { return barShowerYCol; }
     std::vector<CRDEcalEDM::Track> getTrkCol() const {return trkCol; }
-    std::vector<CRDEcalEDM::CRDShadowCluster> getNeuCandidateCol() const { return NeuCandidateCol; }
-    std::vector<CRDEcalEDM::CRDShadowCluster> getTrkCandidateCol() const { return TrkCandidateCol; }
-    std::vector<CRDEcalEDM::CRDShadowCluster> getAllCandidateCol() const; 
+    std::vector<CRDEcalEDM::CRDShadowCluster> getNeuShadowClusCol() const { return NeuShadowClusCol; }
+    std::vector<CRDEcalEDM::CRDShadowCluster> getTrkShadowClusCol() const { return TrkShadowClusCol; }
+    std::vector<CRDEcalEDM::CRDShadowCluster> getAllShadowClusCol() const; 
     bool isForced() const { return m_isForced; }
 
     bool MatchTrk( CRDEcalEDM::Track _trk ) const;
   
     void setIDInfo( int _m, int _s, int _d, int _p ){ module=_m; stave=_s; dlayer=_d; part=_p; }
     void setForced(bool flag) { m_isForced=flag; }
-    void setNeuCandidateCol( std::vector<CRDEcalEDM::CRDShadowCluster>& _showers) { NeuCandidateCol = _showers; }
-    void setTrkCandidateCol( std::vector<CRDEcalEDM::CRDShadowCluster>& _showers) { TrkCandidateCol = _showers; }
+    void setNeuShadowClusCol( std::vector<CRDEcalEDM::CRDShadowCluster>& _clus) { NeuShadowClusCol = _clus; }
+    void setTrkShadowClusCol( std::vector<CRDEcalEDM::CRDShadowCluster>& _clus) { TrkShadowClusCol = _clus; }
+    void addNeuShadowClus( CRDEcalEDM::CRDShadowCluster _clus ) { NeuShadowClusCol.push_back(_clus); }
+    void addTrkShadowClus( CRDEcalEDM::CRDShadowCluster _clus ) { TrkShadowClusCol.push_back(_clus); }
     void setBarCol( std::vector<CRDEcalEDM::CRDCaloBar>& _colX, std::vector<CRDEcalEDM::CRDCaloBar>& _colY ){ barXCol=_colX, barYCol=_colY; }
     void setTrkCol( std::vector<CRDEcalEDM::Track>& _trkvec ) { trkCol=_trkvec; } 
 
     void addTrk( CRDEcalEDM::Track& _trk ) { trkCol.push_back(_trk); }
 
-    void PrintCandidates() const; 
+    void PrintShadowClus() const; 
 
   private:
     int module;
@@ -65,15 +67,15 @@ namespace CRDEcalEDM {
     int dlayer;
     int part;
 
-    std::vector<CRDEcalEDM::CRDCaloBar> barXCol;
-    std::vector<CRDEcalEDM::CRDCaloBar> barYCol;
+    std::vector<CRDEcalEDM::CRDCaloBar> barXCol;  //slayer == 0.
+    std::vector<CRDEcalEDM::CRDCaloBar> barYCol;  //slayer == 1.
     std::vector<CRDEcalEDM::CRDCaloBarShower> barShowerXCol;
     std::vector<CRDEcalEDM::CRDCaloBarShower> barShowerYCol;
     std::vector<CRDEcalEDM::Track> trkCol;
 
     bool m_isForced;         //false for no forced shower.
-    std::vector<CRDEcalEDM::CRDShadowCluster> NeuCandidateCol; 
-    std::vector<CRDEcalEDM::CRDShadowCluster> TrkCandidateCol;
+    std::vector<CRDEcalEDM::CRDShadowCluster> NeuShadowClusCol; 
+    std::vector<CRDEcalEDM::CRDShadowCluster> TrkShadowClusCol;
   };
 
 };

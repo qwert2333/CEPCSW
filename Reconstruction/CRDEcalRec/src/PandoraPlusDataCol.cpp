@@ -152,47 +152,6 @@ void PandoraPlusDataCol::Print3DClus(){
 }
 
 
-void PandoraPlusDataCol::PrintArborTree(){
-  cout<<"------------------------------------------------"<<endl;
-  cout<<"-------------Print out ArborTrees---------------"<<endl;
-  cout<<"------------------------------------------------"<<endl;
-
-  cout<<"Arbor TreeX number: "<<ArborTreeCol.size()<<endl;
-  cout<<"------------------------------------------------"<<endl;
-  cout<<"Loop TreeX:  "<<endl;
-  cout<<"  (Barycenter, Nnode):"<<endl;
-  for(int i=0; i<ArborTreeCol.size(); i++){
-    printf("     (%.2f, %.2f, %.2f, %d) \n", ArborTreeCol[i].GetBarycenter().x(), ArborTreeCol[i].GetBarycenter().y(), ArborTreeCol[i].GetBarycenter().z(), ArborTreeCol[i].GetNodes().size());
-  }
-  cout<<"------------------------------------------------"<<endl;
-  cout<<"--------------------End print-------------------"<<endl;
-
-}
-
-void PandoraPlusDataCol::ClearTempCol(){
-  BlockVec_raw.clear();
-
-  BlockVec_iter0.clear();
-  LayerCol_iter0.clear();
-  Shower2DCol_iter0.clear();
-  GoodClus3DCol_iter0.clear();
-  BadClus3DCol_iter0.clear();
-  Clus3DCol_iter0.clear();
-
-  BlockVec_iter1.clear();
-  LayerCol_iter1.clear();
-  Shower2DCol_iter1.clear();
-  GoodClus3DCol_iter1.clear();
-  BadClus3DCol_iter1.clear();
-  Clus3DCol_iter1.clear();
-
-  BlockVec_iter2.clear();
-  LayerCol_iter2.clear();
-  Shower2DCol_iter2.clear();
-  GoodClus3DCol_iter2.clear();
-  BadClus3DCol_iter2.clear();
-  Clus3DCol_iter2.clear();
-}
 
 void PandoraPlusDataCol::Clear(){
   ClearBlock();  
@@ -201,6 +160,4 @@ void PandoraPlusDataCol::Clear(){
   ClearCluster();
   ClearTrack();
   ClearPFO();    
-  ClearTempCol();
-  ClearArbor();
 }

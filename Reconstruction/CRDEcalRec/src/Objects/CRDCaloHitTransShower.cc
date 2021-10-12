@@ -1,19 +1,19 @@
-#ifndef _CRD_ECAL_2DSHOWER_C
-#define _CRD_ECAL_2DSHOWER_C
+#ifndef _CRD_ECAL_TRANSSHOWER_C
+#define _CRD_ECAL_TRANSSHOWER_C
 #define PI 3.141592653
 
-#include "Objects/CRDCaloHit2DShower.h"
+#include "Objects/CRDCaloHitTransShower.h"
 
 using namespace std;
 namespace CRDEcalEDM{
 
-  CRDCaloHit2DShower::CRDCaloHit2DShower(CRDEcalEDM::CRDCaloBarShower _bars1, CRDEcalEDM::CRDCaloBarShower _bars2, std::vector<edm4hep::ConstCalorimeterHit> _hits ){
+  CRDCaloHitTransShower::CRDCaloHitTransShower(CRDEcalEDM::CRDCaloBarShower _bars1, CRDEcalEDM::CRDCaloBarShower _bars2, std::vector<edm4hep::ConstCalorimeterHit> _hits ){
     barShowerX = _bars1;
     barShowerY = _bars2; 
     CaloHits = _hits;
   }
 
-  dd4hep::Position CRDCaloHit2DShower::getPos() const{
+  dd4hep::Position CRDCaloHitTransShower::getPos() const{
     float rotAngle = module*PI/4.;
     TVector3 m_vecX(0,0,0);
     TVector3 m_vecY(0,0,0);
@@ -27,13 +27,13 @@ namespace CRDEcalEDM{
     return pos;
   }
 
-  double CRDCaloHit2DShower::getHitsE() const{
+  double CRDCaloHitTransShower::getHitsE() const{
     double en=0;
     for(int i=0;i<CaloHits.size();i++) en+=CaloHits[i].getEnergy();
     return en;
   }
 
-  double CRDCaloHit2DShower::getHitsWidth() const{
+  double CRDCaloHitTransShower::getHitsWidth() const{
     TVector3 cent(0., 0., 0.); 
     double totE = getHitsE(); 
     for(int i=0;i<CaloHits.size();i++){
@@ -51,7 +51,7 @@ namespace CRDEcalEDM{
     return width; 
   }
 
-  void CRDCaloHit2DShower::setCandidateType( int _flag ){
+  void CRDCaloHitTransShower::setShadowClusType( int _flag ){
     if(_flag==1)      { m_isTrkShower=true; m_isNeuShower=false; }
     else if(_flag==0) { m_isTrkShower=false; m_isNeuShower=true; }
     else              { m_isTrkShower=false; m_isNeuShower=false;}

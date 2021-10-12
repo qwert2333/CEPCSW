@@ -1,45 +1,32 @@
-#ifndef _CANDIDATEMAKING_ALG_C
-#define _CANDIDATEMAKING_ALG_C
+#ifndef _SHADOWMAKING_ALG_C
+#define _SHADOWMAKING_ALG_C
 
 #include "Algorithm/ShadowMakingAlg.h"
-#include <set>
 
 void ShadowMakingAlg::Settings::SetInitialValue(){
-  Debug=0;
-  UseTrk = false; 
-  EndLayer = 15; 
+  fl_UseTrack = true; 
+  EndLayer = 15;
+  th_GoodLayer = 4; 
 }
 
 StatusCode ShadowMakingAlg::Initialize(){
 
-  //Initialize settings
   return StatusCode::SUCCESS;
 }
 
 StatusCode ShadowMakingAlg::RunAlgorithm(ShadowMakingAlg::Settings& m_settings, PandoraPlusDataCol& m_datacol){
   settings = m_settings;
 
-  std::vector<CRDEcalEDM::CRDCaloHit3DCluster> m_goodClus = m_datacol.GoodClus3DCol;
-  std::vector<CRDEcalEDM::CRDCaloHit3DCluster> m_badClus  = m_datacol.BadClus3DCol;
-  if(settings.Debug>1) { m_datacol.PrintLayer(); m_datacol.PrintShower(); m_datacol.Print3DClus(); }
+  std::vector<CRDEcalEDM::CRDCaloHitLongiCluster> m_clusXCol = m_datacol.LongiClusXCol; 
+  std::vector<CRDEcalEDM::CRDCaloHitLongiCluster> m_clusYCol = m_datacol.LongiClusYCol; 
 
-  for(int ib=0;ib<m_datacol.BlockVec.size(); ib++){ m_datacol.BlockVec[ib].ClearNeuCandidate(); m_datacol.BlockVec[ib].ClearTrkCandidate(); }
+  for(int ib=0;ib<m_datacol.BlockVec.size(); ib++){ m_datacol.BlockVec[ib].ClearNeuShadowClus(); m_datacol.BlockVec[ib].ClearTrkShadowClus(); }
 
-  std::vector<CRDEcalEDM::CRDCaloBlock> m_blockVec = GetBlocksNeedModification( m_goodClus, m_badClus ); //These blocks only have cellID info.
-
-  if(settings.Debug>0){ 
-    std::cout<<"DEBUG: Layers need to modify: ";
-    for(int il=0;il<m_blockVec.size();il++) 
-      printf("  (%d, %d, %d, %d) \n", m_blockVec[il].getModule(), m_blockVec[il].getStave(), m_blockVec[il].getDlayer(), m_blockVec[il].getPart() );
-    std::cout<<std::endl;
-  }
-
-
-  //Update CaloBlock with Track
-  if(m_datacol.TrackCol.size()!=0 && settings.UseTrk){
+  //Shadow cluster from track: 
+  if(m_datacol.TrackCol.size()!=0 && settings.fl_UseTrack){
     for(int ib=0; ib<m_datacol.BlockVec.size(); ib++){
       CRDEcalEDM::CRDCaloBlock m_block = m_datacol.BlockVec[ib];
-      if( m_block.getDlayer()>settings.EndLayer ) continue; 
+      if( m_block.getDlayer()>settings.EndLayer ) continue;
       std::vector<CRDEcalEDM::CRDShadowCluster> m_exptrkvec; m_exptrkvec.clear();
       for(int it=0; it<m_block.getTrkCol().size(); it++){
         CRDEcalEDM::CRDShadowCluster m_trksh; m_trksh.Clear();
@@ -50,102 +37,94 @@ StatusCode ShadowMakingAlg::RunAlgorithm(ShadowMakingAlg::Settings& m_settings, 
         m_trksh.Type = 1;
         m_exptrkvec.push_back(m_trksh);
       }
-    m_datacol.BlockVec[ib].setTrkCandidateCol( m_exptrkvec );
-    if(settings.Debug>0)cout<<"  Block #"<<ib<<": TrkCandidate number = "<<m_datacol.BlockVec[ib].getTrkCandidateCol().size()<<endl;
-  }}
+    m_datacol.BlockVec[ib].setTrkShadowClusCol( m_exptrkvec );
+  }}  
 
 
+  //Identify the cluster quality: 
+  std::vector<CRDEcalEDM::CRDCaloHitLongiCluster> m_goodClusX; m_goodClusX.clear(); 
+  std::vector<CRDEcalEDM::CRDCaloHitLongiCluster> m_badClusX; m_badClusX.clear(); 
+  for(int ic=0; ic<m_clusXCol.size(); ic++){
+    if( m_clusXCol[ic].getBarShowers().size()>=settings.th_GoodLayer ) m_goodClusX.push_back(m_clusXCol[ic]);
+    else m_badClusX.push_back(m_clusXCol[ic]);
+  }
 
-  //Update CaloBlock with Shower Candidate
-  for(int ib=0; ib<m_datacol.BlockVec.size(); ib++){
+  std::vector<CRDEcalEDM::CRDCaloHitLongiCluster> m_goodClusY; m_goodClusY.clear(); 
+  std::vector<CRDEcalEDM::CRDCaloHitLongiCluster> m_badClusY; m_badClusY.clear(); 
+  for(int ic=0; ic<m_clusYCol.size(); ic++){
+    if( m_clusYCol[ic].getBarShowers().size()>=settings.th_GoodLayer ) m_goodClusY.push_back(m_clusYCol[ic]);
+    else m_badClusY.push_back(m_clusYCol[ic]);
+  }
 
-    std::vector<CRDEcalEDM::CRDCaloBlock>::iterator iter = find(m_blockVec.begin(), m_blockVec.end(), m_datacol.BlockVec[ib]);
-    if(iter == m_blockVec.end() ) continue; //This layer doesn't have candidate.
+  for(int ic=0; ic<m_goodClusX.size(); ic++){ 
+    std::vector<CRDEcalEDM::CRDCaloBlock> m_blocks = GetBlocksNeedModification(m_goodClusX[ic]);
 
-    std::vector<CRDEcalEDM::CRDShadowCluster> m_expshvec; m_expshvec.clear(); 
-    for(int icl=0; icl<m_goodClus.size(); icl++){
+    for(int ib=0; ib<m_datacol.BlockVec.size(); ib++){
+      std::vector<CRDEcalEDM::CRDCaloBlock>::iterator iter = find( m_blocks.begin(), m_blocks.end(), m_datacol.BlockVec[ib] );
+      if(iter==m_blocks.end()) continue; 
+
       CRDEcalEDM::CRDShadowCluster m_neush; m_neush.Clear();
       m_neush.Dlayer = m_datacol.BlockVec[ib].getDlayer();
-      m_neush.Type = 0; 
-      m_neush.ExpEshower = m_goodClus[icl].getExpEnergy(m_neush.Dlayer);
-      if(m_neush.ExpEshower <=0 ) continue;
-      m_neush.ExpEseed = m_neush.ExpEshower*0.8;
-      m_neush.ExpDepth = m_neush.Dlayer;
-      m_neush.ExpPos = m_goodClus[icl].getExpPos(m_neush.Dlayer);
+      m_neush.Type = 0;
+      m_neush.slayer = 0; 
+      m_neush.ExpPos = m_goodClusX[ic].getExpPos(m_neush.Dlayer);
 
-      //Overlap removal: remove the neutral candidate overlapped with track candidate.
-      bool f_overlap = false; 
-      CRDEcalEDM::CRDShadowCluster overlappedCandi; overlappedCandi.Clear(); 
-      for(int icd=0; icd<m_datacol.BlockVec[ib].getTrkCandidateCol().size(); icd++){
-        CRDEcalEDM::CRDShadowCluster m_trkCandi = m_datacol.BlockVec[ib].getTrkCandidateCol()[icd];
+      bool f_overlap = false;
+      CRDEcalEDM::CRDShadowCluster overlappedCandi; overlappedCandi.Clear();
+      for(int icd=0; icd<m_datacol.BlockVec[ib].getTrkShadowClusCol().size(); icd++){
+        CRDEcalEDM::CRDShadowCluster m_trkCandi = m_datacol.BlockVec[ib].getTrkShadowClusCol()[icd];
         if( (m_neush.ExpPos-m_trkCandi.ExpPos).Mag()<10 ){ f_overlap=true; overlappedCandi=m_trkCandi; break; }
       }
-      if(f_overlap){ 
-        if(settings.Debug>1) printf("One neutral candidate is overlapped with a trk candidate: NeuCandidate(%.2f, %.2f, %.2f), TrkCandidate(%.2f, %.2f, %.2f). \n", 
-                                    m_neush.ExpPos.x(), m_neush.ExpPos.y(), m_neush.ExpPos.z(), 
-                                    overlappedCandi.ExpPos.x(), overlappedCandi.ExpPos.y(), overlappedCandi.ExpPos.z() );
-        continue; 
-      }
-      m_expshvec.push_back(m_neush);
+      if(!f_overlap) m_datacol.BlockVec[ib].addNeuShadowClus( m_neush );
     }
-
-    m_datacol.BlockVec[ib].setNeuCandidateCol(m_expshvec);
-    if(settings.Debug>0) cout<<"  Block #"<<ib<<": NeuCandidate number = "<<m_datacol.BlockVec[ib].getNeuCandidateCol().size()<<endl;
   }
 
 
-  return StatusCode::SUCCESS;
+  for(int ic=0; ic<m_goodClusY.size(); ic++){
+    std::vector<CRDEcalEDM::CRDCaloBlock> m_blocks = GetBlocksNeedModification(m_goodClusY[ic]);
 
-}
+    for(int ib=0; ib<m_datacol.BlockVec.size(); ib++){
+      std::vector<CRDEcalEDM::CRDCaloBlock>::iterator iter = find( m_blocks.begin(), m_blocks.end(), m_datacol.BlockVec[ib] );
+      if(iter==m_blocks.end()) continue;
 
+      CRDEcalEDM::CRDShadowCluster m_neush; m_neush.Clear();
+      m_neush.Dlayer = m_datacol.BlockVec[ib].getDlayer();
+      m_neush.Type = 0;
+      m_neush.ExpPos = m_goodClusY[ic].getExpPos(m_neush.Dlayer);
 
-
-std::vector<CRDEcalEDM::CRDCaloBlock> ShadowMakingAlg::GetBlocksNeedModification( std::vector<CRDEcalEDM::CRDCaloHit3DCluster>& m_goodClus, std::vector<CRDEcalEDM::CRDCaloHit3DCluster>& m_badClus ){
+      bool f_overlap = false;
+      CRDEcalEDM::CRDShadowCluster overlappedCandi; overlappedCandi.Clear();
+      for(int icd=0; icd<m_datacol.BlockVec[ib].getTrkShadowClusCol().size(); icd++){
+        CRDEcalEDM::CRDShadowCluster m_trkCandi = m_datacol.BlockVec[ib].getTrkShadowClusCol()[icd];
+        if( (m_neush.ExpPos-m_trkCandi.ExpPos).Mag()<10 ){ f_overlap=true; overlappedCandi=m_trkCandi; break; }
+      }
+      if(!f_overlap) m_datacol.BlockVec[ib].addNeuShadowClus( m_neush );
+    }
+  }
   
-  std::vector<CRDEcalEDM::CRDCaloBlock> vec_blocks; vec_blocks.clear();
-  //Case0: no good cluster: Do nothing, skip this event. 
-  if(m_goodClus.size()==0) return vec_blocks;
-
-  //All blocks in good cluster
-  for(int icl=0; icl<m_goodClus.size(); icl++){
-  for(int ish=0; ish<m_goodClus[icl].get2DShowers().size(); ish++){
-    CRDEcalEDM::CRDCaloBlock m_block; m_block.Clear();
-    m_block.setIDInfo( m_goodClus[icl].get2DShowers()[ish].getModule(), 
-                       m_goodClus[icl].get2DShowers()[ish].getStave(), 
-                       m_goodClus[icl].get2DShowers()[ish].getDlayer(), 
-                       m_goodClus[icl].get2DShowers()[ish].getPart() );
-    vec_blocks.push_back(m_block);
-  }}
-  //All blocks in bad cluster
-  for(int icl=0; icl<m_badClus.size(); icl++){
-  for(int ish=0; ish<m_badClus[icl].get2DShowers().size(); ish++){  
-    CRDEcalEDM::CRDCaloBlock m_block; m_block.Clear();
-    m_block.setIDInfo( m_badClus[icl].get2DShowers()[ish].getModule(),
-                       m_badClus[icl].get2DShowers()[ish].getStave(),
-                       m_badClus[icl].get2DShowers()[ish].getDlayer(),
-                       m_badClus[icl].get2DShowers()[ish].getPart()    );
-    vec_blocks.push_back(m_block);
-  }}
-
-  //Clear the duplicated blocks
-  std::vector<CRDEcalEDM::CRDCaloBlock> vec_outblock; vec_outblock.clear();
-  for(int ib=0; ib<vec_blocks.size(); ib++){
-    int m_Dlayer = vec_blocks[ib].getDlayer(); 
-    std::vector<CRDEcalEDM::CRDCaloBlock>::iterator iter = find(vec_outblock.begin(), vec_outblock.end(), vec_blocks[ib]);
-    if( iter==vec_outblock.end() && m_Dlayer<=settings.EndLayer ) vec_outblock.push_back(vec_blocks[ib]);
-  }
-
-  return vec_outblock;
-
-
+  return StatusCode::SUCCESS;
 }
-
 
 StatusCode ShadowMakingAlg::ClearAlgorithm(){
 
-
   return StatusCode::SUCCESS;
+}
 
+
+std::vector<CRDEcalEDM::CRDCaloBlock> ShadowMakingAlg::GetBlocksNeedModification( CRDEcalEDM::CRDCaloHitLongiCluster& m_clus ){
+
+  std::vector<CRDEcalEDM::CRDCaloBlock> vec_blocks; vec_blocks.clear();
+
+  for(int is=0; is<m_clus.getBarShowers().size(); is++){
+    CRDEcalEDM::CRDCaloBlock m_block; m_block.Clear();
+    m_block.setIDInfo( m_clus.getBarShowers()[is].getModule(),  
+                       m_clus.getBarShowers()[is].getStave(),
+                       m_clus.getBarShowers()[is].getDlayer(), 
+                       m_clus.getBarShowers()[is].getPart()  );
+    vec_blocks.push_back(m_block);
+  }
+
+  return vec_blocks; 
 }
 
 #endif

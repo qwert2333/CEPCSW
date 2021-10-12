@@ -107,22 +107,17 @@ protected:
   TTree* t_SimBar;
   FloatVec m_simBar_x, m_simBar_y, m_simBar_z, m_simBar_T1, m_simBar_T2, m_simBar_Q1, m_simBar_Q2, m_simBar_dlayer, m_simBar_part, m_simBar_stave, m_simBar_slayer, m_simBar_module;
 
-  TTree* t_ArborTree;
-  int m_Nnode;
-  float m_tree_centx, m_tree_centy, m_tree_centz, m_tree_minLayer, m_tree_maxLayer; 
-  FloatVec m_nodex, m_nodey, m_nodez, m_nodeType, m_nodeE;
-
   TTree* t_dataColIter0;
-  //Cluster basic info
-  int      m_Iter0_Ngoodclus, m_Iter0_Nbadclus;
-  FloatVec m_Iter0_clus_x, m_Iter0_clus_y, m_Iter0_clus_z, m_Iter0_clus_E;
-  FloatVec m_Iter0_clus_px, m_Iter0_clus_py, m_Iter0_clus_pz; 
-  //----Cluster ID info
-  IntVec   m_Iter0_clus_Nly, m_Iter0_clus_Nsh, m_Iter0_clus_start, m_Iter0_clus_end, m_Iter0_clus_maxELayer, m_Iter0_clus_maxWidthLayer; 
-  FloatVec m_Iter0_clus_aveE, m_Iter0_clus_stdDevE, m_Iter0_clus_maxE, m_Iter0_clus_maxWidth;
-  FloatVec m_Iter0_clus_alpha, m_Iter0_clus_beta, m_Iter0_clus_chi2;
-  //----Showers in cluster
-  FloatVec m_Iter0_gclus_2dshx, m_Iter0_gclus_2dshy, m_Iter0_gclus_2dshz, m_Iter0_gclus_2dshE;
+  FloatVec m_barshower0X, m_barshower0Y, m_barshower0Z, m_barshower0E, m_barshower1X, m_barshower1Y, m_barshower1Z, m_barshower1E;
+  IntVec m_barshower0_layer, m_barshower1_layer;
+  FloatVec m_trkX_x, m_trkX_y, m_trkX_z, m_trkX_px, m_trkX_py, m_trkX_pz; 
+  FloatVec m_trkY_x, m_trkY_y, m_trkY_z, m_trkY_px, m_trkY_py, m_trkY_pz; 
+  IntVec m_trkX_Nsh, m_trkY_Nsh;
+
+  TTree* t_dataColIter1;
+  FloatVec m_barshower0X_iter1, m_barshower0Y_iter1, m_barshower0Z_iter1, m_barshower0E_iter1, m_barshower1X_iter1, m_barshower1Y_iter1, m_barshower1Z_iter1, m_barshower1E_iter1;
+  IntVec m_barshower0_layer_iter1, m_barshower1_layer_iter1;
+  FloatVec m_Iter1_gclus_2dshx, m_Iter1_gclus_2dshy, m_Iter1_gclus_2dshz, m_Iter1_gclus_2dshE;
 
   //Stage2: check reconstructed result
   TTree *t_recoPFO;
@@ -138,8 +133,8 @@ protected:
 
   void ClearBar();
   void ClearRecPFO(); 
-  void ClearTree();
-  void ClearIter();
+  void ClearIter0();
+  void ClearIter1(); 
 
 };
 #endif
