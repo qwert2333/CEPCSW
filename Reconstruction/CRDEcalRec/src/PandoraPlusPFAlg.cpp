@@ -111,6 +111,9 @@ StatusCode PandoraPlusPFAlg::initialize()
   t_Clusters->Branch("clus_y", &m_clus_y);
   t_Clusters->Branch("clus_z", &m_clus_z);
   t_Clusters->Branch("clus_E", &m_clus_E);
+  t_Clusters->Branch("clus_Lstart", &m_clus_Lstart);
+  t_Clusters->Branch("clus_Lend", &m_clus_Lend);
+  t_Clusters->Branch("clus_stdDevE", &m_clus_stdDevE);
 
   t_recoPFO->Branch("Npfo", &m_Npfo);
   t_recoPFO->Branch("recPFO_px", &m_recPFO_px);
@@ -304,6 +307,16 @@ StatusCode PandoraPlusPFAlg::execute()
     m_clus_y.push_back( m_DataCol.Clus3DCol[ic].getShowerCenter().y() );
     m_clus_z.push_back( m_DataCol.Clus3DCol[ic].getShowerCenter().z() );
     m_clus_E.push_back( m_DataCol.Clus3DCol[ic].getShowerE() );
+    m_clus_Lend.push_back(m_DataCol.Clus3DCol[ic].getEndDlayer());
+    m_clus_stdDevE.push_back(m_DataCol.Clus3DCol[ic].getStdDevE());
+
+    float Lstart=0;
+    bool f_found = false;
+    std::vector<double> m_EnVec = m_DataCol.Clus3DCol[ic].getEnInLayer();
+    for(int i=0; i<m_EnVec.size(); i++)
+      if(!f_found && m_EnVec[i]>0.1) { Lstart=i; f_found==true; }
+
+    m_clus_Lstart.push_back(Lstart);
   }
   t_Clusters->Fill();
 
@@ -444,6 +457,9 @@ void PandoraPlusPFAlg::ClearClusterTree(){
   m_clus_y.clear(); 
   m_clus_z.clear(); 
   m_clus_E.clear(); 
+  m_clus_Lstart.clear();
+  m_clus_Lend.clear();
+  m_clus_stdDevE.clear(); 
 }
 
 void PandoraPlusPFAlg::ClearRecPFO(){

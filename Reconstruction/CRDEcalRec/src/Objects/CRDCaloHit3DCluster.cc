@@ -332,6 +332,7 @@ namespace CRDEcalEDM{
     float Lstart=0; 
     bool f_found = false;
     double stdDevE = getStdDevE();
+    Lend = getEndDlayer();
     std::vector<double> m_EnVec = getEnInLayer();
     for(int i=0; i<m_EnVec.size(); i++){
       if(!f_found && m_EnVec[i]>0.1) { Lstart=i; f_found==true; }

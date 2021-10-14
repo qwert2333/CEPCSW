@@ -122,6 +122,7 @@ protected:
   int m_Ngoodclus, m_Nbadclus, m_Nclus; 
   IntVec m_clus_type, m_clus_Nlayer, m_clus_Nshower;
   FloatVec m_clus_x, m_clus_y, m_clus_z, m_clus_E;
+  FloatVec m_clus_Lstart, m_clus_Lend, m_clus_stdDevE; 
 
   //Stage2: check reconstructed result
   TTree *t_recoPFO;
