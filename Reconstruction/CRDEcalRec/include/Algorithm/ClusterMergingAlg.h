@@ -16,14 +16,16 @@ public:
     void SetDebug(int _level)  { Debug  =_level; }
     void SetMergeGoodCluster( bool _fl ) { fl_MergeGoodClus=_fl; }
     void SetMergeBadCluster( bool _fl ) { fl_MergeBadClus=_fl; }
-    void SetMergeEMTail( bool _fl ) { fl_MergeEMTail=_fl; }
+    void SetMergeEMTailShower( bool _fl ) { fl_MergeEMTailShower=_fl; }
+    void SetMergeEMTailCluster( bool _fl ) { fl_MergeEMTailCluster=_fl; }
 
     double axis_Angle;  //Delta R between axis of two cluster
     double relP_Angle;  //Delta R between axis(cluster1) and r(cluster1-cluster2). 
     int skipLayer;      //Allowed layer between two cluster. 
     bool fl_MergeGoodClus ;
     bool fl_MergeBadClus ;
-    bool fl_MergeEMTail; 
+    bool fl_MergeEMTailShower; 
+    bool fl_MergeEMTailCluster; 
     int  Debug;
   };
 

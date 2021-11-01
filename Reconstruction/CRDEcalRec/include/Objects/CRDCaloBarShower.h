@@ -12,6 +12,9 @@ namespace CRDEcalEDM {
   public: 
     CRDCaloBarShower() {}; 
 
+    double getlateralmomentofy() const;
+    double getlateralmomentofz() const;
+
     void Clear() { Energy=0; Bars.clear(); TrkCandidateCol.clear(); NeuCandidateCol.clear(); }
     bool isNeighbor(CRDEcalEDM::CRDCaloBar iBar); 
     bool inShower(CRDEcalEDM::CRDCaloBar iBar); 

@@ -45,6 +45,10 @@ public:
 
   StatusCode GetMatchedShowersL2( std::vector<CRDEcalEDM::CRDCaloBarShower>& barShowerXCol, std::vector<CRDEcalEDM::CRDCaloBarShower>& barShowerYCol, std::vector<CRDEcalEDM::CRDCaloHit2DShower>& outshCol );
 
+  StatusCode CleanShower( std::vector<CRDEcalEDM::CRDCaloBarShower>& rawShowerXCol, 
+                          std::vector<CRDEcalEDM::CRDCaloBarShower>& rawShowerYCol,
+                          std::vector<CRDEcalEDM::CRDCaloBarShower>& cleanShowerXCol,
+                          std::vector<CRDEcalEDM::CRDCaloBarShower>& cleanShowerYCol );
 
   StatusCode XYShowerMatchingL0( CRDEcalEDM::CRDCaloBarShower& barShowerX, CRDEcalEDM::CRDCaloBarShower& barShowerY, CRDEcalEDM::CRDCaloHit2DShower& outsh ); //1*1 case
   StatusCode XYShowerMatchingL1( CRDEcalEDM::CRDCaloBarShower& barShower1, std::vector<CRDEcalEDM::CRDCaloBarShower>& barShowerNCol, std::vector<CRDEcalEDM::CRDCaloHit2DShower>& outshCol ); //1*N case without candidates

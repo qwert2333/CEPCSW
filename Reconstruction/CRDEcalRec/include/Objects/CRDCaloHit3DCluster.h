@@ -28,6 +28,9 @@ namespace CRDEcalEDM{
     CRDCaloHit3DCluster();
     //~CRDCaloHit3DCluster(){ delete track;}
 
+    int getclusterIDlayer() const;  //swz_1 
+    double getlateral() const;
+
     edm4hep::ConstCalorimeterHit getClusterInitialHit() const; 
     TVector3 getHitCenter() const;
     TVector3 getShowerCenter() const;

@@ -6,7 +6,7 @@
 void EnergyTimeMatchingAlg::Settings::SetInitialValue(){
   chi2Wi_E = 1;
   chi2Wi_T = 10;
-  th_chi2  = -1;
+  th_chi2  = 1000;
   sigmaE   = 0.10;
   lv_useCandidate = 0; 
   UseChi2 = false;
@@ -52,9 +52,15 @@ StatusCode EnergyTimeMatchingAlg::RunAlgorithm( EnergyTimeMatchingAlg::Settings&
   //Not use candidate: ET chi2 matching
   if(settings.lv_useCandidate == 0 && settings.UseChi2){
     for(int il=0;il<layers.size();il++){
+      if(layers[il].barShowerXCol.size()==0 || layers[il].barShowerYCol.size()==0) continue;
 
-      std::vector<CRDEcalEDM::CRDCaloBarShower> showerXCol = layers[il].barShowerXCol;
-      std::vector<CRDEcalEDM::CRDCaloBarShower> showerYCol = layers[il].barShowerYCol;
+      std::vector<CRDEcalEDM::CRDCaloBarShower> showerXCol; showerXCol.clear();
+      std::vector<CRDEcalEDM::CRDCaloBarShower> showerYCol; showerYCol.clear(); 
+
+      if(layers[il].barShowerXCol.size()>1 && layers[il].barShowerYCol.size()>1) 
+        CleanShower(layers[il].barShowerXCol, layers[il].barShowerYCol, showerXCol, showerYCol);
+      else{ showerXCol = layers[il].barShowerXCol; showerYCol = layers[il].barShowerYCol; }
+
       if(showerXCol.size()==0 || showerYCol.size()==0) continue;
 
       std::vector<CRDEcalEDM::CRDCaloHit2DShower> m_showerinlayer; m_showerinlayer.clear();
@@ -102,10 +108,10 @@ StatusCode EnergyTimeMatchingAlg::RunAlgorithm( EnergyTimeMatchingAlg::Settings&
       else showerYCol.push_back(layers[il].barShowerYCol[is]);
     }
 
-//cout<<"  Candidate shower number:  X:"<<showerXCol.size()<<"  Y:"<<showerYCol.size()<<endl;
-//cout<<"    Candidate size X: "; for(int ic=0; ic<showerXCol.size(); ic++) printf("%d(%d)  ", showerXCol[ic].getTrkCandiCol().size(), showerXCol[ic].getNeuCandiCol().size()); 
-//cout<<" | Y: "; for(int ic=0; ic<showerYCol.size(); ic++) printf("%d(%d)  ", showerYCol[ic].getTrkCandiCol().size(), showerYCol[ic].getNeuCandiCol().size() );  cout<<endl;
-//cout<<"  No Candidate shower number:  X:"<<m_shX_noCandi.size()<<"  Y:"<<m_shY_noCandi.size()<<endl;
+cout<<"  Candidate shower number:  X:"<<showerXCol.size()<<"  Y:"<<showerYCol.size()<<endl;
+cout<<"    Candidate size X: "; for(int ic=0; ic<showerXCol.size(); ic++) printf("%d(%d)  ", showerXCol[ic].getTrkCandiCol().size(), showerXCol[ic].getNeuCandiCol().size()); 
+cout<<" | Y: "; for(int ic=0; ic<showerYCol.size(); ic++) printf("%d(%d)  ", showerYCol[ic].getTrkCandiCol().size(), showerYCol[ic].getNeuCandiCol().size() );  cout<<endl;
+cout<<"  No Candidate shower number:  X:"<<m_shX_noCandi.size()<<"  Y:"<<m_shY_noCandi.size()<<endl;
 
     //Pre: matching showers without candidate
     if(m_shX_noCandi.size()!=0 && m_shY_noCandi.size()!=0){
@@ -114,7 +120,7 @@ StatusCode EnergyTimeMatchingAlg::RunAlgorithm( EnergyTimeMatchingAlg::Settings&
 
       m_2DshowerCol.insert( m_2DshowerCol.end(), m_showerinlayer.begin(), m_showerinlayer.end() );
     }
-//cout<<"  After Pre-matching. Shower number: "<<showerXCol.size()<<"  "<<showerYCol.size()<<endl;
+cout<<"  After Pre-matching. Shower number: "<<showerXCol.size()<<"  "<<showerYCol.size()<<endl;
     if(showerXCol.size()==0 || showerYCol.size()==0) continue;
 
 
@@ -123,7 +129,7 @@ StatusCode EnergyTimeMatchingAlg::RunAlgorithm( EnergyTimeMatchingAlg::Settings&
     GetMatchedShowersL0( showerXCol, showerYCol, m_lv0showerinlayer  );
 
     m_2DshowerCol.insert( m_2DshowerCol.end(), m_lv0showerinlayer.begin(), m_lv0showerinlayer.end() );
-//cout<<"  After LV0. Shower number: "<<showerXCol.size()<<"  "<<showerYCol.size()<<endl;
+cout<<"  After LV0. Shower number: "<<showerXCol.size()<<"  "<<showerYCol.size()<<endl;
     if(showerXCol.size()==0 || showerYCol.size()==0) continue;
 
 
@@ -133,7 +139,7 @@ StatusCode EnergyTimeMatchingAlg::RunAlgorithm( EnergyTimeMatchingAlg::Settings&
     GetMatchedShowersL1( showerYCol, showerXCol, m_lv1showerinlayer );
 
     m_2DshowerCol.insert( m_2DshowerCol.end(), m_lv1showerinlayer.begin(), m_lv1showerinlayer.end() );
-//cout<<"  After LV1. Shower number: "<<showerXCol.size()<<"  "<<showerYCol.size()<<endl;
+cout<<"  After LV1. Shower number: "<<showerXCol.size()<<"  "<<showerYCol.size()<<endl;
     if(showerXCol.size()==0 || showerYCol.size()==0) continue;
 
 
@@ -285,6 +291,55 @@ StatusCode EnergyTimeMatchingAlg::GetMatchedShowersL2(
   return StatusCode::SUCCESS;
 }
 
+StatusCode EnergyTimeMatchingAlg::CleanShower( std::vector<CRDEcalEDM::CRDCaloBarShower>& rawShowerXCol,
+                                               std::vector<CRDEcalEDM::CRDCaloBarShower>& rawShowerYCol,
+                                               std::vector<CRDEcalEDM::CRDCaloBarShower>& cleanShowerXCol,
+                                               std::vector<CRDEcalEDM::CRDCaloBarShower>& cleanShowerYCol )
+{
+  cleanShowerXCol.clear(); cleanShowerYCol.clear();
+  if(rawShowerXCol.size()==0 || rawShowerYCol.size()==0)  return StatusCode::SUCCESS;
+
+  const int NshowerX = rawShowerXCol.size();
+  const int NshowerY = rawShowerYCol.size();
+
+  double chi2_E[NshowerX][NshowerY] = {0};
+  double Ex[NshowerX] = {0};
+  double Ey[NshowerY] = {0};
+  for(int ix=0;ix<NshowerX;ix++){
+  for(int iy=0;iy<NshowerY;iy++){
+
+    Ex[ix] = rawShowerXCol[ix].getE();
+    Ey[iy] = rawShowerYCol[iy].getE();
+
+    chi2_E[ix][iy] = pow(fabs(Ex-Ey)/(settings.sigmaE*max(Ex[ix], Ey[iy])), 2);
+  }}
+
+  std::vector<int> index_x; index_x.clear();  
+  std::vector<int> index_y; index_y.clear();  
+  for(int ix=0; ix<NshowerX; ix++){
+    bool fl_clean = true; 
+    for(int iy=0; iy<NshowerY; iy++)
+      if(chi2_E[ix][iy]<settings.th_chi2 || Ex[ix]>0.01){ fl_clean=false; break; }
+    if(fl_clean) index_x.push_back(ix);
+  }
+  for(int iy=0; iy<NshowerY; iy++){
+    bool fl_clean = true;
+    for(int ix=0; ix<NshowerX; ix++)
+      if(chi2_E[ix][iy]<settings.th_chi2 || Ey[iy]>0.01){ fl_clean=false; break; }
+    if(fl_clean) index_y.push_back(iy);
+  }
+
+  for(int ix=0; ix<NshowerX; ix++){
+    std::vector<int>::iterator iter = find(index_x.begin(), index_x.end(), ix);
+    if(iter == index_x.end()) cleanShowerXCol.push_back(rawShowerXCol[ix]);
+  }
+  for(int iy=0; iy<NshowerY; iy++){
+    std::vector<int>::iterator iter = find(index_y.begin(), index_y.end(), iy);
+    if(iter == index_y.end()) cleanShowerYCol.push_back(rawShowerYCol[iy]);
+  }
+  return StatusCode::SUCCESS;
+}
+
 
 
 StatusCode EnergyTimeMatchingAlg::XYShowerMatchingL0( 
@@ -410,7 +465,7 @@ StatusCode EnergyTimeMatchingAlg::XYShowerChi2Matching(
 
     double Ex = showerX.getE();
     double Ey = showerY.getE();
-    chi2_E[ix][iy] = pow(fabs(Ex-Ey)/settings.sigmaE, 2);
+    chi2_E[ix][iy] = pow(fabs(Ex-Ey)/(settings.sigmaE*max(Ex, Ey)), 2);
 
     double PosTx = C*(showerY.getT1()-showerY.getT2())/(2*settings.nMat) + showerY.getPos().z();
     chi2_tx[ix][iy] = pow( fabs(PosTx-showerX.getPos().z())/settings.sigmaPos, 2 );
@@ -494,7 +549,7 @@ StatusCode EnergyTimeMatchingAlg::XYShowerChi2MatchingL1(
 
     double Ex = showerX.getE();
     double Ey = showerY.getE();
-    chi2_E[ix][iy] = pow(fabs(Ex-Ey)/settings.sigmaE, 2);
+    chi2_E[ix][iy] = pow(fabs(Ex-Ey)/(settings.sigmaE*max(Ex, Ey)), 2);
 
     double PosTx = C*(showerY.getT1()-showerY.getT2())/(2*settings.nMat) + showerY.getPos().z();
     chi2_tx[ix][iy] = pow( fabs(PosTx-showerX.getPos().z())/settings.sigmaPos, 2 );

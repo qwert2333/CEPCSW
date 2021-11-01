@@ -83,6 +83,34 @@ void PandoraPlusDataCol::PrintShower(){
     totE+=Shower2DCol[i].getShowerE();
   }
   cout<<"Total Energy: "<<totE<<endl;
+
+  cout<<"------------------------------------------------"<<endl;
+  totE = 0; 
+  cout<<"2D MIP shower collection:  Number = "<<MIPShower2DCol.size()<<endl;
+  cout<<"Loop print in layers: "<<endl;
+  cout<<'\t'<<"Layer"<<'\t'<<"position (x, y, z)"<<'\t'<<"Energy"<<endl;
+  for(int i=0;i<MIPShower2DCol.size();i++){
+    cout<<'\t'<<MIPShower2DCol[i].getDlayer()<<'\t';
+    printf( "(%.2f, %.2f, %.2f) \t%.4f \n", MIPShower2DCol[i].getPos().x(), MIPShower2DCol[i].getPos().y(), MIPShower2DCol[i].getPos().z(), MIPShower2DCol[i].getShowerE() );
+    totE+=MIPShower2DCol[i].getShowerE();
+  }
+  cout<<"Total Energy: "<<totE<<endl;
+  cout<<endl;
+
+  cout<<"------------------------------------------------"<<endl;
+  totE = 0;
+  cout<<"2D EM shower collection:  Number = "<<EMShower2DCol.size()<<endl;
+  cout<<"Loop print in layers: "<<endl;
+  cout<<'\t'<<"Layer"<<'\t'<<"position (x, y, z)"<<'\t'<<"Energy"<<endl;
+  for(int i=0;i<EMShower2DCol.size();i++){
+    cout<<'\t'<<EMShower2DCol[i].getDlayer()<<'\t';
+    printf( "(%.2f, %.2f, %.2f) \t%.4f \n", EMShower2DCol[i].getPos().x(), EMShower2DCol[i].getPos().y(), EMShower2DCol[i].getPos().z(), EMShower2DCol[i].getShowerE() );
+    totE+=EMShower2DCol[i].getShowerE();
+  }
+  cout<<"Total Energy: "<<totE<<endl;
+
+
+
   cout<<"------------------------------------------------"<<endl;
   cout<<"--------------------End print-------------------"<<endl;
 }
@@ -95,7 +123,7 @@ void PandoraPlusDataCol::Print3DClus(){
 
   cout<<"Good 3D cluster Number = "<<GoodClus3DCol.size()<<endl;
   cout<<"Bad 3D cluster Number = " <<BadClus3DCol.size()<<endl;
-  cout<<"Merged 3D showers: Number = "<<Clus3DCol.size()<<endl;
+  cout<<"Total 3D showers: Number = "<<Clus3DCol.size()<<endl;
   cout<<endl;
 
   cout<<"------------------------------------------------"<<endl;
@@ -131,7 +159,7 @@ void PandoraPlusDataCol::Print3DClus(){
   }
 
   cout<<"------------------------------------------------"<<endl;
-  cout<<"Loop merged 3Dshowers: "<<endl;
+  cout<<"Loop total 3Dshowers: "<<endl;
   for(int i=0;i<Clus3DCol.size();i++){
     cout<<'\t'<<"Shower #"<<i;
     printf("\t (%2f, %2f, %2f), Energy=%2f, axis (%.2f, %.2f, %.2f) \n", 

@@ -47,14 +47,17 @@ protected:
   //float _seed = 1024;
 
 
+  //---------------------------------------------------------------------
   //Services
   SmartIF<ICRDEcalSvc> m_edmsvc;
 
 
+  //---------------------------------------------------------------------
   //DataCollection
   PandoraPlusDataCol     m_DataCol;
 
 
+  //---------------------------------------------------------------------
   //Creators and their setting
   MCParticleCreator       *m_pMCParticleCreator;
   TrackCreator            *m_pTrackCreator;
@@ -70,15 +73,16 @@ protected:
   HcalHitsCreator::Settings        *m_pHcalHitsCreatorSettings;
   PFOCreator::Settings             *m_pPfoCreatorSettings;
 
+
+  //---------------------------------------------------------------------
   //Algorithm for PFA
   EcalClusterReconstruction   *m_pEcalClusterRec;
-
 
   //Parameters for PFA algorithm
   EcalClusterReconstruction::Settings       *m_pEcalClusterRecSettings;
 
 
-
+  //---------------------------------------------------------------------
   //Input collection
   DataHandle<edm4hep::MCParticleCollection> r_MCParticleCol{"MCParticle", Gaudi::DataHandle::Reader, this};
   DataHandle<edm4hep::TrackCollection>      r_MarlinTrkCol{"MarlinTrkTracks", Gaudi::DataHandle::Reader, this};
@@ -89,10 +93,9 @@ protected:
   mutable Gaudi::Property<float> _seed{this,   "Seed", 2131, "Random Seed"};
   mutable Gaudi::Property<int>  _Debug{this,   "Debug", 0, "Debug level"};
   mutable Gaudi::Property<int>  _Nskip{this,   "SkipEvt", 0, "Skip event"};
-  //Gaudi::Property< std::vector<std::string> >  m_MCParticleCollections{ this, "MCParticleCollections", {"MCParticle"} };
 
+  //---------------------------------------------------------------------
   // Output collections
-  // output: PFOs 
 
 
 
@@ -122,7 +125,7 @@ protected:
   int m_Ngoodclus, m_Nbadclus, m_Nclus; 
   IntVec m_clus_type, m_clus_Nlayer, m_clus_Nshower;
   FloatVec m_clus_x, m_clus_y, m_clus_z, m_clus_E;
-  FloatVec m_clus_Lstart, m_clus_Lend, m_clus_stdDevE; 
+  FloatVec m_clus_Lstart, m_clus_Lend, m_clus_stdDevE, m_clus_LatM; 
 
   //Stage2: check reconstructed result
   TTree *t_recoPFO;

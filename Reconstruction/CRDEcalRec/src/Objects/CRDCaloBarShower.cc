@@ -4,8 +4,117 @@
 #include "Objects/CRDCaloBarShower.h"
 #include <cmath>
 #include <vector>
+#include <algorithm>
 
 namespace CRDEcalEDM {
+
+    double CRDCaloBarShower::getlateralmomentofy() const{
+      
+      std::vector<double> position;
+      std::vector<double> position_copy;
+      std::vector<double> energy;
+      std::vector<double> energy_copy;
+
+      position.clear();
+      position_copy.clear();
+      energy.clear();
+      energy_copy.clear();
+
+      std::vector<double>::iterator it;
+      double find1 = 0;
+      int find2 = 0;
+
+      double lateralmoment = -99;
+      double sum = 0;
+
+      for(int i=0;i<Bars.size();i++)
+      {
+        position_copy.push_back(Bars[i].getPosition().y());
+        energy.push_back(Bars[i].getEnergy());
+        energy_copy.push_back(Bars[i].getEnergy());
+      }
+
+      sort(energy.begin(),energy.end(),std::greater<double>());
+
+      for(int j=0; j<energy.size(); j++)
+      {
+          find1 = energy.at(j);
+          it = find(energy_copy.begin(),energy_copy.end(),find1);
+          find2 = distance(energy_copy.begin(),it);
+          position.push_back(position_copy.at(find2));
+      }
+
+      if((position.size()==2)&&(energy.size()==2))
+      {
+        lateralmoment = 0;
+      }
+
+      if((position.size()>=2)&&(energy.size()>=2))
+      {
+        for(int k=0; k<energy.size(); k++)
+        {
+          sum+=energy.at(k)*fabs(position.at(k)-position.at(0));
+        }
+
+        lateralmoment = sum/(sum + energy.at(0)*10 + energy.at(1)*10);
+      }
+
+      return lateralmoment;
+    } 
+
+    double CRDCaloBarShower::getlateralmomentofz() const{
+      
+      std::vector<double> position;
+      std::vector<double> position_copy;
+      std::vector<double> energy;
+      std::vector<double> energy_copy;
+
+      position.clear();
+      position_copy.clear();
+      energy.clear();
+      energy_copy.clear();
+
+      std::vector<double>::iterator it;
+      double find1 = 0;
+      int find2 = 0;
+
+      double lateralmoment = -99;
+      double sum = 0;
+
+      for(int i=0;i<Bars.size();i++)
+      {
+        position_copy.push_back(Bars[i].getPosition().z());
+        energy.push_back(Bars[i].getEnergy());
+        energy_copy.push_back(Bars[i].getEnergy());
+      }
+
+      sort(energy.begin(),energy.end(),std::greater<double>());
+
+      for(int j=0; j<energy.size(); j++)
+      {
+          find1 = energy.at(j);
+          it = find(energy_copy.begin(),energy_copy.end(),find1);
+          find2 = distance(energy_copy.begin(),it);
+          position.push_back(position_copy.at(find2));
+      }
+
+      if((position.size()==2)&&(energy.size()==2))
+      {
+        lateralmoment = 0;
+      }
+
+      if((position.size()>=2)&&(energy.size()>=2))
+      {
+        for(int k=0; k<energy.size(); k++)
+        {
+          sum+=energy.at(k)*fabs(position.at(k)-position.at(0));
+        }
+
+        lateralmoment = sum/(sum + energy.at(0)*10 + energy.at(1)*10);
+      }
+
+      return lateralmoment;
+    } 
 
     bool CRDCaloBarShower::isNeighbor(CRDEcalEDM::CRDCaloBar iBar){
       for(int i=0;i<Bars.size();i++){

@@ -45,6 +45,14 @@ StatusCode ConeClusteringAlg::RunAlgorithm( ConeClusteringAlg::Settings& m_setti
     return StatusCode::SUCCESS; 
   }
 
+//for(int is=0; is<m_2DshowerCol.size(); is++)
+//  printf("      Shower %d: (%.1f, %.1f, %.1f, %.3f) \n", is,
+//                                                         m_2DshowerCol[is].getPos().x(),
+//                                                         m_2DshowerCol[is].getPos().y(),
+//                                                         m_2DshowerCol[is].getPos().z(),
+//                                                         m_2DshowerCol[is].getShowerE()  );
+
+
   std::vector<CRDEcalEDM::CRDCaloHit3DCluster> m_trkClusterCol;  m_trkClusterCol.clear();
   std::vector<CRDEcalEDM::CRDCaloHit3DCluster> m_neuClusterCol;  m_neuClusterCol.clear();
 
@@ -64,6 +72,17 @@ StatusCode ConeClusteringAlg::RunAlgorithm( ConeClusteringAlg::Settings& m_setti
   //Longitudinal linking
   LongiConeLinking( m_orderedNeuShower, m_neuClusterCol );
   if(settings.fl_UseCandidate>0 && m_orderedTrkShower.size()>0) LongiConeLinking( m_orderedTrkShower, m_trkClusterCol ); 
+//cout<<"  NeuCluster size: "<<m_neuClusterCol.size(); 
+//cout<<"  TrkCluster size: "<<m_trkClusterCol.size()<<endl; 
+
+//for(int icl=0; icl<m_neuClusterCol.size(); icl++){
+//for(int a=0; a<m_neuClusterCol[icl].get2DShowers().size(); a++)
+//  printf("      Shower %d: (%.1f, %.1f, %.1f, %.1f) \n", a,
+//                                                         m_neuClusterCol[icl].get2DShowers()[a].getPos().x(),
+//                                                         m_neuClusterCol[icl].get2DShowers()[a].getPos().y(),
+//                                                         m_neuClusterCol[icl].get2DShowers()[a].getPos().z(),
+//                                                         m_neuClusterCol[icl].get2DShowers()[a].getShowerE()  );
+//}
 
   std::vector<CRDEcalEDM::CRDCaloHit3DCluster> m_ClusterCol;  m_ClusterCol.clear();
   m_ClusterCol.insert(m_ClusterCol.end(), m_neuClusterCol.begin(), m_neuClusterCol.end() );
@@ -72,16 +91,18 @@ StatusCode ConeClusteringAlg::RunAlgorithm( ConeClusteringAlg::Settings& m_setti
 //cout<<"  Cluster size: "<<m_ClusterCol.size()<<endl;
 
   //Check cluster quality.
-  std::vector< CRDEcalEDM::CRDCaloHit3DCluster >  goodClus;
-  std::vector< CRDEcalEDM::CRDCaloHit3DCluster >  badClus;
+  std::vector< CRDEcalEDM::CRDCaloHit3DCluster >  goodClus; goodClus.clear();
+  std::vector< CRDEcalEDM::CRDCaloHit3DCluster >  badClus; badClus.clear(); 
   for(int icl=0; icl<m_ClusterCol.size(); icl++){
     //if(CheckClusterQuality(m_ClusterCol[icl]) >= settings.fl_GoodClusLevel) goodClus.push_back(m_ClusterCol[icl]);
-    if( m_ClusterCol[icl].get2DShowers().size() >= settings.fl_GoodClusLevel) goodClus.push_back(m_ClusterCol[icl]);
+    //if( m_ClusterCol[icl].get2DShowers().size() >= settings.fl_GoodClusLevel) goodClus.push_back(m_ClusterCol[icl]);
+    int m_Nlayer = m_ClusterCol[icl].getEndDlayer()-m_ClusterCol[icl].getBeginningDlayer();
+    if( m_Nlayer >= settings.fl_GoodClusLevel) goodClus.push_back(m_ClusterCol[icl]);
     else badClus.push_back(m_ClusterCol[icl]);
   }
 
-//cout<<"  Good cluster: "<<goodClus.size()<<endl;
-//cout<<"  Bad cluster: "<<badClus.size()<<endl;
+//cout<<"  Good cluster size: "<<goodClus.size()<<endl;
+//cout<<"  Bad cluster size: "<<badClus.size()<<endl;
 
   if(settings.fl_overwrite) m_datacol.ClearCluster();
   m_datacol.GoodClus3DCol.insert(m_datacol.GoodClus3DCol.end(), goodClus.begin(), goodClus.end() );
@@ -105,7 +126,6 @@ StatusCode ConeClusteringAlg::LongiConeLinking(
   std::vector<CRDEcalEDM::CRDCaloHit2DShower> ShowersinFirstLayer;  ShowersinFirstLayer.clear();
   ShowersinFirstLayer = iter->second;
 //cout<<" First layer: "<<iter->first<<", shower size: "<<ShowersinFirstLayer.size()<<endl;
-//printf("%.2f, %.2f,%.2f,%.2f \n", ShowersinFirstLayer[2].getPos().x(), ShowersinFirstLayer[2].getPos().y(), ShowersinFirstLayer[2].getPos().z(), ShowersinFirstLayer[2].getShowerE());
   for(int i=0;i<ShowersinFirstLayer.size(); i++){
     CRDEcalEDM::CRDCaloHit3DCluster m_clus; m_clus.Clear(); 
     m_clus.AddShower(ShowersinFirstLayer[i]);
@@ -160,7 +180,7 @@ int ConeClusteringAlg::CheckClusterQuality(CRDEcalEDM::CRDCaloHit3DCluster& clus
   //L2: return 2. At least 3 layers, but not pass energy ladder(E1, E2, E3). Hadronic shower/mip. 
   //L3: return 3. Pass L0 and L1 and energy ladder. EM shower/hadronic shower. 
 
-  return clus.get2DShowers().size()-1; 
+  return clus.get2DShowers().size(); 
 /*  if(clus.get2DShowers().size()<=1 ) { return 0; }
 
   //Criterion1: at least 3 layers. 

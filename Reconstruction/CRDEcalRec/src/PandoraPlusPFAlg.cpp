@@ -114,6 +114,7 @@ StatusCode PandoraPlusPFAlg::initialize()
   t_Clusters->Branch("clus_Lstart", &m_clus_Lstart);
   t_Clusters->Branch("clus_Lend", &m_clus_Lend);
   t_Clusters->Branch("clus_stdDevE", &m_clus_stdDevE);
+  t_Clusters->Branch("clus_latM", &m_clus_LatM);
 
   t_recoPFO->Branch("Npfo", &m_Npfo);
   t_recoPFO->Branch("recPFO_px", &m_recPFO_px);
@@ -317,6 +318,7 @@ StatusCode PandoraPlusPFAlg::execute()
       if(!f_found && m_EnVec[i]>0.1) { Lstart=i; f_found==true; }
 
     m_clus_Lstart.push_back(Lstart);
+    m_clus_LatM.push_back(m_DataCol.Clus3DCol[ic].getlateral());
   }
   t_Clusters->Fill();
 
@@ -460,6 +462,7 @@ void PandoraPlusPFAlg::ClearClusterTree(){
   m_clus_Lstart.clear();
   m_clus_Lend.clear();
   m_clus_stdDevE.clear(); 
+  m_clus_LatM.clear();
 }
 
 void PandoraPlusPFAlg::ClearRecPFO(){

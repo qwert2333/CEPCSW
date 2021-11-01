@@ -14,6 +14,7 @@ namespace CRDEcalEDM{
     CRDCaloHit2DShower(CRDEcalEDM::CRDCaloBarShower _bars1, CRDEcalEDM::CRDCaloBarShower _bars2, std::vector<edm4hep::ConstCalorimeterHit> _hits ); 
     CRDCaloHit2DShower(){};
 
+    double getlat() const;
 
     void Clear(){
       barShowerX.Clear(); barShowerY.Clear(); CaloHits.clear();

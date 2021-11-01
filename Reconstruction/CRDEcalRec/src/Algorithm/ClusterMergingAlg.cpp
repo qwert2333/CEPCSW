@@ -9,7 +9,8 @@ void ClusterMergingAlg::Settings::SetInitialValue(){
   skipLayer = 3;
   fl_MergeGoodClus = true;
   fl_MergeBadClus = true;
-  fl_MergeEMTail = true; 
+  fl_MergeEMTailShower = false; 
+  fl_MergeEMTailCluster = true; 
   Debug = 0;
 };
 
@@ -98,22 +99,40 @@ StatusCode ClusterMergingAlg::RunAlgorithm( ClusterMergingAlg::Settings& m_setti
 
 
   //Merge EM cluster tail into EM core by profile
-  if(settings.fl_MergeEMTail){
-  for(int ic=0; ic<m_goodClusCol.size() && m_goodClusCol.size()>1; ic++){
+  if(settings.fl_MergeEMTailShower){
+  for(int ic=0; ic<m_goodClusCol.size(); ic++){
     m_goodClusCol[ic].IdentifyCluster();
     if(m_goodClusCol[ic].getType()!=1) continue; 
     m_goodClusCol[ic].FitProfile(); 
+    for(int jc=0; jc<m_badClusCol.size(); jc++){
+      if( fabs(m_goodClusCol[ic].getFitExpEn()-m_goodClusCol[ic].getShowerE()-m_badClusCol[jc].getShowerE()) < fabs(m_goodClusCol[ic].getFitExpEn()-m_goodClusCol[ic].getShowerE()) ){
+        m_goodClusCol[ic].MergeCluster( m_badClusCol[jc] );
+        m_badClusCol.erase(m_badClusCol.begin()+jc);
+        jc--;
+        break;
+      }
+    }
+  }}
+
+  if(settings.fl_MergeEMTailCluster){
+  for(int ic=0; ic<m_goodClusCol.size() && m_goodClusCol.size()>1; ic++){
+    m_goodClusCol[ic].IdentifyCluster();
+    if(m_goodClusCol[ic].getType()!=1) continue;
+    m_goodClusCol[ic].FitProfile();
     for(int jc=ic+1; jc<m_goodClusCol.size(); jc++){
       if( fabs(m_goodClusCol[ic].getFitExpEn()-m_goodClusCol[ic].getShowerE()-m_goodClusCol[jc].getShowerE()) < fabs(m_goodClusCol[ic].getFitExpEn()-m_goodClusCol[ic].getShowerE()) ){
         m_goodClusCol[ic].MergeCluster( m_goodClusCol[jc] );
         m_goodClusCol.erase(m_goodClusCol.begin()+jc);
-        ic--; jc--;
+        jc--; ic--; 
         break;
       }
-    }  
+    }
   }}
 
+
+  m_datacol.GoodClus3DCol.clear(); m_datacol.BadClus3DCol.clear(); 
   m_datacol.GoodClus3DCol = m_goodClusCol;
+  m_datacol.BadClus3DCol = m_badClusCol; 
   if(settings.fl_MergeBadClus || settings.fl_MergeGoodClus) m_datacol.Clus3DCol = m_goodClusCol;
 
 

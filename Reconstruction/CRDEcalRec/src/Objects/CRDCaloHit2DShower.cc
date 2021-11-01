@@ -3,6 +3,7 @@
 #define PI 3.141592653
 
 #include "Objects/CRDCaloHit2DShower.h"
+#include <cmath>
 
 using namespace std;
 namespace CRDEcalEDM{
@@ -11,6 +12,20 @@ namespace CRDEcalEDM{
     barShowerX = _bars1;
     barShowerY = _bars2; 
     CaloHits = _hits;
+  }
+
+  double CRDCaloHit2DShower::getlat() const{
+    double lat = -1;
+    if(barShowerX.getlateralmomentofy()==-99 ||barShowerY.getlateralmomentofz()==-99)
+    {
+      lat = -0.5;
+    }
+    else
+    {
+      lat = sqrt(barShowerX.getlateralmomentofz()*barShowerX.getlateralmomentofz()+barShowerY.getlateralmomentofy()*barShowerY.getlateralmomentofy());
+    }
+
+    return lat;
   }
 
   dd4hep::Position CRDCaloHit2DShower::getPos() const{

@@ -22,7 +22,7 @@ public:
   EcalClusterReconstruction() {};
   ~EcalClusterReconstruction() {};
 
-  void Initialize();
+  StatusCode Initialize();
   StatusCode RunAlgorithm( Settings& settings,  PandoraPlusDataCol& dataCol );
   StatusCode ClearAlgorithm();
 
