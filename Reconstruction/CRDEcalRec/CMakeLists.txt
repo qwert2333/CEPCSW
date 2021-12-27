@@ -7,6 +7,7 @@ gaudi_add_library(CRDEcalRecLib
                           src/Objects/CRDCaloHitTransShower.cc
                           src/Objects/CRDCaloHitLongiCluster.cc
                           src/Objects/CRDCaloHit3DCluster.cc
+                          src/Objects/CRDHoughSpace.cc
                           src/Objects/Track.cc
                           src/Objects/TrackFitInEcal.cpp
                   LINK    k4FWCore::k4FWCore
@@ -29,6 +30,7 @@ gaudi_add_module(CRDEcalRec
                          src/PandoraPlusDataCol.cpp
                          src/Algorithm/EnergySplittingAlg.cpp
                          src/Algorithm/ConeClustering2DAlg.cpp
+                         src/Algorithm/HoughClusteringAlg.cpp
                          src/Algorithm/ShadowMakingAlg.cpp
                          src/Algorithm/EnergyTimeMatchingAlg.cpp
                          src/Algorithm/ConeClusteringAlg.cpp

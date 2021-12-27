@@ -8,6 +8,8 @@
 #include "Objects/CRDCaloBarShower.h"
 #include "Objects/CRDCaloBarCluster.h"
 #include "Objects/CRDCaloLayer.h"
+#include "Objects/CRDHoughObject.h"
+#include "Objects/CRDHoughHill.h"
 #include "Objects/CRDShadowCluster.h"
 #include "Objects/CRDCaloHitTransShower.h"
 #include "Objects/CRDCaloHitLongiCluster.h"
