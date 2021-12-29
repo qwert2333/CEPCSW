@@ -1,8 +1,9 @@
 #ifndef HOUGHCLUSTERINGALG_C
-#define HOUGHCLUSTERINGALG_H
+#define HOUGHCLUSTERINGALG_C
 
 #include "Algorithm/HoughClusteringAlg.h"
-
+#include <algorithm>
+using namespace std;
 void HoughClusteringAlg::Settings::SetInitialValue(){
   Nbins_alpha = 800;
   Nbins_rho = 800;
@@ -14,7 +15,7 @@ StatusCode HoughClusteringAlg::Initialize(){
   return StatusCode::SUCCESS;
 }
 
-StatusCode HoughClusteringAlg::RunAlgorithm( BasicClusterIDAlg::Settings& m_settings, PandoraPlusDataCol& m_datacol){
+StatusCode HoughClusteringAlg::RunAlgorithm( HoughClusteringAlg::Settings& m_settings, PandoraPlusDataCol& m_datacol){
   settings = m_settings; 
 
   //TODO: Loop for each block. Can not cover blocks now. 
@@ -50,8 +51,8 @@ StatusCode HoughClusteringAlg::RunAlgorithm( BasicClusterIDAlg::Settings& m_sett
   MergingHills(m_HoughSpaceY);
 
 	//Create output HoughClusters 
-  for(int ic=0; ic<m_HoughSpaceX.GetHills().size(); ic++) m_datacol.LongiClusXCol.push_back( m_HoughSpaceX.GetHills()[ic].TransformToCluster() ); 
-  for(int ic=0; ic<m_HoughSpaceY.GetHills().size(); ic++) m_datacol.LongiClusYCol.push_back( m_HoughSpaceY.GetHills()[ic].TransformToCluster() ); 
+  for(int ic=0; ic<m_HoughSpaceX.getHills().size(); ic++) m_datacol.LongiClusXCol.push_back( m_HoughSpaceX.getHills()[ic].TransformToCluster() ); 
+  for(int ic=0; ic<m_HoughSpaceY.getHills().size(); ic++) m_datacol.LongiClusYCol.push_back( m_HoughSpaceY.getHills()[ic].TransformToCluster() ); 
 
 
   return StatusCode::SUCCESS;
@@ -91,8 +92,8 @@ StatusCode HoughClusteringAlg::ConformalTransformation(std::vector<CRDEcalEDM::C
       pos_d.SetY((p_localMax.Y()+5)/1000.);
 		}
 
-		double mod2_u = pos_u.Mod2()
-		double mod2_d = pos_d.Mod2()
+		double mod2_u = pos_u.Mod2();
+		double mod2_d = pos_d.Mod2();
     pos_u.SetX(2*pos_u.X()/mod2_u); pos_u.SetY(2*pos_u.Y()/mod2_u);
     pos_d.SetX(2*pos_d.X()/mod2_d); pos_d.SetY(2*pos_d.Y()/mod2_d);
 
@@ -144,15 +145,15 @@ StatusCode HoughClusteringAlg::FillHoughSpace(std::vector<CRDEcalEDM::CRDHoughOb
   double width_alpha = (PI+0.1)/(double)settings.Nbins_alpha;
   double width_rho = 0.2/(double)settings.Nbins_rho; 
   for(int io=0; io<m_Hobjects.size(); io++){
-    TF1* line_u = &(m_Hobjects[io].getHoughLineU());
-    TF1* line_d = &(m_Hobjects[io].getHoughLineD());
+    TF1 line_u = m_Hobjects[io].getHoughLineU();
+    TF1 line_d = m_Hobjects[io].getHoughLineD();
 
     std::vector<CRDEcalEDM::CRDHoughSpace::HoughCell> m_cells; m_cells.clear(); 
     //Loop for upper edge
-    double rho_tmp = line_u->Eval(-0.1); 
+    double rho_tmp = line_u.Eval(-0.1); 
 		for(int ibin=0; ibin<m_houghMap.GetNbinsX(); ibin++){
       //Fill Hough space map
-      double m_rho = line_u->Eval(-0.1+ibin*width_alpha);
+      double m_rho = line_u.Eval(-0.1+ibin*width_alpha);
       m_houghMap.Fill(ibin*width_alpha, m_rho);
 
       //Create HoughCell
@@ -171,17 +172,17 @@ StatusCode HoughClusteringAlg::FillHoughSpace(std::vector<CRDEcalEDM::CRDHoughOb
         CRDEcalEDM::CRDHoughSpace::HoughCell p_cell; p_cell.Clear();
         p_cell.SetIndex(ibin, floor(rho_step/width_rho));
         p_cell.AddObject(m_Hobjects[io]);
-        if( m_cells.find( m_cells.begin(), m_cells.end(), p_cell )==m_cells.end() ) m_cells.push_back(p_cell);  
+        if( std::find( m_cells.begin(), m_cells.end(), p_cell )==m_cells.end() ) m_cells.push_back(p_cell);  
       }}
       rho_tmp = m_rho; 
 
     }
 
     //Loop for bottom edge
-    rho_tmp = line_d->Eval(-0.1);
+    rho_tmp = line_d.Eval(-0.1);
     for(int ibin=0; ibin<m_houghMap.GetNbinsX(); ibin++){
 
-      double m_rho = line_d->Eval(-0.1+ibin*width_alpha);
+      double m_rho = line_d.Eval(-0.1+ibin*width_alpha);
       m_houghMap.Fill(ibin*width_alpha, m_rho);
 
       CRDEcalEDM::CRDHoughSpace::HoughCell m_cell; m_cell.Clear();
@@ -198,15 +199,15 @@ StatusCode HoughClusteringAlg::FillHoughSpace(std::vector<CRDEcalEDM::CRDHoughOb
         CRDEcalEDM::CRDHoughSpace::HoughCell p_cell; p_cell.Clear();
         p_cell.SetIndex(ibin, floor(rho_step/width_rho));
         p_cell.AddObject(m_Hobjects[io]);
-        if( m_cells.find( m_cells.begin(), m_cells.end(), p_cell )==m_cells.end() ) m_cells.push_back(p_cell);
+        if( std::find( m_cells.begin(), m_cells.end(), p_cell )==m_cells.end() ) m_cells.push_back(p_cell);
       }}
 
       rho_tmp = m_rho;
     } //End loop alpha bins. 
+    m_Hspace.SetHoughCells(m_cells);
 	}//End loop Hough lines. 
 
   m_Hspace.SetSpaceMap(m_houghMap);
-  m_Hspace.SetHoughCells(m_cells);
 
   return StatusCode::SUCCESS;
 }

@@ -25,7 +25,7 @@ public:
 	~HoughClusteringAlg() {};
 
   StatusCode Initialize();
-  StatusCode RunAlgorithm( BasicClusterIDAlg::Settings& m_settings, PandoraPlusDataCol& m_datacol);
+  StatusCode RunAlgorithm( HoughClusteringAlg::Settings& m_settings, PandoraPlusDataCol& m_datacol);
   StatusCode ClearAlgorithm();
 
   StatusCode ConformalTransformation(std::vector<CRDEcalEDM::CRDCaloBarShower>& m_localMax, std::vector<CRDEcalEDM::CRDHoughObject>& m_Hobjects); 

@@ -1,6 +1,7 @@
 #ifndef _PANDORAPLUS_DATA_SVC_
 #define _PANDORAPLUS_DATA_SVC_
 #include <iostream>
+#include <algorithm>
 #include <map>
 
 #include "Objects/CRDCaloBar.h"
@@ -9,7 +10,7 @@
 #include "Objects/CRDCaloBarCluster.h"
 #include "Objects/CRDCaloLayer.h"
 #include "Objects/CRDHoughObject.h"
-#include "Objects/CRDHoughHill.h"
+#include "Objects/CRDHoughSpace.h"
 #include "Objects/CRDShadowCluster.h"
 #include "Objects/CRDCaloHitTransShower.h"
 #include "Objects/CRDCaloHitLongiCluster.h"

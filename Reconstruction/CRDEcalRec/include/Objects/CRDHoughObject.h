@@ -16,10 +16,10 @@ namespace CRDEcalEDM {
     }
 
 		CRDEcalEDM::CRDCaloBarShower* getLocalMax() const { return originLocalMax; }
-		TVector2 getConformPointU const { return ConformalPoint_u; }
-		TVector2 getConformPointD const { return ConformalPoint_d; }
-    TF1 getHoughLineU const { return HoughLine_u; }
-    TF1 getHoughLineD const { return HoughLine_d; }
+		TVector2 getConformPointU() const { return ConformalPoint_u; }
+		TVector2 getConformPointD() const { return ConformalPoint_d; }
+    TF1 getHoughLineU() const { return HoughLine_u; }
+    TF1 getHoughLineD() const { return HoughLine_d; }
 
     void Clear() { originLocalMax=nullptr; ConformalPoint_u.SetX(0.); ConformalPoint_u.SetY(0.); ConformalPoint_d.SetX(0.); ConformalPoint_d.SetY(0.); }
     void SetLocalMax( CRDEcalEDM::CRDCaloBarShower* _localmax ) { originLocalMax=_localmax; }
