@@ -21,6 +21,10 @@ namespace CRDEcalEDM {
         return (index_alpha==x.index_alpha && index_rho==x.index_rho && m_objs==x.m_objs);
       }
 
+      std::vector<CRDEcalEDM::CRDHoughObject> getObjects() const { return m_objs; }
+      int getIndexAlpha() const { return index_alpha; }
+      int getIndexRho() const { return index_rho; }
+
       void Clear() {m_objs.clear(); index_alpha=-1; index_rho=-1; }
       void SetIndex(int _alpha, int _rho) { index_alpha=_alpha; index_rho=_rho; }
       void SetObjects(std::vector<CRDEcalEDM::CRDHoughObject> _objs) { m_objs=_objs; }

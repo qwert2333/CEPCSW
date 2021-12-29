@@ -13,6 +13,7 @@ namespace CRDEcalEDM{
     CRDCaloHitLongiCluster(){};
     ~CRDCaloHitLongiCluster(){};
 
+  void Clear() { axis.SetXYZ(0.,0.,0.); barShowerCol.clear(); }
   TVector3 getPos() const; 
   TVector3 getAxis() const {return axis; }
   int getSlayer() const; 

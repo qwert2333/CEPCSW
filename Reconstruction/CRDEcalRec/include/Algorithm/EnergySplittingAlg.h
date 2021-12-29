@@ -42,7 +42,7 @@ public:
   StatusCode RunAlgorithm( EnergySplittingAlg::Settings& m_settings, PandoraPlusDataCol& m_datacol);
   StatusCode ClearAlgorithm(); 
 
-  StatusCode GetLocalMaxinLayer( CRDEcalEDM::CRDCaloBlock& m_block,CRDEcalEDM::CRDCaloLayer& m_layer );
+  StatusCode GetLocalMax( CRDEcalEDM::CRDCaloBlock& m_block);
   StatusCode GetLocalMaxBar( std::vector<CRDEcalEDM::CRDCaloBar>& barCol, std::vector<CRDEcalEDM::CRDCaloBar>& localMaxCol );
 
   StatusCode ClusteringinLayer( CRDEcalEDM::CRDCaloBlock& m_blocks,CRDEcalEDM::CRDCaloLayer& m_layer );

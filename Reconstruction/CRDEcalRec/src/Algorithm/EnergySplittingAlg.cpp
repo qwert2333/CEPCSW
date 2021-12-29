@@ -33,7 +33,7 @@ StatusCode EnergySplittingAlg::RunAlgorithm( EnergySplittingAlg::Settings& m_set
   for(int ib=0;ib<Nblocks;ib++){
     CRDEcalEDM::CRDCaloLayer m_layer; m_layer.Clear();
 
-    if( settings.fl_findMaxOnly ) GetLocalMaxinLayer( m_datacol.BlockVec[ib], m_layer );
+    if( settings.fl_findMaxOnly ) GetLocalMax( m_datacol.BlockVec[ib] );
     else ClusteringinLayer( m_datacol.BlockVec[ib], m_layer );
 
     m_LayerCol.push_back(m_layer);
@@ -50,18 +50,18 @@ StatusCode EnergySplittingAlg::ClearAlgorithm(){
 }
 
 
-StatusCode EnergySplittingAlg::GetLocalMaxinLayer( CRDEcalEDM::CRDCaloBlock& m_block,CRDEcalEDM::CRDCaloLayer& m_layer ){
+StatusCode EnergySplittingAlg::GetLocalMax( CRDEcalEDM::CRDCaloBlock& m_block ){
   if(m_block.getBarXCol().size()==0 && m_block.getBarYCol().size()==0) return StatusCode::SUCCESS;
 
-  m_layer.Clear();
-  m_layer.barXCol = m_block.getBarXCol();
-  m_layer.barYCol = m_block.getBarYCol();
 
   std::vector<CRDEcalEDM::CRDCaloBar> localMaxXCol; localMaxXCol.clear();
   std::vector<CRDEcalEDM::CRDCaloBar> localMaxYCol; localMaxYCol.clear();
-  GetLocalMaxBar( m_layer.barXCol, localMaxXCol );
-  GetLocalMaxBar( m_layer.barYCol, localMaxYCol );
-  
+  GetLocalMaxBar( m_block.getBarXCol(), localMaxXCol );
+  GetLocalMaxBar( m_block.getBarYCol(), localMaxYCol );
+
+
+  std::vector<CRDEcalEDM::CRDCaloBarShower> m_showerColX; m_showerColX.clear();  
+  std::vector<CRDEcalEDM::CRDCaloBarShower> m_showerColY; m_showerColY.clear();  
   for(int j=0; j<localMaxXCol.size(); j++){
     CRDEcalEDM::CRDCaloBarShower m_shower; m_shower.Clear();
     m_shower.addBar( localMaxXCol[j] );
@@ -71,7 +71,7 @@ StatusCode EnergySplittingAlg::GetLocalMaxinLayer( CRDEcalEDM::CRDCaloBlock& m_b
                         localMaxXCol[j].getDlayer(),
                         localMaxXCol[j].getPart(),
                         localMaxXCol[j].getSlayer() );
-    m_layer.barShowerXCol.push_back(m_shower);
+    m_showerColX.push_back(m_shower);
   }
   for(int j=0; j<localMaxYCol.size(); j++){
     CRDEcalEDM::CRDCaloBarShower m_shower; m_shower.Clear();
@@ -82,9 +82,11 @@ StatusCode EnergySplittingAlg::GetLocalMaxinLayer( CRDEcalEDM::CRDCaloBlock& m_b
                         localMaxYCol[j].getDlayer(),
                         localMaxYCol[j].getPart(),
                         localMaxYCol[j].getSlayer() );
-    m_layer.barShowerYCol.push_back(m_shower);
+    m_showerColY.push_back(m_shower);
   }
 
+  m_block.setShowerXCol(m_showerColX);
+  m_block.setShowerYCol(m_showerColY);
   return StatusCode::SUCCESS;
 }
 

@@ -56,6 +56,8 @@ namespace CRDEcalEDM {
     void addTrkShadowClus( CRDEcalEDM::CRDShadowCluster _clus ) { TrkShadowClusCol.push_back(_clus); }
     void setBarCol( std::vector<CRDEcalEDM::CRDCaloBar>& _colX, std::vector<CRDEcalEDM::CRDCaloBar>& _colY ){ barXCol=_colX, barYCol=_colY; }
     void setTrkCol( std::vector<CRDEcalEDM::Track>& _trkvec ) { trkCol=_trkvec; } 
+    void setShowerXCol( std::vector<CRDEcalEDM::CRDCaloBarShower> _col ) { barShowerXCol=_col; }
+    void setShowerYCol( std::vector<CRDEcalEDM::CRDCaloBarShower> _col ) { barShowerYCol=_col; }
 
     void addTrk( CRDEcalEDM::Track& _trk ) { trkCol.push_back(_trk); }
 
