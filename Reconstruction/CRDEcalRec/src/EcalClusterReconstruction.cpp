@@ -5,6 +5,7 @@ void EcalClusterReconstruction::Initialize(){
   //Initialize settings
   m_ESAlgSettings  = new EnergySplittingAlg::Settings();
   m_CC2AlgSettings = new ConeClustering2DAlg::Settings();
+  m_HCAlgSettings  = new HoughClusteringAlg::Settings();
   m_CMAlgSettings  = new ShadowMakingAlg::Settings(); 
   m_ETAlgSettings  = new EnergyTimeMatchingAlg::Settings();
   m_CCAlgSettings  = new ConeClusteringAlg::Settings();
@@ -15,6 +16,7 @@ void EcalClusterReconstruction::Initialize(){
   //Initialize Algorthm
   m_energysplittingAlg  = new EnergySplittingAlg();
   m_coneclus2DAlg       = new ConeClustering2DAlg();
+  m_houghclusAlg        = new HoughClusteringAlg();
   m_shadowmakingAlg     = new ShadowMakingAlg(); 
   m_etmatchingAlg       = new EnergyTimeMatchingAlg();
   m_coneclusterAlg      = new ConeClusteringAlg();
@@ -29,6 +31,7 @@ StatusCode EcalClusterReconstruction::RunAlgorithm( EcalClusterReconstruction::S
   //Iteration 0: pre-treatment, get initial level candidates
   m_ESAlgSettings->SetInitialValue();
   m_CC2AlgSettings->SetInitialValue();
+  m_HCAlgSettings->SetInitialValue();
   m_CMAlgSettings->SetInitialValue(); 
   m_ETAlgSettings->SetInitialValue();
   m_CCAlgSettings->SetInitialValue();
@@ -39,7 +42,8 @@ StatusCode EcalClusterReconstruction::RunAlgorithm( EcalClusterReconstruction::S
   //Stage 1
   m_ESAlgSettings->SetOnlyFindMax(true);
   m_energysplittingAlg->RunAlgorithm( *m_ESAlgSettings,  dataCol ); 
-  m_coneclus2DAlg     ->RunAlgorithm( *m_CC2AlgSettings, dataCol );
+  //m_coneclus2DAlg     ->RunAlgorithm( *m_CC2AlgSettings, dataCol );
+  m_houghclusAlg      ->RunAlgorithm( *m_HCAlgSettings, dataCol );
   m_shadowmakingAlg   ->RunAlgorithm( *m_CMAlgSettings, dataCol );
 
 //dataCol.PrintLayer();
@@ -96,6 +100,7 @@ StatusCode EcalClusterReconstruction::ClearAlgorithm(){
 
   delete m_energysplittingAlg;
   delete m_coneclus2DAlg; 
+  delete m_houghclusAlg;
   delete m_shadowmakingAlg; 
   delete m_etmatchingAlg;
   delete m_coneclusterAlg;
@@ -104,6 +109,7 @@ StatusCode EcalClusterReconstruction::ClearAlgorithm(){
 
   delete m_ESAlgSettings;
   delete m_CC2AlgSettings; 
+  delete m_HCAlgSettings;
   delete m_CMAlgSettings; 
   delete m_ETAlgSettings;
   delete m_CCAlgSettings;

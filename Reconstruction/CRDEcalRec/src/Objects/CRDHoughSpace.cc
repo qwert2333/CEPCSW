@@ -5,7 +5,7 @@
 
 namespace CRDEcalEDM{
 
-  bool CRDHoughSpace::HoughHill::isNeighbor( CRDEcalEDM::CRDHoughSpace::HoughCell _cell ){
+  bool CRDHoughSpace::HoughHill::isNeighbor( CRDEcalEDM::CRDHoughSpace::HoughCell _cell ) const{
     for(int ic=0; ic<m_cells.size(); ic++){
       if( fabs(m_cells[ic].getIndexAlpha()-_cell.getIndexAlpha())<=1 && 
           fabs(m_cells[ic].getIndexRho() - _cell.getIndexRho())<=1 )

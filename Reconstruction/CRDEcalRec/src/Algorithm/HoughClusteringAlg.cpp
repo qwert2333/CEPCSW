@@ -18,46 +18,48 @@ StatusCode HoughClusteringAlg::Initialize(){
 StatusCode HoughClusteringAlg::RunAlgorithm( HoughClusteringAlg::Settings& m_settings, PandoraPlusDataCol& m_datacol){
   settings = m_settings; 
 
-  //TODO: Loop for each block. Can not cover blocks now. 
   std::vector<CRDEcalEDM::CRDCaloLayer> m_layerCol = m_datacol.LayerCol;
   std::vector<CRDEcalEDM::CRDCaloBlock> m_blocks = m_datacol.BlockVec;
 
+cout<<"Block number: "<<m_blocks.size()<<endl;
   for(int ib=0; ib<m_blocks.size(); ib++){
-    std::vector<CRDEcalEDM::CRDCaloBarShower> m_localMaxXCol; m_localMaxXCol.clear(); 
-    std::vector<CRDEcalEDM::CRDCaloBarShower> m_localMaxYCol; m_localMaxYCol.clear(); 
-  
-    m_localMaxXCol.insert(m_localMaxXCol.end(), m_blocks[ib].getShowerXCol().begin(), m_blocks[ib].getShowerXCol().end());
-    m_localMaxYCol.insert(m_localMaxYCol.end(), m_blocks[ib].getShowerYCol().begin(), m_blocks[ib].getShowerYCol().end());
+cout<<"  Hough Clustering in block #"<<ib<<endl;
+    std::vector<CRDEcalEDM::CRDCaloBarShower> m_localMaxXCol = m_blocks[ib].getShowerXCol();
+    std::vector<CRDEcalEDM::CRDCaloBarShower> m_localMaxYCol = m_blocks[ib].getShowerYCol();
+    if(m_localMaxXCol.size()==0 && m_localMaxYCol.size()==0) continue; 
 
+cout<<"  Local maximum size: barX "<<m_localMaxXCol.size()<<"  barY "<<m_localMaxYCol.size()<<endl;
 
+cout<<"  HoughClusteringAlg: Conformal transformation"<<endl;
     //Conformal transformation  
     std::vector<CRDEcalEDM::CRDHoughObject> m_HoughObjectsX; m_HoughObjectsX.clear(); 
     std::vector<CRDEcalEDM::CRDHoughObject> m_HoughObjectsY; m_HoughObjectsY.clear(); 
     ConformalTransformation(m_localMaxXCol, m_HoughObjectsX);
     ConformalTransformation(m_localMaxYCol, m_HoughObjectsY);
 
-
+cout<<"  HoughClusteringAlg: Hough transformation"<<endl;
     //Hough transformation
     HoughTransformation(m_HoughObjectsX);
     HoughTransformation(m_HoughObjectsY);
    
-   
+cout<<"  HoughClusteringAlg: Fill bins to get the hills"<<endl;
     //Fill bins to get the hills
     CRDEcalEDM::CRDHoughSpace m_HoughSpaceX; 
     CRDEcalEDM::CRDHoughSpace m_HoughSpaceY; 
     FillHoughSpace(m_HoughObjectsX, m_HoughSpaceX);
     FillHoughSpace(m_HoughObjectsY, m_HoughSpaceY);
    
-   
+cout<<"  HoughClusteringAlg: Merge hills"<<endl;
     //Merge hills
     MergingHills(m_HoughSpaceX);
     MergingHills(m_HoughSpaceY);
 
+cout<<"  HoughClusteringAlg: Create output HoughClusters"<<endl;
     //Create output HoughClusters 
     for(int ic=0; ic<m_HoughSpaceX.getHills().size(); ic++) m_datacol.LongiClusXCol.push_back( m_HoughSpaceX.getHills()[ic].TransformToCluster() ); 
     for(int ic=0; ic<m_HoughSpaceY.getHills().size(); ic++) m_datacol.LongiClusYCol.push_back( m_HoughSpaceY.getHills()[ic].TransformToCluster() ); 
   }
-
+cout<<"End in HoughClusteringAlg"<<endl;
   return StatusCode::SUCCESS;
 }
 
@@ -128,10 +130,10 @@ StatusCode HoughClusteringAlg::HoughTransformation(std::vector<CRDEcalEDM::CRDHo
 
   
   for(int iobj=0; iobj<m_Hobjects.size(); iobj++){
-    TF1 line_u("", "[0]*Cos(x) + [1]*Sin(x)", -0.1, PI);
+    TF1 line_u("", "[0]*cos(x) + [1]*sin(x)", -0.1, PI);
     line_u.SetParameters(m_Hobjects[iobj].getConformPointU().X()-centreX, m_Hobjects[iobj].getConformPointU().Y()-centerY);
 
-    TF1 line_d("", "[0]*Cos(x) + [1]*Sin(x)", -0.1, PI);
+    TF1 line_d("", "[0]*cos(x) + [1]*sin(x)", -0.1, PI);
     line_d.SetParameters(m_Hobjects[iobj].getConformPointD().X()-centreX, m_Hobjects[iobj].getConformPointD().Y()-centerY);
 
 		m_Hobjects[iobj].SetHoughLine(line_u, line_d);

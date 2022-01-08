@@ -53,11 +53,13 @@ StatusCode EnergySplittingAlg::ClearAlgorithm(){
 StatusCode EnergySplittingAlg::GetLocalMax( CRDEcalEDM::CRDCaloBlock& m_block ){
   if(m_block.getBarXCol().size()==0 && m_block.getBarYCol().size()==0) return StatusCode::SUCCESS;
 
+  std::vector<CRDEcalEDM::CRDCaloBar> m_barXCol = m_block.getBarXCol();
+  std::vector<CRDEcalEDM::CRDCaloBar> m_barYCol = m_block.getBarYCol();
 
   std::vector<CRDEcalEDM::CRDCaloBar> localMaxXCol; localMaxXCol.clear();
   std::vector<CRDEcalEDM::CRDCaloBar> localMaxYCol; localMaxYCol.clear();
-  GetLocalMaxBar( m_block.getBarXCol(), localMaxXCol );
-  GetLocalMaxBar( m_block.getBarYCol(), localMaxYCol );
+  GetLocalMaxBar( m_barXCol, localMaxXCol );
+  GetLocalMaxBar( m_barYCol, localMaxYCol );
 
 
   std::vector<CRDEcalEDM::CRDCaloBarShower> m_showerColX; m_showerColX.clear();  

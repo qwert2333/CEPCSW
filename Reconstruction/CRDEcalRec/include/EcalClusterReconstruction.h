@@ -5,6 +5,7 @@
 #include "PandoraPlusDataCol.h"
 #include "Algorithm/EnergySplittingAlg.h"
 #include "Algorithm/ConeClustering2DAlg.h"
+#include "Algorithm/HoughClusteringAlg.h"
 #include "Algorithm/ShadowMakingAlg.h"
 #include "Algorithm/EnergyTimeMatchingAlg.h"
 #include "Algorithm/ConeClusteringAlg.h"
@@ -30,6 +31,7 @@ public:
 
   EnergySplittingAlg     *m_energysplittingAlg;
   ConeClustering2DAlg    *m_coneclus2DAlg;
+  HoughClusteringAlg     *m_houghclusAlg; 
   ShadowMakingAlg        *m_shadowmakingAlg;
   EnergyTimeMatchingAlg  *m_etmatchingAlg;
   ConeClusteringAlg      *m_coneclusterAlg;
@@ -39,6 +41,7 @@ public:
 
   EnergySplittingAlg::Settings    *m_ESAlgSettings;
   ConeClustering2DAlg::Settings   *m_CC2AlgSettings;
+  HoughClusteringAlg::Settings    *m_HCAlgSettings; 
   ShadowMakingAlg::Settings       *m_CMAlgSettings;
   EnergyTimeMatchingAlg::Settings *m_ETAlgSettings;
   ConeClusteringAlg::Settings     *m_CCAlgSettings;
