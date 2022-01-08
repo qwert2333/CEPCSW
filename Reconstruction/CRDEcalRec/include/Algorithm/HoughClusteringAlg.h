@@ -28,7 +28,7 @@ public:
   StatusCode RunAlgorithm( HoughClusteringAlg::Settings& m_settings, PandoraPlusDataCol& m_datacol);
   StatusCode ClearAlgorithm();
 
-  StatusCode ConformalTransformation(std::vector<CRDEcalEDM::CRDCaloBarShower>& m_localMax, std::vector<CRDEcalEDM::CRDHoughObject>& m_Hobjects); 
+  StatusCode ConformalTransformation(std::vector<CRDEcalEDM::CRDHoughObject>& m_Hobjects); 
   StatusCode HoughTransformation(std::vector<CRDEcalEDM::CRDHoughObject>& m_Hobjects);
 	StatusCode FillHoughSpace(std::vector<CRDEcalEDM::CRDHoughObject>& m_Hobjects, CRDEcalEDM::CRDHoughSpace& m_Hspace);
   StatusCode MergingHills(CRDEcalEDM::CRDHoughSpace& m_Hspace);

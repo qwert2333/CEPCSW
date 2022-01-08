@@ -15,25 +15,33 @@ namespace CRDEcalEDM {
       return  originLocalMax == x.originLocalMax;
     }
 
-		CRDEcalEDM::CRDCaloBarShower* getLocalMax() const { return originLocalMax; }
-		TVector2 getConformPointU() const { return ConformalPoint_u; }
-		TVector2 getConformPointD() const { return ConformalPoint_d; }
-    TF1 getHoughLineU() const { return HoughLine_u; }
-    TF1 getHoughLineD() const { return HoughLine_d; }
+		CRDEcalEDM::CRDCaloBarShower getLocalMax() const { return originLocalMax; }
+		TVector2 getConformPointUR() const { return ConformalPoint+TVector2(cellSize/2., cellSize/2.);   }
+		TVector2 getConformPointUL() const { return ConformalPoint+TVector2(-cellSize/2., cellSize/2.);  }
+		TVector2 getConformPointDR() const { return ConformalPoint+TVector2(cellSize/2., -cellSize/2.);  }
+		TVector2 getConformPointDL() const { return ConformalPoint+TVector2(-cellSize/2., -cellSize/2.); }
+    TF1 getHoughLineUR() const { return HoughLine_ur; }
+    TF1 getHoughLineUL() const { return HoughLine_ul; }
+    TF1 getHoughLineDR() const { return HoughLine_dr; }
+    TF1 getHoughLineDL() const { return HoughLine_dl; }
 
-    void Clear() { originLocalMax=nullptr; ConformalPoint_u.SetX(0.); ConformalPoint_u.SetY(0.); ConformalPoint_d.SetX(0.); ConformalPoint_d.SetY(0.); }
-    void SetLocalMax( CRDEcalEDM::CRDCaloBarShower* _localmax ) { originLocalMax=_localmax; }
-    void SetConformalPoint(TVector2& _uvec, TVector2& _dvec) { ConformalPoint_u=_uvec; ConformalPoint_d=_dvec; }
-		void SetHoughLine(TF1& _func_u, TF1& _func_d) { HoughLine_u=_func_u; HoughLine_d=_func_d; }
+    void Clear() { originLocalMax.Clear(); ConformalPoint.SetX(0.); ConformalPoint.SetY(0.);}
+    void SetCellSize(double _cell) { cellSize=_cell; }
+    void SetLocalMax( CRDEcalEDM::CRDCaloBarShower _localmax ) { originLocalMax=_localmax; }
+    void SetConformalPoint(TVector2& _vec) { ConformalPoint_u=_vec;}
+		void SetHoughLine(TF1& _func_ur, TF1& _func_ul, TF1& _func_dr, TF1& _func_dl) 
+         { HoughLine_ur=_func_ur; HoughLine_ul=_func_ul; HoughLine_dr=_func_dr; HoughLine_dl=_func_dl; }
 		void SetSlayer(int _slayer) { Slayer=_slayer; }
 
   private: 
 	  int Slayer;
-    CRDEcalEDM::CRDCaloBarShower* originLocalMax;  //Local max
-		TVector2 ConformalPoint_u; 
-		TVector2 ConformalPoint_d; 
-		TF1 HoughLine_u;
-		TF1 HoughLine_d;
+    double cellSize; //crystal cell size, unit: mm. 
+    CRDEcalEDM::CRDCaloBarShower originLocalMax;  //Local max
+		TVector2 ConformalPoint; //Center position. 
+		TF1 HoughLine_ur;
+		TF1 HoughLine_ul;
+		TF1 HoughLine_dr;
+		TF1 HoughLine_dl;
 
 };
 
