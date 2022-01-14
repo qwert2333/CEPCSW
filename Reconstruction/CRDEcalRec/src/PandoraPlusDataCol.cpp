@@ -151,10 +151,30 @@ void PandoraPlusDataCol::Print3DClus(){
 
 }
 
+void PandoraPlusDataCol::PrintTower(){
+  cout<<"------------------------------------------------"<<endl;
+  cout<<"----------Print out Shower Collection-----------"<<endl;
+  cout<<"------------------------------------------------"<<endl; 
 
+  cout<<"Total tower number: "<<TowerCol.size()<<endl;
+  cout<<"Loop print in towers"<<endl;
+  for(int it=0; it<TowerCol.size(); it++){
+    cout<<'\t'<<"Tower ID: "; printf("(%d, %d, %d) \n", TowerCol[it].getModule(), TowerCol[it].getStave(), TowerCol[it].getPart());
+    cout<<'\t'<<"Covered block size in tower: "<<TowerCol[it].getBlocks().size()<<endl;
+    cout<<'\t'<<"Block ID: ";
+    for(int ib=0; ib<TowerCol[it].getBlocks().size(); ib++) 
+      printf("(%d, %d, %d, %d), ", TowerCol[it].getBlocks()[ib].getModule(), 
+                                   TowerCol[it].getBlocks()[ib].getStave(),
+                                   TowerCol[it].getBlocks()[ib].getPart(),
+                                   TowerCol[it].getBlocks()[ib].getDlayer() );
+    cout<<endl;
+  }
+
+}
 
 void PandoraPlusDataCol::Clear(){
   ClearBlock();  
+  ClearTower(); 
   ClearLayer();  
   ClearShower(); 
   ClearCluster();

@@ -18,7 +18,11 @@ public:
 
     int Nbins_alpha;
 		int Nbins_rho;
-		int Layers; 
+
+		int th_Layers;  //Only use first th_Layers layer. 
+    int th_peak;    //At least th_peak th_peak hits in one track(longiCluster).
+    int th_continuetrkN; //Should have at least N continue layers. 
+    bool fl_continuetrk; //Should be continue. 
 	};
 
 	HoughClusteringAlg () {};
@@ -31,9 +35,10 @@ public:
   StatusCode ConformalTransformation(std::vector<CRDEcalEDM::CRDHoughObject>& m_Hobjects); 
   StatusCode HoughTransformation(std::vector<CRDEcalEDM::CRDHoughObject>& m_Hobjects);
 	StatusCode FillHoughSpace(std::vector<CRDEcalEDM::CRDHoughObject>& m_Hobjects, CRDEcalEDM::CRDHoughSpace& m_Hspace);
-  StatusCode MergingHills(CRDEcalEDM::CRDHoughSpace& m_Hspace);
-  
-
+  StatusCode FindingHills(CRDEcalEDM::CRDHoughSpace& m_Hspace);
+  StatusCode Transform2Clusters(CRDEcalEDM::CRDHoughSpace& m_Hspace, std::vector<CRDEcalEDM::CRDHoughObject>& m_Hobjects, std::vector<CRDEcalEDM::CRDCaloHitLongiCluster>& m_longiClusCol );
+  StatusCode CleanClusters( std::vector<CRDEcalEDM::CRDCaloHitLongiCluster>& m_longiClusCol );
+  int ExpandingPeak(TH2 &houghMap, int index_a, int index_b, CRDEcalEDM::CRDHoughSpace::HoughHill& hill); 
 
   Settings settings;
 

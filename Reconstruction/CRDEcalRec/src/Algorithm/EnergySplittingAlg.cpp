@@ -29,17 +29,25 @@ StatusCode EnergySplittingAlg::RunAlgorithm( EnergySplittingAlg::Settings& m_set
   settings = m_settings;
 
   std::vector<CRDEcalEDM::CRDCaloLayer> m_LayerCol; m_LayerCol.clear();
+  std::vector<CRDEcalEDM::CRDCaloTower> m_TowerCol; m_TowerCol.clear();
   int Nblocks = m_datacol.BlockVec.size();
   for(int ib=0;ib<Nblocks;ib++){
     CRDEcalEDM::CRDCaloLayer m_layer; m_layer.Clear();
-
     if( settings.fl_findMaxOnly ) GetLocalMax( m_datacol.BlockVec[ib] );
     else ClusteringinLayer( m_datacol.BlockVec[ib], m_layer );
-
     m_LayerCol.push_back(m_layer);
+
+    CRDEcalEDM::CRDCaloTower m_tower; m_tower.Clear();
+    m_tower.SetTowerID( m_datacol.BlockVec[ib].getModule(), 
+                        m_datacol.BlockVec[ib].getStave(),
+                        m_datacol.BlockVec[ib].getPart() );
+    std::vector<CRDEcalEDM::CRDCaloTower>::iterator iter = find(m_TowerCol.begin(), m_TowerCol.end(), m_tower);
+    if(iter==m_TowerCol.end()){ m_tower.AddBlock(m_datacol.BlockVec[ib]); m_TowerCol.push_back(m_tower); }
+    else iter->AddBlock(m_datacol.BlockVec[ib]);
+    
   }
   m_datacol.LayerCol = m_LayerCol;
-
+  m_datacol.TowerCol = m_TowerCol;
   return StatusCode::SUCCESS;
 }
 

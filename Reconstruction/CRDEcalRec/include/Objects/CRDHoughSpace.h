@@ -8,63 +8,42 @@ namespace CRDEcalEDM {
   class CRDHoughSpace{
   public: 
     CRDHoughSpace() {};
-    ~CRDHoughSpace() { m_sapceMap.Reset();  m_cells.clear(); m_hills.clear(); }
-    void Clear() { m_sapceMap.Reset();  m_cells.clear(); m_hills.clear(); }
+    ~CRDHoughSpace() { m_sapceMap.Reset(); m_hills.clear(); }
+    void Clear() { m_sapceMap.Reset();  m_hills.clear(); }
 
-    //Sub-object classes: Cell and Hill. 
-    class HoughCell{
-	  public:
-      HoughCell() {};
-
-      inline bool operator == (const HoughCell &x) const{
-        //return m_objs == x.m_objs;
-        return (index_alpha==x.index_alpha && index_rho==x.index_rho && m_objs==x.m_objs);
-      }
-
-      std::vector<CRDEcalEDM::CRDHoughObject> getObjects() const { return m_objs; }
-      int getIndexAlpha() const { return index_alpha; }
-      int getIndexRho() const { return index_rho; }
-
-      void Clear() {m_objs.clear(); index_alpha=-1; index_rho=-1; }
-      void SetIndex(int _alpha, int _rho) { index_alpha=_alpha; index_rho=_rho; }
-      void SetObjects(std::vector<CRDEcalEDM::CRDHoughObject> _objs) { m_objs=_objs; }
-      void AddObject(CRDEcalEDM::CRDHoughObject _obj) { m_objs.push_back(_obj); }
-
-    private: 
-		  std::vector<CRDEcalEDM::CRDHoughObject> m_objs; 
-      int index_alpha;
-			int index_rho; 
-
-	  };
-
+    //Sub-object classes: Hill. 
 	  class HoughHill{
     public:
       HoughHill() {};
-      void Clear() {m_cells.clear(); }
+      void Clear() {index_alpha.clear(); index_rho.clear(); binSize.clear();}
+      std::vector<int> getIndexAlpha() const { return index_alpha; }
+      std::vector<int> getIndexRho() const { return index_rho; }
 
-      bool isNeighbor( CRDEcalEDM::CRDHoughSpace::HoughCell _cell ) const; 
-      void AddCell( CRDEcalEDM::CRDHoughSpace::HoughCell _cell ) { m_cells.push_back(_cell); }
-      CRDEcalEDM::CRDCaloHitLongiCluster TransformToCluster(); 
-
+      void AddCell(int _alpha, int _rho, int _size) { index_alpha.push_back(_alpha); index_rho.push_back(_rho); binSize.push_back(_size); }
 
     private: 
-		  std::vector<CRDEcalEDM::CRDHoughSpace::HoughCell> m_cells; 
+      std::vector<int> index_alpha;
+      std::vector<int> index_rho;
+      std::vector<int> binSize;
 
 	  };
 
 
     //Functions
 		TH2F getSpaceMap() const { return m_sapceMap; }
-    std::vector<CRDEcalEDM::CRDHoughSpace::HoughCell> getCells() const { return m_cells; }
     std::vector<CRDEcalEDM::CRDHoughSpace::HoughHill> getHills() const { return m_hills; }
+    double getAlphaBinWidth() const { return m_sapceMap.GetXaxis()->GetBinWidth(0); }
+    double getRhoBinWidth() const { return m_sapceMap.GetYaxis()->GetBinWidth(0); }
+    double getAlphaLowEdge() const { return m_sapceMap.GetXaxis()->GetBinLowEdge(1); }
+    double getAlphaUpEdge() const { return m_sapceMap.GetXaxis()->GetBinUpEdge(m_sapceMap.GetXaxis()->GetNbins()); }
+    double getRhoLowEdge() const { return m_sapceMap.GetYaxis()->GetBinLowEdge(1); }
+    double getRhoUpEdge() const { return m_sapceMap.GetYaxis()->GetBinUpEdge(m_sapceMap.GetYaxis()->GetNbins()); }
 
     void SetSpaceMap(TH2F& _map) { m_sapceMap=_map; }
-    void SetHoughCells(  std::vector<CRDEcalEDM::CRDHoughSpace::HoughCell> _cellCol ) { m_cells=_cellCol; }
     void SetHoughHills(  std::vector<CRDEcalEDM::CRDHoughSpace::HoughHill> _hillCol ) { m_hills=_hillCol; }
 
   private: 
     TH2F m_sapceMap; 
-    std::vector<CRDEcalEDM::CRDHoughSpace::HoughCell> m_cells; 
 		std::vector<CRDEcalEDM::CRDHoughSpace::HoughHill> m_hills; 
 
 

@@ -60,8 +60,7 @@ StatusCode ShadowMakingAlg::RunAlgorithm(ShadowMakingAlg::Settings& m_settings, 
     std::vector<CRDEcalEDM::CRDCaloBlock> m_blocks = GetBlocksNeedModification(m_goodClusX[ic]);
 
     for(int ib=0; ib<m_datacol.BlockVec.size(); ib++){
-      std::vector<CRDEcalEDM::CRDCaloBlock>::iterator iter = find( m_blocks.begin(), m_blocks.end(), m_datacol.BlockVec[ib] );
-      if(iter==m_blocks.end()) continue; 
+      if(find( m_blocks.begin(), m_blocks.end(), m_datacol.BlockVec[ib] )==m_blocks.end()) continue;
 
       CRDEcalEDM::CRDShadowCluster m_neush; m_neush.Clear();
       m_neush.Dlayer = m_datacol.BlockVec[ib].getDlayer();
@@ -84,8 +83,7 @@ StatusCode ShadowMakingAlg::RunAlgorithm(ShadowMakingAlg::Settings& m_settings, 
     std::vector<CRDEcalEDM::CRDCaloBlock> m_blocks = GetBlocksNeedModification(m_goodClusY[ic]);
 
     for(int ib=0; ib<m_datacol.BlockVec.size(); ib++){
-      std::vector<CRDEcalEDM::CRDCaloBlock>::iterator iter = find( m_blocks.begin(), m_blocks.end(), m_datacol.BlockVec[ib] );
-      if(iter==m_blocks.end()) continue;
+      if(find( m_blocks.begin(), m_blocks.end(), m_datacol.BlockVec[ib] )==m_blocks.end()) continue;
 
       CRDEcalEDM::CRDShadowCluster m_neush; m_neush.Clear();
       m_neush.Dlayer = m_datacol.BlockVec[ib].getDlayer();

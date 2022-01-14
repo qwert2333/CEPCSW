@@ -55,6 +55,55 @@ namespace CRDEcalEDM{
     return pos_maxE + axis*20*(dlayer-dlayer_maxE);
   }
 
+  bool CRDCaloHitLongiCluster::isContinue() const{
+    int ly_max = -1; 
+    int ly_min = 99;
+    std::vector<int> vec_layers; vec_layers.clear();
+    for(int il=0; il<barShowerCol.size(); il++){
+      vec_layers.push_back(barShowerCol[il].getDlayer());
+      if(barShowerCol[il].getDlayer()>ly_max) ly_max = barShowerCol[il].getDlayer();
+      if(barShowerCol[il].getDlayer()<ly_min) ly_min = barShowerCol[il].getDlayer();
+    }
+
+    bool flag = true;
+    std::sort(vec_layers.begin(), vec_layers.end());
+    for(int il=0; il<vec_layers.size() && vec_layers[il]!=ly_max; il++)
+      if( find(vec_layers.begin(), vec_layers.end(), vec_layers[il]+1) == vec_layers.end() ){ flag=false; break; }
+
+    return flag;
+  }
+
+  bool CRDCaloHitLongiCluster::isContinueN(int n) const{
+    if(n<=0) return true; 
+
+    int ly_max = -1;
+    int ly_min = 99;
+    std::vector<int> vec_layers; vec_layers.clear();
+    for(int il=0; il<barShowerCol.size(); il++){
+      vec_layers.push_back(barShowerCol[il].getDlayer());
+      if(barShowerCol[il].getDlayer()>ly_max) ly_max = barShowerCol[il].getDlayer();
+      if(barShowerCol[il].getDlayer()<ly_min) ly_min = barShowerCol[il].getDlayer();
+    }
+    if(n>(ly_max-ly_min+1)) return false; 
+
+    bool flag = false;
+    std::sort(vec_layers.begin(), vec_layers.end());
+    for(int il=0; il<vec_layers.size(); il++){
+      bool fl_continueN = true;
+      for(int in=1; in<n; in++) 
+        if( find(vec_layers.begin(), vec_layers.end(), vec_layers[il]+in)!=vec_layers.end() ) { fl_continueN=false; break; }
+      if(fl_continueN) {flag = true; break;}
+    }
+    return flag;
+  }
+
+  bool CRDCaloHitLongiCluster::isSubset(CRDCaloHitLongiCluster& clus) const{
+    bool flag = true; 
+    for(int is=0; is<clus.getBarShowers().size(); is++)
+      if( find(barShowerCol.begin(), barShowerCol.end(), clus.getBarShowers()[is])==barShowerCol.end() ) {flag=false; break;}
+    return flag; 
+  }
+
   void CRDCaloHitLongiCluster::FitAxis(){
     if(barShowerCol.size()==0){ axis.SetXYZ(0,0,0); return; }
     else if(barShowerCol.size()==1){ 

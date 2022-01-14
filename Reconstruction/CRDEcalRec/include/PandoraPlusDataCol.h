@@ -6,6 +6,7 @@
 
 #include "Objects/CRDCaloBar.h"
 #include "Objects/CRDCaloBlock.h"
+#include "Objects/CRDCaloTower.h"
 #include "Objects/CRDCaloBarShower.h"
 #include "Objects/CRDCaloBarCluster.h"
 #include "Objects/CRDCaloLayer.h"
@@ -41,6 +42,7 @@ public:
 
   //ECal Collections
   std::vector<CRDEcalEDM::CRDCaloBlock>       BlockVec;  //All fired crystal bars, grouped as blocks 
+  std::vector<CRDEcalEDM::CRDCaloTower>       TowerCol;  
   std::vector<CRDEcalEDM::CRDCaloLayer>       LayerCol;  //Results of EnergySplittingAlg
   std::vector<CRDEcalEDM::CRDCaloHitLongiCluster> LongiClusXCol; 
   std::vector<CRDEcalEDM::CRDCaloHitLongiCluster> LongiClusYCol; 
@@ -62,11 +64,13 @@ public:
 
 
   //Function
+  void PrintTower(); 
   void PrintLayer();
   void PrintShower();
   void Print3DClus();
   void Clear();
   void ClearBlock()  { BlockVec.clear(); }
+  void ClearTower()  { TowerCol.clear(); }
   void ClearLayer()  { LayerCol.clear(); }
   void ClearShower() { Shower2DCol.clear(); MIPShower2DCol.clear(); EMShower2DCol.clear(); }
   void ClearCluster(){ GoodClus3DCol.clear(); BadClus3DCol.clear(); Clus3DCol.clear(); }

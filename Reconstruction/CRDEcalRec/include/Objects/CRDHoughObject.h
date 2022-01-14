@@ -11,9 +11,9 @@ namespace CRDEcalEDM {
     CRDHoughObject() {};
     ~CRDHoughObject() {};
 
-    inline bool operator == (const CRDHoughObject &x) const{
-      return  originLocalMax == x.originLocalMax;
-    }
+    //inline bool operator == (const CRDHoughObject &x) const{
+    //  return  originLocalMax == x.originLocalMax;
+    //}
 
 		CRDEcalEDM::CRDCaloBarShower getLocalMax() const { return originLocalMax; }
 		TVector2 getConformPointUR() const { return ConformalPoint+TVector2(cellSize/2., cellSize/2.);   }
@@ -28,7 +28,7 @@ namespace CRDEcalEDM {
     void Clear() { originLocalMax.Clear(); ConformalPoint.SetX(0.); ConformalPoint.SetY(0.);}
     void SetCellSize(double _cell) { cellSize=_cell; }
     void SetLocalMax( CRDEcalEDM::CRDCaloBarShower _localmax ) { originLocalMax=_localmax; }
-    void SetConformalPoint(TVector2& _vec) { ConformalPoint_u=_vec;}
+    void SetConformalPoint(TVector2& _vec) { ConformalPoint=_vec;}
 		void SetHoughLine(TF1& _func_ur, TF1& _func_ul, TF1& _func_dr, TF1& _func_dl) 
          { HoughLine_ur=_func_ur; HoughLine_ul=_func_ul; HoughLine_dr=_func_dr; HoughLine_dl=_func_dl; }
 		void SetSlayer(int _slayer) { Slayer=_slayer; }

@@ -42,8 +42,35 @@ StatusCode EcalClusterReconstruction::RunAlgorithm( EcalClusterReconstruction::S
   //Stage 1
   m_ESAlgSettings->SetOnlyFindMax(true);
   m_energysplittingAlg->RunAlgorithm( *m_ESAlgSettings,  dataCol ); 
+//  dataCol.PrintTower(); 
   //m_coneclus2DAlg     ->RunAlgorithm( *m_CC2AlgSettings, dataCol );
   m_houghclusAlg      ->RunAlgorithm( *m_HCAlgSettings, dataCol );
+
+
+cout<<"  LongiClusterX size: "<<dataCol.LongiClusXCol.size()<<endl;
+cout<<"  Loop print the longiclusterX: "<<endl;
+for(int ic=0; ic<dataCol.LongiClusXCol.size(); ic++){
+  cout<<"    In LongiCluster #"<<ic<<endl;
+  printf("    From layer %d to %d, bar shower size %d \n", dataCol.LongiClusXCol[ic].getBeginningDlayer(), dataCol.LongiClusXCol[ic].getEndDlayer(), dataCol.LongiClusXCol[ic].getBarShowers().size());
+  for(int is=0; is<dataCol.LongiClusXCol[ic].getBarShowers().size(); is++)
+    printf("  (%.3f, %.3f, %.3f) \t", dataCol.LongiClusXCol[ic].getBarShowers()[is].getPos().x(), 
+                                      dataCol.LongiClusXCol[ic].getBarShowers()[is].getPos().y(),
+                                      dataCol.LongiClusXCol[ic].getBarShowers()[is].getPos().z() );
+  cout<<endl;
+}
+
+cout<<"  LongiClusterY size: "<<dataCol.LongiClusYCol.size()<<endl;
+cout<<"  Loop print the longiclusterY: "<<endl;
+for(int ic=0; ic<dataCol.LongiClusYCol.size(); ic++){
+  cout<<"    In LongiCluster #"<<ic<<endl;
+  printf("    From layer %d to %d, bar shower size %d \n", dataCol.LongiClusYCol[ic].getBeginningDlayer(), dataCol.LongiClusYCol[ic].getEndDlayer(), dataCol.LongiClusYCol[ic].getBarShowers().size());
+  for(int is=0; is<dataCol.LongiClusYCol[ic].getBarShowers().size(); is++)
+    printf("  (%.3f, %.3f, %.3f) \t", dataCol.LongiClusYCol[ic].getBarShowers()[is].getPos().x(),
+                                      dataCol.LongiClusYCol[ic].getBarShowers()[is].getPos().y(),
+                                      dataCol.LongiClusYCol[ic].getBarShowers()[is].getPos().z() );
+  cout<<endl;
+}
+
   m_shadowmakingAlg   ->RunAlgorithm( *m_CMAlgSettings, dataCol );
 
 //dataCol.PrintLayer();
@@ -65,7 +92,7 @@ StatusCode EcalClusterReconstruction::RunAlgorithm( EcalClusterReconstruction::S
 
 //dataCol.PrintLayer();
 
-/*
+
   m_CIDAlgSettings->SetDepartShower(true);
   m_clusteridAlg->RunAlgorithm( *m_CIDAlgSettings, dataCol );
 
@@ -85,11 +112,12 @@ StatusCode EcalClusterReconstruction::RunAlgorithm( EcalClusterReconstruction::S
   m_CCAlgSettings->SetGoodClusLevel(5);
   m_CCAlgSettings->SetOverwrite(false);
   m_coneclusterAlg->RunAlgorithm( *m_CCAlgSettings, dataCol);
-*/
+
   m_CLAlgSettings->SetMergeGoodCluster(false);
   m_CLAlgSettings->SetMergeBadCluster(false);
   m_CLAlgSettings->SetMergeEMTail(false);
   m_clustermergingAlg  ->RunAlgorithm( *m_CLAlgSettings, dataCol );
+
 
   return StatusCode::SUCCESS;
 

@@ -12,6 +12,9 @@ namespace CRDEcalEDM {
   public: 
     CRDCaloBarShower() {}; 
 
+    inline bool operator == (const CRDCaloBarShower &x) const{
+      return Bars == x.Bars;
+    }
     void Clear() { Energy=0; Bars.clear(); TrkShadowClusCol.clear(); NeuShadowClusCol.clear(); }
     bool isNeighbor(CRDEcalEDM::CRDCaloBar iBar); 
     bool inShower(CRDEcalEDM::CRDCaloBar iBar); 

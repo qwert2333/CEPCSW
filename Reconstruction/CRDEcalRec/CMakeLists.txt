@@ -7,7 +7,6 @@ gaudi_add_library(CRDEcalRecLib
                           src/Objects/CRDCaloHitTransShower.cc
                           src/Objects/CRDCaloHitLongiCluster.cc
                           src/Objects/CRDCaloHit3DCluster.cc
-                          src/Objects/CRDHoughSpace.cc
                           src/Objects/Track.cc
                           src/Objects/TrackFitInEcal.cpp
                   LINK    k4FWCore::k4FWCore

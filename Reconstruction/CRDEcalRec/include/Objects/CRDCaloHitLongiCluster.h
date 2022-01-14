@@ -14,6 +14,10 @@ namespace CRDEcalEDM{
     ~CRDCaloHitLongiCluster(){};
 
   void Clear() { axis.SetXYZ(0.,0.,0.); barShowerCol.clear(); }
+  inline bool operator == (const CRDCaloHitLongiCluster &x) const{
+    return barShowerCol == x.barShowerCol;
+  }  
+
   TVector3 getPos() const; 
   TVector3 getAxis() const {return axis; }
   int getSlayer() const; 
@@ -22,12 +26,13 @@ namespace CRDEcalEDM{
   int getBeginningDlayer() const; 
   int getEndDlayer() const; 
   TVector3 getExpPos(int& dlayer) const; 
-
+  bool isContinue() const; 
+  bool isContinueN(int n) const; 
+  bool isSubset( CRDCaloHitLongiCluster& clus) const; 
 
   void FitAxis(); 
   void AddBarShower( CRDEcalEDM::CRDCaloBarShower _shower ) { barShowerCol.push_back(_shower); FitAxis(); }
   void SetBarShowers( std::vector<CRDEcalEDM::CRDCaloBarShower> _barshwoers ) { barShowerCol = _barshwoers; }
-
 
   private:
     TVector3 axis; 
