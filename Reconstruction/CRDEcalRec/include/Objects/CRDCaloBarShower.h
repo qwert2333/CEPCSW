@@ -20,6 +20,7 @@ namespace CRDEcalEDM {
     bool inShower(CRDEcalEDM::CRDCaloBar iBar); 
 
     dd4hep::Position getPos() const;
+    TVector3 getPosV3() const; 
     double getE()  const;
     double getT1() const;
     double getT2() const;

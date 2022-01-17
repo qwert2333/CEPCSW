@@ -41,13 +41,8 @@ public:
   //Vertex Collections
 
   //ECal Collections
-  std::vector<CRDEcalEDM::CRDCaloBlock>       BlockVec;  //All fired crystal bars, grouped as blocks 
-  std::vector<CRDEcalEDM::CRDCaloTower>       TowerCol;  
-  std::vector<CRDEcalEDM::CRDCaloLayer>       LayerCol;  //Results of EnergySplittingAlg
-  std::vector<CRDEcalEDM::CRDCaloHitLongiCluster> LongiClusXCol; 
-  std::vector<CRDEcalEDM::CRDCaloHitLongiCluster> LongiClusYCol; 
-
-    std::vector<CRDEcalEDM::CRDCaloLayer>       LayerCol_tmp;
+  std::vector<CRDEcalEDM::CRDCaloBlock>       BlockVec;  //All fired crystal bars, grouped as blocks
+  std::vector<CRDEcalEDM::CRDCaloTower>       TowerCol;  //40*40*28 tower, containing blocks, LongiClusters, tracks.
 
   std::vector<CRDEcalEDM::CRDCaloHitTransShower> Shower2DCol;
   std::vector<CRDEcalEDM::CRDCaloHitTransShower> MIPShower2DCol; 

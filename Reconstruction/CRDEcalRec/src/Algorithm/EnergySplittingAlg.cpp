@@ -3,19 +3,9 @@
 
 #include "Algorithm/EnergySplittingAlg.h"
 void EnergySplittingAlg::Settings::SetInitialValue(){
-  fl_findMaxOnly = true; 
-  Eth_localMax = 0.003;
-  Eth_MaxWithNeigh = 0.;
 
-  Sth_split = -1;
-  Eth_SeedAbs = 0.007; //0.1MeV
-  Eth_ShowerAbs = 0.0;
-  Eth_ClusAbs = 0.0;
-  Eth_SeedWithNeigh = 0.6;
-  Eth_SeedWithTot = 0.;
-  Eth_ShowerWithTot = 0.;
-  Eth_ClusterWithTot = 0.;
-  Etot=0;
+  th_GoodLayer = 4;
+  th_split = -1; 
   Debug = 0;
 }
 
@@ -28,179 +18,128 @@ StatusCode EnergySplittingAlg::Initialize(){
 StatusCode EnergySplittingAlg::RunAlgorithm( EnergySplittingAlg::Settings& m_settings, PandoraPlusDataCol& m_datacol){
   settings = m_settings;
 
-  std::vector<CRDEcalEDM::CRDCaloLayer> m_LayerCol; m_LayerCol.clear();
-  std::vector<CRDEcalEDM::CRDCaloTower> m_TowerCol; m_TowerCol.clear();
-  int Nblocks = m_datacol.BlockVec.size();
-  for(int ib=0;ib<Nblocks;ib++){
-    CRDEcalEDM::CRDCaloLayer m_layer; m_layer.Clear();
-    if( settings.fl_findMaxOnly ) GetLocalMax( m_datacol.BlockVec[ib] );
-    else ClusteringinLayer( m_datacol.BlockVec[ib], m_layer );
-    m_LayerCol.push_back(m_layer);
+  for(int it=0; it<m_datacol.TowerCol.size(); it++){
+    std::vector<CRDEcalEDM::CRDCaloBlock> m_blocksInTower = m_datacol.TowerCol[it].getBlocks(); 
+    std::vector<CRDEcalEDM::CRDCaloHitLongiCluster> m_clusXCol = m_datacol.TowerCol[it].getLongiClusterXCol();
+    std::vector<CRDEcalEDM::CRDCaloHitLongiCluster> m_clusYCol = m_datacol.TowerCol[it].getLongiClusterYCol();
 
-    CRDEcalEDM::CRDCaloTower m_tower; m_tower.Clear();
-    m_tower.SetTowerID( m_datacol.BlockVec[ib].getModule(), 
-                        m_datacol.BlockVec[ib].getStave(),
-                        m_datacol.BlockVec[ib].getPart() );
-    std::vector<CRDEcalEDM::CRDCaloTower>::iterator iter = find(m_TowerCol.begin(), m_TowerCol.end(), m_tower);
-    if(iter==m_TowerCol.end()){ m_tower.AddBlock(m_datacol.BlockVec[ib]); m_TowerCol.push_back(m_tower); }
-    else iter->AddBlock(m_datacol.BlockVec[ib]);
+
+    //Identify longitudinal cluster quality
+    std::vector<CRDEcalEDM::CRDCaloHitLongiCluster> m_goodClusXCol; m_goodClusXCol.clear();
+    std::vector<CRDEcalEDM::CRDCaloHitLongiCluster> m_badClusXCol; m_badClusXCol.clear();
+    for(int ic=0; ic<m_clusXCol.size(); ic++){
+      if( m_clusXCol[ic].getEndDlayer()-m_clusXCol[ic].getBeginningDlayer()>=settings.th_GoodLayer ) m_goodClusXCol.push_back(m_clusXCol[ic]);
+      else m_badClusXCol.push_back(m_clusXCol[ic]);
+    }
+
+    std::vector<CRDEcalEDM::CRDCaloHitLongiCluster> m_goodClusYCol; m_goodClusYCol.clear();
+    std::vector<CRDEcalEDM::CRDCaloHitLongiCluster> m_badClusYCol; m_badClusYCol.clear();
+    for(int ic=0; ic<m_clusYCol.size(); ic++){
+      if( m_clusYCol[ic].getEndDlayer()-m_clusYCol[ic].getBeginningDlayer()>=settings.th_GoodLayer ) m_goodClusYCol.push_back(m_clusYCol[ic]);
+      else m_badClusYCol.push_back(m_clusYCol[ic]);
+    }
     
+
+    //Make clusters and shwoers in blocks
+    for(int ib=0; ib<m_blocksInTower.size(); ib++ ){
+      m_blocksInTower[ib].ClearShower();
+      ClusteringInBlock(m_blocksInTower[ib], m_goodClusXCol, m_goodClusYCol); 
+    }
+
+    std::vector<CRDCaloHitLongiCluster> m_longiClusXCol; m_longiClusXCol.clear();
+    std::vector<CRDCaloHitLongiCluster> m_longiClusYCol; m_longiClusYCol.clear();
+    LongiClusterLinking(m_blocksInTower, m_clusXCol, m_longiClusXCol);
+    LongiClusterLinking(m_blocksInTower, m_clusYCol, m_longiClusYCol);
+
+    m_datacol.TowerCol[it].SetLongiClusters( m_longiClusXCol, m_longiClusYCol );
+    m_datacol.TowerCol[it].SetBlocks( m_blocksInTower );
   }
-  m_datacol.LayerCol = m_LayerCol;
-  m_datacol.TowerCol = m_TowerCol;
+
   return StatusCode::SUCCESS;
 }
-
 
 StatusCode EnergySplittingAlg::ClearAlgorithm(){
 
   return StatusCode::SUCCESS;
 }
 
+StatusCode EnergySplittingAlg::ClusteringInBlock( CRDEcalEDM::CRDCaloBlock& m_block, 
+                                                  std::vector<CRDEcalEDM::CRDCaloHitLongiCluster>& m_longiClusXCol,
+                                                  std::vector<CRDEcalEDM::CRDCaloHitLongiCluster>& m_longiClusYCol  )
+{
 
-StatusCode EnergySplittingAlg::GetLocalMax( CRDEcalEDM::CRDCaloBlock& m_block ){
-  if(m_block.getBarXCol().size()==0 && m_block.getBarYCol().size()==0) return StatusCode::SUCCESS;
+  std::vector<CRDEcalEDM::CRDCaloBarCluster> m_barClusXCol; m_barClusXCol.clear();
+  std::vector<CRDEcalEDM::CRDCaloBarCluster> m_barClusYCol; m_barClusYCol.clear();
+  Clustering( m_block.getBarXCol(), m_barClusXCol, m_longiClusXCol );
+  Clustering( m_block.getBarYCol(), m_barClusYCol, m_longiClusYCol );
 
-  std::vector<CRDEcalEDM::CRDCaloBar> m_barXCol = m_block.getBarXCol();
-  std::vector<CRDEcalEDM::CRDCaloBar> m_barYCol = m_block.getBarYCol();
+  m_block.setClusterXCol(m_barClusXCol);
+  m_block.setClusterYCol(m_barClusYCol);
 
-  std::vector<CRDEcalEDM::CRDCaloBar> localMaxXCol; localMaxXCol.clear();
-  std::vector<CRDEcalEDM::CRDCaloBar> localMaxYCol; localMaxYCol.clear();
-  GetLocalMaxBar( m_barXCol, localMaxXCol );
-  GetLocalMaxBar( m_barYCol, localMaxYCol );
+  std::vector<CRDEcalEDM::CRDCaloBarShower> m_barShowerXCol; m_barShowerXCol.clear();
+  for(int ic=0; ic<m_barClusXCol.size(); ic++){
+    std::vector<CRDEcalEDM::CRDCaloBarShower> m_showers; m_showers.clear();
+    ClusterSplitting( m_barClusXCol[ic], m_showers );
 
-
-  std::vector<CRDEcalEDM::CRDCaloBarShower> m_showerColX; m_showerColX.clear();  
-  std::vector<CRDEcalEDM::CRDCaloBarShower> m_showerColY; m_showerColY.clear();  
-  for(int j=0; j<localMaxXCol.size(); j++){
-    CRDEcalEDM::CRDCaloBarShower m_shower; m_shower.Clear();
-    m_shower.addBar( localMaxXCol[j] );
-    m_shower.setSeed( localMaxXCol[j] );
-    m_shower.setIDInfo( localMaxXCol[j].getModule(),    
-                        localMaxXCol[j].getStave(),
-                        localMaxXCol[j].getDlayer(),
-                        localMaxXCol[j].getPart(),
-                        localMaxXCol[j].getSlayer() );
-    m_showerColX.push_back(m_shower);
-  }
-  for(int j=0; j<localMaxYCol.size(); j++){
-    CRDEcalEDM::CRDCaloBarShower m_shower; m_shower.Clear();
-    m_shower.addBar( localMaxYCol[j] );
-    m_shower.setSeed( localMaxYCol[j] );
-    m_shower.setIDInfo( localMaxYCol[j].getModule(),
-                        localMaxYCol[j].getStave(),
-                        localMaxYCol[j].getDlayer(),
-                        localMaxYCol[j].getPart(),
-                        localMaxYCol[j].getSlayer() );
-    m_showerColY.push_back(m_shower);
+    if(m_showers.size()==0) continue;
+    m_barShowerXCol.insert( m_barShowerXCol.end(), m_showers.begin(), m_showers.end() );
   }
 
-  m_block.setShowerXCol(m_showerColX);
-  m_block.setShowerYCol(m_showerColY);
+  std::vector<CRDEcalEDM::CRDCaloBarShower> m_barShowerYCol; m_barShowerYCol.clear();
+  for(int ic=0; ic<m_barClusYCol.size(); ic++){
+    std::vector<CRDEcalEDM::CRDCaloBarShower> m_showers; m_showers.clear();
+    ClusterSplitting( m_barClusYCol[ic], m_showers );
+
+    if(m_showers.size()==0) continue;
+    m_barShowerYCol.insert( m_barShowerYCol.end(), m_showers.begin(), m_showers.end() );
+  }
+  m_block.setShowerXCol( m_barShowerXCol );
+  m_block.setShowerYCol( m_barShowerYCol );
+
   return StatusCode::SUCCESS;
 }
 
-StatusCode EnergySplittingAlg::GetLocalMaxBar( std::vector<CRDEcalEDM::CRDCaloBar>& barCol, std::vector<CRDEcalEDM::CRDCaloBar>& localMaxCol ){
-  std::sort( barCol.begin(), barCol.end() );
 
-  for(int ib=0; ib<barCol.size(); ib++){
-    std::vector<CRDEcalEDM::CRDCaloBar> m_neighbors = getNeighbors( barCol[ib], barCol );
-    if( m_neighbors.size()==0 && barCol[ib].getEnergy()>settings.Eth_localMax ) { localMaxCol.push_back( barCol[ib] ); continue; }
+StatusCode LongiClusterLinking( std::vector<CRDEcalEDM::CRDCaloBlock>& m_blocks, 
+                                std::vector<CRDEcalEDM::CRDCaloHitLongiCluster>& m_oldClusCol, 
+                                std::vector<CRDEcalEDM::CRDCaloHitLongiCluster>& m_outClusCol )
+{
+  if(m_blocks.size()==0 || m_oldClusCol.size()==0) return StatusCode::SUCCESS;
+  m_outClusCol.clear();
 
-    bool isLocalMax=true;
-    bool isIso;
-    double Eneigh=0;
-    if(barCol[ib].getEnergy()<settings.Eth_localMax) isLocalMax = false;
-    for(int j=0;j<m_neighbors.size();j++){
-      if(m_neighbors[j].getEnergy()>barCol[ib].getEnergy()) isLocalMax=false;
-      Eneigh += m_neighbors[j].getEnergy();
+  bool fl_isXclus = (m_oldClusCol[0].getSlayer()==0);
+  for(int icl=0; icl<m_oldClusCol.size(); icl++){
+    CRDEcalEDM::CRDCaloHitLongiCluster m_newClus; m_newClus.Clear();
+    
+    for(int is=0; is<m_oldClusCol[ic].getBarShowers().size(); is++){
+      CRDEcalEDM::CRDCaloBarShower m_shower = m_oldClusCol[ic].getBarShowers()[is];
+      
+      std::vector<CRDEcalEDM::CRDCaloBarShower> m_showers = fl_isXclus ? m_blocks.getShowerXCol() : m_blocks.getShowerYCol(); 
+      CRDEcalEDM::CRDCaloBarShower m_shower m_selshower; m_selshower.Clear();
+      for(int js=0; js<m_showers.size(); js++){
+        if( m_showers[js].getModule()==m_shower.getModule() && 
+            m_showers[js].getStave()==m_shower.getStave() && 
+            m_showers[js].getPart()==m_shower.getPart() && 
+            m_showers[js].getDlayer()==m_shower.getDlayer() && 
+            (m_showers[js].getPosV3()-m_shower.getPosV3()).Mag()<10 ) {m_selshower = m_showers[js]; break; }
+      }
+      m_newClus.AddBarShower( m_selshower );
     }
-    isIso = (barCol[ib].getEnergy()/(barCol[ib].getEnergy()+Eneigh))>settings.Eth_MaxWithNeigh;
-    if(!isIso) continue;
-
-    if(isLocalMax) localMaxCol.push_back( barCol[ib] );
-
+    m_newClus.FitAxis();
+    m_outClusCol.push_back( m_newClus );
   }
 
   return StatusCode::SUCCESS;
 }
 
 
-
-
-StatusCode EnergySplittingAlg::ClusteringinLayer( CRDEcalEDM::CRDCaloBlock& m_blocks, CRDEcalEDM::CRDCaloLayer& m_layer ){
-  m_layer.Clear(); 
-
-  m_layer.barXCol = m_blocks.getBarXCol();
-  m_layer.barYCol = m_blocks.getBarYCol();
-
-  bool f_succX = true;  bool f_succY = true;
-  if( !Clustering( m_layer.barXCol, m_layer.barClusXCol, m_blocks.getAllShadowClusCol()) ) {
-       Clustering( m_layer.barXCol, m_layer.barClusXCol ); f_succX = false;
-  }
-  if( !Clustering( m_layer.barYCol, m_layer.barClusYCol, m_blocks.getAllShadowClusCol()) ) {
-       Clustering( m_layer.barYCol, m_layer.barClusYCol ); f_succY = false;
-  }
-
-  if(settings.Debug>0){
-    printf("EnergySplittingAlg::ClusterinLayer  BlockID(%d, %d, %d, %d), Bar size(X/Y): (%d / %d) \n",
-           m_blocks.getModule(), m_blocks.getStave(), m_blocks.getPart(),  m_blocks.getDlayer(), m_layer.barXCol.size(), m_layer.barYCol.size() );
-    std::cout<<"  Cluster with candidates in X: "<<f_succX<<"  Cluster size: "<<m_layer.barClusXCol.size()<<std::endl;
-    std::cout<<"  Cluster with candidates in Y: "<<f_succY<<"  Cluster size: "<<m_layer.barClusYCol.size()<<std::endl;
-  }
-
-  for(int i=0;i<m_layer.barClusXCol.size();i++){
-    std::vector<CRDEcalEDM::CRDCaloBarShower> showers; showers.clear();
-    //---WIP: Split the cluster with expected showers (position & energy).
-//    if(f_succX)
-//      ClusterSplitting( m_layer.barClusXCol[i], showers,  m_blocks.getNeuShadowClusCol(), m_blocks.getTrkShadowClusCol() );
-//    else
-      ClusterSplitting(m_layer.barClusXCol[i], showers);
-
-    if(showers.size()==0) continue;
-    m_layer.barShowerXCol.insert(m_layer.barShowerXCol.end(), showers.begin(), showers.end());
-  }
-
-  for(int i=0;i<m_layer.barClusYCol.size();i++){
-    std::vector<CRDEcalEDM::CRDCaloBarShower> showers; showers.clear();
-//    if(f_succY)
-//      ClusterSplitting( m_layer.barClusYCol[i], showers, m_blocks.getNeuShadowClusCol(), m_blocks.getTrkShadowClusCol());
-//    else
-      ClusterSplitting(m_layer.barClusYCol[i], showers);
-
-    if(showers.size()==0) continue;
-    m_layer.barShowerYCol.insert(m_layer.barShowerYCol.end(), showers.begin(), showers.end());
-  }
-
-  return StatusCode::SUCCESS;
-}
-
-
-bool EnergySplittingAlg::Clustering( std::vector<CRDEcalEDM::CRDCaloBar>& barCol,
-                                     std::vector<CRDEcalEDM::CRDCaloBarCluster>& outClus)
+StatusCode EnergySplittingAlg::Clustering( std::vector<CRDEcalEDM::CRDCaloBar>& barCol, 
+                                           std::vector<CRDEcalEDM::CRDCaloBarCluster>& outClus,  
+                                           std::vector<CRDEcalEDM::CRDCaloHitLongiCluster>& m_longiClusCol )
 {
-  if(barCol.size()==0) return false;
-  const std::vector<CRDEcalEDM::CRDShadowCluster> emptyCol(0);
-  return Clustering( barCol, outClus, emptyCol );
-}
-
-
-bool EnergySplittingAlg::Clustering( std::vector<CRDEcalEDM::CRDCaloBar>& barCol,
-                                     std::vector<CRDEcalEDM::CRDCaloBarCluster>& outClus,
-                                     const std::vector<CRDEcalEDM::CRDShadowCluster>& m_CandiCol )
-{
-
-  if(settings.Debug>1) std::cout<<"Bar Clustering: barCol size = "<<barCol.size()<<std::endl;
-  if(barCol.size()==0) return false;
-
-  if(settings.Debug>2){
-    for(int i=0; i<barCol.size(); i++)
-      printf("  Bar Pos: (%.2f, %.2f, %.2f, %.5f) \t", barCol[i].getPosition().x(), barCol[i].getPosition().y(), barCol[i].getPosition().z(), barCol[i].getEnergy());
-    cout<<endl;
-  }
+  if(barCol.size()==0) return StatusCode::SUCCESS;
 
   //Neighbor clustering
-  for(int i=0;i<barCol.size();i++) settings.Etot+=barCol[i].getEnergy();
   std::sort(barCol.begin(), barCol.end());
   std::vector<CRDEcalEDM::CRDCaloBarCluster> m_clusCol; m_clusCol.clear();
   for(int i=0;i<barCol.size();i++){
@@ -215,61 +154,53 @@ bool EnergySplittingAlg::Clustering( std::vector<CRDEcalEDM::CRDCaloBar>& barCol
     m_clusCol.push_back(clus);
   }
 
-  //Find seeds in cluster.
-  std::vector<CRDEcalEDM::CRDCaloBarCluster> out_clusCol; out_clusCol.clear();
-  for(int i=0;i<m_clusCol.size();i++){
-    CRDEcalEDM::CRDCaloBarCluster iclus = m_clusCol[i];
-    if( (iclus.getE()/settings.Etot < settings.Eth_ClusterWithTot) || iclus.getE()<settings.Eth_ClusAbs ) continue;
-    std::vector<CRDEcalEDM::CRDCaloBar> m_seedVec; m_seedVec.clear();
+  //Save out CaloBars in longiClusCol as seed. 
+  std::vector<CRDEcalEDM::CRDCaloBar> m_seedbars; m_seedbars.clear(); 
+  for(int il=0; il<m_longiClusCol.size(); il++){
+  for(int is=0; is<m_longiClusCol[il].getBarShowers().size(); is++){
+    std::vector<CRDEcalEDM::CRDCaloBar> m_bars = m_longiClusCol[il].getBarShowers()[is].getBars();
+    m_seedbars.insert(m_seedbars.end(), m_bars.begin(), m_bars.end());
+  }}
 
-    m_seedVec = findSeeds(iclus, m_CandiCol);
-    iclus.setSeeds(m_seedVec);
-    iclus.getScndMoment();
-    out_clusCol.push_back(iclus);
-  }
+  //Find seed with LongiCluster
+  for(int ic=0; ic<m_clusCol.size(); ic++){
+  for(int ib=0; ib<m_clusCol.getBars().size(); ib++){
+      std::vector<CRDEcalEDM::CRDCaloBar>::iterator iter = find(m_seedbars.begin(), m_seedbars.end(), m_clusCol.getBars()[ib]);
+      if(iter==m_seedbars.end()) continue; 
+      m_clusCol[ic].addSeed( *iter );
+    
+  }}
 
-  if(settings.Debug>1){
-    std::cout<<"  N neiCluster: "<<m_clusCol.size()<<std::endl;
-    std::cout<<"  N outCluster: "<<out_clusCol.size()<<std::endl;
-    std::cout<<"  N bars in outClus: "; for(int i=0; i<out_clusCol.size(); i++) std::cout<<out_clusCol[i].getBars().size()<<"  "; std::cout<<endl;
-    std::cout<<"  N seed in outClus: "; for(int i=0; i<out_clusCol.size(); i++) std::cout<<out_clusCol[i].getNseeds()<<"  "; std::cout<<endl;
-  }
-
-  //Merge Clusters without seed
-  for(int i=0; i<out_clusCol.size(); i++){
-    if(out_clusCol[i].getNseeds()==0){
-      MergeToClosestCluster( out_clusCol[i], out_clusCol );
-      out_clusCol.erase(out_clusCol.begin()+i);
-      i--;
+  //Merge clusters without seed
+  for(int ic=0; ic<m_clusCol.size(); ic++){
+    if(m_clusCol[ic].getNseeds()==0){
+      MergeToClosestCluster( m_clusCol[ic], m_clusCol );
+      m_clusCol.erase(m_clusCol.begin()+ic);
+      ic--;
     }
   }
+  outClus = m_clusCol; 
 
-  outClus = out_clusCol;
-  return true;
+  return StatusCode::SUCCESS;
 }
 
 
-
-bool EnergySplittingAlg::ClusterSplitting( CRDEcalEDM::CRDCaloBarCluster& m_cluster, std::vector<CRDEcalEDM::CRDCaloBarShower>& outshCol ){
-
+StatusCode EnergySplittingAlg::ClusterSplitting( CRDEcalEDM::CRDCaloBarCluster& m_cluster, std::vector<CRDEcalEDM::CRDCaloBarShower>& outshCol ){
   std::vector<CRDEcalEDM::CRDCaloBarShower> m_showers; m_showers.clear();
 
-  if(settings.Debug>1)
-    printf("Cluster for Splitting: (%.2f, %.2f, %.2f), scndM=%.2f \n", m_cluster.getPos().x(), m_cluster.getPos().y(), m_cluster.getPos().z(), m_cluster.getScndMoment());
-
   //No seed in cluster: return empty vector.
-  if(m_cluster.getNseeds()==0) { std::cout<<"WARNING: Still have no-seed cluster!!"<<std::endl; outshCol = m_showers; return false; }
+  if(m_cluster.getNseeds()==0) { std::cout<<"WARNING: Still have no-seed cluster!!"<<std::endl; outshCol = m_showers; return StatusCode::SUCCESS; }
 
   //1 seed or second moment less than threshold: Not split. Turn cluster to shower and return
-  else if(m_cluster.getNseeds()<2 || m_cluster.getScndMoment()<settings.Sth_split){
+  else if(m_cluster.getNseeds()<2 || m_cluster.getScndMoment()<settings.th_split){
     CRDEcalEDM::CRDCaloBarShower shower; shower.Clear();
     shower.setBars(m_cluster.getBars());
     if(m_cluster.getNseeds()!=0) shower.setSeed(m_cluster.getSeeds()[0]);
-    if( (shower.getE()/settings.Etot > settings.Eth_ShowerWithTot) && shower.getE()>settings.Eth_ShowerAbs  ) m_showers.push_back(shower);
+    m_showers.push_back(shower);
     outshCol = m_showers;
-    return true;
+    return StatusCode::SUCCESS;
   }
-
+  
   //2 or more seeds, large second moment: Split
   int Nshower = m_cluster.getNseeds();
   int Nbars = m_cluster.getBars().size();
@@ -290,7 +221,6 @@ bool EnergySplittingAlg::ClusterSplitting( CRDEcalEDM::CRDCaloBarCluster& m_clus
       for(int is=0;is<Nshower;is++){ Eexp[is] = Eseed[is]*GetShowerProfile(m_cluster.getBars()[ibar].getPosition(), SeedPos[is] ); Eexp_tot+= Eexp[is];}
       for(int is=0;is<Nshower;is++) weight[ibar][is] = Eexp[is]/Eexp_tot;
     }
-
     for(int is=0;is<Nshower;is++){
       SeedPos_prev[is]=SeedPos[is];
 
@@ -314,10 +244,6 @@ bool EnergySplittingAlg::ClusterSplitting( CRDEcalEDM::CRDCaloBarCluster& m_clus
   if(iter>=20){
     std::cout<<"WARNING: Iteration time larger than 20! Might not converge!"<<std::endl;
     std::cout<<"  For Check: NBars: "<<m_cluster.getBars().size()<<"  Nseeds: "<<Nshower<<std::endl;
-    if(settings.Debug>1){
-      std::cout<<"  Seed position in last iter: "; for(int is=0; is<Nshower; is++) printf("(%.2f, %.2f, %.2f)  ",SeedPos[is].x(), SeedPos[is].y(),SeedPos[is].z()); std::cout<<std::endl;
-      std::cout<<"  Seed position in 2nd last iter: "; for(int is=0; is<Nshower; is++) printf("(%.2f, %.2f, %.2f)  ",SeedPos[is].x(), SeedPos[is].y(),SeedPos[is].z()); std::cout<<std::endl;
-    }
   }
 
   for(int is=0;is<Nshower;is++){
@@ -338,215 +264,17 @@ bool EnergySplittingAlg::ClusterSplitting( CRDEcalEDM::CRDCaloBarCluster& m_clus
   }
 
   outshCol = m_showers;
-  return true;
-
-}
-
-bool EnergySplittingAlg::ClusterSplitting( CRDEcalEDM::CRDCaloBarCluster& m_cluster,
-                                           std::vector<CRDEcalEDM::CRDCaloBarShower>& outshCol,
-                                           const std::vector<CRDEcalEDM::CRDShadowCluster>& m_Neucandidates,
-                                           const std::vector<CRDEcalEDM::CRDShadowCluster>& m_Trkcandidates  )
-{
-  std::vector<CRDEcalEDM::CRDCaloBarShower> m_showers; m_showers.clear();
-  bool f_succ = ClusterSplitting( m_cluster, m_showers );
-  if(!f_succ){ outshCol=m_showers;  return false;}
-
-  int slayer = m_showers[0].getBars()[0].getSlayer();
-  int module = m_showers[0].getBars()[0].getModule();
-  int f_isXclus = (slayer==0 ? 1 : 0);
-  double rotAngle = -module*PI/4.;
-
-  if(settings.Debug>1) std::cout<<"ClusterSplitting Adding ShadowClus: isXclus "<<f_isXclus<<"  shower size: "<<m_showers.size()<<std::endl;
-
-  for(int is=0; is<m_showers.size(); is++){
-    TVector3 p_shower(0, 0, 0);
-    p_shower.SetXYZ( m_showers[is].getPos().x(), m_showers[is].getPos().y(), m_showers[is].getPos().z() );
-
-    if(settings.Debug>2) printf("  Shower #%d: (%.2f, %.2f, %.2f) \n", is, p_shower.x(), p_shower.y(), p_shower.z() );
-
-    //Neutral candidate
-    for(int ic=0; ic<m_Neucandidates.size(); ic++){
-      TVector3 p_candi = m_Neucandidates[ic].ExpPos;
-
-      if(settings.Debug>2) printf("    Neutral candidate: ((%.2f, %.2f, %.2f) \n", p_candi.x(), p_candi.y(), p_candi.z());
-
-      if(f_isXclus==1 && fabs(p_candi.z()-p_shower.z())<10 ){  //10mm distance
-        m_showers[is].addNeuShadowClus( m_Neucandidates[ic] );
-        if(settings.Debug>2) cout<<"    !!Added!"<<endl;
-      }
-      if(f_isXclus==0){
-        p_shower.RotateZ(rotAngle);
-        p_candi.RotateZ(rotAngle);
-        if( fabs(p_shower.x()-p_candi.x())<10. ){
-          m_showers[is].addNeuShadowClus( m_Neucandidates[ic] );
-          if(settings.Debug>2) cout<<"    !!Added!"<<endl;
-        }
-        p_shower.RotateZ(-rotAngle);
-        p_candi.RotateZ(-rotAngle);
-      }
-    }
-
-    //Charged candidate
-    p_shower.SetXYZ( m_showers[is].getPos().x(), m_showers[is].getPos().y(), m_showers[is].getPos().z() );
-    for(int ic=0; ic<m_Trkcandidates.size(); ic++){
-      TVector3 p_candi = m_Trkcandidates[ic].ExpPos;
-
-      if(settings.Debug>2) printf("    Track candidate: ((%.2f, %.2f, %.2f) \n", p_candi.x(), p_candi.y(), p_candi.z());
-
-      if(f_isXclus==1 && fabs(p_candi.z()-p_shower.z())<10 ){
-        m_showers[is].addTrkShadowClus( m_Trkcandidates[ic] );
-        if(settings.Debug>2) cout<<"    !!Added!"<<endl;
-      }
-      if(f_isXclus==0){
-        p_shower.RotateZ(rotAngle);
-        p_candi.RotateZ(rotAngle);
-        if( fabs(p_shower.x()-p_candi.x())<10. ){
-          m_showers[is].addTrkShadowClus( m_Trkcandidates[ic] );
-          if(settings.Debug>2) cout<<"    !!Added!"<<endl;
-        }
-        p_shower.RotateZ(-rotAngle);
-        p_candi.RotateZ(-rotAngle);
-      }
-    }
-
-  } //End loop showers
-
-  outshCol=m_showers;
-  return true;
-}
-
-bool EnergySplittingAlg::GetMatchedSeeds( std::vector<CRDEcalEDM::CRDCaloBar>& seeds, 
-                                          const std::vector<CRDEcalEDM::CRDShadowCluster>& m_CandiCol, 
-                                          std::vector<CRDEcalEDM::CRDCaloBar>& m_matchedCol,
-                                          std::vector<CRDEcalEDM::CRDCaloBar>& m_unmatchedCol ) 
-{
-  m_matchedCol.clear(); m_unmatchedCol.clear(); 
-
-  for(int is=0;is<seeds.size(); is++){
-  for(int j=0; j<m_CandiCol.size(); j++){
-    if( seeds[is].getSlayer()==0){
-
-    if(settings.Debug>2)
-      printf("  Slayer0: Seed(%.2f, %.2f, %.2f).  Candidate(%.2f, %.2f, %.2f) \n",
-                seeds[is].getPosition().x(), seeds[is].getPosition().y(), seeds[is].getPosition().z(),
-                m_CandiCol[j].ExpPos.x(), m_CandiCol[j].ExpPos.y(), m_CandiCol[j].ExpPos.z());
-
-
-      if( fabs( seeds[is].getPosition().z()-m_CandiCol[j].ExpPos.z() ) < 12 ) // Position difference within 12mm
-        { m_matchedCol.push_back(seeds[is]); break; }
-      else 
-        { m_unmatchedCol.push_back(seeds[is]); break; }
-    }
-    else if (seeds[is].getSlayer()==1){
-
-      if(settings.Debug>2)
-      printf("  Slayer1: Seed(%.2f, %.2f, %.2f).  Candidate(%.2f, %.2f, %.2f) \n",
-              seeds[is].getPosition().x(), seeds[is].getPosition().y(), seeds[is].getPosition().z(),
-              m_CandiCol[j].ExpPos.x(), m_CandiCol[j].ExpPos.y(), m_CandiCol[j].ExpPos.z());
-
-
-      double rotAngle = -seeds[is].getModule()*PI/4.;
-      TVector3 p_exps = m_CandiCol[j].ExpPos;
-      TVector3 p_seed(0,0,0);
-      p_seed.SetXYZ( seeds[is].getPosition().x(), seeds[is].getPosition().y(), seeds[is].getPosition().z() );
-
-      p_exps.RotateZ(rotAngle);
-      p_seed.RotateZ(rotAngle);
-
-      if( fabs(p_exps.x()-p_seed.x()) < 12 )
-        { m_matchedCol.push_back(seeds[is]); break; }
-      else
-        { m_unmatchedCol.push_back(seeds[is]); break; }
-    }
-  }}
-  return true;
+  
+  return StatusCode::SUCCESS;
 }
 
 
-std::vector<CRDEcalEDM::CRDCaloBar>  EnergySplittingAlg::findSeeds( CRDEcalEDM::CRDCaloBarCluster& m_cluster){
-  const std::vector<CRDEcalEDM::CRDShadowCluster> emptyCol(0);
-  return findSeeds(m_cluster, emptyCol);
-}
-
-
-std::vector<CRDEcalEDM::CRDCaloBar>  EnergySplittingAlg::findSeeds( CRDEcalEDM::CRDCaloBarCluster& m_cluster, const std::vector<CRDEcalEDM::CRDShadowCluster>& m_CandiCol){
-
-  std::vector<CRDEcalEDM::CRDCaloBar> m_seeds; m_seeds.clear();
-  std::vector<CRDEcalEDM::CRDCaloBar> m_localMax; m_localMax.clear();
-  for(int i=0;i<m_cluster.getBars().size();i++){
-    CRDEcalEDM::CRDCaloBar ibar = m_cluster.getBars()[i];
-    std::vector<CRDEcalEDM::CRDCaloBar> m_neighbor = getNeighbors(m_cluster, ibar);
-    if(m_neighbor.size()==0){
-      //std::cout<<"WARNING: An isolated bar without neighbors! "<<std::endl;
-      if(ibar.getEnergy()>settings.Eth_localMax) { m_localMax.push_back(ibar); }
-      continue;
-    }
-
-    bool isLocalMax=true;
-    double Eneigh=0;
-    for(int j=0;j<m_neighbor.size();j++){
-      if(m_neighbor[j].getEnergy()>ibar.getEnergy()) isLocalMax=false;
-      Eneigh += m_neighbor[j].getEnergy();
-    }
-    if(isLocalMax && ibar.getEnergy()>settings.Eth_localMax ) m_localMax.push_back(ibar);
-  }
-
-  if(m_CandiCol.size()==0){
-    for(int is=0; is<m_localMax.size(); is++)
-      if(m_localMax[is].getEnergy()>settings.Eth_SeedAbs) m_seeds.push_back(m_localMax[is]);
-    
-  }
-  else{
-    std::vector<CRDEcalEDM::CRDCaloBar> m_matched; m_matched.clear(); 
-    std::vector<CRDEcalEDM::CRDCaloBar> m_unmatched; m_unmatched.clear(); 
-    GetMatchedSeeds(m_localMax, m_CandiCol, m_matched, m_unmatched);
-
-    m_seeds.insert(m_seeds.end(), m_matched.begin(), m_matched.end());
-
-    for(int is=0; is<m_unmatched.size(); is++){
-      std::vector<CRDEcalEDM::CRDCaloBar> m_neighbor = getNeighbors(m_cluster, m_unmatched[is]);
-      double Eneigh=0;
-      for(int j=0;j<m_neighbor.size();j++){
-        Eneigh += m_neighbor[j].getEnergy();
-      }
-      bool isIso = ( m_unmatched.size()>0 && (m_unmatched[is].getEnergy()/(m_unmatched[is].getEnergy()+Eneigh))>settings.Eth_SeedWithNeigh );
-      if(m_unmatched[is].getEnergy()>settings.Eth_SeedAbs && isIso) m_seeds.push_back(m_unmatched[is]);
-    }
-  }
-  return m_seeds; 
-
-}
-
-
-std::vector<CRDEcalEDM::CRDCaloBar> EnergySplittingAlg::getNeighbors( CRDEcalEDM::CRDCaloBar& seed, std::vector<CRDEcalEDM::CRDCaloBar>& barCol){
-  std::vector<CRDEcalEDM::CRDCaloBar> m_neighbor;
-  for(int i=0;i<barCol.size();i++){
-
-    if( seed.isNeighbor(barCol[i]) ) m_neighbor.push_back(barCol[i]);
-  }
-  if(m_neighbor.size()>2) std::cout<<"WARNING: more than 2 hits in neighborCol!!"<<std::endl;
-
-  return m_neighbor;
-}
-
-std::vector<CRDEcalEDM::CRDCaloBar>  EnergySplittingAlg::getNeighbors(CRDEcalEDM::CRDCaloBarCluster& m_cluster, CRDEcalEDM::CRDCaloBar& seed){
-
-  std::vector<CRDEcalEDM::CRDCaloBar> m_neighbor;
-  for(int i=0;i<m_cluster.getBars().size();i++){
-
-    if( seed.isNeighbor(m_cluster.getBars()[i]) ) m_neighbor.push_back(m_cluster.getBars()[i]);
-  }
-  if(m_neighbor.size()>2) std::cout<<"WARNING: more than 2 hits in neighborCol!!"<<std::endl;
-
-  return m_neighbor;
-}
-
-
-bool EnergySplittingAlg::MergeToClosestCluster( CRDEcalEDM::CRDCaloBarCluster& iclus, std::vector<CRDEcalEDM::CRDCaloBarCluster>& clusvec ){
+StatusCode EnergySplittingAlg::MergeToClosestCluster( CRDEcalEDM::CRDCaloBarCluster& iclus, std::vector<CRDEcalEDM::CRDCaloBarCluster>& clusvec ){
 
   int cLedge = iclus.getLeftEdge();
   int cRedge = iclus.getRightEdge();
 
+  //Find the closest cluster with iclus. 
   int minD = 99;
   int index = -1;
   for(int icl=0; icl<clusvec.size(); icl++){
@@ -555,16 +283,15 @@ bool EnergySplittingAlg::MergeToClosestCluster( CRDEcalEDM::CRDCaloBarCluster& i
     int iRedge = clusvec[icl].getRightEdge();
 
     int dis = (cLedge-iRedge>0 ? cLedge-iRedge : iLedge-cRedge );
-    if(dis>3) continue;
-    if(dis<minD){ minD = dis; index=icl; }
+    if(dis>5) continue; //Don't merge to a too far cluster. 
+    if(dis<minD && clusvec[icl]>2.*iclus.getE() ){ minD = dis; index=icl; } //Don't merge to a too small cluster. 
   }
-  if(index<0) return false;
-  if(clusvec[index].getE()/iclus.getE()<2.) return false;
+  if(index<0) return StatusCode::FAILURE;
 
+  //Merge to the selected cluster
   for(int icl=0; icl<iclus.getBars().size(); icl++)  clusvec[index].addBar(iclus.getBars()[icl]);
-  clusvec[index].getScndMoment();
-  return true;
 
+  return StatusCode::SUCCESS;
 }
 
 
@@ -603,5 +330,4 @@ double EnergySplittingAlg::GetShowerProfile(const dd4hep::Position& p_bar, const
 
   return a1*exp(-b1*dis/Rm)+a2*exp(-b2*dis/Rm);
 }
-
 #endif

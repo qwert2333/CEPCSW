@@ -3,6 +3,7 @@
 void EcalClusterReconstruction::Initialize(){
 
   //Initialize settings
+  m_LFAlgSettings  = new LocalMaxFindingAlg::Settings();
   m_ESAlgSettings  = new EnergySplittingAlg::Settings();
   m_CC2AlgSettings = new ConeClustering2DAlg::Settings();
   m_HCAlgSettings  = new HoughClusteringAlg::Settings();
@@ -14,6 +15,7 @@ void EcalClusterReconstruction::Initialize(){
 
 
   //Initialize Algorthm
+  m_localmaxfindingAlg  = new LocalMaxFindingAlg();
   m_energysplittingAlg  = new EnergySplittingAlg();
   m_coneclus2DAlg       = new ConeClustering2DAlg();
   m_houghclusAlg        = new HoughClusteringAlg();
@@ -29,6 +31,7 @@ StatusCode EcalClusterReconstruction::RunAlgorithm( EcalClusterReconstruction::S
 
 
   //Iteration 0: pre-treatment, get initial level candidates
+  m_LFAlgSettings->SetInitialValue();
   m_ESAlgSettings->SetInitialValue();
   m_CC2AlgSettings->SetInitialValue();
   m_HCAlgSettings->SetInitialValue();
@@ -40,13 +43,11 @@ StatusCode EcalClusterReconstruction::RunAlgorithm( EcalClusterReconstruction::S
 
 
   //Stage 1
-  m_ESAlgSettings->SetOnlyFindMax(true);
-  m_energysplittingAlg->RunAlgorithm( *m_ESAlgSettings,  dataCol ); 
-//  dataCol.PrintTower(); 
+  m_localmaxfindingAlg->RunAlgorithm( *m_LFAlgSettings,  dataCol );
   //m_coneclus2DAlg     ->RunAlgorithm( *m_CC2AlgSettings, dataCol );
   m_houghclusAlg      ->RunAlgorithm( *m_HCAlgSettings, dataCol );
 
-
+/*
 cout<<"  LongiClusterX size: "<<dataCol.LongiClusXCol.size()<<endl;
 cout<<"  Loop print the longiclusterX: "<<endl;
 for(int ic=0; ic<dataCol.LongiClusXCol.size(); ic++){
@@ -71,24 +72,16 @@ for(int ic=0; ic<dataCol.LongiClusYCol.size(); ic++){
   cout<<endl;
 }
 
-  m_shadowmakingAlg   ->RunAlgorithm( *m_CMAlgSettings, dataCol );
+  //m_shadowmakingAlg   ->RunAlgorithm( *m_CMAlgSettings, dataCol );
 
 //dataCol.PrintLayer();
-  dataCol.LayerCol_tmp = dataCol.LayerCol; 
-
-  dataCol.ClearLayer();
-  dataCol.ClearShower(); 
-  dataCol.ClearCluster();
-  dataCol.ClearPFO();  
+*/
 
   //Stage 2:
-  m_ESAlgSettings->SetOnlyFindMax(false);
-  m_ESAlgSettings->SetDebug(0);
-  m_ETAlgSettings->SetUseChi2(true);
-  m_CCAlgSettings->SetGoodClusLevel(4);
   m_energysplittingAlg->RunAlgorithm( *m_ESAlgSettings,  dataCol );
   m_etmatchingAlg->     RunAlgorithm( *m_ETAlgSettings, dataCol );
-  m_coneclusterAlg->    RunAlgorithm( *m_CCAlgSettings, dataCol);
+
+  //m_coneclusterAlg->    RunAlgorithm( *m_CCAlgSettings, dataCol);
 
 //dataCol.PrintLayer();
 

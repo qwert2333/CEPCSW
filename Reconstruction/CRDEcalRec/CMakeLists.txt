@@ -27,6 +27,7 @@ gaudi_add_module(CRDEcalRec
                  SOURCES src/PandoraPlusPFAlg.cpp
                          src/EcalClusterReconstruction.cpp
                          src/PandoraPlusDataCol.cpp
+                         src/Algorithm/LocalMaxFindingAlg.cpp
                          src/Algorithm/EnergySplittingAlg.cpp
                          src/Algorithm/ConeClustering2DAlg.cpp
                          src/Algorithm/HoughClusteringAlg.cpp

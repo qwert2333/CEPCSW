@@ -12,6 +12,7 @@ public:
     Settings(){};
     void SetInitialValue();
 
+    int th_beginLayer; 
     int th_stopLayer; 
     double th_ConeTheta; 
     double th_ConeR; 

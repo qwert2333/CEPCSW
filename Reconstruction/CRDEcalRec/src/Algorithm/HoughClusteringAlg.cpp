@@ -26,25 +26,19 @@ StatusCode HoughClusteringAlg::RunAlgorithm( HoughClusteringAlg::Settings& m_set
   std::vector<CRDEcalEDM::CRDCaloBlock> m_blocks = m_datacol.BlockVec;
   std::vector<CRDEcalEDM::CRDCaloTower> m_towers = m_datacol.TowerCol; 
 
-  std::vector<CRDEcalEDM::CRDCaloHitLongiCluster> m_longiClusXCol; m_longiClusXCol.clear();
-  std::vector<CRDEcalEDM::CRDCaloHitLongiCluster> m_longiClusYCol; m_longiClusYCol.clear(); 
 
   for(int it=0; it<m_towers.size(); it++){
-cout<<"  Hough Clustering in tower #"<<it<<endl;
-cout<<"  Block number in this tower: "<<m_towers[it].getBlocks().size()<<endl;
 
     std::vector<CRDEcalEDM::CRDCaloBarShower> m_localMaxXCol; m_localMaxXCol.clear();
     std::vector<CRDEcalEDM::CRDCaloBarShower> m_localMaxYCol; m_localMaxYCol.clear();
-
     for(int ib=0; ib<m_towers[it].getBlocks().size(); ib++){
-      if(m_towers[it].getBlocks()[ib].getDlayer()>settings.th_Layers) continue;
+      if(settings.th_Layers>0 && m_towers[it].getBlocks()[ib].getDlayer()>settings.th_Layers) continue;
       std::vector<CRDEcalEDM::CRDCaloBarShower> tmp_showerX = m_towers[it].getBlocks()[ib].getShowerXCol();
       std::vector<CRDEcalEDM::CRDCaloBarShower> tmp_showerY = m_towers[it].getBlocks()[ib].getShowerYCol();
 
       m_localMaxXCol.insert(m_localMaxXCol.end(), tmp_showerX.begin(), tmp_showerX.end() );
       m_localMaxYCol.insert(m_localMaxYCol.end(), tmp_showerY.begin(), tmp_showerY.end() );
     }
-
 
     if(m_localMaxXCol.size()==0 && m_localMaxYCol.size()==0) continue; 
 cout<<"  Local maximum size: barX "<<m_localMaxXCol.size()<<"  barY "<<m_localMaxYCol.size()<<endl;
@@ -137,16 +131,13 @@ cout<<"  HoughClusteringAlg: Find hills"<<endl;
 
 cout<<"  HoughClusteringAlg: Create output HoughClusters"<<endl;
     //Create output HoughClusters 
+    std::vector<CRDEcalEDM::CRDCaloHitLongiCluster> m_longiClusXCol; m_longiClusXCol.clear();
+    std::vector<CRDEcalEDM::CRDCaloHitLongiCluster> m_longiClusYCol; m_longiClusYCol.clear(); 
     Transform2Clusters(m_HoughSpaceX, m_HoughObjectsX, m_longiClusXCol);
     Transform2Clusters(m_HoughSpaceY, m_HoughObjectsY, m_longiClusYCol);
 
+    m_towers[it].SetLongiClusters(m_longiClusXCol, m_longiClusYCol); 
   }//End loop tower
-
-  //CleanClusters( m_longiClusXCol );
-  //CleanClusters( m_longiClusYCol );
-
-  m_datacol.LongiClusXCol = m_longiClusXCol;
-  m_datacol.LongiClusYCol = m_longiClusYCol;
 
 cout<<"End in HoughClusteringAlg"<<endl;
 

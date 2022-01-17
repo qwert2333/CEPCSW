@@ -3,6 +3,7 @@
 
 #include "GaudiAlg/GaudiAlgorithm.h"
 #include "PandoraPlusDataCol.h"
+#include "Algorithm/LocalMaxFindingAlg.cpp"
 #include "Algorithm/EnergySplittingAlg.h"
 #include "Algorithm/ConeClustering2DAlg.h"
 #include "Algorithm/HoughClusteringAlg.h"
@@ -28,7 +29,7 @@ public:
 
   Settings   m_settings;
 
-
+  LocalMaxFindingAlg     *m_localmaxfindingAlg;
   EnergySplittingAlg     *m_energysplittingAlg;
   ConeClustering2DAlg    *m_coneclus2DAlg;
   HoughClusteringAlg     *m_houghclusAlg; 
@@ -38,7 +39,8 @@ public:
   ClusterMergingAlg      *m_clustermergingAlg;
   BasicClusterIDAlg      *m_clusteridAlg;
 
-
+ 
+  LocalMaxFindingAlg::Settings    *m_LFAlgSettings; 
   EnergySplittingAlg::Settings    *m_ESAlgSettings;
   ConeClustering2DAlg::Settings   *m_CC2AlgSettings;
   HoughClusteringAlg::Settings    *m_HCAlgSettings; 

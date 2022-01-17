@@ -33,6 +33,12 @@ namespace CRDEcalEDM {
       for(int i=0;i<Bars.size();i++) pos += (Bars[i].getPosition() * Bars[i].getEnergy())/Etot;
       return pos;
     }
+
+    TVector CRDCaloBarShower::getPosV3() const{
+      dd4hep::Position pos = getPos();
+      TVector3 pos_v3( pos.x(), pos.y(), pos.z() );
+      return pos_v3; 
+    }
    
     double CRDCaloBarShower::getT1() const{
       double T1=0;

@@ -4,6 +4,7 @@
 #include "Algorithm/ConeClustering2DAlg.h"
 
 void ConeClustering2DAlg::Settings::SetInitialValue(){
+  th_beginLayer = 10;
   th_stopLayer = 15; 
   th_ConeTheta = PI/2.;
   th_ConeR = 50.; 
@@ -56,7 +57,7 @@ StatusCode ConeClustering2DAlg::LongiConeLinking(
   std::vector<CRDEcalEDM::CRDCaloBarShower> ShowersinFirstLayer;  ShowersinFirstLayer.clear();
   ShowersinFirstLayer = iter->second;
   for(int i=0;i<ShowersinFirstLayer.size(); i++){
-    if(iter->first > settings.th_stopLayer) continue; 
+    if(iter->first < settings.th_beginLayer || iter->first > settings.th_stopLayer) continue; 
     CRDEcalEDM::CRDCaloHitLongiCluster m_clus;
     m_clus.AddBarShower(ShowersinFirstLayer[i]);
     ClusterCol.push_back(m_clus);
@@ -65,7 +66,7 @@ StatusCode ConeClustering2DAlg::LongiConeLinking(
 
 
   for(iter;iter!=orderedShower.end();iter++){
-    if(iter->first > settings.th_stopLayer) continue; 
+    if(iter->first < settings.th_beginLayer || iter->first > settings.th_stopLayer) continue; 
     std::vector<CRDEcalEDM::CRDCaloBarShower> ShowersinLayer = iter->second;
 
     for(int is=0; is<ShowersinLayer.size(); is++){
