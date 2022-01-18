@@ -34,7 +34,7 @@ namespace CRDEcalEDM {
       return pos;
     }
 
-    TVector CRDCaloBarShower::getPosV3() const{
+    TVector3 CRDCaloBarShower::getPosV3() const{
       dd4hep::Position pos = getPos();
       TVector3 pos_v3( pos.x(), pos.y(), pos.z() );
       return pos_v3; 

@@ -20,6 +20,13 @@ namespace CRDEcalEDM{
     return pos; 
   }
 
+  double CRDCaloHitLongiCluster::getE() const{
+    double totE = 0;
+    for(int i=0; i<barShowerCol.size(); i++) totE += barShowerCol[i].getE();
+    return totE;
+  }
+
+
   int CRDCaloHitLongiCluster::getBeginningDlayer() const{
     int Lstart = 99; 
     for(int i=0; i<barShowerCol.size(); i++)

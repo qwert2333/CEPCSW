@@ -1,6 +1,8 @@
 #include "PandoraPlusDataCol.h"
 
 using namespace std;
+
+/*
 void PandoraPlusDataCol::PrintLayer(){
 
   cout<<"------------------------------------------------"<<endl;
@@ -11,7 +13,7 @@ void PandoraPlusDataCol::PrintLayer(){
   cout<<"Loop print all layers: "<<endl;
   for(int i=0;i<LayerCol.size();i++){
   double totE;
-/*
+
   cout<<'\t'<<"BarX collection in layer #"<<i<<endl;
   totE=0;
   for(int j=0;j<LayerCol[i].barXCol.size();j++){
@@ -35,7 +37,7 @@ void PandoraPlusDataCol::PrintLayer(){
   }
   cout<<'\t'<<"Total energy in BarY: "<<totE<<endl;
   cout<<'\t'<<"------------------------------------------"<<endl;
-*/
+
 
   cout<<'\t'<<"ShowerX collection in layer #"<<i<<endl;
   totE=0;
@@ -65,6 +67,8 @@ void PandoraPlusDataCol::PrintLayer(){
   cout<<"------------------------------------------------"<<endl;
   cout<<"--------------------End print-------------------"<<endl;
 }
+*/
+
 
 void PandoraPlusDataCol::PrintShower(){
 
@@ -175,7 +179,6 @@ void PandoraPlusDataCol::PrintTower(){
 void PandoraPlusDataCol::Clear(){
   ClearBlock();  
   ClearTower(); 
-  ClearLayer();  
   ClearShower(); 
   ClearCluster();
   ClearTrack();

@@ -3,6 +3,7 @@
 
 #include "Objects/CRDCaloBar.h"
 #include "Objects/CRDCaloBarShower.h"
+#include "Objects/CRDCaloBarCluster.h"
 #include "Objects/CRDShadowCluster.h"
 #include "Objects/Track.h"
 namespace CRDEcalEDM {

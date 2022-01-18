@@ -107,17 +107,18 @@ protected:
   TTree* t_SimBar;
   FloatVec m_simBar_x, m_simBar_y, m_simBar_z, m_simBar_T1, m_simBar_T2, m_simBar_Q1, m_simBar_Q2, m_simBar_dlayer, m_simBar_part, m_simBar_stave, m_simBar_slayer, m_simBar_module;
 
-  TTree* t_dataColIter0;
-  FloatVec m_barshower0X, m_barshower0Y, m_barshower0Z, m_barshower0E, m_barshower1X, m_barshower1Y, m_barshower1Z, m_barshower1E;
-  IntVec m_barshower0_layer, m_barshower1_layer;
-  FloatVec m_trkX_x, m_trkX_y, m_trkX_z, m_trkX_px, m_trkX_py, m_trkX_pz; 
-  FloatVec m_trkY_x, m_trkY_y, m_trkY_z, m_trkY_px, m_trkY_py, m_trkY_pz; 
-  IntVec m_trkX_Nsh, m_trkY_Nsh;
-
-  TTree* t_dataColIter1;
-  FloatVec m_barshower0X_iter1, m_barshower0Y_iter1, m_barshower0Z_iter1, m_barshower0E_iter1, m_barshower1X_iter1, m_barshower1Y_iter1, m_barshower1Z_iter1, m_barshower1E_iter1;
-  IntVec m_barshower0_layer_iter1, m_barshower1_layer_iter1;
-  FloatVec m_Iter1_gclus_2dshx, m_Iter1_gclus_2dshy, m_Iter1_gclus_2dshz, m_Iter1_gclus_2dshE;
+  //Check local max
+  TTree *t_Layers;
+  int m_NshowerX, m_NshowerY;
+  FloatVec m_barShowerX_x, m_barShowerX_y, m_barShowerX_z, m_barShowerX_E;
+  FloatVec m_barShowerY_x, m_barShowerY_y, m_barShowerY_z, m_barShowerY_E; 
+ 
+  //Check Hough clusters
+  TTree *t_HoughClusters;
+  int m_NclusX, m_NclusY;
+  FloatVec m_clusX_x, m_clusX_y, m_clusX_z, m_clusX_E, m_clusX_alpha, m_clusX_rho, m_clusX_px, m_clusX_py, m_clusX_pz;
+  FloatVec m_clusY_x, m_clusY_y, m_clusY_z, m_clusY_E, m_clusY_alpha, m_clusY_rho, m_clusY_px, m_clusY_py, m_clusY_pz;
+  IntVec m_clusX_Nhit, m_clusY_Nhit;
 
   //Stage2: check reconstructed result
   TTree *t_recoPFO;
@@ -132,9 +133,9 @@ protected:
 
 
   void ClearBar();
+  void ClearLayer();
+  void ClearCluster();
   void ClearRecPFO(); 
-  void ClearIter0();
-  void ClearIter1(); 
 
 };
 #endif

@@ -57,8 +57,8 @@ StatusCode PandoraPlusPFAlg::initialize()
   std::string s_outfile = _filename;
   m_wfile = new TFile(s_outfile.c_str(), "recreate");
   t_SimBar = new TTree("SimBarHit", "SimBarHit");
-  t_dataColIter0 = new TTree("dataColIter0", "dataColIter0");
-  t_dataColIter1 = new TTree("dataColIter1", "dataColIter1");
+  t_Layers = new TTree("RecLayers","RecLayers");
+  t_HoughClusters = new TTree("RecClusters", "RecClusters");
   t_recoPFO = new TTree("RecPFO",  "RecPFO");
 
   t_SimBar->Branch("simBar_x", &m_simBar_x);
@@ -74,47 +74,39 @@ StatusCode PandoraPlusPFAlg::initialize()
   t_SimBar->Branch("simBar_stave", &m_simBar_stave);
   t_SimBar->Branch("simBar_slayer", &m_simBar_slayer);
 
-  t_dataColIter0->Branch("barshower0X", &m_barshower0X );
-  t_dataColIter0->Branch("barshower0Y", &m_barshower0Y );
-  t_dataColIter0->Branch("barshower0Z", &m_barshower0Z );
-  t_dataColIter0->Branch("barshower0E", &m_barshower0E );
-  t_dataColIter0->Branch("barshower0_layer", &m_barshower0_layer );
-  t_dataColIter0->Branch("barshower1X", &m_barshower1X );
-  t_dataColIter0->Branch("barshower1Y", &m_barshower1Y );
-  t_dataColIter0->Branch("barshower1Z", &m_barshower1Z );
-  t_dataColIter0->Branch("barshower1E", &m_barshower1E );
-  t_dataColIter0->Branch("barshower1_layer", &m_barshower1_layer );
-/*  t_dataColIter0->Branch("trkX_x", &m_trkX_x);
-  t_dataColIter0->Branch("trkX_y", &m_trkX_y);
-  t_dataColIter0->Branch("trkX_z", &m_trkX_z);
-  t_dataColIter0->Branch("trkX_px", &m_trkX_px);
-  t_dataColIter0->Branch("trkX_py", &m_trkX_py);
-  t_dataColIter0->Branch("trkX_pz", &m_trkX_pz);
-  t_dataColIter0->Branch("trkX_Nsh", &m_trkX_Nsh);
-  t_dataColIter0->Branch("trkY_x", &m_trkY_x);
-  t_dataColIter0->Branch("trkY_y", &m_trkY_y);
-  t_dataColIter0->Branch("trkY_z", &m_trkY_z);
-  t_dataColIter0->Branch("trkY_px", &m_trkY_px);
-  t_dataColIter0->Branch("trkY_py", &m_trkY_py);
-  t_dataColIter0->Branch("trkY_pz", &m_trkY_pz);
-  t_dataColIter0->Branch("trkY_Nsh", &m_trkY_Nsh);
-*/
+  t_Layers->Branch("NshowerX", &m_NshowerX);
+  t_Layers->Branch("NshowerY", &m_NshowerY);
+  t_Layers->Branch("barShowerX_x", &m_barShowerX_x);
+  t_Layers->Branch("barShowerX_y", &m_barShowerX_y);
+  t_Layers->Branch("barShowerX_z", &m_barShowerX_z);
+  t_Layers->Branch("barShowerX_E", &m_barShowerX_E);
+  t_Layers->Branch("barShowerY_x", &m_barShowerY_x);
+  t_Layers->Branch("barShowerY_y", &m_barShowerY_y);
+  t_Layers->Branch("barShowerY_z", &m_barShowerY_z);
+  t_Layers->Branch("barShowerY_E", &m_barShowerY_E);
 
-  t_dataColIter1->Branch("barshower0X", &m_barshower0X_iter1);
-  t_dataColIter1->Branch("barshower0Y", &m_barshower0Y_iter1);
-  t_dataColIter1->Branch("barshower0Z", &m_barshower0Z_iter1);
-  t_dataColIter1->Branch("barshower0E", &m_barshower0E_iter1);
-  t_dataColIter1->Branch("barshower1X", &m_barshower1X_iter1);
-  t_dataColIter1->Branch("barshower1Y", &m_barshower1Y_iter1);
-  t_dataColIter1->Branch("barshower1Z", &m_barshower1Z_iter1);
-  t_dataColIter1->Branch("barshower1E", &m_barshower1E_iter1);
-  t_dataColIter1->Branch("barshower0_layer", &m_barshower0_layer_iter1 );
-  t_dataColIter1->Branch("barshower1_layer", &m_barshower1_layer_iter1 );
-  t_dataColIter1->Branch("gclus_2dshx", &m_Iter1_gclus_2dshx );
-  t_dataColIter1->Branch("gclus_2dshy", &m_Iter1_gclus_2dshy );
-  t_dataColIter1->Branch("gclus_2dshz", &m_Iter1_gclus_2dshz );
-  t_dataColIter1->Branch("gclus_2dshE", &m_Iter1_gclus_2dshE );
-
+  t_HoughClusters->Branch("m_NclusX", &m_NclusX);
+  t_HoughClusters->Branch("m_NclusY", &m_NclusY);
+  t_HoughClusters->Branch("m_clusX_x", &m_clusX_x);
+  t_HoughClusters->Branch("m_clusX_y", &m_clusX_y);
+  t_HoughClusters->Branch("m_clusX_z", &m_clusX_z);
+  t_HoughClusters->Branch("m_clusX_E", &m_clusX_E);
+  t_HoughClusters->Branch("m_clusX_alpha", &m_clusX_alpha);
+  t_HoughClusters->Branch("m_clusX_rho", &m_clusX_rho);
+  t_HoughClusters->Branch("m_clusX_px", &m_clusX_px);
+  t_HoughClusters->Branch("m_clusX_py", &m_clusX_py);
+  t_HoughClusters->Branch("m_clusX_pz", &m_clusX_pz);
+  t_HoughClusters->Branch("m_clusX_Nhit", &m_clusX_Nhit);
+  t_HoughClusters->Branch("m_clusY_x", &m_clusY_x);
+  t_HoughClusters->Branch("m_clusY_y", &m_clusY_y);
+  t_HoughClusters->Branch("m_clusY_z", &m_clusY_z);
+  t_HoughClusters->Branch("m_clusY_E", &m_clusY_E);
+  t_HoughClusters->Branch("m_clusY_alpha", &m_clusY_alpha);
+  t_HoughClusters->Branch("m_clusY_rho", &m_clusY_rho);
+  t_HoughClusters->Branch("m_clusY_px", &m_clusY_px);
+  t_HoughClusters->Branch("m_clusY_py", &m_clusY_py);
+  t_HoughClusters->Branch("m_clusY_pz", &m_clusY_pz);
+  t_HoughClusters->Branch("m_clusY_Nhit", &m_clusY_Nhit);
 
   t_recoPFO->Branch("Npfo", &m_Npfo);
   t_recoPFO->Branch("recPFO_px", &m_recPFO_px);
@@ -234,97 +226,62 @@ StatusCode PandoraPlusPFAlg::execute()
   t_SimBar->Fill();
 
   //Save Layer info
-  ClearIter0();
-  std::vector< CRDEcalEDM::CRDCaloLayer > m_layerCol = m_DataCol.LayerCol_tmp;
-  for(int ily=0; ily<m_layerCol.size(); ily++){
-    CRDEcalEDM::CRDCaloLayer m_layer = m_layerCol[ily];
-    for(int ishx=0; ishx<m_layer.barShowerXCol.size(); ishx++){
-      m_barshower0_layer.push_back(m_layer.getDlayer());
-      m_barshower0X.push_back( m_layer.barShowerXCol[ishx].getPos().x() );
-      m_barshower0Y.push_back( m_layer.barShowerXCol[ishx].getPos().y() );
-      m_barshower0Z.push_back( m_layer.barShowerXCol[ishx].getPos().z() );
-      m_barshower0E.push_back( m_layer.barShowerXCol[ishx].getE() );
+  ClearLayer();
+  for(int ibl=0;ibl<tmp_stavevec.size();ibl++){
+    CRDEcalEDM::CRDCaloBlock tmp_barcol = tmp_stavevec[ibl];
+    m_NshowerX = tmp_barcol.getShowerXCol().size();
+    m_NshowerY = tmp_barcol.getShowerYCol().size();
+    for(int is=0; is<m_NshowerX; is++){
+      m_barShowerX_x.push_back( tmp_barcol.getShowerXCol()[is].getPos().x() );
+      m_barShowerX_y.push_back( tmp_barcol.getShowerXCol()[is].getPos().y() );
+      m_barShowerX_z.push_back( tmp_barcol.getShowerXCol()[is].getPos().z() );
+      m_barShowerX_E.push_back( tmp_barcol.getShowerXCol()[is].getE() );
     }
-    for(int ishy=0; ishy<m_layer.barShowerYCol.size(); ishy++){
-      m_barshower1_layer.push_back(m_layer.getDlayer());
-      m_barshower1X.push_back( m_layer.barShowerYCol[ishy].getPos().x() );
-      m_barshower1Y.push_back( m_layer.barShowerYCol[ishy].getPos().y() );
-      m_barshower1Z.push_back( m_layer.barShowerYCol[ishy].getPos().z() );
-      m_barshower1E.push_back( m_layer.barShowerYCol[ishy].getE() );
-    }
-  }
-  t_dataColIter0->Fill();
-
-/*  ClearIter1(); 
-  m_layerCol = m_DataCol.LayerCol;
-  for(int ily=0; ily<m_layerCol.size(); ily++){
-    CRDEcalEDM::CRDCaloLayer m_layer = m_layerCol[ily];
-    for(int ishx=0; ishx<m_layer.barShowerXCol.size(); ishx++){
-      m_barshower0_layer_iter1.push_back(m_layer.getDlayer());
-      m_barshower0X_iter1.push_back( m_layer.barShowerXCol[ishx].getPos().x() );
-      m_barshower0Y_iter1.push_back( m_layer.barShowerXCol[ishx].getPos().y() );
-      m_barshower0Z_iter1.push_back( m_layer.barShowerXCol[ishx].getPos().z() );
-      m_barshower0E_iter1.push_back( m_layer.barShowerXCol[ishx].getE() );
-    }
-    for(int ishy=0; ishy<m_layer.barShowerYCol.size(); ishy++){
-      m_barshower1_layer_iter1.push_back(m_layer.getDlayer());
-      m_barshower1X_iter1.push_back( m_layer.barShowerYCol[ishy].getPos().x() );
-      m_barshower1Y_iter1.push_back( m_layer.barShowerYCol[ishy].getPos().y() );
-      m_barshower1Z_iter1.push_back( m_layer.barShowerYCol[ishy].getPos().z() );
-      m_barshower1E_iter1.push_back( m_layer.barShowerYCol[ishy].getE() );
+    for(int is=0; is<m_NshowerY; is++){
+      m_barShowerY_x.push_back( tmp_barcol.getShowerYCol()[is].getPos().x() );
+      m_barShowerY_y.push_back( tmp_barcol.getShowerYCol()[is].getPos().y() );
+      m_barShowerY_z.push_back( tmp_barcol.getShowerYCol()[is].getPos().z() );
+      m_barShowerY_E.push_back( tmp_barcol.getShowerYCol()[is].getE() );
     }
   }
-  t_dataColIter1->Fill();
-*/
+  t_Layers->Fill();
 
-  std::vector<CRDEcalEDM::CRDCaloHit3DCluster> m_3dclusCol_iter0 = m_DataCol.Clus3DCol;
-  for(int icl=0; icl<m_3dclusCol_iter0.size(); icl++){
-  ClearIter1();
-    CRDEcalEDM::CRDCaloHit3DCluster m_clus = m_3dclusCol_iter0[icl];
 
-    for(int ig=0; ig<m_clus.get2DShowers().size(); ig++){
-      m_Iter1_gclus_2dshx.push_back(m_clus.get2DShowers()[ig].getPos().x() );
-      m_Iter1_gclus_2dshy.push_back(m_clus.get2DShowers()[ig].getPos().y() );
-      m_Iter1_gclus_2dshz.push_back(m_clus.get2DShowers()[ig].getPos().z() );
-      m_Iter1_gclus_2dshE.push_back(m_clus.get2DShowers()[ig].getShowerE() );
+  //Save Hough Clusters
+  std::vector<CRDEcalEDM::CRDCaloTower> m_towers = m_DataCol.TowerCol;
+  for(int it=0; it<m_towers.size(); it++){
+    ClearCluster();
+    m_NclusX = m_towers[it].getLongiClusterXCol().size(); 
+    m_NclusY = m_towers[it].getLongiClusterYCol().size();
+    for(int ic=0; ic<m_NclusX; ic++){
+      CRDEcalEDM::CRDCaloHitLongiCluster m_longicl = m_towers[it].getLongiClusterXCol()[ic];
+      m_clusX_x.push_back(m_longicl.getPos().X()); 
+      m_clusX_y.push_back(m_longicl.getPos().Y()); 
+      m_clusX_z.push_back(m_longicl.getPos().Z()); 
+      m_clusX_E.push_back(m_longicl.getE()); 
+      m_clusX_alpha.push_back(m_longicl.getHoughAlpha()); 
+      m_clusX_rho.push_back(m_longicl.getHoughRho()); 
+      m_clusX_px.push_back(m_longicl.getAxis().X());
+      m_clusX_py.push_back(m_longicl.getAxis().Y());
+      m_clusX_pz.push_back(m_longicl.getAxis().Z());
+      m_clusX_Nhit.push_back(m_longicl.getBarShowers().size());
     }
-  t_dataColIter1->Fill();
-  }
-
-/*
-  //Save ClusTrk info
-  std::vector< CRDEcalEDM::CRDCaloHitLongiCluster > m_ClusTrk_X = m_DataCol.LongiClusXCol;
-  for(int itrk=0; itrk<m_ClusTrk_X.size(); itrk++){
-    //m_trkX_x.push_back(m_ClusTrk_X[itrk].getPos().x());
-    //m_trkX_y.push_back(m_ClusTrk_X[itrk].getPos().y());
-    //m_trkX_z.push_back(m_ClusTrk_X[itrk].getPos().z());
-    //m_trkX_px.push_back(m_ClusTrk_X[itrk].getAxis().x());
-    //m_trkX_py.push_back(m_ClusTrk_X[itrk].getAxis().y());
-    //m_trkX_pz.push_back(m_ClusTrk_X[itrk].getAxis().z());
-    //m_trkX_Nsh.push_back(m_ClusTrk_X[itrk].getBarShowers().size());
-    ClearIter();
-
-    for(int is=0; is<m_ClusTrk_X[itrk].getBarShowers().size(); is++){
-      m_barshower0_layer.push_back( m_ClusTrk_X[itrk].getBarShowers()[is].getDlayer() );
-      m_barshower0X.push_back( m_ClusTrk_X[itrk].getBarShowers()[is].getPos().x() );
-      m_barshower0Y.push_back( m_ClusTrk_X[itrk].getBarShowers()[is].getPos().y() );
-      m_barshower0Z.push_back( m_ClusTrk_X[itrk].getBarShowers()[is].getPos().z() );
-      m_barshower0E.push_back( m_ClusTrk_X[itrk].getBarShowers()[is].getE() );    
+    for(int ic=0; ic<m_NclusY; ic++){
+      CRDEcalEDM::CRDCaloHitLongiCluster m_longicl = m_towers[it].getLongiClusterYCol()[ic];
+      m_clusY_x.push_back(m_longicl.getPos().X());
+      m_clusY_y.push_back(m_longicl.getPos().Y());
+      m_clusY_z.push_back(m_longicl.getPos().Z());
+      m_clusY_E.push_back(m_longicl.getE());
+      m_clusY_alpha.push_back(m_longicl.getHoughAlpha());
+      m_clusY_rho.push_back(m_longicl.getHoughRho());
+      m_clusY_px.push_back(m_longicl.getAxis().X());
+      m_clusY_py.push_back(m_longicl.getAxis().Y());
+      m_clusY_pz.push_back(m_longicl.getAxis().Z());
+      m_clusY_Nhit.push_back(m_longicl.getBarShowers().size());
     }
-    t_dataColIter0->Fill();
+    t_HoughClusters->Fill();
   }
-  std::vector< CRDEcalEDM::CRDCaloHitLongiCluster > m_ClusTrk_Y = m_DataCol.LongiClusYCol;
-  for(int itrk=0; itrk<m_ClusTrk_Y.size(); itrk++){
-    m_trkY_x.push_back(m_ClusTrk_Y[itrk].getPos().x());
-    m_trkY_y.push_back(m_ClusTrk_Y[itrk].getPos().y());
-    m_trkY_z.push_back(m_ClusTrk_Y[itrk].getPos().z());
-    m_trkY_px.push_back(m_ClusTrk_Y[itrk].getAxis().x());
-    m_trkY_py.push_back(m_ClusTrk_Y[itrk].getAxis().y());
-    m_trkY_pz.push_back(m_ClusTrk_Y[itrk].getAxis().z());
-    m_trkY_Nsh.push_back(m_ClusTrk_Y[itrk].getBarShowers().size());
-  }
-  t_dataColIter0->Fill();
-*/
+
 
   //Save PFO
   ClearRecPFO();
@@ -382,8 +339,8 @@ StatusCode PandoraPlusPFAlg::finalize()
 
   m_wfile->cd();
   t_SimBar->Write();
-  t_dataColIter0->Write();
-  t_dataColIter1->Write();
+  t_Layers->Write();
+  t_HoughClusters->Write();
   t_recoPFO->Write();
   m_wfile->Close();
 
@@ -403,7 +360,7 @@ StatusCode PandoraPlusPFAlg::finalize()
   delete m_pPfoCreatorSettings;
   delete m_pEcalClusterRecSettings;
 
-  delete m_wfile, t_SimBar, t_recoPFO, t_dataColIter0, t_dataColIter1;
+  delete m_wfile, t_SimBar, t_recoPFO, t_Layers, t_recoPFO;
 
   info() << "Processed " << _nEvt << " events " << endmsg;
   return GaudiAlgorithm::finalize();
@@ -426,50 +383,44 @@ void PandoraPlusPFAlg::ClearBar(){
 }
 
 
-void PandoraPlusPFAlg::ClearIter0(){
-  m_barshower0X.clear(); 
-  m_barshower0Y.clear(); 
-  m_barshower0Z.clear(); 
-  m_barshower0E.clear(); 
-  m_barshower0_layer.clear();
-  m_barshower1X.clear();
-  m_barshower1Y.clear();
-  m_barshower1Z.clear();
-  m_barshower1E.clear();
-  m_barshower1_layer.clear(); 
-  m_trkX_x.clear(); 
-  m_trkX_y.clear();
-  m_trkX_z.clear();
-  m_trkX_px.clear();
-  m_trkX_py.clear();
-  m_trkX_pz.clear();
-  m_trkX_Nsh.clear();
-  m_trkY_x.clear();
-  m_trkY_y.clear();
-  m_trkY_z.clear();
-  m_trkY_px.clear();
-  m_trkY_py.clear();
-  m_trkY_pz.clear();
-  m_trkY_Nsh.clear();
+void PandoraPlusPFAlg::ClearLayer(){
+  m_NshowerX=-99;
+  m_NshowerY=-99;
+  m_barShowerX_x.clear();
+  m_barShowerX_y.clear();
+  m_barShowerX_z.clear();
+  m_barShowerX_E.clear();
+  m_barShowerY_x.clear();
+  m_barShowerY_y.clear();
+  m_barShowerY_z.clear();
+  m_barShowerY_E.clear();
 }
 
 
-void PandoraPlusPFAlg::ClearIter1(){
-  m_barshower0X_iter1.clear();
-  m_barshower0Y_iter1.clear();
-  m_barshower0Z_iter1.clear();
-  m_barshower0E_iter1.clear();
-  m_barshower1X_iter1.clear();
-  m_barshower1Y_iter1.clear();
-  m_barshower1Z_iter1.clear();
-  m_barshower1E_iter1.clear();
-  m_barshower0_layer_iter1.clear();
-  m_barshower1_layer_iter1.clear();
+void PandoraPlusPFAlg::ClearCluster(){
+  m_NclusX=-99;
+  m_NclusY=-99;
+  m_clusX_x.clear();
+  m_clusX_y.clear();
+  m_clusX_z.clear();
+  m_clusX_E.clear();
+  m_clusX_px.clear();
+  m_clusX_py.clear();
+  m_clusX_pz.clear();
+  m_clusX_alpha.clear();
+  m_clusX_rho.clear();
+  m_clusX_Nhit.clear();
+  m_clusY_x.clear();
+  m_clusY_y.clear();
+  m_clusY_z.clear();
+  m_clusY_E.clear();
+  m_clusY_px.clear();
+  m_clusY_py.clear();
+  m_clusY_pz.clear();
+  m_clusY_alpha.clear();
+  m_clusY_rho.clear();
+  m_clusY_Nhit.clear();
 
-  m_Iter1_gclus_2dshx.clear();
-  m_Iter1_gclus_2dshy.clear();
-  m_Iter1_gclus_2dshz.clear();
-  m_Iter1_gclus_2dshE.clear();
 }
 
 

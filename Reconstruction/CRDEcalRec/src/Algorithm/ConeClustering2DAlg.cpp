@@ -20,22 +20,28 @@ StatusCode ConeClustering2DAlg::Initialize(){
 StatusCode ConeClustering2DAlg::RunAlgorithm( ConeClustering2DAlg::Settings& m_settings, PandoraPlusDataCol& m_datacol ){
   settings = m_settings; 
 
-  std::vector<CRDEcalEDM::CRDCaloLayer> m_layerCol = m_datacol.LayerCol; 
-  std::map<int, std::vector<CRDEcalEDM::CRDCaloBarShower> > m_orderedShowerX; m_orderedShowerX.clear(); 
-  std::map<int, std::vector<CRDEcalEDM::CRDCaloBarShower> > m_orderedShowerY; m_orderedShowerY.clear(); 
-  for(int il=0; il<m_layerCol.size(); il++){
-      m_orderedShowerX[m_layerCol[il].getDlayer()].insert( m_orderedShowerX[m_layerCol[il].getDlayer()].end(), m_layerCol[il].barShowerXCol.begin(), m_layerCol[il].barShowerXCol.end() );
-      m_orderedShowerY[m_layerCol[il].getDlayer()].insert( m_orderedShowerY[m_layerCol[il].getDlayer()].end(), m_layerCol[il].barShowerYCol.begin(), m_layerCol[il].barShowerYCol.end() );
+  std::vector<CRDEcalEDM::CRDCaloTower> m_towers = m_datacol.TowerCol;
+
+
+  for(int it=0; it<m_towers.size(); it++){
+    std::vector<CRDEcalEDM::CRDCaloBlock> m_blocks = m_towers[it].getBlocks();
+
+    std::map<int, std::vector<CRDEcalEDM::CRDCaloBarShower> > m_orderedShowerX; m_orderedShowerX.clear(); 
+    std::map<int, std::vector<CRDEcalEDM::CRDCaloBarShower> > m_orderedShowerY; m_orderedShowerY.clear(); 
+    for(int ib=0; ib<m_blocks.size(); ib++){
+      std::vector<CRDEcalEDM::CRDCaloBarShower> tmp_showerXinblock = m_blocks[ib].getShowerXCol(); 
+      std::vector<CRDEcalEDM::CRDCaloBarShower> tmp_showerYinblock = m_blocks[ib].getShowerYCol(); 
+      m_orderedShowerX[m_blocks[ib].getDlayer()].insert( m_orderedShowerX[m_blocks[ib].getDlayer()].end(), tmp_showerXinblock.begin(), tmp_showerXinblock.end() );
+      m_orderedShowerY[m_blocks[ib].getDlayer()].insert( m_orderedShowerY[m_blocks[ib].getDlayer()].end(), tmp_showerYinblock.begin(), tmp_showerYinblock.end() );
+    }
+   
+    std::vector<CRDEcalEDM::CRDCaloHitLongiCluster> m_ClusterColX; m_ClusterColX.clear(); 
+    std::vector<CRDEcalEDM::CRDCaloHitLongiCluster> m_ClusterColY; m_ClusterColY.clear(); 
+    LongiConeLinking( m_orderedShowerX, m_ClusterColX );
+    LongiConeLinking( m_orderedShowerY, m_ClusterColY );
+   
+    m_towers[it].SetLongiClusters(m_ClusterColX, m_ClusterColY);
   }
-
-  std::vector<CRDEcalEDM::CRDCaloHitLongiCluster> m_ClusterColX; m_ClusterColX.clear(); 
-  std::vector<CRDEcalEDM::CRDCaloHitLongiCluster> m_ClusterColY; m_ClusterColY.clear(); 
-  LongiConeLinking( m_orderedShowerX, m_ClusterColX );
-  LongiConeLinking( m_orderedShowerY, m_ClusterColY );
-
-  m_datacol.LongiClusXCol = m_ClusterColX;
-  m_datacol.LongiClusYCol = m_ClusterColY; 
-
   return StatusCode::SUCCESS;
 }
 

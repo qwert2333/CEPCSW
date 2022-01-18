@@ -76,7 +76,7 @@ for(int ic=0; ic<dataCol.LongiClusYCol.size(); ic++){
 
 //dataCol.PrintLayer();
 */
-
+/*
   //Stage 2:
   m_energysplittingAlg->RunAlgorithm( *m_ESAlgSettings,  dataCol );
   m_etmatchingAlg->     RunAlgorithm( *m_ETAlgSettings, dataCol );
@@ -110,7 +110,7 @@ for(int ic=0; ic<dataCol.LongiClusYCol.size(); ic++){
   m_CLAlgSettings->SetMergeBadCluster(false);
   m_CLAlgSettings->SetMergeEMTail(false);
   m_clustermergingAlg  ->RunAlgorithm( *m_CLAlgSettings, dataCol );
-
+*/
 
   return StatusCode::SUCCESS;
 

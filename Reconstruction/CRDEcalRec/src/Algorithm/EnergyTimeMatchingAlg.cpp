@@ -37,8 +37,8 @@ StatusCode EnergyTimeMatchingAlg::RunAlgorithm( EnergyTimeMatchingAlg::Settings&
     //Case1: Don't use shadow cluster or chi2 matching, Save all combinations for 3D clustering.
     if(!settings.fl_UseChi2){
       for(int ib=0;ib<m_blocks.size();ib++){
-        std::vector<CRDEcalEDM::CRDCaloBarShower> showerXCol = m_blocks[ib].barShowerXCol;
-        std::vector<CRDEcalEDM::CRDCaloBarShower> showerYCol = m_blocks[ib].barShowerYCol;
+        std::vector<CRDEcalEDM::CRDCaloBarShower> showerXCol = m_blocks[ib].getShowerXCol();
+        std::vector<CRDEcalEDM::CRDCaloBarShower> showerYCol = m_blocks[ib].getShowerYCol();
    
         std::vector<CRDEcalEDM::CRDCaloHitTransShower> m_showerinlayer; m_showerinlayer.clear();
         GetFullMatchedShowers( showerXCol, showerYCol, m_showerinlayer );
@@ -67,8 +67,8 @@ StatusCode EnergyTimeMatchingAlg::RunAlgorithm( EnergyTimeMatchingAlg::Settings&
       //Case 2.1
       if(NclusX==1 && NclusY==1){
         //chi2=0; sumchi2=0; 
-        XYShowerMatchingL0(m_longiClXCol[0], m_longiClYCol[0], tmp_clus); 
-        tmp_clusters.push_back(m_3Dclus);
+        //XYShowerMatchingL0(m_longiClXCol[0], m_longiClYCol[0], tmp_clus); 
+        //tmp_clusters.push_back(m_3Dclus);
         continue;
       }
       //Case 2.2
@@ -77,13 +77,13 @@ StatusCode EnergyTimeMatchingAlg::RunAlgorithm( EnergyTimeMatchingAlg::Settings&
 
       //Case 2.3
       else if( NclusX==NclusY ){ 
-        XYShowerChi2Matching(m_longiClXCol, m_longiClYCol, chi2);
+        //XYShowerChi2Matching(m_longiClXCol, m_longiClYCol, chi2);
 
 
       }
       //Case 2.4
       else{ 
-        XYShowerChi2MatchingL1(m_longiClXCol, m_longiClYCol, chi2);
+        //XYShowerChi2MatchingL1(m_longiClXCol, m_longiClYCol, chi2);
 
       
       }
@@ -110,7 +110,7 @@ StatusCode EnergyTimeMatchingAlg::GetFullMatchedShowers(
            std::vector<CRDEcalEDM::CRDCaloBarShower>& barShowerYCol, 
            std::vector<CRDEcalEDM::CRDCaloHitTransShower>& outshCol )
 {
-  outshCol.clear(); 
+/*  outshCol.clear(); 
 
   for(int is=0;is<barShowerXCol.size();is++){
   for(int js=0;js<barShowerYCol.size();js++){
@@ -119,7 +119,7 @@ StatusCode EnergyTimeMatchingAlg::GetFullMatchedShowers(
     XYShowerMatchingL0(barShowerXCol[is], barShowerYCol[js], tmp_shower);
     outshCol.push_back(tmp_shower);
   }}
-
+*/
   return StatusCode::SUCCESS;
 }
 
@@ -133,18 +133,16 @@ StatusCode EnergyTimeMatchingAlg::XYShowerMatchingL0( CRDEcalEDM::CRDCaloHitLong
   std::vector<CRDEcalEDM::CRDCaloHitTransShower> m_showers;  m_showers.clear(); 
 
   std::vector<int> layerindex; layerindex.clear(); 
-  for(int is=0; is<m_longiClX.getBarShowers(); is++){
+  for(int is=0; is<m_longiClX.getBarShowers().size(); is++){
     if( find( layerindex.begin(), layerindex.end(), m_longiClX.getBarShowers()[is].getDlayer() )==layerindex.end() ) layerindex.push_back(m_longiClX.getBarShowers()[is].getDlayer());
   }
-  for(int is=0; is<m_longiClY.getBarShowers(); is++){
+  for(int is=0; is<m_longiClY.getBarShowers().size(); is++){
     if( find( layerindex.begin(), layerindex.end(), m_longiClY.getBarShowers()[is].getDlayer() )==layerindex.end() ) layerindex.push_back(m_longiClY.getBarShowers()[is].getDlayer());
   }
 
   
   for(int il=0; il<layerindex.size(); il++){
     
-
-
 
 
   }

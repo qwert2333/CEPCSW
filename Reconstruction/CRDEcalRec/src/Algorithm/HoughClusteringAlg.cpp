@@ -23,9 +23,7 @@ StatusCode HoughClusteringAlg::Initialize(){
 StatusCode HoughClusteringAlg::RunAlgorithm( HoughClusteringAlg::Settings& m_settings, PandoraPlusDataCol& m_datacol){
   settings = m_settings; 
 
-  std::vector<CRDEcalEDM::CRDCaloBlock> m_blocks = m_datacol.BlockVec;
   std::vector<CRDEcalEDM::CRDCaloTower> m_towers = m_datacol.TowerCol; 
-
 
   for(int it=0; it<m_towers.size(); it++){
 
@@ -139,6 +137,7 @@ cout<<"  HoughClusteringAlg: Create output HoughClusters"<<endl;
     m_towers[it].SetLongiClusters(m_longiClusXCol, m_longiClusYCol); 
   }//End loop tower
 
+  m_datacol.TowerCol = m_towers;
 cout<<"End in HoughClusteringAlg"<<endl;
 
   return StatusCode::SUCCESS;
@@ -363,8 +362,10 @@ cout<<"Hill size: "<<m_hills.size()<<endl;
               m_Hobjects[io].getHoughLineUR().Eval(ave_alpha)>ave_rho-rho_width) ||
             ( m_Hobjects[io].getHoughLineDL().Eval(ave_alpha)>ave_rho-rho_width &&
               m_Hobjects[io].getHoughLineUR().Eval(ave_alpha)<ave_rho+rho_width) )
-
-           m_clus.AddBarShower( m_Hobjects[io].getLocalMax() );
+          { 
+          m_clus.AddBarShower( m_Hobjects[io].getLocalMax() ); 
+          m_clus.SetHoughPars(ave_alpha, m_Hobjects[io].getHoughLineUR().Eval(ave_alpha) ); 
+          }
     }}
 
     else if(ave_alpha>PI/2. && ave_alpha<alpha_max+alpha_width){
@@ -374,7 +375,10 @@ cout<<"Hill size: "<<m_hills.size()<<endl;
             ( m_Hobjects[io].getHoughLineDR().Eval(ave_alpha)>ave_rho-rho_width &&
               m_Hobjects[io].getHoughLineUL().Eval(ave_alpha)<ave_rho+rho_width) )
 
-           m_clus.AddBarShower( m_Hobjects[io].getLocalMax() );
+          {   
+          m_clus.AddBarShower( m_Hobjects[io].getLocalMax() );
+          m_clus.SetHoughPars(ave_alpha, m_Hobjects[io].getHoughLineUL().Eval(ave_alpha) );
+          }
     }}
 
     if(m_clus.getBarShowers().size()<=settings.th_peak) continue;

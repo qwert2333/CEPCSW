@@ -70,8 +70,11 @@ StatusCode EnergySplittingAlg::ClusteringInBlock( CRDEcalEDM::CRDCaloBlock& m_bl
 
   std::vector<CRDEcalEDM::CRDCaloBarCluster> m_barClusXCol; m_barClusXCol.clear();
   std::vector<CRDEcalEDM::CRDCaloBarCluster> m_barClusYCol; m_barClusYCol.clear();
-  Clustering( m_block.getBarXCol(), m_barClusXCol, m_longiClusXCol );
-  Clustering( m_block.getBarYCol(), m_barClusYCol, m_longiClusYCol );
+  
+  std::vector<CRDEcalEDM::CRDCaloBar> m_barColX = m_block.getBarXCol(); 
+  std::vector<CRDEcalEDM::CRDCaloBar> m_barColY = m_block.getBarYCol(); 
+  Clustering( m_barColX, m_barClusXCol, m_longiClusXCol );
+  Clustering( m_barColY, m_barClusYCol, m_longiClusYCol );
 
   m_block.setClusterXCol(m_barClusXCol);
   m_block.setClusterYCol(m_barClusYCol);
@@ -108,14 +111,21 @@ StatusCode LongiClusterLinking( std::vector<CRDEcalEDM::CRDCaloBlock>& m_blocks,
   m_outClusCol.clear();
 
   bool fl_isXclus = (m_oldClusCol[0].getSlayer()==0);
-  for(int icl=0; icl<m_oldClusCol.size(); icl++){
+  std::vector<CRDEcalEDM::CRDCaloBarShower> m_showers; m_showers.clear(); 
+  for(int ib=0; ib<m_blocks.size(); ib++){
+    std::vector<CRDEcalEDM::CRDCaloBarShower> tmp_showersinblock; tmp_showersinblock.clear(); 
+    if(fl_isXclus) tmp_showersinblock = m_blocks[ib].getShowerXCol();
+    else tmp_showersinblock = m_blocks[ib].getShowerYCol();
+    m_showers.insert(m_showers.end(), tmp_showersinblock.begin(), tmp_showersinblock.end());
+  }
+
+  for(int ic=0; ic<m_oldClusCol.size(); ic++){
     CRDEcalEDM::CRDCaloHitLongiCluster m_newClus; m_newClus.Clear();
     
     for(int is=0; is<m_oldClusCol[ic].getBarShowers().size(); is++){
       CRDEcalEDM::CRDCaloBarShower m_shower = m_oldClusCol[ic].getBarShowers()[is];
       
-      std::vector<CRDEcalEDM::CRDCaloBarShower> m_showers = fl_isXclus ? m_blocks.getShowerXCol() : m_blocks.getShowerYCol(); 
-      CRDEcalEDM::CRDCaloBarShower m_shower m_selshower; m_selshower.Clear();
+      CRDEcalEDM::CRDCaloBarShower m_selshower; m_selshower.Clear();
       for(int js=0; js<m_showers.size(); js++){
         if( m_showers[js].getModule()==m_shower.getModule() && 
             m_showers[js].getStave()==m_shower.getStave() && 
@@ -164,8 +174,8 @@ StatusCode EnergySplittingAlg::Clustering( std::vector<CRDEcalEDM::CRDCaloBar>& 
 
   //Find seed with LongiCluster
   for(int ic=0; ic<m_clusCol.size(); ic++){
-  for(int ib=0; ib<m_clusCol.getBars().size(); ib++){
-      std::vector<CRDEcalEDM::CRDCaloBar>::iterator iter = find(m_seedbars.begin(), m_seedbars.end(), m_clusCol.getBars()[ib]);
+  for(int ib=0; ib<m_clusCol[ic].getBars().size(); ib++){
+      std::vector<CRDEcalEDM::CRDCaloBar>::iterator iter = find(m_seedbars.begin(), m_seedbars.end(), m_clusCol[ic].getBars()[ib]);
       if(iter==m_seedbars.end()) continue; 
       m_clusCol[ic].addSeed( *iter );
     
@@ -284,7 +294,7 @@ StatusCode EnergySplittingAlg::MergeToClosestCluster( CRDEcalEDM::CRDCaloBarClus
 
     int dis = (cLedge-iRedge>0 ? cLedge-iRedge : iLedge-cRedge );
     if(dis>5) continue; //Don't merge to a too far cluster. 
-    if(dis<minD && clusvec[icl]>2.*iclus.getE() ){ minD = dis; index=icl; } //Don't merge to a too small cluster. 
+    if(dis<minD && clusvec[icl].getE()>2.*iclus.getE() ){ minD = dis; index=icl; } //Don't merge to a too small cluster. 
   }
   if(index<0) return StatusCode::FAILURE;
 

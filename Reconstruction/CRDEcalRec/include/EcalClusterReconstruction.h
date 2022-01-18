@@ -3,7 +3,7 @@
 
 #include "GaudiAlg/GaudiAlgorithm.h"
 #include "PandoraPlusDataCol.h"
-#include "Algorithm/LocalMaxFindingAlg.cpp"
+#include "Algorithm/LocalMaxFindingAlg.h"
 #include "Algorithm/EnergySplittingAlg.h"
 #include "Algorithm/ConeClustering2DAlg.h"
 #include "Algorithm/HoughClusteringAlg.h"

@@ -1,5 +1,5 @@
-#ifndef _FINDINGLOCALMAX_ALG_H
-#define _FINDINGLOCALMAX_ALG_H
+#ifndef _LOCALMAXFINDING_ALG_H
+#define _LOCALMAXFINDING_ALG_H
 
 #include "PandoraPlusDataCol.h"
 
@@ -10,9 +10,12 @@ public:
 
   class Settings{
   public: 
-    void SetInitialValue(); 
+    Settings() {};
 
-  }
+    void SetInitialValue(); 
+    double Eth_localMax;
+    double Eth_MaxWithNeigh;
+  };
 
   LocalMaxFindingAlg(){};
   ~LocalMaxFindingAlg(){};
@@ -23,7 +26,7 @@ public:
 
   StatusCode GetLocalMax( CRDEcalEDM::CRDCaloBlock& m_block);
   StatusCode GetLocalMaxBar( std::vector<CRDEcalEDM::CRDCaloBar>& barCol, std::vector<CRDEcalEDM::CRDCaloBar>& localMaxCol );
-
+  std::vector<CRDEcalEDM::CRDCaloBar>  getNeighbors( CRDEcalEDM::CRDCaloBar& seed, std::vector<CRDEcalEDM::CRDCaloBar>& barCol);
 
   Settings settings;
 

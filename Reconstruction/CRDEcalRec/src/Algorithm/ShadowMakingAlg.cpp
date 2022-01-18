@@ -17,11 +17,11 @@ StatusCode ShadowMakingAlg::Initialize(){
 StatusCode ShadowMakingAlg::RunAlgorithm(ShadowMakingAlg::Settings& m_settings, PandoraPlusDataCol& m_datacol){
   settings = m_settings;
 
-  std::vector<CRDEcalEDM::CRDCaloHitLongiCluster> m_clusXCol = m_datacol.LongiClusXCol; 
-  std::vector<CRDEcalEDM::CRDCaloHitLongiCluster> m_clusYCol = m_datacol.LongiClusYCol; 
 
   for(int it=0; it<m_datacol.TowerCol.size(); it++){
     std::vector<CRDEcalEDM::CRDCaloBlock> m_blocksInTower = m_datacol.TowerCol[it].getBlocks();
+    std::vector<CRDEcalEDM::CRDCaloHitLongiCluster> m_clusXCol = m_datacol.TowerCol[it].getLongiClusterXCol(); 
+    std::vector<CRDEcalEDM::CRDCaloHitLongiCluster> m_clusYCol = m_datacol.TowerCol[it].getLongiClusterYCol(); 
 
     for(int ib=0;ib<m_blocksInTower.size(); ib++){ m_blocksInTower[ib].ClearNeuShadowClus(); m_blocksInTower[ib].ClearTrkShadowClus(); }
    
@@ -105,7 +105,7 @@ StatusCode ShadowMakingAlg::RunAlgorithm(ShadowMakingAlg::Settings& m_settings, 
       }
     }
 
-    dataCol.TowerCol[it].SetBlocks( m_blocksInTower );
+    m_datacol.TowerCol[it].SetBlocks( m_blocksInTower );
   }
   return StatusCode::SUCCESS;
 }

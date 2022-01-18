@@ -17,8 +17,8 @@ namespace CRDEcalEDM{
     }
 
     std::vector<CRDEcalEDM::CRDCaloBlock> getBlocks() const { return blockCol; }
-    std::vector<CRDCaloHitLongiCluster> getLongiClusterXCol() const { return longiClusXCol; }
-    std::vector<CRDCaloHitLongiCluster> getLongiClusterYCol() const { return longiClusYCol; }
+    std::vector<CRDEcalEDM::CRDCaloHitLongiCluster> getLongiClusterXCol() const { return longiClusXCol; }
+    std::vector<CRDEcalEDM::CRDCaloHitLongiCluster> getLongiClusterYCol() const { return longiClusYCol; }
     int getModule() const { return module; }
     int getStave() const { return stave; }
     int getPart() const { return part; }

@@ -1,9 +1,10 @@
-#ifndef _FINDINGLOCALMAX_ALG_C
-#define _FINDINGLOCALMAX_ALG_C
+#ifndef _LOCALMAXFINDING_ALG_C
+#define _LOCALMAXFINDING_ALG_C
 
 #include "Algorithm/LocalMaxFindingAlg.h"
 void LocalMaxFindingAlg::Settings::SetInitialValue(){
-
+  Eth_localMax = 0.005;
+  Eth_MaxWithNeigh = 0.;
 
 }
 
@@ -103,6 +104,18 @@ StatusCode LocalMaxFindingAlg::GetLocalMaxBar( std::vector<CRDEcalEDM::CRDCaloBa
   }
 
   return StatusCode::SUCCESS;
+}
+
+
+std::vector<CRDEcalEDM::CRDCaloBar> LocalMaxFindingAlg::getNeighbors( CRDEcalEDM::CRDCaloBar& seed, std::vector<CRDEcalEDM::CRDCaloBar>& barCol){
+  std::vector<CRDEcalEDM::CRDCaloBar> m_neighbor;
+  for(int i=0;i<barCol.size();i++){
+
+    if( seed.isNeighbor(barCol[i]) ) m_neighbor.push_back(barCol[i]);
+  }
+  if(m_neighbor.size()>2) std::cout<<"WARNING: more than 2 hits in neighborCol!!"<<std::endl;
+
+  return m_neighbor;
 }
 
 #endif

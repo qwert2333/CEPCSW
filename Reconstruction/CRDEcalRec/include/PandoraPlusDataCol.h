@@ -66,7 +66,6 @@ public:
   void Clear();
   void ClearBlock()  { BlockVec.clear(); }
   void ClearTower()  { TowerCol.clear(); }
-  void ClearLayer()  { LayerCol.clear(); }
   void ClearShower() { Shower2DCol.clear(); MIPShower2DCol.clear(); EMShower2DCol.clear(); }
   void ClearCluster(){ GoodClus3DCol.clear(); BadClus3DCol.clear(); Clus3DCol.clear(); }
   void ClearPFO()    { PFOCol.clear(); }
