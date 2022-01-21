@@ -33,12 +33,18 @@ public:
   StatusCode RunAlgorithm( EnergyTimeMatchingAlg::Settings& m_settings, PandoraPlusDataCol& m_datasvc );
   StatusCode ClearAlgorithm(); 
 
-  StatusCode GetFullMatchedShowers( std::vector<CRDEcalEDM::CRDCaloBarShower>& barShowerXCol, std::vector<CRDEcalEDM::CRDCaloBarShower>& barShowerYCol, std::vector<CRDEcalEDM::CRDCaloHitTransShower>& outshCol );
 
-  StatusCode XYShowerMatchingL0( CRDEcalEDM::CRDCaloHitLongiCluster& m_longiClX, CRDEcalEDM::CRDCaloHitLongiCluster& m_longiClY, CRDEcalEDM::CRDCaloHit3DCluster& m_clus);
-  StatusCode XYShowerMatchingL1( CRDEcalEDM::CRDCaloHitLongiCluster& m_longiCl1, std::vector<CRDEcalEDM::CRDCaloHitLongiCluster>& m_longiClN, std::vector<CRDEcalEDM::CRDCaloHit3DCluster>& m_clusters );
-  StatusCode XYShowerChi2Matching( std::vector<CRDEcalEDM::CRDCaloHitLongiCluster>& m_longiClXCol, std::vector<CRDEcalEDM::CRDCaloHitLongiCluster>& m_longiClYCol, double** chi2 );
-  StatusCode XYShowerChi2MatchingL1( std::vector<CRDEcalEDM::CRDCaloHitLongiCluster>& m_longiClXCol, std::vector<CRDEcalEDM::CRDCaloHitLongiCluster>& m_longiClYCol, double** chi2 );
+  StatusCode XYClusterMatchingL0( CRDEcalEDM::CRDCaloHitLongiCluster& m_longiClX, CRDEcalEDM::CRDCaloHitLongiCluster& m_longiClY, CRDEcalEDM::CRDCaloHit3DCluster& m_clus);
+  StatusCode XYClusterMatchingL1( CRDEcalEDM::CRDCaloHitLongiCluster& m_longiCl1, std::vector<CRDEcalEDM::CRDCaloHitLongiCluster>& m_longiClN, std::vector<CRDEcalEDM::CRDCaloHit3DCluster>& m_clusters );
+  StatusCode XYClusterMatchingL2( std::vector<CRDEcalEDM::CRDCaloHitLongiCluster>& m_longiClXCol, std::vector<CRDEcalEDM::CRDCaloHitLongiCluster>& m_longiClYCol, std::vector<CRDEcalEDM::CRDCaloHit3DCluster>& m_clusters );
+  StatusCode XYClusterMatchingL3( std::vector<CRDEcalEDM::CRDCaloHitLongiCluster>& m_longiClXCol, std::vector<CRDEcalEDM::CRDCaloHitLongiCluster>& m_longiClYCol, std::vector<CRDEcalEDM::CRDCaloHit3DCluster>& m_clusters );
+
+
+  StatusCode GetFullMatchedShowers( std::vector<CRDEcalEDM::CRDCaloBarShower>& barShowerXCol, std::vector<CRDEcalEDM::CRDCaloBarShower>& barShowerYCol, std::vector<CRDEcalEDM::CRDCaloHitTransShower>& outshCol );
+  StatusCode GetMatchedShowersL0(CRDEcalEDM::CRDCaloBarShower& barShowerX, CRDEcalEDM::CRDCaloBarShower& barShowerY, CRDEcalEDM::CRDCaloHitTransShower& outsh); //1*1
+  StatusCode GetMatchedShowersL1(CRDEcalEDM::CRDCaloBarShower& shower1, std::vector<CRDEcalEDM::CRDCaloBarShower>& showerNCol, std::vector<CRDEcalEDM::CRDCaloHitTransShower>& outshCol ); //1*N
+
+  double** GetClusterChi2Map(std::vector<std::vector<CRDEcalEDM::CRDCaloBarShower>>& barShowerXCol, std::vector<std::vector<CRDEcalEDM::CRDCaloBarShower>>& barShowerYCol);
 
 
   Settings settings;

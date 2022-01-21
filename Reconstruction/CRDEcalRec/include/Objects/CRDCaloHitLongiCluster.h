@@ -23,6 +23,7 @@ namespace CRDEcalEDM{
   double getE() const; 
   int getSlayer() const; 
   std::vector<CRDEcalEDM::CRDCaloBarShower> getBarShowers() const { return barShowerCol; }
+  std::vector<CRDEcalEDM::CRDCaloBarShower> getBarShowersInLayer(int _layer) const; 
   double getHoughAlpha() const { return Hough_alpha; }
   double getHoughRho() const { return Hough_rho; }
 

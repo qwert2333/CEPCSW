@@ -27,6 +27,14 @@ namespace CRDEcalEDM{
   }
 
 
+  std::vector<CRDEcalEDM::CRDCaloBarShower> getBarShowersInLayer(int _layer) const{
+    std::vector<CRDEcalEDM::CRDCaloBarShower> outShowers; outShowers.clear(); 
+    for(int i=0; i<barShowerCol.size(); i++)
+      if(barShowerCol[i].getDlayer()==_layer) outShowers.push_back(barShowerCol[i]);
+    return outShowers; 
+  }
+
+
   int CRDCaloHitLongiCluster::getBeginningDlayer() const{
     int Lstart = 99; 
     for(int i=0; i<barShowerCol.size(); i++)
