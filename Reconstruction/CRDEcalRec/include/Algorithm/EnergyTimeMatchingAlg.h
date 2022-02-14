@@ -22,6 +22,7 @@ public:
     double th_chi2;
     double sigmaE;
     double sigmaPos = 34.89;  //sqrt(10*10/12 + pow((Tres*C/(2*nMat)),2) )
+    int th_GoodLayer; 
     double nMat = 2.15;
     bool fl_UseChi2; 
     int Debug;
@@ -43,6 +44,7 @@ public:
   StatusCode GetFullMatchedShowers( std::vector<CRDEcalEDM::CRDCaloBarShower>& barShowerXCol, std::vector<CRDEcalEDM::CRDCaloBarShower>& barShowerYCol, std::vector<CRDEcalEDM::CRDCaloHitTransShower>& outshCol );
   StatusCode GetMatchedShowersL0(CRDEcalEDM::CRDCaloBarShower& barShowerX, CRDEcalEDM::CRDCaloBarShower& barShowerY, CRDEcalEDM::CRDCaloHitTransShower& outsh); //1*1
   StatusCode GetMatchedShowersL1(CRDEcalEDM::CRDCaloBarShower& shower1, std::vector<CRDEcalEDM::CRDCaloBarShower>& showerNCol, std::vector<CRDEcalEDM::CRDCaloHitTransShower>& outshCol ); //1*N
+  StatusCode GetMatchedShowersL2(std::vector<CRDEcalEDM::CRDCaloBarShower>& barShowerXCol, std::vector<CRDEcalEDM::CRDCaloBarShower>& barShowerYCol, std::vector<CRDEcalEDM::CRDCaloHitTransShower>& outshCol ); 
 
   double** GetClusterChi2Map(std::vector<std::vector<CRDEcalEDM::CRDCaloBarShower>>& barShowerXCol, std::vector<std::vector<CRDEcalEDM::CRDCaloBarShower>>& barShowerYCol);
 

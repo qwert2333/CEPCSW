@@ -59,6 +59,7 @@ StatusCode PandoraPlusPFAlg::initialize()
   t_SimBar = new TTree("SimBarHit", "SimBarHit");
   t_Layers = new TTree("RecLayers","RecLayers");
   t_HoughClusters = new TTree("RecClusters", "RecClusters");
+  t_Showers = new TTree("RecShowers", "RecShowers");
   t_recoPFO = new TTree("RecPFO",  "RecPFO");
 
   t_SimBar->Branch("simBar_x", &m_simBar_x);
@@ -85,28 +86,51 @@ StatusCode PandoraPlusPFAlg::initialize()
   t_Layers->Branch("barShowerY_z", &m_barShowerY_z);
   t_Layers->Branch("barShowerY_E", &m_barShowerY_E);
 
-  t_HoughClusters->Branch("m_NclusX", &m_NclusX);
-  t_HoughClusters->Branch("m_NclusY", &m_NclusY);
-  t_HoughClusters->Branch("m_clusX_x", &m_clusX_x);
-  t_HoughClusters->Branch("m_clusX_y", &m_clusX_y);
-  t_HoughClusters->Branch("m_clusX_z", &m_clusX_z);
-  t_HoughClusters->Branch("m_clusX_E", &m_clusX_E);
-  t_HoughClusters->Branch("m_clusX_alpha", &m_clusX_alpha);
-  t_HoughClusters->Branch("m_clusX_rho", &m_clusX_rho);
-  t_HoughClusters->Branch("m_clusX_px", &m_clusX_px);
-  t_HoughClusters->Branch("m_clusX_py", &m_clusX_py);
-  t_HoughClusters->Branch("m_clusX_pz", &m_clusX_pz);
-  t_HoughClusters->Branch("m_clusX_Nhit", &m_clusX_Nhit);
-  t_HoughClusters->Branch("m_clusY_x", &m_clusY_x);
-  t_HoughClusters->Branch("m_clusY_y", &m_clusY_y);
-  t_HoughClusters->Branch("m_clusY_z", &m_clusY_z);
-  t_HoughClusters->Branch("m_clusY_E", &m_clusY_E);
-  t_HoughClusters->Branch("m_clusY_alpha", &m_clusY_alpha);
-  t_HoughClusters->Branch("m_clusY_rho", &m_clusY_rho);
-  t_HoughClusters->Branch("m_clusY_px", &m_clusY_px);
-  t_HoughClusters->Branch("m_clusY_py", &m_clusY_py);
-  t_HoughClusters->Branch("m_clusY_pz", &m_clusY_pz);
-  t_HoughClusters->Branch("m_clusY_Nhit", &m_clusY_Nhit);
+  t_HoughClusters->Branch("NclusX", &m_NclusX);
+  t_HoughClusters->Branch("NclusY", &m_NclusY);
+  t_HoughClusters->Branch("clusX_x", &m_clusX_x);
+  t_HoughClusters->Branch("clusX_y", &m_clusX_y);
+  t_HoughClusters->Branch("clusX_z", &m_clusX_z);
+  t_HoughClusters->Branch("clusX_E", &m_clusX_E);
+  t_HoughClusters->Branch("clusX_alpha", &m_clusX_alpha);
+  t_HoughClusters->Branch("clusX_rho", &m_clusX_rho);
+  t_HoughClusters->Branch("clusX_px", &m_clusX_px);
+  t_HoughClusters->Branch("clusX_py", &m_clusX_py);
+  t_HoughClusters->Branch("clusX_pz", &m_clusX_pz);
+  t_HoughClusters->Branch("clusX_Nhit", &m_clusX_Nhit);
+  t_HoughClusters->Branch("clusX_Nlayer", &m_clusX_Nlayer);
+  t_HoughClusters->Branch("clusY_x", &m_clusY_x);
+  t_HoughClusters->Branch("clusY_y", &m_clusY_y);
+  t_HoughClusters->Branch("clusY_z", &m_clusY_z);
+  t_HoughClusters->Branch("clusY_E", &m_clusY_E);
+  t_HoughClusters->Branch("clusY_alpha", &m_clusY_alpha);
+  t_HoughClusters->Branch("clusY_rho", &m_clusY_rho);
+  t_HoughClusters->Branch("clusY_px", &m_clusY_px);
+  t_HoughClusters->Branch("clusY_py", &m_clusY_py);
+  t_HoughClusters->Branch("clusY_pz", &m_clusY_pz);
+  t_HoughClusters->Branch("clusY_Nhit", &m_clusY_Nhit);
+  t_HoughClusters->Branch("clusY_Nlayer", &m_clusY_Nlayer);
+  //t_HoughClusters->Branch("NshowerX", &m_NshowerX);
+  //t_HoughClusters->Branch("NshowerY", &m_NshowerY);
+  t_HoughClusters->Branch("barShowerX_x", &m_barShowerX_x);
+  t_HoughClusters->Branch("barShowerX_y", &m_barShowerX_y);
+  t_HoughClusters->Branch("barShowerX_z", &m_barShowerX_z);
+  t_HoughClusters->Branch("barShowerX_E", &m_barShowerX_E);
+  t_HoughClusters->Branch("barShowerY_x", &m_barShowerY_x);
+  t_HoughClusters->Branch("barShowerY_y", &m_barShowerY_y);
+  t_HoughClusters->Branch("barShowerY_z", &m_barShowerY_z);
+  t_HoughClusters->Branch("barShowerY_E", &m_barShowerY_E);
+
+  t_Showers->Branch("Nshower2D", &m_Nshower2D);
+  t_Showers->Branch("shower2D_dlayer", &m_shower2D_dlayer);
+  t_Showers->Branch("shower2D_part", &m_shower2D_part);
+  t_Showers->Branch("shower2D_stave", &m_shower2D_stave);
+  t_Showers->Branch("shower2D_module", &m_shower2D_module);
+  t_Showers->Branch("shower2D_type", &m_shower2D_type);
+  t_Showers->Branch("shower2D_x", &m_shower2D_x);
+  t_Showers->Branch("shower2D_y", &m_shower2D_y);
+  t_Showers->Branch("shower2D_z", &m_shower2D_z);
+  t_Showers->Branch("shower2D_E", &m_shower2D_E);
 
   t_recoPFO->Branch("Npfo", &m_Npfo);
   t_recoPFO->Branch("recPFO_px", &m_recPFO_px);
@@ -226,8 +250,8 @@ StatusCode PandoraPlusPFAlg::execute()
   t_SimBar->Fill();
 
   //Save Layer info
-  ClearLayer();
   for(int ibl=0;ibl<tmp_stavevec.size();ibl++){
+    ClearLayer();
     CRDEcalEDM::CRDCaloBlock tmp_barcol = tmp_stavevec[ibl];
     m_NshowerX = tmp_barcol.getShowerXCol().size();
     m_NshowerY = tmp_barcol.getShowerYCol().size();
@@ -243,16 +267,43 @@ StatusCode PandoraPlusPFAlg::execute()
       m_barShowerY_z.push_back( tmp_barcol.getShowerYCol()[is].getPos().z() );
       m_barShowerY_E.push_back( tmp_barcol.getShowerYCol()[is].getE() );
     }
+    t_Layers->Fill();
   }
-  t_Layers->Fill();
 
 
-  //Save Hough Clusters
+  //Save tower info
   std::vector<CRDEcalEDM::CRDCaloTower> m_towers = m_DataCol.TowerCol;
   for(int it=0; it<m_towers.size(); it++){
-    ClearCluster();
+    //Save bar showers
+    ClearLayer();
+    std::vector<CRDEcalEDM::CRDCaloBlock> m_blockcol = m_towers[it].getBlocks();
+
+    for(int ib=0; ib<m_blockcol.size(); ib++){
+    m_NshowerX = m_blockcol[ib].getShowerXCol().size();
+    m_NshowerY = m_blockcol[ib].getShowerYCol().size();
+    for(int is=0; is<m_NshowerX; is++){
+      m_barShowerX_x.push_back( m_blockcol[ib].getShowerXCol()[is].getPos().x() );
+      m_barShowerX_y.push_back( m_blockcol[ib].getShowerXCol()[is].getPos().y() );
+      m_barShowerX_z.push_back( m_blockcol[ib].getShowerXCol()[is].getPos().z() );
+      m_barShowerX_E.push_back( m_blockcol[ib].getShowerXCol()[is].getE() );
+    }
+    for(int is=0; is<m_NshowerY; is++){
+      m_barShowerY_x.push_back( m_blockcol[ib].getShowerYCol()[is].getPos().x() );
+      m_barShowerY_y.push_back( m_blockcol[ib].getShowerYCol()[is].getPos().y() );
+      m_barShowerY_z.push_back( m_blockcol[ib].getShowerYCol()[is].getPos().z() );
+      m_barShowerY_E.push_back( m_blockcol[ib].getShowerYCol()[is].getE() );
+    }
+    }
+  
+
+
+    //Save Hough clusters
+    //for(int it=0; it<m_towers.size(); it++){
+    //ClearCluster();
     m_NclusX = m_towers[it].getLongiClusterXCol().size(); 
     m_NclusY = m_towers[it].getLongiClusterYCol().size();
+    //if(m_NclusX==0 && m_NclusY==0) continue;
+
     for(int ic=0; ic<m_NclusX; ic++){
       CRDEcalEDM::CRDCaloHitLongiCluster m_longicl = m_towers[it].getLongiClusterXCol()[ic];
       m_clusX_x.push_back(m_longicl.getPos().X()); 
@@ -265,6 +316,7 @@ StatusCode PandoraPlusPFAlg::execute()
       m_clusX_py.push_back(m_longicl.getAxis().Y());
       m_clusX_pz.push_back(m_longicl.getAxis().Z());
       m_clusX_Nhit.push_back(m_longicl.getBarShowers().size());
+      m_clusX_Nlayer.push_back(m_longicl.getEndDlayer()-m_longicl.getBeginningDlayer());
     }
     for(int ic=0; ic<m_NclusY; ic++){
       CRDEcalEDM::CRDCaloHitLongiCluster m_longicl = m_towers[it].getLongiClusterYCol()[ic];
@@ -278,9 +330,27 @@ StatusCode PandoraPlusPFAlg::execute()
       m_clusY_py.push_back(m_longicl.getAxis().Y());
       m_clusY_pz.push_back(m_longicl.getAxis().Z());
       m_clusY_Nhit.push_back(m_longicl.getBarShowers().size());
+      m_clusY_Nlayer.push_back(m_longicl.getEndDlayer()-m_longicl.getBeginningDlayer());
     }
+
     t_HoughClusters->Fill();
+  } 
+
+  //Save 2D showers
+  ClearShower();
+  m_Nshower2D = m_DataCol.Shower2DCol.size();
+  for(int is=0; is<m_DataCol.Shower2DCol.size(); is++){
+    m_shower2D_type.push_back(2);
+    m_shower2D_dlayer.push_back( m_DataCol.Shower2DCol[is].getDlayer() );
+    m_shower2D_part.push_back( m_DataCol.Shower2DCol[is].getPart() );
+    m_shower2D_stave.push_back( m_DataCol.Shower2DCol[is].getStave() );
+    m_shower2D_module.push_back( m_DataCol.Shower2DCol[is].getModule() );
+    m_shower2D_x.push_back( m_DataCol.Shower2DCol[is].getPos().x() );
+    m_shower2D_y.push_back( m_DataCol.Shower2DCol[is].getPos().y() );
+    m_shower2D_z.push_back( m_DataCol.Shower2DCol[is].getPos().z() );
+    m_shower2D_E.push_back( m_DataCol.Shower2DCol[is].getShowerE() );
   }
+  t_Showers->Fill();
 
 
   //Save PFO
@@ -341,6 +411,7 @@ StatusCode PandoraPlusPFAlg::finalize()
   t_SimBar->Write();
   t_Layers->Write();
   t_HoughClusters->Write();
+  t_Showers->Write();
   t_recoPFO->Write();
   m_wfile->Close();
 
@@ -360,7 +431,7 @@ StatusCode PandoraPlusPFAlg::finalize()
   delete m_pPfoCreatorSettings;
   delete m_pEcalClusterRecSettings;
 
-  delete m_wfile, t_SimBar, t_recoPFO, t_Layers, t_recoPFO;
+  delete m_wfile, t_SimBar, t_recoPFO, t_Layers, t_HoughClusters, t_Showers;
 
   info() << "Processed " << _nEvt << " events " << endmsg;
   return GaudiAlgorithm::finalize();
@@ -410,6 +481,7 @@ void PandoraPlusPFAlg::ClearCluster(){
   m_clusX_alpha.clear();
   m_clusX_rho.clear();
   m_clusX_Nhit.clear();
+  m_clusX_Nlayer.clear();
   m_clusY_x.clear();
   m_clusY_y.clear();
   m_clusY_z.clear();
@@ -420,9 +492,22 @@ void PandoraPlusPFAlg::ClearCluster(){
   m_clusY_alpha.clear();
   m_clusY_rho.clear();
   m_clusY_Nhit.clear();
+  m_clusY_Nlayer.clear();
 
 }
 
+void PandoraPlusPFAlg::ClearShower(){
+  m_Nshower2D = -99;
+  m_shower2D_dlayer.clear();
+  m_shower2D_part.clear();
+  m_shower2D_stave.clear();
+  m_shower2D_module.clear();
+  m_shower2D_type.clear();
+  m_shower2D_x.clear();
+  m_shower2D_y.clear();
+  m_shower2D_z.clear();
+  m_shower2D_E.clear();
+}
 
 void PandoraPlusPFAlg::ClearRecPFO(){
   m_recPFO_px.clear(); 

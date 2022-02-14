@@ -7,9 +7,9 @@
 using namespace std;
 using namespace TMath;
 void HoughClusteringAlg::Settings::SetInitialValue(){
-  Nbins_alpha = 500;
-  Nbins_rho = 500;
-  th_Layers = 10;
+  Nbins_alpha = 800;
+  Nbins_rho = 800;
+  th_Layers = 15;
   th_peak = 4;
   fl_continuetrk = true;
   th_continuetrkN = 3;
@@ -343,7 +343,7 @@ StatusCode HoughClusteringAlg::Transform2Clusters( CRDEcalEDM::CRDHoughSpace& m_
   double alpha_width = m_Hspace.getAlphaBinWidth();
   double rho_width = m_Hspace.getRhoBinWidth();
 
-cout<<"Hill size: "<<m_hills.size()<<endl;
+cout<<"HoughObj to Cluster: input hill size = "<<m_hills.size()<<endl;
   for(int ih=0; ih<m_hills.size(); ih++){
     CRDEcalEDM::CRDCaloHitLongiCluster m_clus; m_clus.Clear();
 
@@ -381,14 +381,25 @@ cout<<"Hill size: "<<m_hills.size()<<endl;
           }
     }}
 
-    if(m_clus.getBarShowers().size()<=settings.th_peak) continue;
-    if(settings.fl_continuetrk && !m_clus.isContinue()) continue;
-    if(!m_clus.isContinueN(settings.th_continuetrkN)) continue;
+    if(m_clus.getBarShowers().size()<=settings.th_peak) { /*cout<<"Remove this hill: less than "<<settings.th_peak<<" hits."<<endl;*/  continue;}
+    if(settings.fl_continuetrk && !m_clus.isContinue()) { /*cout<<"Remove this hill: cluster is not continue "<<endl;*/ continue;}
+    if(!m_clus.isContinueN(settings.th_continuetrkN)) { /*cout<<"Remove this hill: does not have "<<settings.th_continuetrkN<<" continuum hits"<<endl;*/  continue; }
     m_clus.FitAxis();
     m_clusCol.push_back(m_clus);
+
   }
 
+cout<<"HoughObj to Cluster: cluster size before cleaning = "<<m_clusCol.size()<<endl;
   CleanClusters(m_clusCol);
+
+cout<<"HoughObj to Cluster: cluster size after cleaning = "<<m_clusCol.size()<<endl;
+cout<<"  Loop print clusters: "<<endl;
+for(int i=0; i<m_clusCol.size(); i++){
+  cout<<"    LongiCluster #"<<i<<'\t';
+  for(int j=0; j<m_clusCol[i].getBarShowers().size(); j++) cout<<m_clusCol[i].getBarShowers()[j].getPosV3().X()<<'\t';
+  cout<<endl;
+}
+
   m_longiClusCol.insert(m_longiClusCol.end(), m_clusCol.begin(), m_clusCol.end());
 
   return StatusCode::SUCCESS;
@@ -403,6 +414,12 @@ StatusCode HoughClusteringAlg::CleanClusters( std::vector<CRDEcalEDM::CRDCaloHit
     if(ic>=m_longiClusCol.size()) ic--;
     if(ic!=jc && m_longiClusCol[ic].isSubset(m_longiClusCol[jc]) ){
       m_longiClusCol.erase(m_longiClusCol.begin()+jc );   
+      jc--;
+      if(ic>jc+1) ic--;
+    }
+    else if(ic!=jc && m_longiClusCol[ic].isOverlap(m_longiClusCol[jc],7,3) ){
+      m_longiClusCol[ic].MergeCluster( m_longiClusCol[jc] );
+      m_longiClusCol.erase(m_longiClusCol.begin()+jc );
       jc--;
       if(ic>jc+1) ic--;
     }

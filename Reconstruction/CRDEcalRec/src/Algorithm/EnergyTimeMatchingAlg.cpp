@@ -6,6 +6,7 @@
 void EnergyTimeMatchingAlg::Settings::SetInitialValue(){
   chi2Wi_E = 1;
   chi2Wi_T = 10;
+  th_GoodLayer = 7;
   th_chi2  = -1;
   sigmaE   = 0.10;
   fl_UseChi2 = true;
@@ -13,9 +14,7 @@ void EnergyTimeMatchingAlg::Settings::SetInitialValue(){
 }
 
 
-EnergyTimeMatchingAlg::EnergyTimeMatchingAlg(){
-
-}
+EnergyTimeMatchingAlg::EnergyTimeMatchingAlg(){}
 
 StatusCode Initialize(){
 	return StatusCode::SUCCESS;
@@ -31,11 +30,16 @@ StatusCode EnergyTimeMatchingAlg::RunAlgorithm( EnergyTimeMatchingAlg::Settings&
   std::vector<CRDEcalEDM::CRDCaloTower> m_towerCol = m_datacol.TowerCol;
   if(m_towerCol.size()==0){ std::cout<<"Warning: Empty input in EnergyTimeMatchingAlg! Please check previous algorithm!"<<std::endl; return StatusCode::SUCCESS; }
 
+cout<<"Start EnergyTimeMatchingAlg. Tower size: "<<m_towerCol.size()<<endl;
+
   for(int it=0; it<m_towerCol.size(); it++){
-    std::vector<CRDEcalEDM::CRDCaloBlock> m_blocks = m_towerCol[it].getBlocks(); 
 
     //Case1: Don't use shadow cluster or chi2 matching, Save all combinations for 3D clustering.
     if(!settings.fl_UseChi2){
+cout<<"  EnergyTimeMatchingAlg: Tower #"<<it<<", Not use chi2 matching"<<endl;
+      std::vector<CRDEcalEDM::CRDCaloBlock> m_blocks = m_towerCol[it].getBlocks(); 
+      if(m_blocks.size()==0) continue; 
+
       for(int ib=0;ib<m_blocks.size();ib++){
         std::vector<CRDEcalEDM::CRDCaloBarShower> showerXCol = m_blocks[ib].getShowerXCol();
         std::vector<CRDEcalEDM::CRDCaloBarShower> showerYCol = m_blocks[ib].getShowerYCol();
@@ -54,11 +58,30 @@ StatusCode EnergyTimeMatchingAlg::RunAlgorithm( EnergyTimeMatchingAlg::Settings&
 
     //Case2: chi2 matching (combined chi2 in all layers)
     else{
+cout<<"  EnergyTimeMatchingAlg: Tower #"<<it<<", Use chi2 matching"<<endl;
       std::vector<CRDEcalEDM::CRDCaloHitLongiCluster> m_longiClXCol = m_towerCol[it].getLongiClusterXCol();
       std::vector<CRDEcalEDM::CRDCaloHitLongiCluster> m_longiClYCol = m_towerCol[it].getLongiClusterYCol();
+cout<<"  EnergyTimeMatchingAlg: Longitudinal cluster size: X "<<m_longiClXCol.size()<<", Y: "<<m_longiClYCol.size()<<endl;
 
-      const int NclusX = m_longiClXCol.size(); 
-      const int NclusY = m_longiClYCol.size(); 
+
+      //Identify longitudinal cluster quality
+      std::vector<CRDEcalEDM::CRDCaloHitLongiCluster> m_goodClusXCol; m_goodClusXCol.clear();
+      std::vector<CRDEcalEDM::CRDCaloHitLongiCluster> m_badClusXCol; m_badClusXCol.clear();
+      for(int ic=0; ic<m_longiClXCol.size(); ic++){
+        if( m_longiClXCol[ic].getEndDlayer()-m_longiClXCol[ic].getBeginningDlayer()>=settings.th_GoodLayer ) m_goodClusXCol.push_back(m_longiClXCol[ic]);
+        else m_badClusXCol.push_back(m_longiClXCol[ic]);
+      }
+      std::vector<CRDEcalEDM::CRDCaloHitLongiCluster> m_goodClusYCol; m_goodClusYCol.clear();
+      std::vector<CRDEcalEDM::CRDCaloHitLongiCluster> m_badClusYCol; m_badClusYCol.clear();
+      for(int ic=0; ic<m_longiClYCol.size(); ic++){
+        if( m_longiClYCol[ic].getEndDlayer()-m_longiClYCol[ic].getBeginningDlayer()>=settings.th_GoodLayer ) m_goodClusYCol.push_back(m_longiClYCol[ic]);
+        else m_badClusYCol.push_back(m_longiClYCol[ic]);
+      }
+cout<<"  EnergyTimeMatchingAlg: Good cluster size: X  "<<m_goodClusXCol.size()<<", Y "<<m_goodClusYCol.size()<<endl;
+
+
+      const int NclusX = m_goodClusXCol.size(); 
+      const int NclusY = m_goodClusYCol.size(); 
       if(NclusX==0 || NclusY==0) continue; 
 
       std::vector<CRDEcalEDM::CRDCaloHit3DCluster> tmp_clusters; tmp_clusters.clear(); 
@@ -66,38 +89,45 @@ StatusCode EnergyTimeMatchingAlg::RunAlgorithm( EnergyTimeMatchingAlg::Settings&
       
       //Case 2.1
       if(NclusX==1 && NclusY==1){
-        chi2=0; sumchi2=0; 
-        XYClusterMatchingL0(m_longiClXCol[0], m_longiClYCol[0], tmp_clus); 
-        tmp_clusters.push_back(m_3Dclus);
-        continue;
+cout<<"  EnergyTimeMatchingAlg: Printout input LongiClusters X "<<endl;
+for(int ii=0; ii<m_goodClusXCol[0].getBarShowers().size(); ii++)
+printf("    #%d shower: pos/E=(%.2f, %.2f, %.2f, %.3f), cellID=(%d, %d, %d, %d, %d) \n", m_goodClusXCol[0].getBarShowers()[ii].getPos().x(), m_goodClusXCol[0].getBarShowers()[ii].getPos().y(), m_goodClusXCol[0].getBarShowers()[ii].getPos().z(), m_goodClusXCol[0].getBarShowers()[ii].getE(), m_goodClusXCol[0].getBarShowers()[ii].getModule(), m_goodClusXCol[0].getBarShowers()[ii].getStave(), m_goodClusXCol[0].getBarShowers()[ii].getPart(), m_goodClusXCol[0].getBarShowers()[ii].getDlayer(), m_goodClusXCol[0].getBarShowers()[ii].getSlayer() );
+cout<<"  EnergyTimeMatchingAlg: Printout input LongiClusters Y "<<endl;
+for(int ii=0; ii<m_goodClusYCol[0].getBarShowers().size(); ii++)
+printf("    #%d shower: pos/E=(%.2f, %.2f, %.2f, %.3f), cellID=(%d, %d, %d, %d, %d) \n", m_goodClusYCol[0].getBarShowers()[ii].getPos().x(), m_goodClusYCol[0].getBarShowers()[ii].getPos().y(), m_goodClusYCol[0].getBarShowers()[ii].getPos().z(), m_goodClusYCol[0].getBarShowers()[ii].getE(), m_goodClusYCol[0].getBarShowers()[ii].getModule(), m_goodClusYCol[0].getBarShowers()[ii].getStave(), m_goodClusYCol[0].getBarShowers()[ii].getPart(), m_goodClusYCol[0].getBarShowers()[ii].getDlayer(), m_goodClusYCol[0].getBarShowers()[ii].getSlayer() );
+
+
+        XYClusterMatchingL0(m_goodClusXCol[0], m_goodClusYCol[0], tmp_clus); 
+        tmp_clusters.push_back(tmp_clus);
+        //continue;
       }
       //Case 2.2
-      else if(NclusX==1){ XYClusterMatchingL1(m_longiClXCol[0], m_longiClYCol, tmp_clusters); continue; }
-      else if(NclusY==1){ XYClusterMatchingL1(m_longiClYCol[0], m_longiClXCol, tmp_clusters); continue; }
+      else if(NclusX==1){ XYClusterMatchingL1(m_goodClusXCol[0], m_goodClusYCol, tmp_clusters); }
+      else if(NclusY==1){ XYClusterMatchingL1(m_goodClusYCol[0], m_goodClusXCol, tmp_clusters); }
 
       //Case 2.3
       else if( NclusX==NclusY ){ 
-        XYClusterMatchingL2(m_longiClXCol, m_longiClYCol, tmp_clusters);
+        XYClusterMatchingL2(m_goodClusXCol, m_goodClusYCol, tmp_clusters);
       }
       //Case 2.4
       else{ 
-        XYClusterMatchingL3(m_longiClXCol, m_longiClYCol, tmp_clusters);
+        XYClusterMatchingL3(m_goodClusXCol, m_goodClusYCol, tmp_clusters);
       }
+cout<<"  EnergyTimeMatchingAlg: After cluster matching. 3D cluster size: "<<tmp_clusters.size()<<endl;
 
       m_ClusterCol.insert(m_ClusterCol.end(), tmp_clusters.begin(), tmp_clusters.end());
       for(int ic=0; ic<tmp_clusters.size(); ic++){ 
         std::vector<CRDEcalEDM::CRDCaloHitTransShower> m_showersinclus = tmp_clusters[ic].get2DShowers(); 
         m_2DshowerCol.insert(m_2DshowerCol.end(), m_showersinclus.begin(), m_showersinclus.end());
       }
-
     }
-
+cout<<"  EnergyTimeMatchingAlg: present 2D shower size: "<<m_2DshowerCol.size()<<", 3D cluster size: "<<m_ClusterCol.size()<<endl;
 
   }
   m_datacol.Shower2DCol = m_2DshowerCol;
   m_datacol.Clus3DCol = m_ClusterCol; 
 
-
+cout<<"End EnergyTimeMatchingAlg"<<endl;
   return StatusCode::SUCCESS;
 }
 
@@ -139,8 +169,8 @@ StatusCode EnergyTimeMatchingAlg::XYClusterMatchingL0( CRDEcalEDM::CRDCaloHitLon
     else if(m_showerXcol.size()==1 && m_showerYcol.size()==1){ GetMatchedShowersL0(m_showerXcol[0], m_showerYcol[0], tmp_shower); m_showerinlayer.push_back(tmp_shower); }
     else if(m_showerXcol.size()==1) GetMatchedShowersL1(m_showerXcol[0], m_showerYcol, m_showerinlayer );
     else if(m_showerYcol.size()==1) GetMatchedShowersL1(m_showerYcol[0], m_showerXcol, m_showerinlayer );
+    else if(m_showerXcol.size()== m_showerYcol.size()) GetMatchedShowersL2(m_showerXcol, m_showerYcol, m_showerinlayer );
     else GetFullMatchedShowers(m_showerXcol, m_showerYcol, m_showerinlayer);
-    //else if(m_showerXcol.size()== m_showerYcol.size()) GetMatchedShowersL2(m_showerXcol, m_showerYcol, m_showerinlayer );
     //else GetMatchedShowersL3(m_showerXcol, m_showerYcol, m_showerinlayer);
 
     for(int is=0; is<m_showerinlayer.size(); is++) m_clus.AddShower(m_showerinlayer[is]);
@@ -191,8 +221,8 @@ StatusCode EnergyTimeMatchingAlg::XYClusterMatchingL1( CRDEcalEDM::CRDCaloHitLon
     else if(m_showerXcol.size()==1 && m_showerYcol.size()==1){ GetMatchedShowersL0(m_showerXcol[0], m_showerYcol[0], tmp_shower); m_showerinlayer.push_back(tmp_shower); }
     else if(m_showerXcol.size()==1) GetMatchedShowersL1(m_showerXcol[0], m_showerYcol, m_showerinlayer );
     else if(m_showerYcol.size()==1) GetMatchedShowersL1(m_showerYcol[0], m_showerXcol, m_showerinlayer );
+    else if(m_showerXcol.size()== m_showerYcol.size()) GetMatchedShowersL2(m_showerXcol, m_showerYcol, m_showerinlayer );
     else GetFullMatchedShowers(m_showerXcol, m_showerYcol, m_showerinlayer);
-    //else if(m_showerXcol.size()== m_showerYcol.size()) GetMatchedShowersL2(m_showerXcol, m_showerYcol, m_showerinlayer );
     //else GetMatchedShowersL3(m_showerXcol, m_showerYcol, m_showerinlayer);
 
     map_2Dshowersinlayer[layerindex[il]] = m_showerinlayer; 
@@ -230,6 +260,8 @@ StatusCode EnergyTimeMatchingAlg::XYClusterMatchingL2( std::vector<CRDEcalEDM::C
   std::map<int, std::vector<std::vector<CRDEcalEDM::CRDCaloBarShower>> > map_showersXinlayer; map_showersXinlayer.clear();
   std::map<int, std::vector<std::vector<CRDEcalEDM::CRDCaloBarShower>> > map_showersYinlayer; map_showersYinlayer.clear();
 
+  //Find layers need to match.
+cout<<"  XYClusterMatchingL2: Find layers need to match "<<endl;
   for(int ic=0; ic<m_longiClXCol.size(); ic++){
   for(int is=0; is<m_longiClXCol[ic].getBarShowers().size(); is++){
     int m_layer = m_longiClXCol[ic].getBarShowers()[is].getDlayer();
@@ -240,45 +272,58 @@ StatusCode EnergyTimeMatchingAlg::XYClusterMatchingL2( std::vector<CRDEcalEDM::C
     int m_layer = m_longiClYCol[ic].getBarShowers()[is].getDlayer();
     if( find( layerindex.begin(), layerindex.end(), m_layer )==layerindex.end() ) layerindex.push_back(m_layer);
   }}
+  sort(layerindex.begin(), layerindex.end());
 
+  //Fill shower maps
+cout<<"  XYClusterMatchingL2: Fill shower maps"<<endl;  
   for(int il=0; il<layerindex.size(); il++){
     for(int ic=0; ic<m_longiClXCol.size(); ic++)
       map_showersXinlayer[layerindex[il]].push_back( m_longiClXCol[ic].getBarShowersInLayer(layerindex[il]) );
     for(int ic=0; ic<m_longiClYCol.size(); ic++)
       map_showersYinlayer[layerindex[il]].push_back( m_longiClYCol[ic].getBarShowersInLayer(layerindex[il]) );
   }
+cout<<"  XYClusterMatchingL2: map size X "<<map_showersXinlayer.size()<<", Y "<<map_showersYinlayer.size()<<endl;
 
   //Get the chi2 map for N*N
+cout<<"  XYClusterMatchingL2: Get chi2 maps"<<endl;
   const int Nclus = m_longiClXCol.size();
-  double map_chi2[14][Nclus][Nclus] = {0};
+  double  **map_chi2[14] = {NULL};  //TODO: hardcoded layer number here! 
   double sumchi2[Nclus][Nclus] = {0};
-  std::map<int, std::vector<CRDEcalEDM::CRDCaloHitTransShower> > map_2Dshowersinlayer; map_2Dshowersinlayer.clear();  
 
   for(int il=0; il<layerindex.size(); il++){
+cout<<"  XYClusterMatchingL2: at layer #"<<layerindex[il]<<endl;
     std::vector<std::vector<CRDEcalEDM::CRDCaloBarShower>> m_showerXcol = map_showersXinlayer[layerindex[il]];
     std::vector<std::vector<CRDEcalEDM::CRDCaloBarShower>> m_showerYcol = map_showersYinlayer[layerindex[il]];
 
-    map_chi2[layerindex[il]] = GetClusterChi2Map(m_showerXcol, m_showerYcol);
+    //double **chi2inlayer = GetClusterChi2Map(m_showerXcol, m_showerYcol);
+    //if(chi2inlayer!=nullptr) map_chi2[layerindex[il]-1] = chi2inlayer;
+   map_chi2[layerindex[il]-1] = GetClusterChi2Map(m_showerXcol, m_showerYcol);
   }
 
+cout<<"  XYClusterMatchingL2: Print Sumchi2 matrix"<<endl;
   for(int ic=0; ic<Nclus; ic++){
   for(int jc=0; jc<Nclus; jc++){
-    for(int il=0; il<14; il++) sumchi2[ic][jc] += map_chi2[il][ic][jc];
-  }}
-
+    for(int il=0; il<14; il++){ 
+      if(map_chi2[il]==nullptr) continue; 
+      sumchi2[ic][jc] += map_chi2[il][ic][jc];
+    }
+cout<<sumchi2[ic][jc]<<'\t';
+  }
+cout<<endl;
+  }
 
   //Get the chi2 of N! combinations
   int Ncomb=1;
   for(int i=Nclus; i>0; i--) Ncomb = Ncomb*i;
 
   map<double, vector<pair<int, int>> > matchingMap;
-  int num[Nshower];
-  int num_init[Nshower];
-  for(int i=0;i<Nshower;i++){ num[i]=i; num_init[i]=i;}
+  int num[Nclus];
+  int num_init[Nclus];
+  for(int i=0;i<Nclus;i++){ num[i]=i; num_init[i]=i;}
 
   for(int icont=0;icont<Ncomb;icont++){
     vector<pair<int, int>> Index;
-    for(int i=0;i<Nshower;i++){
+    for(int i=0;i<Nclus;i++){
        pair<int, int> p1(num_init[i], num[i]);
        Index.push_back(p1);
     }
@@ -287,16 +332,18 @@ StatusCode EnergyTimeMatchingAlg::XYClusterMatchingL2( std::vector<CRDEcalEDM::C
     matchingMap[chi2_tot] = Index;
 
     Index.clear();
-    if(!next_permutation(num, num+Nshower)) break;
+    if(!next_permutation(num, num+Nclus)) break;
   }
+cout<<"  XYClusterMatchingL2: Got chi2 of combination"<<endl;
 
   //map is ordered with [double] value, first element has the smallest chi2 value. 
   map<double, vector<pair<int, int>> >::iterator iter = matchingMap.begin();
   vector<pair<int, int>> Index = iter->second;
 
   for(int ii=0; ii<Index.size(); ii++){
+cout<<"  XYClusterMatchingL2: Selected combination: "<<Index[ii].first<<", "<<Index[ii].second<<endl;
     CRDEcalEDM::CRDCaloHitLongiCluster m_clusX = m_longiClXCol[Index[ii].first];
-    CRDEcalEDM::CRDCaloHitLongiCluster m_clusY = m_longiClYCol[Index[ii].first];
+    CRDEcalEDM::CRDCaloHitLongiCluster m_clusY = m_longiClYCol[Index[ii].second];
     CRDEcalEDM::CRDCaloHit3DCluster tmp_clus; tmp_clus.Clear();
 
     XYClusterMatchingL0(m_clusX, m_clusY, tmp_clus);
@@ -512,11 +559,16 @@ StatusCode EnergyTimeMatchingAlg::GetMatchedShowersL2( std::vector<CRDEcalEDM::C
 double** EnergyTimeMatchingAlg::GetClusterChi2Map( std::vector<std::vector<CRDEcalEDM::CRDCaloBarShower>>& barShowerXCol, 
                                                    std::vector<std::vector<CRDEcalEDM::CRDCaloBarShower>>& barShowerYCol )
 {
-  if(NclusX==0 || NclusY==0) return nullptr; 
-
   const int NclusX = barShowerXCol.size(); 
   const int NclusY = barShowerYCol.size(); 
-  double chi2map[NclusX][NclusY]={0};
+
+  if(NclusX==0 || NclusY==0) return nullptr; 
+  //If one longidutinal cluster is empty in this layer: skip this layer. 
+  for(int icx=0; icx<NclusX; icx++) if(barShowerXCol[icx].size()==0) return nullptr;
+  for(int icy=0; icy<NclusY; icy++) if(barShowerYCol[icy].size()==0) return nullptr;
+
+  double  **chi2map = new double*[NclusX];
+
   double chi2map_E[NclusX][NclusY]={0};
   double chi2map_tx[NclusX][NclusY]={0};
   double chi2map_ty[NclusX][NclusY]={0};
@@ -530,6 +582,7 @@ double** EnergyTimeMatchingAlg::GetClusterChi2Map( std::vector<std::vector<CRDEc
   Ctower.RotateZ(rotAngle);
 
   for(int ix=0;ix<NclusX;ix++){
+  chi2map[ix] = new double[NclusY];
   for(int iy=0;iy<NclusY;iy++){
     std::vector<CRDEcalEDM::CRDCaloBarShower> clusterX = barShowerXCol[ix];
     std::vector<CRDEcalEDM::CRDCaloBarShower> clusterY = barShowerYCol[iy];
@@ -563,7 +616,7 @@ double** EnergyTimeMatchingAlg::GetClusterChi2Map( std::vector<std::vector<CRDEc
     chi2map_E[ix][iy] = min_chi2E; 
     chi2map_tx[ix][iy] = min_chi2tx;
     chi2map_ty[ix][iy] = min_chi2ty;
-    chi2map[ix][iy] = chi2_E[ix][iy]*wi_E + (chi2_tx[ix][iy]+chi2_ty[ix][iy])*wi_T ;
+    chi2map[ix][iy] = chi2map_E[ix][iy]*wi_E + (chi2map_tx[ix][iy]+chi2map_ty[ix][iy])*wi_T ;
 
   }}
 

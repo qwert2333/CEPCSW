@@ -83,7 +83,7 @@ namespace CRDEcalEDM {
     }
 
     void CRDCaloBarShower::setIDInfo(){
-      if(Bars.size()==0) return; 
+      if(Bars.size()==0) { std::cout<<"WARNING: Empty shower does not have ID Info! "<<std::endl;  return; }
       module = Bars[0].getModule(); 
       stave = Bars[0].getStave();
       part = Bars[0].getPart(); 

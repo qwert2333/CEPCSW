@@ -38,12 +38,12 @@ namespace CRDEcalEDM {
 
     void setIDInfo( int _m, int _s, int _d, int _p, int _sl ){ module=_m; stave=_s; dlayer=_d; part=_p; slayer=_sl; }
     void setIDInfo(); 
-    void setBars(std::vector<CRDEcalEDM::CRDCaloBar> _bars){ Bars = _bars; }
-    void addBar(CRDEcalEDM::CRDCaloBar _bar) { Bars.push_back(_bar); }
-    void setSeed(CRDEcalEDM::CRDCaloBar _seed ) { Seed = _seed; }
-    void setPos(dd4hep::Position _pos) { pos = _pos; }
-    void addTrkShadowClus( CRDEcalEDM::CRDShadowCluster _candi ) { TrkShadowClusCol.push_back(_candi); }
-    void addNeuShadowClus( CRDEcalEDM::CRDShadowCluster _candi ) { NeuShadowClusCol.push_back(_candi); }
+    void setBars(std::vector<CRDEcalEDM::CRDCaloBar>& _bars){ Bars = _bars; }
+    void addBar(CRDEcalEDM::CRDCaloBar& _bar) { Bars.push_back(_bar); }
+    void setSeed(CRDEcalEDM::CRDCaloBar& _seed ) { Seed = _seed; }
+    void setPos(dd4hep::Position& _pos) { pos = _pos; }
+    void addTrkShadowClus( CRDEcalEDM::CRDShadowCluster& _candi ) { TrkShadowClusCol.push_back(_candi); }
+    void addNeuShadowClus( CRDEcalEDM::CRDShadowCluster& _candi ) { NeuShadowClusCol.push_back(_candi); }
 
   private:
     int module;

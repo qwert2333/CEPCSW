@@ -33,11 +33,13 @@ namespace CRDEcalEDM{
   bool isContinue() const; 
   bool isContinueN(int n) const; 
   bool isSubset( CRDCaloHitLongiCluster& clus) const; 
+  bool isOverlap( CRDCaloHitLongiCluster& clus, int Nhit_main, int Nhit_diff ) const;
 
   void FitAxis(); 
   void AddBarShower( CRDEcalEDM::CRDCaloBarShower _shower ) { barShowerCol.push_back(_shower); FitAxis(); }
   void SetBarShowers( std::vector<CRDEcalEDM::CRDCaloBarShower> _barshwoers ) { barShowerCol = _barshwoers; }
   void SetHoughPars(double _a, double _r) { Hough_alpha=_a; Hough_rho=_r; }
+  void MergeCluster( CRDCaloHitLongiCluster& clus ); 
 
   private:
     TVector3 axis; 

@@ -43,6 +43,7 @@ namespace CRDEcalEDM{
   }
 
   double CRDCaloBarCluster::getScndMoment(){
+    if(Bars.size()<=1) return 0.;
     dd4hep::Position pos = getPos();
     double Etot = getE();
     double scndM = 0;
@@ -101,8 +102,8 @@ namespace CRDEcalEDM{
   void CRDCaloBarCluster::PrintBars() const{
     if(Bars.size()!=0){
       std::cout<<"BarCluster::PrintBars"<<std::endl;
-      printf("#bar \t x \t y \t z \t E \n");
-      for(int i=0;i<Bars.size();i++) printf("%d \t %f \t %f \t %f \t %f \n",i, Bars[i].getPosition().x(), Bars[i].getPosition().y(), Bars[i].getPosition().z(), Bars[i].getEnergy() );
+      printf("#bar \t x \t y \t z \t E \t cellID \n");
+      for(int i=0;i<Bars.size();i++) printf("%d \t %f \t %f \t %f \t %f \t (%d, %d, %d, %d, %d) \n",i, Bars[i].getPosition().x(), Bars[i].getPosition().y(), Bars[i].getPosition().z(), Bars[i].getEnergy(), Bars[i].getModule(), Bars[i].getStave(), Bars[i].getDlayer(), Bars[i].getPart(),  Bars[i].getSlayer() );
     }
   }
 

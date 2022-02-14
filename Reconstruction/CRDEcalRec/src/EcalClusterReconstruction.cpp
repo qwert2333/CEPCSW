@@ -43,74 +43,54 @@ StatusCode EcalClusterReconstruction::RunAlgorithm( EcalClusterReconstruction::S
 
 
   //Stage 1
-  m_localmaxfindingAlg->RunAlgorithm( *m_LFAlgSettings,  dataCol );
-  //m_coneclus2DAlg     ->RunAlgorithm( *m_CC2AlgSettings, dataCol );
+  cout<<"Finding Local Maximum"<<endl;
+  m_localmaxfindingAlg->RunAlgorithm( *m_LFAlgSettings, dataCol );
+  cout<<"Hough Clustering"<<endl;
   m_houghclusAlg      ->RunAlgorithm( *m_HCAlgSettings, dataCol );
+  cout<<"Energy splitting"<<endl;
+  m_energysplittingAlg->RunAlgorithm( *m_ESAlgSettings, dataCol );
+  cout<<"Chi2 matching"<<endl;
+  m_etmatchingAlg     ->RunAlgorithm( *m_ETAlgSettings, dataCol );
+
 
 /*
-cout<<"  LongiClusterX size: "<<dataCol.LongiClusXCol.size()<<endl;
-cout<<"  Loop print the longiclusterX: "<<endl;
-for(int ic=0; ic<dataCol.LongiClusXCol.size(); ic++){
-  cout<<"    In LongiCluster #"<<ic<<endl;
-  printf("    From layer %d to %d, bar shower size %d \n", dataCol.LongiClusXCol[ic].getBeginningDlayer(), dataCol.LongiClusXCol[ic].getEndDlayer(), dataCol.LongiClusXCol[ic].getBarShowers().size());
-  for(int is=0; is<dataCol.LongiClusXCol[ic].getBarShowers().size(); is++)
-    printf("  (%.3f, %.3f, %.3f) \t", dataCol.LongiClusXCol[ic].getBarShowers()[is].getPos().x(), 
-                                      dataCol.LongiClusXCol[ic].getBarShowers()[is].getPos().y(),
-                                      dataCol.LongiClusXCol[ic].getBarShowers()[is].getPos().z() );
-  cout<<endl;
+cout<<"Block Info: "<<endl;
+for(int ib=0; ib<dataCol.BlockVec.size(); ib++){
+  printf("  #%d Block: ID=(%d, %d, %d, %d). Bar shower size: X=%d, Y=%d \n", ib, dataCol.BlockVec[ib].getModule(), dataCol.BlockVec[ib].getStave(), dataCol.BlockVec[ib].getPart(), dataCol.BlockVec[ib].getDlayer(), dataCol.BlockVec[ib].getShowerXCol().size(), dataCol.BlockVec[ib].getShowerYCol().size() );
+
+  cout<<"  Print BarShowersX "<<endl;
+  for(int is=0 ;is<dataCol.BlockVec[ib].getShowerXCol().size(); is++) 
+  printf("    #%d showerX: cellID=(%d, %d, %d, %d) \n", is, dataCol.BlockVec[ib].getShowerXCol()[is].getModule(), dataCol.BlockVec[ib].getShowerXCol()[is].getStave(), dataCol.BlockVec[ib].getShowerXCol()[is].getPart(), dataCol.BlockVec[ib].getShowerXCol()[is].getDlayer() );
+
+  cout<<"  Print BarShowersY "<<endl;
+  for(int is=0 ;is<dataCol.BlockVec[ib].getShowerYCol().size(); is++)
+  printf("    #%d showerX: cellID=(%d, %d, %d, %d) \n", is, dataCol.BlockVec[ib].getShowerYCol()[is].getModule(), dataCol.BlockVec[ib].getShowerYCol()[is].getStave(), dataCol.BlockVec[ib].getShowerYCol()[is].getPart(), dataCol.BlockVec[ib].getShowerYCol()[is].getDlayer() );
 }
 
-cout<<"  LongiClusterY size: "<<dataCol.LongiClusYCol.size()<<endl;
-cout<<"  Loop print the longiclusterY: "<<endl;
-for(int ic=0; ic<dataCol.LongiClusYCol.size(); ic++){
-  cout<<"    In LongiCluster #"<<ic<<endl;
-  printf("    From layer %d to %d, bar shower size %d \n", dataCol.LongiClusYCol[ic].getBeginningDlayer(), dataCol.LongiClusYCol[ic].getEndDlayer(), dataCol.LongiClusYCol[ic].getBarShowers().size());
-  for(int is=0; is<dataCol.LongiClusYCol[ic].getBarShowers().size(); is++)
-    printf("  (%.3f, %.3f, %.3f) \t", dataCol.LongiClusYCol[ic].getBarShowers()[is].getPos().x(),
-                                      dataCol.LongiClusYCol[ic].getBarShowers()[is].getPos().y(),
-                                      dataCol.LongiClusYCol[ic].getBarShowers()[is].getPos().z() );
-  cout<<endl;
+cout<<endl;
+cout<<endl;
+
+cout<<"Tower Info: "<<endl;
+for(int it=0; it<dataCol.TowerCol.size(); it++){
+  printf("  #%d Tower: ID=(%d, %d, %d). Block size: %d \n", dataCol.TowerCol[it].getModule(), dataCol.TowerCol[it].getStave(), dataCol.TowerCol[it].getPart(), dataCol.TowerCol[it].getBlocks().size() );
+
+for(int ib=0; ib<dataCol.TowerCol[it].getBlocks().size(); ib++){
+  printf("  #%d Block: ID=(%d, %d, %d, %d). Bar shower size: X=%d, Y=%d \n", ib, dataCol.TowerCol[it].getBlocks()[ib].getModule(), dataCol.TowerCol[it].getBlocks()[ib].getStave(), dataCol.TowerCol[it].getBlocks()[ib].getPart(), dataCol.TowerCol[it].getBlocks()[ib].getDlayer(), dataCol.TowerCol[it].getBlocks()[ib].getShowerXCol().size(), dataCol.TowerCol[it].getBlocks()[ib].getShowerYCol().size() );
+
+  cout<<"  Print BarShowersX "<<endl;
+  for(int is=0 ;is<dataCol.TowerCol[it].getBlocks()[ib].getShowerXCol().size(); is++)
+  printf("    #%d showerX: cellID=(%d, %d, %d, %d) \n", is, dataCol.TowerCol[it].getBlocks()[ib].getShowerXCol()[is].getModule(), dataCol.TowerCol[it].getBlocks()[ib].getShowerXCol()[is].getStave(), dataCol.TowerCol[it].getBlocks()[ib].getShowerXCol()[is].getPart(), dataCol.TowerCol[it].getBlocks()[ib].getShowerXCol()[is].getDlayer() );
+
+  cout<<"  Print BarShowersY "<<endl;
+  for(int is=0 ;is<dataCol.TowerCol[it].getBlocks()[ib].getShowerYCol().size(); is++)
+  printf("    #%d showerX: cellID=(%d, %d, %d, %d) \n", is, dataCol.TowerCol[it].getBlocks()[ib].getShowerYCol()[is].getModule(), dataCol.TowerCol[it].getBlocks()[ib].getShowerYCol()[is].getStave(), dataCol.TowerCol[it].getBlocks()[ib].getShowerYCol()[is].getPart(), dataCol.TowerCol[it].getBlocks()[ib].getShowerYCol()[is].getDlayer() );
 }
 
-  //m_shadowmakingAlg   ->RunAlgorithm( *m_CMAlgSettings, dataCol );
-
-//dataCol.PrintLayer();
+}
 */
-/*
-  //Stage 2:
-  m_energysplittingAlg->RunAlgorithm( *m_ESAlgSettings,  dataCol );
-  m_etmatchingAlg->     RunAlgorithm( *m_ETAlgSettings, dataCol );
 
-  //m_coneclusterAlg->    RunAlgorithm( *m_CCAlgSettings, dataCol);
-
-//dataCol.PrintLayer();
-
-
-  m_CIDAlgSettings->SetDepartShower(true);
-  m_clusteridAlg->RunAlgorithm( *m_CIDAlgSettings, dataCol );
-
-  m_CCAlgSettings->SetClusterType("MIP");
-  m_CCAlgSettings->SetConeValue(PI/4., 50., PI/6., 30.);
-  m_CCAlgSettings->SetGoodClusLevel(5);
-  m_CCAlgSettings->SetOverwrite(true);
-  m_coneclusterAlg->RunAlgorithm( *m_CCAlgSettings, dataCol);
-
-  m_CCAlgSettings->SetClusterType("EM");
-  m_CCAlgSettings->SetGoodClusLevel(4);
-  m_CCAlgSettings->SetOverwrite(false);
-  m_coneclusterAlg->RunAlgorithm( *m_CCAlgSettings, dataCol);
-
-  m_CCAlgSettings->SetClusterType("");
-  m_CCAlgSettings->SetConeValue(PI/2., 40., PI/2., 70.);
-  m_CCAlgSettings->SetGoodClusLevel(5);
-  m_CCAlgSettings->SetOverwrite(false);
-  m_coneclusterAlg->RunAlgorithm( *m_CCAlgSettings, dataCol);
-
-  m_CLAlgSettings->SetMergeGoodCluster(false);
-  m_CLAlgSettings->SetMergeBadCluster(false);
-  m_CLAlgSettings->SetMergeEMTail(false);
-  m_clustermergingAlg  ->RunAlgorithm( *m_CLAlgSettings, dataCol );
-*/
+  dataCol.PrintShower();
+  dataCol.Print3DClus();
 
   return StatusCode::SUCCESS;
 

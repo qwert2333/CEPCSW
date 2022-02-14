@@ -27,7 +27,7 @@ namespace CRDEcalEDM{
   }
 
 
-  std::vector<CRDEcalEDM::CRDCaloBarShower> getBarShowersInLayer(int _layer) const{
+  std::vector<CRDEcalEDM::CRDCaloBarShower> CRDCaloHitLongiCluster::getBarShowersInLayer(int _layer) const{
     std::vector<CRDEcalEDM::CRDCaloBarShower> outShowers; outShowers.clear(); 
     for(int i=0; i<barShowerCol.size(); i++)
       if(barShowerCol[i].getDlayer()==_layer) outShowers.push_back(barShowerCol[i]);
@@ -119,6 +119,17 @@ namespace CRDEcalEDM{
     return flag; 
   }
 
+  bool CRDCaloHitLongiCluster::isOverlap( CRDCaloHitLongiCluster& clus, int Nhit_main, int Nhit_diff ) const{
+    bool flag; 
+    int Ndiffhit = 0;
+    for(int is=0; is<clus.getBarShowers().size(); is++)
+      if( find(barShowerCol.begin(), barShowerCol.end(), clus.getBarShowers()[is])==barShowerCol.end() ) Ndiffhit++; 
+
+    if(barShowerCol.size()>=Nhit_main && clus.getBarShowers().size()>=Nhit_main && Ndiffhit<=Nhit_diff) return true; 
+    return false;
+  }
+
+
   void CRDCaloHitLongiCluster::FitAxis(){
     if(barShowerCol.size()==0){ axis.SetXYZ(0,0,0); return; }
     else if(barShowerCol.size()==1){ 
@@ -154,7 +165,13 @@ namespace CRDEcalEDM{
     }
   }
 
-
+  void CRDCaloHitLongiCluster::MergeCluster( CRDCaloHitLongiCluster& clus ){
+    for(int is=0; is<clus.getBarShowers().size(); is++){
+      if( find(barShowerCol.begin(), barShowerCol.end(), clus.getBarShowers()[is])==barShowerCol.end() ) 
+        barShowerCol.push_back( clus.getBarShowers()[is] );
+    }
+    FitAxis();
+  }
 
 
 
