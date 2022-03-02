@@ -68,13 +68,13 @@ cout<<"  EnergyTimeMatchingAlg: Longitudinal cluster size: X "<<m_longiClXCol.si
       std::vector<CRDEcalEDM::CRDCaloHitLongiCluster> m_goodClusXCol; m_goodClusXCol.clear();
       std::vector<CRDEcalEDM::CRDCaloHitLongiCluster> m_badClusXCol; m_badClusXCol.clear();
       for(int ic=0; ic<m_longiClXCol.size(); ic++){
-        if( m_longiClXCol[ic].getEndDlayer()-m_longiClXCol[ic].getBeginningDlayer()>=settings.th_GoodLayer ) m_goodClusXCol.push_back(m_longiClXCol[ic]);
+        if( m_longiClXCol[ic].getEndDlayer()-m_longiClXCol[ic].getBeginningDlayer()+1>=settings.th_GoodLayer ) m_goodClusXCol.push_back(m_longiClXCol[ic]);
         else m_badClusXCol.push_back(m_longiClXCol[ic]);
       }
       std::vector<CRDEcalEDM::CRDCaloHitLongiCluster> m_goodClusYCol; m_goodClusYCol.clear();
       std::vector<CRDEcalEDM::CRDCaloHitLongiCluster> m_badClusYCol; m_badClusYCol.clear();
       for(int ic=0; ic<m_longiClYCol.size(); ic++){
-        if( m_longiClYCol[ic].getEndDlayer()-m_longiClYCol[ic].getBeginningDlayer()>=settings.th_GoodLayer ) m_goodClusYCol.push_back(m_longiClYCol[ic]);
+        if( m_longiClYCol[ic].getEndDlayer()-m_longiClYCol[ic].getBeginningDlayer()+1>=settings.th_GoodLayer ) m_goodClusYCol.push_back(m_longiClYCol[ic]);
         else m_badClusYCol.push_back(m_longiClYCol[ic]);
       }
 cout<<"  EnergyTimeMatchingAlg: Good cluster size: X  "<<m_goodClusXCol.size()<<", Y "<<m_goodClusYCol.size()<<endl;
@@ -185,6 +185,17 @@ StatusCode EnergyTimeMatchingAlg::XYClusterMatchingL1( CRDEcalEDM::CRDCaloHitLon
                                                        std::vector<CRDEcalEDM::CRDCaloHitLongiCluster>& m_longiClN, 
                                                        std::vector<CRDEcalEDM::CRDCaloHit3DCluster>& m_clusters )
 {
+cout<<"  Input LongiCluster: "<<endl;
+for(int ic=0; ic<m_longiClN.size(); ic++){
+for(int is=0; is<m_longiClN[ic].getBarShowers().size(); is++){
+printf("    (%.3f, %.3f, %.3f, %.3f) \t", m_longiClN[ic].getBarShowers()[is].getPos().X(), 
+                                          m_longiClN[ic].getBarShowers()[is].getPos().Y(),
+                                          m_longiClN[ic].getBarShowers()[is].getPos().Z(), 
+                                          m_longiClN[ic].getBarShowers()[is].getE() );
+}
+cout<<endl;
+}
+
   m_clusters.clear(); 
   m_clusters.resize(m_longiClN.size());
 
@@ -210,9 +221,13 @@ StatusCode EnergyTimeMatchingAlg::XYClusterMatchingL1( CRDEcalEDM::CRDCaloHitLon
   }}
   
   std::map<int, std::vector<CRDEcalEDM::CRDCaloHitTransShower> > map_2Dshowersinlayer; map_2Dshowersinlayer.clear(); 
+
+  sort(layerindex.begin(), layerindex.end());
   for(int il=0; il<layerindex.size(); il++){
+
     std::vector<CRDEcalEDM::CRDCaloBarShower> m_showerXcol = map_showersXinlayer[layerindex[il]];
     std::vector<CRDEcalEDM::CRDCaloBarShower> m_showerYcol = map_showersYinlayer[layerindex[il]];
+cout<<"    XYClusterMatchingL1: In Layer #"<<layerindex[il]<<": (X, Y) = ("<<m_showerXcol.size()<<", "<<m_showerYcol.size()<<") "<<endl;
 
     std::vector<CRDEcalEDM::CRDCaloHitTransShower> m_showerinlayer; m_showerinlayer.clear();
     CRDEcalEDM::CRDCaloHitTransShower tmp_shower; tmp_shower.Clear();
@@ -228,11 +243,18 @@ StatusCode EnergyTimeMatchingAlg::XYClusterMatchingL1( CRDEcalEDM::CRDCaloHitLon
     map_2Dshowersinlayer[layerindex[il]] = m_showerinlayer; 
   }
 
+
   for(int il=0; il<layerindex.size(); il++){
+cout<<"    In Layer #"<<layerindex[il]<<":  TransShower size = "<<map_2Dshowersinlayer[layerindex[il]].size()<<endl;
+
   for(int is=0; is<map_2Dshowersinlayer[layerindex[il]].size(); is++){
+printf("      TransShower #%d: pos+E=(%.3f, %.3f, %.3f) \n", is, map_2Dshowersinlayer[layerindex[il]][is].getPos().Z(), map_2Dshowersinlayer[layerindex[il]][is].getPos().Y(), map_2Dshowersinlayer[layerindex[il]][is].getShowerE() );
+
     CRDEcalEDM::CRDCaloBarShower m_barshower; 
     if(slayer==0) m_barshower=map_2Dshowersinlayer[layerindex[il]][is].getShowerY();
     else m_barshower=map_2Dshowersinlayer[layerindex[il]][is].getShowerX();
+
+printf("      Selected barshower: DLayer=%d, sLayer=%d, pos+E=(%.3f, %.3f, %.3f) \n", m_barshower.getDlayer(), m_barshower.getSlayer(), m_barshower.getPos().Y(), m_barshower.getPos().Z(), m_barshower.getE() );
 
     int index_longiclus=-1; 
     bool fl_foundsh = false; 
@@ -240,6 +262,7 @@ StatusCode EnergyTimeMatchingAlg::XYClusterMatchingL1( CRDEcalEDM::CRDCaloHitLon
     for(int jc=0; jc<m_longiClN[ic].getBarShowers().size() && !fl_foundsh; jc++){
       if(m_barshower==m_longiClN[ic].getBarShowers()[jc]){index_longiclus=ic; fl_foundsh=true; break; }
     }}
+cout<<"      Found LongiShower: "<<index_longiclus<<endl;
 
     if(index_longiclus<0){ std::cout<<"WARNING: did not find properate longitudinal cluster! "<<std::endl; continue; }
     m_clusters[index_longiclus].AddShower(map_2Dshowersinlayer[layerindex[il]][is]);

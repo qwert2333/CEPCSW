@@ -7,10 +7,10 @@
 using namespace std;
 using namespace TMath;
 void HoughClusteringAlg::Settings::SetInitialValue(){
-  Nbins_alpha = 800;
-  Nbins_rho = 800;
-  th_Layers = 15;
-  th_peak = 4;
+  Nbins_alpha = 300;
+  Nbins_rho = 300;
+  th_Layers = 10;
+  th_peak = 3;
   fl_continuetrk = true;
   th_continuetrkN = 3;
 }
@@ -59,7 +59,7 @@ cout<<"  HoughClusteringAlg: Conformal transformation"<<endl;
     ConformalTransformation(m_HoughObjectsX);
     ConformalTransformation(m_HoughObjectsY);
 
-/*
+
 cout<<"    Local max (HoughObjectX): "<<endl;
 for(int i=0; i<m_HoughObjectsX.size(); i++) printf("(%.2f, %.2f, %.2f) \t", m_HoughObjectsX[i].getLocalMax().getPos().x(), m_HoughObjectsX[i].getLocalMax().getPos().y(), m_HoughObjectsX[i].getLocalMax().getPos().z() );
 cout<<endl;
@@ -73,21 +73,29 @@ cout<<endl;
 cout<<"    Conformal Point (HoughObjectY): "<<endl;
 for(int i=0; i<m_HoughObjectsY.size(); i++) printf("(%.2f, %.2f) \t", m_HoughObjectsY[i].getConformPointUR().X(), m_HoughObjectsY[i].getConformPointUR().Y());
 cout<<endl;
-*/
+
 
 cout<<"  HoughClusteringAlg: Hough transformation"<<endl;
     //Hough transformation
     HoughTransformation(m_HoughObjectsX);
     HoughTransformation(m_HoughObjectsY);
-/*
+
+
+cout<<"  Check all Hough Objects: "<<endl;
+
 cout<<"  Transformed Hough lines X: "<<endl;
 for(int i=0; i<m_HoughObjectsX.size(); i++){
+  cout<<"    HoughObj #"<<i<<": Origin localMax position ";
+  printf(" (%.3f, %.3f, %.3f) \n", m_HoughObjectsX[i].getLocalMax().getPos().X(), m_HoughObjectsX[i].getLocalMax().getPos().Z(), m_HoughObjectsX[i].getLocalMax().getE());
+  printf("    Conformal Point: (%.3f, %.3f) \n", m_HoughObjectsX[i].getConformPointUR().X()-5, m_HoughObjectsX[i].getConformPointUR().Y()-5 );
   cout<<"    LineUR pars: "<<m_HoughObjectsX[i].getHoughLineUR().GetParameter(0)<<"  "<<m_HoughObjectsX[i].getHoughLineUR().GetParameter(1)<<", range: ["<<m_HoughObjectsX[i].getHoughLineUR().GetMaximum()<<", "<<m_HoughObjectsX[i].getHoughLineUR().GetMinimum()<<"]"<<endl;
   cout<<"    LineUL pars: "<<m_HoughObjectsX[i].getHoughLineUL().GetParameter(0)<<"  "<<m_HoughObjectsX[i].getHoughLineUL().GetParameter(1)<<", range: ["<<m_HoughObjectsX[i].getHoughLineUL().GetMaximum()<<", "<<m_HoughObjectsX[i].getHoughLineUL().GetMinimum()<<"]"<<endl;
   cout<<"    LineDR pars: "<<m_HoughObjectsX[i].getHoughLineDR().GetParameter(0)<<"  "<<m_HoughObjectsX[i].getHoughLineDR().GetParameter(1)<<", range: ["<<m_HoughObjectsX[i].getHoughLineDR().GetMaximum()<<", "<<m_HoughObjectsX[i].getHoughLineDR().GetMinimum()<<"]"<<endl;
   cout<<"    LineDL pars: "<<m_HoughObjectsX[i].getHoughLineDL().GetParameter(0)<<"  "<<m_HoughObjectsX[i].getHoughLineDL().GetParameter(1)<<", range: ["<<m_HoughObjectsX[i].getHoughLineDL().GetMaximum()<<", "<<m_HoughObjectsX[i].getHoughLineDL().GetMinimum()<<"]"<<endl;
+  cout<<endl;
 }
 
+/*
 cout<<"  Transformed Hough lines Y: "<<endl;
 for(int i=0; i<m_HoughObjectsY.size(); i++){
   cout<<"    LineUR pars: "<<m_HoughObjectsY[i].getHoughLineUR().GetParameter(0)<<"  "<<m_HoughObjectsY[i].getHoughLineUR().GetParameter(1)<<", range: ["<<m_HoughObjectsY[i].getHoughLineUR().GetMaximum()<<", "<<m_HoughObjectsY[i].getHoughLineUR().GetMinimum()<<"]"<<endl;
@@ -104,22 +112,18 @@ cout<<"  HoughClusteringAlg: Fill bins to get the hills"<<endl;
     CRDEcalEDM::CRDHoughSpace m_HoughSpaceY; 
     FillHoughSpace(m_HoughObjectsX, m_HoughSpaceX);
     FillHoughSpace(m_HoughObjectsY, m_HoughSpaceY);
-/*   
-//Print Hough space map:
-cout<<"HoughMap X: "<<endl;
-for(int ix=0; ix<settings.Nbins_alpha; ix++){
-for(int iy=0; iy<settings.Nbins_rho; iy++){
-  cout<<m_HoughSpaceX.getSpaceMap().GetBinContent(ix+1, iy+1)<<"  ";
-}
-cout<<endl;
-}
-cout<<"HoughMap Y: "<<endl;
-for(int ix=0; ix<settings.Nbins_alpha; ix++){
-for(int iy=0; iy<settings.Nbins_rho; iy++){
-  cout<<m_HoughSpaceY.getSpaceMap().GetBinContent(ix+1, iy+1)<<"  ";
-}
-cout<<endl;
-}
+
+/*
+cout<<"  Save Hough space map"<<endl;
+TCanvas *c1 = new TCanvas("c1", "c1", 700,500);
+c1->cd();
+TH2F *h2_mapXZ = new TH2F();
+*h2_mapXZ = m_HoughSpaceX.getSpaceMap();
+cout<<" If space map is empty: "<<h2_mapXZ->Integral()<<endl;
+h2_mapXZ->Draw("colz");
+//c1->Draw();
+c1->SaveAs("/cefs/higgs/guofy/cepcsoft/CEPCSW_v10/run/HoughMapXZ.C");
+delete c1, h2_mapXZ;
 */
 
 cout<<"  HoughClusteringAlg: Find hills"<<endl;
@@ -142,6 +146,8 @@ cout<<"End in HoughClusteringAlg"<<endl;
 
   return StatusCode::SUCCESS;
 }
+
+
 
 StatusCode HoughClusteringAlg::ClearAlgorithm(){
 
@@ -241,17 +247,17 @@ StatusCode HoughClusteringAlg::FillHoughSpace(std::vector<CRDEcalEDM::CRDHoughOb
 
   m_Hspace.Clear(); 
 
-  TH2F m_houghMap("","",settings.Nbins_alpha, -0.1, PI, settings.Nbins_rho, -200, 200);
+  TH2F m_houghMap("","",settings.Nbins_alpha, -0.1, PI, settings.Nbins_rho, -130, 130);
   double width_alpha = (PI+0.1)/(double)settings.Nbins_alpha;
-  double width_rho = 400./(double)settings.Nbins_rho; 
+  double width_rho = 260./(double)settings.Nbins_rho; 
 
-cout<<"Hough object size: "<<m_Hobjects.size()<<endl;  
   for(int io=0; io<m_Hobjects.size(); io++){
 
     TF1 line_ur = m_Hobjects[io].getHoughLineUR();
     TF1 line_ul = m_Hobjects[io].getHoughLineUL();
     TF1 line_dr = m_Hobjects[io].getHoughLineDR();
     TF1 line_dl = m_Hobjects[io].getHoughLineDL();
+
 
     //Loop for alpha bins
 		for(int ibin=0; ibin<m_houghMap.GetNbinsX(); ibin++){
@@ -265,12 +271,13 @@ cout<<"Hough object size: "<<m_Hobjects.size()<<endl;
       double rho_min = min(min(min(rho_u,rho_d), rho_u_p), rho_d_p);
       double rho_max = max(max(max(rho_u,rho_d), rho_u_p), rho_d_p);
 
-
       double rho_tmp = rho_min; 
+
       while( floor(rho_tmp/width_rho)<floor(rho_max/width_rho) ){
-        m_houghMap.Fill(alpha, rho_tmp);
+       m_houghMap.Fill(alpha+0.001, rho_tmp);
         rho_tmp += width_rho;
       }
+
     }
 	}//End loop Hough Objects
 
@@ -296,7 +303,7 @@ cout<<m_houghMap.GetBinContent(ia, ir+1)<<'\t'<<m_houghMap.GetBinContent(ia+1, i
 cout<<m_houghMap.GetBinContent(ia, ir+2)<<'\t'<<m_houghMap.GetBinContent(ia+1, ir+2)<<'\t'<<m_houghMap.GetBinContent(ia+2, ir+2)<<endl;
 }
 */
-    if(m_houghMap.GetBinContent(ia+1, ir+1)>settings.th_peak){
+    if(m_houghMap.GetBinContent(ia+1, ir+1)>=settings.th_peak){
       CRDEcalEDM::CRDHoughSpace::HoughHill m_hill; m_hill.Clear();
       m_hill.AddCell(ia, ir, m_houghMap.GetBinContent(ia+1, ir+1));
       int flag_expend = ExpandingPeak( m_houghMap, ia, ir, m_hill );
@@ -334,6 +341,21 @@ StatusCode HoughClusteringAlg::Transform2Clusters( CRDEcalEDM::CRDHoughSpace& m_
 {
   if(m_Hobjects.size()==0) return StatusCode::SUCCESS;
 
+  //Get center of hits, for calculating intercept. 
+  double m_minX = 9999;
+  double m_maxX = -9999;
+  double m_minY = 9999;
+  double m_maxY = -9999;
+  for(int iobj=0; iobj<m_Hobjects.size(); iobj++){
+    if(m_Hobjects[iobj].getConformPointUR().X()<m_minX) m_minX = m_Hobjects[iobj].getConformPointUR().X();
+    if(m_Hobjects[iobj].getConformPointUR().X()>m_maxX) m_maxX = m_Hobjects[iobj].getConformPointUR().X();
+    if(m_Hobjects[iobj].getConformPointUR().Y()<m_minY) m_minY = m_Hobjects[iobj].getConformPointUR().Y();
+    if(m_Hobjects[iobj].getConformPointUR().Y()>m_maxY) m_maxY = m_Hobjects[iobj].getConformPointUR().Y();
+  }
+  double centerX = (m_minX+m_maxX)/2.;
+  double centerY = (m_minY+m_maxY)/2.;
+
+
   std::vector<CRDEcalEDM::CRDCaloHitLongiCluster> m_clusCol; m_clusCol.clear(); 
   std::vector<CRDEcalEDM::CRDHoughSpace::HoughHill> m_hills = m_Hspace.getHills(); 
   double alpha_min = m_Hspace.getAlphaLowEdge();
@@ -343,7 +365,6 @@ StatusCode HoughClusteringAlg::Transform2Clusters( CRDEcalEDM::CRDHoughSpace& m_
   double alpha_width = m_Hspace.getAlphaBinWidth();
   double rho_width = m_Hspace.getRhoBinWidth();
 
-cout<<"HoughObj to Cluster: input hill size = "<<m_hills.size()<<endl;
   for(int ih=0; ih<m_hills.size(); ih++){
     CRDEcalEDM::CRDCaloHitLongiCluster m_clus; m_clus.Clear();
 
@@ -384,21 +405,17 @@ cout<<"HoughObj to Cluster: input hill size = "<<m_hills.size()<<endl;
     if(m_clus.getBarShowers().size()<=settings.th_peak) { /*cout<<"Remove this hill: less than "<<settings.th_peak<<" hits."<<endl;*/  continue;}
     if(settings.fl_continuetrk && !m_clus.isContinue()) { /*cout<<"Remove this hill: cluster is not continue "<<endl;*/ continue;}
     if(!m_clus.isContinueN(settings.th_continuetrkN)) { /*cout<<"Remove this hill: does not have "<<settings.th_continuetrkN<<" continuum hits"<<endl;*/  continue; }
+
+    double sin_alpha = sin(m_clus.getHoughAlpha()); 
+    double cos_alpha = cos(m_clus.getHoughAlpha());
+    double intercept = centerY + cos_alpha*centerX/sin_alpha + m_clus.getHoughRho()/sin_alpha; 
+    m_clus.SetIntercept(intercept); 
     m_clus.FitAxis();
     m_clusCol.push_back(m_clus);
 
   }
 
-cout<<"HoughObj to Cluster: cluster size before cleaning = "<<m_clusCol.size()<<endl;
   CleanClusters(m_clusCol);
-
-cout<<"HoughObj to Cluster: cluster size after cleaning = "<<m_clusCol.size()<<endl;
-cout<<"  Loop print clusters: "<<endl;
-for(int i=0; i<m_clusCol.size(); i++){
-  cout<<"    LongiCluster #"<<i<<'\t';
-  for(int j=0; j<m_clusCol[i].getBarShowers().size(); j++) cout<<m_clusCol[i].getBarShowers()[j].getPosV3().X()<<'\t';
-  cout<<endl;
-}
 
   m_longiClusCol.insert(m_longiClusCol.end(), m_clusCol.begin(), m_clusCol.end());
 

@@ -59,7 +59,8 @@ StatusCode PandoraPlusPFAlg::initialize()
   t_SimBar = new TTree("SimBarHit", "SimBarHit");
   t_Layers = new TTree("RecLayers","RecLayers");
   t_HoughClusters = new TTree("RecClusters", "RecClusters");
-  t_Showers = new TTree("RecShowers", "RecShowers");
+  t_ShowersX = new TTree("RecShowersX", "RecShowersX");
+  t_ShowersY = new TTree("RecShowersY", "RecShowersY");
   t_recoPFO = new TTree("RecPFO",  "RecPFO");
 
   t_SimBar->Branch("simBar_x", &m_simBar_x);
@@ -74,6 +75,7 @@ StatusCode PandoraPlusPFAlg::initialize()
   t_SimBar->Branch("simBar_part", &m_simBar_part);
   t_SimBar->Branch("simBar_stave", &m_simBar_stave);
   t_SimBar->Branch("simBar_slayer", &m_simBar_slayer);
+  t_SimBar->Branch("simBar_id", &m_simBar_id);
 
   t_Layers->Branch("NshowerX", &m_NshowerX);
   t_Layers->Branch("NshowerY", &m_NshowerY);
@@ -94,6 +96,7 @@ StatusCode PandoraPlusPFAlg::initialize()
   t_HoughClusters->Branch("clusX_E", &m_clusX_E);
   t_HoughClusters->Branch("clusX_alpha", &m_clusX_alpha);
   t_HoughClusters->Branch("clusX_rho", &m_clusX_rho);
+  t_HoughClusters->Branch("clusX_inter", &m_clusX_inter);
   t_HoughClusters->Branch("clusX_px", &m_clusX_px);
   t_HoughClusters->Branch("clusX_py", &m_clusX_py);
   t_HoughClusters->Branch("clusX_pz", &m_clusX_pz);
@@ -105,6 +108,7 @@ StatusCode PandoraPlusPFAlg::initialize()
   t_HoughClusters->Branch("clusY_E", &m_clusY_E);
   t_HoughClusters->Branch("clusY_alpha", &m_clusY_alpha);
   t_HoughClusters->Branch("clusY_rho", &m_clusY_rho);
+  t_HoughClusters->Branch("clusY_inter", &m_clusY_inter);
   t_HoughClusters->Branch("clusY_px", &m_clusY_px);
   t_HoughClusters->Branch("clusY_py", &m_clusY_py);
   t_HoughClusters->Branch("clusY_pz", &m_clusY_pz);
@@ -112,7 +116,8 @@ StatusCode PandoraPlusPFAlg::initialize()
   t_HoughClusters->Branch("clusY_Nlayer", &m_clusY_Nlayer);
   //t_HoughClusters->Branch("NshowerX", &m_NshowerX);
   //t_HoughClusters->Branch("NshowerY", &m_NshowerY);
-  t_HoughClusters->Branch("barShowerX_x", &m_barShowerX_x);
+
+/*  t_HoughClusters->Branch("barShowerX_x", &m_barShowerX_x);
   t_HoughClusters->Branch("barShowerX_y", &m_barShowerX_y);
   t_HoughClusters->Branch("barShowerX_z", &m_barShowerX_z);
   t_HoughClusters->Branch("barShowerX_E", &m_barShowerX_E);
@@ -120,8 +125,9 @@ StatusCode PandoraPlusPFAlg::initialize()
   t_HoughClusters->Branch("barShowerY_y", &m_barShowerY_y);
   t_HoughClusters->Branch("barShowerY_z", &m_barShowerY_z);
   t_HoughClusters->Branch("barShowerY_E", &m_barShowerY_E);
+*/
 
-  t_Showers->Branch("Nshower2D", &m_Nshower2D);
+/*  t_Showers->Branch("Nshower2D", &m_Nshower2D);
   t_Showers->Branch("shower2D_dlayer", &m_shower2D_dlayer);
   t_Showers->Branch("shower2D_part", &m_shower2D_part);
   t_Showers->Branch("shower2D_stave", &m_shower2D_stave);
@@ -131,6 +137,15 @@ StatusCode PandoraPlusPFAlg::initialize()
   t_Showers->Branch("shower2D_y", &m_shower2D_y);
   t_Showers->Branch("shower2D_z", &m_shower2D_z);
   t_Showers->Branch("shower2D_E", &m_shower2D_E);
+*/
+  t_ShowersX->Branch("barShowerX_x", &m_barShowerX_x);
+  t_ShowersX->Branch("barShowerX_y", &m_barShowerX_y);
+  t_ShowersX->Branch("barShowerX_z", &m_barShowerX_z);
+  t_ShowersX->Branch("barShowerX_E", &m_barShowerX_E);
+  t_ShowersY->Branch("barShowerY_x", &m_barShowerY_x);
+  t_ShowersY->Branch("barShowerY_y", &m_barShowerY_y);
+  t_ShowersY->Branch("barShowerY_z", &m_barShowerY_z);
+  t_ShowersY->Branch("barShowerY_E", &m_barShowerY_E);
 
   t_recoPFO->Branch("Npfo", &m_Npfo);
   t_recoPFO->Branch("recPFO_px", &m_recPFO_px);
@@ -230,6 +245,7 @@ StatusCode PandoraPlusPFAlg::execute()
       m_simBar_part.push_back(hitbar.getPart());
       m_simBar_stave.push_back(hitbar.getStave());
       m_simBar_slayer.push_back(hitbar.getSlayer());
+      m_simBar_id.push_back(hitbar.getcellID());
     }
     for(int ibar=0;ibar<tmp_barcol.getBarYCol().size();ibar++){
       CRDEcalEDM::CRDCaloBar hitbar = tmp_barcol.getBarYCol()[ibar];
@@ -250,8 +266,9 @@ StatusCode PandoraPlusPFAlg::execute()
   t_SimBar->Fill();
 
   //Save Layer info
+  ClearLayer();
+  tmp_stavevec = m_DataCol.BlockVec;
   for(int ibl=0;ibl<tmp_stavevec.size();ibl++){
-    ClearLayer();
     CRDEcalEDM::CRDCaloBlock tmp_barcol = tmp_stavevec[ibl];
     m_NshowerX = tmp_barcol.getShowerXCol().size();
     m_NshowerY = tmp_barcol.getShowerYCol().size();
@@ -267,15 +284,17 @@ StatusCode PandoraPlusPFAlg::execute()
       m_barShowerY_z.push_back( tmp_barcol.getShowerYCol()[is].getPos().z() );
       m_barShowerY_E.push_back( tmp_barcol.getShowerYCol()[is].getE() );
     }
-    t_Layers->Fill();
   }
+  t_Layers->Fill();
 
 
   //Save tower info
   std::vector<CRDEcalEDM::CRDCaloTower> m_towers = m_DataCol.TowerCol;
+  ClearCluster();
   for(int it=0; it<m_towers.size(); it++){
+
     //Save bar showers
-    ClearLayer();
+/*    ClearLayer();
     std::vector<CRDEcalEDM::CRDCaloBlock> m_blockcol = m_towers[it].getBlocks();
 
     for(int ib=0; ib<m_blockcol.size(); ib++){
@@ -294,16 +313,13 @@ StatusCode PandoraPlusPFAlg::execute()
       m_barShowerY_E.push_back( m_blockcol[ib].getShowerYCol()[is].getE() );
     }
     }
-  
+*/  
 
-
-    //Save Hough clusters
-    //for(int it=0; it<m_towers.size(); it++){
     //ClearCluster();
+    //Save Hough clusters
     m_NclusX = m_towers[it].getLongiClusterXCol().size(); 
     m_NclusY = m_towers[it].getLongiClusterYCol().size();
-    //if(m_NclusX==0 && m_NclusY==0) continue;
-
+    if(m_NclusX==0 && m_NclusY==0) continue;
     for(int ic=0; ic<m_NclusX; ic++){
       CRDEcalEDM::CRDCaloHitLongiCluster m_longicl = m_towers[it].getLongiClusterXCol()[ic];
       m_clusX_x.push_back(m_longicl.getPos().X()); 
@@ -312,6 +328,7 @@ StatusCode PandoraPlusPFAlg::execute()
       m_clusX_E.push_back(m_longicl.getE()); 
       m_clusX_alpha.push_back(m_longicl.getHoughAlpha()); 
       m_clusX_rho.push_back(m_longicl.getHoughRho()); 
+      m_clusX_inter.push_back(m_longicl.getHoughIntercept());
       m_clusX_px.push_back(m_longicl.getAxis().X());
       m_clusX_py.push_back(m_longicl.getAxis().Y());
       m_clusX_pz.push_back(m_longicl.getAxis().Z());
@@ -326,32 +343,53 @@ StatusCode PandoraPlusPFAlg::execute()
       m_clusY_E.push_back(m_longicl.getE());
       m_clusY_alpha.push_back(m_longicl.getHoughAlpha());
       m_clusY_rho.push_back(m_longicl.getHoughRho());
+      m_clusY_inter.push_back(m_longicl.getHoughIntercept());
       m_clusY_px.push_back(m_longicl.getAxis().X());
       m_clusY_py.push_back(m_longicl.getAxis().Y());
       m_clusY_pz.push_back(m_longicl.getAxis().Z());
       m_clusY_Nhit.push_back(m_longicl.getBarShowers().size());
       m_clusY_Nlayer.push_back(m_longicl.getEndDlayer()-m_longicl.getBeginningDlayer());
     }
-
-    t_HoughClusters->Fill();
+    //t_HoughClusters->Fill();
   } 
+  t_HoughClusters->Fill();
 
-  //Save 2D showers
-  ClearShower();
-  m_Nshower2D = m_DataCol.Shower2DCol.size();
-  for(int is=0; is<m_DataCol.Shower2DCol.size(); is++){
-    m_shower2D_type.push_back(2);
-    m_shower2D_dlayer.push_back( m_DataCol.Shower2DCol[is].getDlayer() );
-    m_shower2D_part.push_back( m_DataCol.Shower2DCol[is].getPart() );
-    m_shower2D_stave.push_back( m_DataCol.Shower2DCol[is].getStave() );
-    m_shower2D_module.push_back( m_DataCol.Shower2DCol[is].getModule() );
-    m_shower2D_x.push_back( m_DataCol.Shower2DCol[is].getPos().x() );
-    m_shower2D_y.push_back( m_DataCol.Shower2DCol[is].getPos().y() );
-    m_shower2D_z.push_back( m_DataCol.Shower2DCol[is].getPos().z() );
-    m_shower2D_E.push_back( m_DataCol.Shower2DCol[is].getShowerE() );
+  //Save Hough Clusters
+  m_towers = m_DataCol.TowerCol;
+  for(int it=0; it<m_towers.size(); it++){
+
+    ClearLayer();
+
+    m_NclusX = m_towers[it].getLongiClusterXCol().size();
+    m_NclusY = m_towers[it].getLongiClusterYCol().size();
+
+    for(int is=0; is<m_NclusX; is++){
+      m_barShowerX_x.clear(); m_barShowerX_y.clear(); m_barShowerX_z.clear(); m_barShowerX_E.clear();
+
+      CRDEcalEDM::CRDCaloHitLongiCluster m_longicl = m_towers[it].getLongiClusterXCol()[is];
+      for(int js=0; js<m_longicl.getBarShowers().size(); js++){
+        m_barShowerX_x.push_back( m_longicl.getBarShowers()[js].getPos().x() );
+        m_barShowerX_y.push_back( m_longicl.getBarShowers()[js].getPos().y() );
+        m_barShowerX_z.push_back( m_longicl.getBarShowers()[js].getPos().z() );
+        m_barShowerX_E.push_back( m_longicl.getBarShowers()[js].getE() );
+      }
+      t_ShowersX->Fill();
+    }
+    for(int is=0; is<m_NclusY; is++){
+      m_barShowerY_x.clear(); m_barShowerY_y.clear(); m_barShowerY_z.clear(); m_barShowerY_E.clear();
+
+      CRDEcalEDM::CRDCaloHitLongiCluster m_longicl = m_towers[it].getLongiClusterYCol()[is];
+      for(int js=0; js<m_longicl.getBarShowers().size(); js++){
+        m_barShowerY_x.push_back( m_longicl.getBarShowers()[js].getPos().x() );
+        m_barShowerY_y.push_back( m_longicl.getBarShowers()[js].getPos().y() );
+        m_barShowerY_z.push_back( m_longicl.getBarShowers()[js].getPos().z() );
+        m_barShowerY_E.push_back( m_longicl.getBarShowers()[js].getE() );
+      }
+      t_ShowersY->Fill();
+    }
+
+   
   }
-  t_Showers->Fill();
-
 
   //Save PFO
   ClearRecPFO();
@@ -411,7 +449,8 @@ StatusCode PandoraPlusPFAlg::finalize()
   t_SimBar->Write();
   t_Layers->Write();
   t_HoughClusters->Write();
-  t_Showers->Write();
+  t_ShowersX->Write();
+  t_ShowersY->Write();
   t_recoPFO->Write();
   m_wfile->Close();
 
@@ -431,7 +470,7 @@ StatusCode PandoraPlusPFAlg::finalize()
   delete m_pPfoCreatorSettings;
   delete m_pEcalClusterRecSettings;
 
-  delete m_wfile, t_SimBar, t_recoPFO, t_Layers, t_HoughClusters, t_Showers;
+  delete m_wfile, t_SimBar, t_recoPFO, t_Layers, t_HoughClusters, t_ShowersX, t_ShowersY;
 
   info() << "Processed " << _nEvt << " events " << endmsg;
   return GaudiAlgorithm::finalize();
@@ -451,6 +490,7 @@ void PandoraPlusPFAlg::ClearBar(){
   m_simBar_part.clear();
   m_simBar_stave.clear();
   m_simBar_slayer.clear();
+  m_simBar_id.clear();
 }
 
 
@@ -480,6 +520,7 @@ void PandoraPlusPFAlg::ClearCluster(){
   m_clusX_pz.clear();
   m_clusX_alpha.clear();
   m_clusX_rho.clear();
+  m_clusX_inter.clear();
   m_clusX_Nhit.clear();
   m_clusX_Nlayer.clear();
   m_clusY_x.clear();
@@ -491,6 +532,7 @@ void PandoraPlusPFAlg::ClearCluster(){
   m_clusY_pz.clear();
   m_clusY_alpha.clear();
   m_clusY_rho.clear();
+  m_clusY_inter.clear();
   m_clusY_Nhit.clear();
   m_clusY_Nlayer.clear();
 

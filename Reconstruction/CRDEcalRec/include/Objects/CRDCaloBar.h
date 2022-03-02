@@ -18,7 +18,7 @@ namespace CRDEcalEDM{
       return bar<x.bar ;
     }
     inline bool operator == (const CRDCaloBar &x) const{
-      return cellID == x.cellID;
+      return ( (cellID == x.cellID) && getEnergy()==x.getEnergy() );
     }
     unsigned long long getcellID() const { return cellID; }
     int getSystem() const { return system; }

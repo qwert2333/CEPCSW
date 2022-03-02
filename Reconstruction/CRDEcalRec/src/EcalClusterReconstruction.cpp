@@ -47,10 +47,11 @@ StatusCode EcalClusterReconstruction::RunAlgorithm( EcalClusterReconstruction::S
   m_localmaxfindingAlg->RunAlgorithm( *m_LFAlgSettings, dataCol );
   cout<<"Hough Clustering"<<endl;
   m_houghclusAlg      ->RunAlgorithm( *m_HCAlgSettings, dataCol );
-  cout<<"Energy splitting"<<endl;
-  m_energysplittingAlg->RunAlgorithm( *m_ESAlgSettings, dataCol );
-  cout<<"Chi2 matching"<<endl;
-  m_etmatchingAlg     ->RunAlgorithm( *m_ETAlgSettings, dataCol );
+
+//  cout<<"Energy splitting"<<endl;
+//  m_energysplittingAlg->RunAlgorithm( *m_ESAlgSettings, dataCol );
+//  cout<<"Chi2 matching"<<endl;
+//  m_etmatchingAlg     ->RunAlgorithm( *m_ETAlgSettings, dataCol );
 
 
 /*

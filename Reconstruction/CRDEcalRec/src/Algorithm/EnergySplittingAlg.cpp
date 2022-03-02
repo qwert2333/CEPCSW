@@ -30,7 +30,7 @@ cout<<"  EnergySplittingAlg: Tower #"<<it<<": Check longitudinal cluster quality
     std::vector<CRDEcalEDM::CRDCaloHitLongiCluster> m_goodClusXCol; m_goodClusXCol.clear();
     std::vector<CRDEcalEDM::CRDCaloHitLongiCluster> m_badClusXCol; m_badClusXCol.clear();
     for(int ic=0; ic<m_clusXCol.size(); ic++){
-      if( m_clusXCol[ic].getEndDlayer()-m_clusXCol[ic].getBeginningDlayer()>=settings.th_GoodLayer ) m_goodClusXCol.push_back(m_clusXCol[ic]);
+      if( m_clusXCol[ic].getEndDlayer()-m_clusXCol[ic].getBeginningDlayer()+1>=settings.th_GoodLayer ) m_goodClusXCol.push_back(m_clusXCol[ic]);
       else m_badClusXCol.push_back(m_clusXCol[ic]);
     }
 printf("  EnergySplittingAlg: Tower #%d: GoodClusterX size = %d, BadClusterX size = %d \n", it, m_goodClusXCol.size(), m_badClusXCol.size());
@@ -39,7 +39,7 @@ printf("  EnergySplittingAlg: Tower #%d: GoodClusterX size = %d, BadClusterX siz
     std::vector<CRDEcalEDM::CRDCaloHitLongiCluster> m_goodClusYCol; m_goodClusYCol.clear();
     std::vector<CRDEcalEDM::CRDCaloHitLongiCluster> m_badClusYCol; m_badClusYCol.clear();
     for(int ic=0; ic<m_clusYCol.size(); ic++){
-      if( m_clusYCol[ic].getEndDlayer()-m_clusYCol[ic].getBeginningDlayer()>=settings.th_GoodLayer ) m_goodClusYCol.push_back(m_clusYCol[ic]);
+      if( m_clusYCol[ic].getEndDlayer()-m_clusYCol[ic].getBeginningDlayer()+1>=settings.th_GoodLayer ) m_goodClusYCol.push_back(m_clusYCol[ic]);
       else m_badClusYCol.push_back(m_clusYCol[ic]);
     }
 printf("  EnergySplittingAlg: Tower #%d: GoodClusterY size = %d, BadClusterY size = %d \n", it, m_goodClusYCol.size(), m_badClusYCol.size());
@@ -102,7 +102,7 @@ cout<<"  EnergySplittingAlg::ClusteringInBlock: cluster splitting in X"<<endl;
     ClusterSplitting( m_barClusXCol[ic], m_showers );
 
 cout<<"  Printout showers after cluster splitting: "<<endl;
-for(int as=0; as<m_showers.size(); as++) printf("    For #%d shower: cellID=(%d, %d, %d, %d), pos=(%.3f, %.3f, %.3f) \n", as, m_showers[as].getModule(), m_showers[as].getStave(), m_showers[as].getPart(), m_showers[as].getDlayer(), m_showers[as].getPosV3().X(), m_showers[as].getPosV3().Y(), m_showers[as].getPosV3().Z() );
+for(int as=0; as<m_showers.size(); as++) printf("    For #%d shower: cellID=(%d, %d, %d, %d), pos+E=(%.3f, %.3f, %.3f, %.3f) \n", as, m_showers[as].getModule(), m_showers[as].getStave(), m_showers[as].getPart(), m_showers[as].getDlayer(), m_showers[as].getPosV3().X(), m_showers[as].getPosV3().Y(), m_showers[as].getPosV3().Z(), m_showers[as].getE() );
 
     if(m_showers.size()==0) continue;
     m_barShowerXCol.insert( m_barShowerXCol.end(), m_showers.begin(), m_showers.end() );
@@ -115,7 +115,7 @@ cout<<"  EnergySplittingAlg::ClusteringInBlock: cluster splitting in Y"<<endl;
     ClusterSplitting( m_barClusYCol[ic], m_showers );
 
 cout<<"  Printout showers after cluster splitting: "<<endl;
-for(int as=0; as<m_showers.size(); as++) printf("    For #%d shower: cellID=(%d, %d, %d, %d), pos=(%.3f, %.3f, %.3f) \n", as, m_showers[as].getModule(), m_showers[as].getStave(), m_showers[as].getPart(), m_showers[as].getDlayer(), m_showers[as].getPosV3().X(), m_showers[as].getPosV3().Y(), m_showers[as].getPosV3().Z() );
+for(int as=0; as<m_showers.size(); as++) printf("    For #%d shower: cellID=(%d, %d, %d, %d), pos+E=(%.3f, %.3f, %.3f, %.3f) \n", as, m_showers[as].getModule(), m_showers[as].getStave(), m_showers[as].getPart(), m_showers[as].getDlayer(), m_showers[as].getPosV3().X(), m_showers[as].getPosV3().Y(), m_showers[as].getPosV3().Z(), m_showers[as].getE() );
     if(m_showers.size()==0) continue;
     m_barShowerYCol.insert( m_barShowerYCol.end(), m_showers.begin(), m_showers.end() );
   }

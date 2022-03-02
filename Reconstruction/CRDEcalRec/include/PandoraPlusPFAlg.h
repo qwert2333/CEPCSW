@@ -106,6 +106,7 @@ protected:
   //Stage0: check input simbars. 
   TTree* t_SimBar;
   FloatVec m_simBar_x, m_simBar_y, m_simBar_z, m_simBar_T1, m_simBar_T2, m_simBar_Q1, m_simBar_Q2, m_simBar_dlayer, m_simBar_part, m_simBar_stave, m_simBar_slayer, m_simBar_module;
+  std::vector<unsigned long long> m_simBar_id;
 
   //Check local max
   TTree *t_Layers;
@@ -116,11 +117,13 @@ protected:
   //Check Hough clusters
   TTree *t_HoughClusters;
   int m_NclusX, m_NclusY;
-  FloatVec m_clusX_x, m_clusX_y, m_clusX_z, m_clusX_E, m_clusX_alpha, m_clusX_rho, m_clusX_px, m_clusX_py, m_clusX_pz;
-  FloatVec m_clusY_x, m_clusY_y, m_clusY_z, m_clusY_E, m_clusY_alpha, m_clusY_rho, m_clusY_px, m_clusY_py, m_clusY_pz;
+  FloatVec m_clusX_x, m_clusX_y, m_clusX_z, m_clusX_E, m_clusX_alpha, m_clusX_rho, m_clusX_inter, m_clusX_px, m_clusX_py, m_clusX_pz;
+  FloatVec m_clusY_x, m_clusY_y, m_clusY_z, m_clusY_E, m_clusY_alpha, m_clusY_rho, m_clusY_inter, m_clusY_px, m_clusY_py, m_clusY_pz;
   IntVec m_clusX_Nhit, m_clusY_Nhit, m_clusX_Nlayer, m_clusY_Nlayer;
 
-  TTree *t_Showers;
+  TTree *t_ShowersX;
+  TTree *t_ShowersY;
+
   int m_Nshower2D;
   IntVec m_shower2D_dlayer, m_shower2D_part, m_shower2D_stave, m_shower2D_module, m_shower2D_type;
   FloatVec m_shower2D_x, m_shower2D_y, m_shower2D_z, m_shower2D_E;

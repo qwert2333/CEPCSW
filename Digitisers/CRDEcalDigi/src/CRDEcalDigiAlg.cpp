@@ -70,6 +70,7 @@ StatusCode CRDEcalDigiAlg::initialize()
 	t_SimBar->Branch("simBar_dlayer", &m_simBar_dlayer);
 	t_SimBar->Branch("simBar_part", &m_simBar_part);
 	t_SimBar->Branch("simBar_slayer", &m_simBar_slayer);
+	t_SimBar->Branch("simBar_cellID", &m_simBar_cellID);
 	t_SimTruth->Branch("simTruth_x", &m_simTruth_x);
 	t_SimTruth->Branch("simTruth_y", &m_simTruth_y);
 	t_SimTruth->Branch("simTruth_z", &m_simTruth_z);
@@ -88,7 +89,7 @@ StatusCode CRDEcalDigiAlg::initialize()
 		error() << "Failed to get the decoder. " << endmsg;
 		return StatusCode::FAILURE;
 	}
-	
+
 	m_edmsvc = service<ICRDEcalSvc>("CRDEcalSvc");
 	if ( !m_edmsvc )  throw "CRDEcalDigiAlg :Failed to find CRDEcalSvc ...";
 
@@ -299,7 +300,7 @@ StatusCode CRDEcalDigiAlg::execute()
 		m_simBar_dlayer.push_back(hitbar.getDlayer());
 		m_simBar_part.push_back(hitbar.getPart());
 		m_simBar_slayer.push_back(hitbar.getSlayer());
-
+    m_simBar_cellID.push_back(hitbar.getcellID());
 	}
 	t_SimCont->Fill();
 	t_SimBar->Fill();
@@ -465,6 +466,7 @@ void CRDEcalDigiAlg::Clear(){
 	m_simBar_dlayer.clear();
 	m_simBar_part.clear();
 	m_simBar_slayer.clear();
+  m_simBar_cellID.clear();
 	m_simTruth_x.clear();
 	m_simTruth_y.clear();
 	m_simTruth_z.clear();

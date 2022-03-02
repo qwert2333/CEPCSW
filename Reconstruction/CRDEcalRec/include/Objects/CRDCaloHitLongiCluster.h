@@ -26,6 +26,7 @@ namespace CRDEcalEDM{
   std::vector<CRDEcalEDM::CRDCaloBarShower> getBarShowersInLayer(int _layer) const; 
   double getHoughAlpha() const { return Hough_alpha; }
   double getHoughRho() const { return Hough_rho; }
+  double getHoughIntercept() const { return Hough_intercept; }
 
   int getBeginningDlayer() const; 
   int getEndDlayer() const; 
@@ -39,12 +40,14 @@ namespace CRDEcalEDM{
   void AddBarShower( CRDEcalEDM::CRDCaloBarShower _shower ) { barShowerCol.push_back(_shower); FitAxis(); }
   void SetBarShowers( std::vector<CRDEcalEDM::CRDCaloBarShower> _barshwoers ) { barShowerCol = _barshwoers; }
   void SetHoughPars(double _a, double _r) { Hough_alpha=_a; Hough_rho=_r; }
+  void SetIntercept(double _in) { Hough_intercept=_in; }
   void MergeCluster( CRDCaloHitLongiCluster& clus ); 
 
   private:
     TVector3 axis; 
     double Hough_alpha;
     double Hough_rho;
+    double Hough_intercept;
     std::vector<CRDEcalEDM::CRDCaloBarShower> barShowerCol;
     TrackFitInEcal* track = new TrackFitInEcal();
 
