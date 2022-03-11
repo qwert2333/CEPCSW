@@ -14,7 +14,7 @@ Before run following commands, please make sure you setup the CVMFS:
 ```
 $ git clone git@github.com:cepc/CEPCSW.git
 $ cd CEPCSW
-$ git checkout dev-EcalRec-v08 # branch name
+$ git checkout dev-EcalRec-v1.1 # branch name
 $ source setup.sh
 $ ./build.sh
 $ ./run.sh Examples/options/helloalg.py
@@ -44,9 +44,6 @@ Keep the collection names compatible between the prototype and the existing CEPC
 * TPCCollection
 * SETCollection
 
-
-## Update in branch dev-EcalRec-v08: CRD Ecal Reconstruction
-  * Deal with EM cluster tail.
-
-
-
+## Update in branch dev-EcalRec-v1.1: 
+* Add tracker simulation and track fit (Si tracker only now).
+* Add tracks (MarlinTrkTracks) in CRDEcalRec 

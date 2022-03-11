@@ -30,6 +30,7 @@ namespace CRDEcalEDM {
   double getFrontz()     const { return extrapolation_front_z; }
 
   void setHelix(double p, double thetaini, double phiini);
+  void setHelix(double _phi0, double _d0, double _z0, double _kappa, double _tanL) { m_phi0=_phi0; m_d0=_d0; m_z0=_z0; m_kappa=_kappa, m_tanLambda=_tanL; }
   void setExtrapolation_points();
   void setExtrapolation_front_face();
 

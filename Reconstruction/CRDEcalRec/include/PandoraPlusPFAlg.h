@@ -138,7 +138,8 @@ protected:
   IntVec m_mcPdgid, m_mcNdaughter, m_mcNparent, m_mcStatus; 
   FloatVec m_mcPx, m_mcPy, m_mcPz, m_mcEn;
   FloatVec m_scndM; 
-
+  FloatVec m_trk_d0, m_trk_z0, m_trk_phi, m_trk_kappa, m_trk_tanL, m_trk_p; 
+  FloatVec m_trk_vtx_x0, m_trk_vtx_y0, m_trk_vtx_z0;  
 
   void ClearBar();
   void ClearLayer();

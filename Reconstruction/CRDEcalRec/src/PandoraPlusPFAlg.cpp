@@ -170,6 +170,16 @@ StatusCode PandoraPlusPFAlg::initialize()
   t_recoPFO->Branch("mcEn", &m_mcEn);
   t_recoPFO->Branch("Nmc",  &m_Nmc);
   t_recoPFO->Branch("scndM", &m_scndM);
+  t_recoPFO->Branch("trk_d0", &m_trk_d0);
+  t_recoPFO->Branch("trk_z0", &m_trk_z0);
+  t_recoPFO->Branch("trk_phi", &m_trk_phi);
+  t_recoPFO->Branch("trk_kappa", &m_trk_kappa);
+  t_recoPFO->Branch("trk_tanL", &m_trk_tanL);
+  t_recoPFO->Branch("trk_p", &m_trk_p);
+  t_recoPFO->Branch("trk_vtx_x0", &m_trk_vtx_x0);
+  t_recoPFO->Branch("trk_vtx_y0", &m_trk_vtx_y0);
+  t_recoPFO->Branch("trk_vtx_z0", &m_trk_vtx_z0);
+
 
   return GaudiAlgorithm::initialize();
 }
@@ -187,10 +197,10 @@ StatusCode PandoraPlusPFAlg::execute()
 
   //Get dataCol from service
   const edm4hep::MCParticleCollection* const_MCPCol = r_MCParticleCol.get();
-  //const edm4hep::TrackCollection*      const_TrkCol = r_MarlinTrkCol.get(); 
+  const edm4hep::TrackCollection*      const_TrkCol = r_MarlinTrkCol.get(); 
   if( const_MCPCol!=NULL ) m_pMCParticleCreator->GetMCParticle( m_DataCol, *const_MCPCol);
-  //if( const_TrkCol!=NULL ) m_pTrackCreator->     GetTracks( m_DataCol, *const_TrkCol );
-  m_pTrackCreator->     GetTracks( m_DataCol );
+  if( const_TrkCol!=NULL ) m_pTrackCreator->     GetTracks( m_DataCol, *const_TrkCol );
+    else m_pTrackCreator->     GetTracks( m_DataCol );
   m_pVertexCreator->    GetVertex( m_DataCol );
   m_pEcalHitsCreator->  GetEcalBars( m_DataCol, *m_edmsvc); 
   m_pHcalHitsCreator->  GetHcalHits( m_DataCol );
@@ -418,7 +428,6 @@ StatusCode PandoraPlusPFAlg::execute()
     m_Clus_type.push_back(m_type);
   }
 
-
   //Save MC information
   std::vector<edm4hep::MCParticle> m_MCPCol = m_DataCol.MCParticleCol; 
   m_Nmc = m_MCPCol.size(); 
@@ -431,6 +440,20 @@ StatusCode PandoraPlusPFAlg::execute()
     m_mcPy.push_back( m_MCPCol[imc].getMomentum()[1] );
     m_mcPz.push_back( m_MCPCol[imc].getMomentum()[2] );
     m_mcEn.push_back( m_MCPCol[imc].getEnergy() );
+  }
+
+  //Save track information
+  std::vector<CRDEcalEDM::Track> m_trkCol = m_DataCol.TrackCol; 
+  for(int itrk=0; itrk<m_trkCol.size(); itrk++){
+    m_trk_d0.push_back( m_trkCol[itrk].getD0() );
+    m_trk_z0.push_back( m_trkCol[itrk].getZ0() );
+    m_trk_phi.push_back( m_trkCol[itrk].getPhi0() );
+    m_trk_kappa.push_back( m_trkCol[itrk].getKappa() );
+    m_trk_tanL.push_back( m_trkCol[itrk].getTanLambda() );
+    m_trk_p.push_back( m_trkCol[itrk].getMomentum().Mag() );
+    m_trk_vtx_x0.push_back( m_trkCol[itrk].getVertex().x() );
+    m_trk_vtx_y0.push_back( m_trkCol[itrk].getVertex().y() );
+    m_trk_vtx_z0.push_back( m_trkCol[itrk].getVertex().z() );
   }
   t_recoPFO->Fill();
 
@@ -575,6 +598,15 @@ void PandoraPlusPFAlg::ClearRecPFO(){
   m_Nmc=-99;
   m_N3dclus=-99;
   m_scndM.clear(); 
+  m_trk_d0.clear();
+  m_trk_z0.clear();
+  m_trk_phi.clear();
+  m_trk_kappa.clear();
+  m_trk_tanL.clear();
+  m_trk_p.clear();
+  m_trk_vtx_x0.clear();
+  m_trk_vtx_y0.clear();
+  m_trk_vtx_z0.clear();
 }
 
 #endif

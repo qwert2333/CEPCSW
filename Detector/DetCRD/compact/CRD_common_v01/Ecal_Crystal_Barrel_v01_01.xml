@@ -21,7 +21,7 @@
   
   <readouts>
     <readout name="EcalBarrelCollection">
-      <!-- <segmentation type="NoSegmentation"/> -->
+      <segmentation type="NoSegmentation"/>
 
       <!--segmentation type="CartesianGridXYZ"
                     grid_size_x="1*cm"
