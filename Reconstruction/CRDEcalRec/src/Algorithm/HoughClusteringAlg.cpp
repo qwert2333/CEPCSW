@@ -273,7 +273,7 @@ StatusCode HoughClusteringAlg::FillHoughSpace(std::vector<CRDEcalEDM::CRDHoughOb
 
       double rho_tmp = rho_min; 
 
-      while( floor(rho_tmp/width_rho)<floor(rho_max/width_rho) ){
+      while( floor(rho_tmp/width_rho)<=floor(rho_max/width_rho) ){
        m_houghMap.Fill(alpha+0.001, rho_tmp);
         rho_tmp += width_rho;
       }
@@ -318,7 +318,7 @@ cout<<m_houghMap.GetBinContent(ia, ir+2)<<'\t'<<m_houghMap.GetBinContent(ia+1, i
 
 int HoughClusteringAlg::ExpandingPeak(TH2 &houghMap, int index_a, int index_b, CRDEcalEDM::CRDHoughSpace::HoughHill& hill){
 
-  if(index_a<0 || index_b<0 || index_a>=settings.Nbins_alpha || index_b>settings.Nbins_alpha) return 0;
+  if(index_a<0 || index_b<0 || index_a>=settings.Nbins_alpha || index_b>=settings.Nbins_alpha) return 0;
   houghMap.SetBinContent(index_a+1, index_b+1, -1.*houghMap.GetBinContent(index_a+1, index_b+1) );
   int count = 0;
   for(int fl1=-1; fl1<=1; fl1++){
@@ -398,7 +398,7 @@ StatusCode HoughClusteringAlg::Transform2Clusters( CRDEcalEDM::CRDHoughSpace& m_
 
           {   
           m_clus.AddBarShower( m_Hobjects[io].getLocalMax() );
-          m_clus.SetHoughPars(ave_alpha, m_Hobjects[io].getHoughLineUL().Eval(ave_alpha) );
+          m_clus.SetHoughPars(ave_alpha, ave_rho );
           }
     }}
 
