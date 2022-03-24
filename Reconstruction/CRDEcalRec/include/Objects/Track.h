@@ -17,7 +17,8 @@ namespace CRDEcalEDM {
   double getTanLambda()  const { return m_tanLambda; }
   int    getPID()        const { return m_pdgID; }
   int    getCharge()     const { return m_charge; }
-  TVector3 getMomentum() const {return m_momentum; }
+  int    getLocation()   const { return m_location; }
+  TVector3 getMomentum() const { return m_momentum; }
   TVector3 getVertex()   const { return m_vtx; }
   TVector3 getProspectPos(double _var) const; 
   TVector3 getProspectPos(int _dlayer) const;
@@ -39,6 +40,7 @@ namespace CRDEcalEDM {
   void setMomentum( TVector3 _p) { m_momentum = _p; }
   void setPID(int _pid) { m_pdgID=_pid; }
   void setCharge(int _ch) { m_charge=_ch; }
+  void setLocation(int _lc) { m_location=_lc; }
 
   private:
 
@@ -57,6 +59,7 @@ namespace CRDEcalEDM {
     int    m_pdgID;
     TVector3 m_momentum;
     TVector3 m_vtx; 
+    int m_location; 
 
     double extrapolation_point_x[7];
     double extrapolation_point_y[7];

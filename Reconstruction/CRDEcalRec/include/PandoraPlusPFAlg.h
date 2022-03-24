@@ -140,6 +140,7 @@ protected:
   FloatVec m_scndM; 
   FloatVec m_trk_d0, m_trk_z0, m_trk_phi, m_trk_kappa, m_trk_tanL, m_trk_p; 
   FloatVec m_trk_vtx_x0, m_trk_vtx_y0, m_trk_vtx_z0;  
+  IntVec m_trk_location; 
 
   void ClearBar();
   void ClearLayer();

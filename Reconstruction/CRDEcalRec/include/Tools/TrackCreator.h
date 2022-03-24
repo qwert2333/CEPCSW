@@ -65,6 +65,7 @@ public:
       m_trk.setExtrapolation_front_face();
       m_trk.setVertex( const_TrkCol[itrk].getTrackStates(0).referencePoint[0], const_TrkCol[itrk].getTrackStates(0).referencePoint[1], const_TrkCol[itrk].getTrackStates(0).referencePoint[2] );
       m_trk.setCharge( const_TrkCol[itrk].getTrackStates(0).omega>0 ? 1 : -1 );
+      m_trk.setLocation( const_TrkCol[itrk].getTrackStates(0).location );
       //m_trk.setMomentum( mc_p ); //TODO: Need to set the momentum by hand, or write a function to calculate. 
       m_trkCol.push_back(m_trk);
     }

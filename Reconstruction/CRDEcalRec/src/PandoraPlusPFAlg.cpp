@@ -179,6 +179,7 @@ StatusCode PandoraPlusPFAlg::initialize()
   t_recoPFO->Branch("trk_vtx_x0", &m_trk_vtx_x0);
   t_recoPFO->Branch("trk_vtx_y0", &m_trk_vtx_y0);
   t_recoPFO->Branch("trk_vtx_z0", &m_trk_vtx_z0);
+  t_recoPFO->Branch("trk_vtx_location", &m_trk_location);
 
 
   return GaudiAlgorithm::initialize();
@@ -454,6 +455,7 @@ StatusCode PandoraPlusPFAlg::execute()
     m_trk_vtx_x0.push_back( m_trkCol[itrk].getVertex().x() );
     m_trk_vtx_y0.push_back( m_trkCol[itrk].getVertex().y() );
     m_trk_vtx_z0.push_back( m_trkCol[itrk].getVertex().z() );
+    m_trk_location.push_back( m_trkCol[itrk].getLocation() );
   }
   t_recoPFO->Fill();
 
@@ -607,6 +609,7 @@ void PandoraPlusPFAlg::ClearRecPFO(){
   m_trk_vtx_x0.clear();
   m_trk_vtx_y0.clear();
   m_trk_vtx_z0.clear();
+  m_trk_location.clear();
 }
 
 #endif
