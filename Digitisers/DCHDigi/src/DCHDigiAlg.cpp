@@ -106,7 +106,7 @@ cout<<"  Readin TrackerHits"<<endl;
 
   auto SimHit0 = SimHitCol->at(0);
   std::map<unsigned long long, std::vector<decltype(SimHit0)> > id_hits_map;
-  //std::map<unsigned long long, std::vector<edm4hep::ConstSimTrackerhit> > id_hits_map;
+  //std::map<unsigned long long, std::vector<edm4hep::SimTrackerhit> > id_hits_map;
 
   for( int i = 0; i < SimHitCol->size(); i++ ) 
   {
