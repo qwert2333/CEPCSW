@@ -22,7 +22,8 @@ public:
     double th_chi2;
     double sigmaE;
     double sigmaPos = 34.89;  //sqrt(10*10/12 + pow((Tres*C/(2*nMat)),2) )
-    int th_GoodLayer; 
+    //int th_GoodLayer; 
+    //double th_intercept; 
     double nMat = 2.15;
     bool fl_UseChi2; 
     int Debug;

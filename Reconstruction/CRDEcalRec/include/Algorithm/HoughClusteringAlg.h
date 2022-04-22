@@ -16,13 +16,27 @@ public:
     Settings(){};
     void SetInitialValue();
 
+    //Only use first th_Layers layer.
+		int th_Layers;  
+
+    //Houghspace setting
     int Nbins_alpha;
 		int Nbins_rho;
-
-		int th_Layers;  //Only use first th_Layers layer. 
+    int HoughBinDivide; 
     int th_peak;    //At least th_peak th_peak hits in one track(longiCluster).
+
+    //Good Cluster settings
     int th_continuetrkN; //Should have at least N continue layers. 
-    bool fl_continuetrk; //Should be continue. 
+    float th_AxisE;
+    float th_intercept;
+
+    float th_dAlpha1;
+    float th_dAlpha2;
+    float th_dRho1;
+    float th_dRho2;
+    float th_overlapE1; 
+    float th_overlapE2; 
+
 	};
 
 	HoughClusteringAlg () {};

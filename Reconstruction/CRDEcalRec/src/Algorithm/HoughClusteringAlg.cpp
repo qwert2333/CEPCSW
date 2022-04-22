@@ -7,12 +7,24 @@
 using namespace std;
 using namespace TMath;
 void HoughClusteringAlg::Settings::SetInitialValue(){
-  Nbins_alpha = 300;
-  Nbins_rho = 300;
   th_Layers = 10;
+
   th_peak = 3;
-  fl_continuetrk = true;
+  Nbins_alpha = 800;
+  Nbins_rho = 800;
+  HoughBinDivide = 4;
+
   th_continuetrkN = 3;
+  th_AxisE = 1.;
+  th_intercept = 300;
+
+  th_dAlpha1 = 0.3;
+  th_dAlpha2 = 0.8;
+  th_dRho1 = 20;
+  th_dRho2 = 50;
+  th_overlapE1 = 0.7;
+  th_overlapE2 = 0.9;
+
 }
 
 StatusCode HoughClusteringAlg::Initialize(){
@@ -59,7 +71,7 @@ cout<<"  HoughClusteringAlg: Conformal transformation"<<endl;
     ConformalTransformation(m_HoughObjectsX);
     ConformalTransformation(m_HoughObjectsY);
 
-
+/*
 cout<<"    Local max (HoughObjectX): "<<endl;
 for(int i=0; i<m_HoughObjectsX.size(); i++) printf("(%.2f, %.2f, %.2f) \t", m_HoughObjectsX[i].getLocalMax().getPos().x(), m_HoughObjectsX[i].getLocalMax().getPos().y(), m_HoughObjectsX[i].getLocalMax().getPos().z() );
 cout<<endl;
@@ -67,20 +79,22 @@ cout<<"    Conformal Point (HoughObjectX): "<<endl;
 for(int i=0; i<m_HoughObjectsX.size(); i++) printf("(%.2f, %.2f) \t", m_HoughObjectsX[i].getConformPointUR().X(), m_HoughObjectsX[i].getConformPointUR().Y());
 cout<<endl;
 
+
 cout<<"    Local max (HoughObjectY): "<<endl;
 for(int i=0; i<m_HoughObjectsY.size(); i++) printf("(%.2f, %.2f, %.2f) \t", m_HoughObjectsY[i].getLocalMax().getPos().x(), m_HoughObjectsY[i].getLocalMax().getPos().y(), m_HoughObjectsY[i].getLocalMax().getPos().z() );
 cout<<endl;
 cout<<"    Conformal Point (HoughObjectY): "<<endl;
 for(int i=0; i<m_HoughObjectsY.size(); i++) printf("(%.2f, %.2f) \t", m_HoughObjectsY[i].getConformPointUR().X(), m_HoughObjectsY[i].getConformPointUR().Y());
 cout<<endl;
-
+*/
 
 cout<<"  HoughClusteringAlg: Hough transformation"<<endl;
+
     //Hough transformation
     HoughTransformation(m_HoughObjectsX);
     HoughTransformation(m_HoughObjectsY);
 
-
+/*
 cout<<"  Check all Hough Objects: "<<endl;
 
 cout<<"  Transformed Hough lines X: "<<endl;
@@ -95,13 +109,17 @@ for(int i=0; i<m_HoughObjectsX.size(); i++){
   cout<<endl;
 }
 
-/*
+
 cout<<"  Transformed Hough lines Y: "<<endl;
 for(int i=0; i<m_HoughObjectsY.size(); i++){
+  cout<<"    HoughObj #"<<i<<": Origin localMax position ";
+  printf(" (%.3f, %.3f, %.3f) \n", m_HoughObjectsY[i].getLocalMax().getPos().X(), m_HoughObjectsY[i].getLocalMax().getPos().Z(), m_HoughObjectsY[i].getLocalMax().getE());
+  printf("    Conformal Point: (%.3f, %.3f) \n", m_HoughObjectsY[i].getConformPointUR().X()-5, m_HoughObjectsY[i].getConformPointUR().Y()-5 );
   cout<<"    LineUR pars: "<<m_HoughObjectsY[i].getHoughLineUR().GetParameter(0)<<"  "<<m_HoughObjectsY[i].getHoughLineUR().GetParameter(1)<<", range: ["<<m_HoughObjectsY[i].getHoughLineUR().GetMaximum()<<", "<<m_HoughObjectsY[i].getHoughLineUR().GetMinimum()<<"]"<<endl;
   cout<<"    LineUL pars: "<<m_HoughObjectsY[i].getHoughLineUL().GetParameter(0)<<"  "<<m_HoughObjectsY[i].getHoughLineUL().GetParameter(1)<<", range: ["<<m_HoughObjectsY[i].getHoughLineUL().GetMaximum()<<", "<<m_HoughObjectsY[i].getHoughLineUL().GetMinimum()<<"]"<<endl;
   cout<<"    LineDR pars: "<<m_HoughObjectsY[i].getHoughLineDR().GetParameter(0)<<"  "<<m_HoughObjectsY[i].getHoughLineDR().GetParameter(1)<<", range: ["<<m_HoughObjectsY[i].getHoughLineDR().GetMaximum()<<", "<<m_HoughObjectsY[i].getHoughLineDR().GetMinimum()<<"]"<<endl;
   cout<<"    LineDL pars: "<<m_HoughObjectsY[i].getHoughLineDL().GetParameter(0)<<"  "<<m_HoughObjectsY[i].getHoughLineDL().GetParameter(1)<<", range: ["<<m_HoughObjectsY[i].getHoughLineDL().GetMaximum()<<", "<<m_HoughObjectsY[i].getHoughLineDL().GetMinimum()<<"]"<<endl;
+  cout<<endl;
 }
 */
 
@@ -130,6 +148,21 @@ cout<<"  HoughClusteringAlg: Find hills"<<endl;
     //Find hills
     FindingHills(m_HoughSpaceX);
     FindingHills(m_HoughSpaceY);
+
+/*
+cout<<"  Print Hough hills in HoughSpaceY: "<<endl;
+cout<<"  Hill size: "<<m_HoughSpaceY.getHills().size()<<endl;
+for(int ih=0; ih<m_HoughSpaceY.getHills().size(); ih++){
+  int m_size = m_HoughSpaceY.getHills()[ih].getIndexAlpha().size(); 
+  std::vector<int> vec_alpha = m_HoughSpaceY.getHills()[ih].getIndexAlpha();
+  std::vector<int> vec_rho = m_HoughSpaceY.getHills()[ih].getIndexRho();
+
+  printf("    In Hill #%d: cell size = %d, alpha range [%d, %d], rho range [%d, %d]. \n", 
+          ih, m_size, *min_element(vec_alpha.begin(), vec_alpha.end()), *max_element(vec_alpha.begin(), vec_alpha.end()), 
+          *min_element(vec_rho.begin(), vec_rho.end()), *max_element(vec_rho.begin(), vec_rho.end())  );
+
+}
+*/
 
 cout<<"  HoughClusteringAlg: Create output HoughClusters"<<endl;
     //Create output HoughClusters 
@@ -218,6 +251,8 @@ StatusCode HoughClusteringAlg::HoughTransformation(std::vector<CRDEcalEDM::CRDHo
   double centerX = (m_minX+m_maxX)/2.; 
 	double centerY = (m_minY+m_maxY)/2.; 
 
+//cout<<"Origin point in conformal space: (X, Y) = ("<<centerX<<", "<<centerX<<")"<<endl;
+
   for(int iobj=0; iobj<m_Hobjects.size(); iobj++){
     //UR
     TF1 line1("line_ur", "[0]*cos(x)+[1]*sin(x)", -0.1, PI/2);  
@@ -252,6 +287,7 @@ StatusCode HoughClusteringAlg::FillHoughSpace(std::vector<CRDEcalEDM::CRDHoughOb
   double width_rho = 260./(double)settings.Nbins_rho; 
 
   for(int io=0; io<m_Hobjects.size(); io++){
+//cout<<"  In HoughObj #"<<io<<endl;
 
     TF1 line_ur = m_Hobjects[io].getHoughLineUR();
     TF1 line_ul = m_Hobjects[io].getHoughLineUL();
@@ -261,21 +297,47 @@ StatusCode HoughClusteringAlg::FillHoughSpace(std::vector<CRDEcalEDM::CRDHoughOb
 
     //Loop for alpha bins
 		for(int ibin=0; ibin<m_houghMap.GetNbinsX(); ibin++){
-      double alpha = ibin*width_alpha-0.1; 
-      double rho_u = alpha<PI/2. ? line_ur.Eval(alpha) : line_ul.Eval(alpha);
-      double rho_d = alpha<PI/2. ? line_dl.Eval(alpha) : line_dr.Eval(alpha);
+      double m_alphaL = ibin*width_alpha-0.1; 
+      if(line_ur.Eval(m_alphaL)>130.-2*width_rho
+         || line_ur.Eval(m_alphaL)<-130.+2*width_rho
+         || line_dl.Eval(m_alphaL)>130.-2*width_rho
+         || line_dl.Eval(m_alphaL)<-130.+2*width_rho) continue;
 
-      double rho_u_p = (alpha+width_alpha)<PI/2. ? line_ur.Eval(alpha+width_alpha) : line_ul.Eval(alpha+width_alpha);
-      double rho_d_p = (alpha+width_alpha)<PI/2. ? line_dl.Eval(alpha+width_alpha) : line_dr.Eval(alpha+width_alpha);
 
-      double rho_min = min(min(min(rho_u,rho_d), rho_u_p), rho_d_p);
-      double rho_max = max(max(max(rho_u,rho_d), rho_u_p), rho_d_p);
+      int divide = settings.HoughBinDivide;
+      int nbin_rho_u, nbin_rho_d; 
+      double rho_min = 9999.;
+      double rho_max = -9999.; 
 
-      double rho_tmp = rho_min; 
+      for(int id=0; id<=divide; id++){
 
-      while( floor(rho_tmp/width_rho)<=floor(rho_max/width_rho) ){
-       m_houghMap.Fill(alpha+0.001, rho_tmp);
-        rho_tmp += width_rho;
+        double alpha = ibin*width_alpha-0.1 + (double)id*width_alpha/divide; 
+
+        double rho_u = alpha<((PI+0.1)/2.-0.1) ? line_ur.Eval(alpha) : line_ul.Eval(alpha);
+        double rho_d = alpha<((PI+0.1)/2.-0.1) ? line_dl.Eval(alpha) : line_dr.Eval(alpha);
+        //double rho_u_p = (alpha+width_alpha)<((PI+0.1)/2.-0.1) ? line_ur.Eval(alpha+width_alpha) : line_ul.Eval(alpha+width_alpha);
+        //double rho_d_p = (alpha+width_alpha)<((PI+0.1)/2.-0.1) ? line_dl.Eval(alpha+width_alpha) : line_dr.Eval(alpha+width_alpha);
+
+        //if(rho_min>min(rho_u, rho_d)) rho_min = min(rho_u, rho_d); 
+        //if(rho_max<max(rho_u, rho_d)) rho_max = max(rho_u, rho_d);
+        if(rho_min>rho_u) rho_min = rho_u;
+        if(rho_max<rho_u) rho_max = rho_u;
+        if(rho_min>rho_d) rho_min = rho_d;
+        if(rho_max<rho_d) rho_max = rho_d;
+//if(io==0) printf("      In divied %d: rho = %.2f(%.2f), min_rho = %.2f, max_rho = %.2f \n", id, rho_u,rho_d,rho_min,rho_max);
+      }
+      nbin_rho_d = floor( (rho_min+130.)/width_rho );
+      nbin_rho_u = floor( (rho_max+130.)/width_rho );
+
+//if(io==0) printf("    Loop in bin #%d: alpha range [%.3f, %.3f], rho bin range [%d, %d] \n",
+//                 ibin, ibin*width_alpha-0.1, (ibin+1)*width_alpha-0.1, nbin_rho_d, nbin_rho_u); 
+
+      for(int irho=nbin_rho_d; irho<=nbin_rho_u; irho++){
+        //double tmp_alpha = ibin*width_alpha-0.1+0.001; 
+        //double tmp_rho = irho*width_rho-130.; 
+        //m_houghMap.Fill(tmp_alpha, tmp_rho);
+        m_houghMap.SetBinContent(ibin+1, irho+1, m_houghMap.GetBinContent(ibin+1, irho+1)+1 );
+//if(io==0) printf("      Fill HoughMap bin: (%d, %d, %.1f) \n", ibin, irho, m_houghMap.GetBinContent(ibin+1, irho+1) );
       }
 
     }
@@ -365,6 +427,10 @@ StatusCode HoughClusteringAlg::Transform2Clusters( CRDEcalEDM::CRDHoughSpace& m_
   double alpha_width = m_Hspace.getAlphaBinWidth();
   double rho_width = m_Hspace.getRhoBinWidth();
 
+
+std::vector<CRDEcalEDM::CRDCaloHitLongiCluster> tmp_clusCol; tmp_clusCol.clear(); 
+cout<<"  Transform2Clusters: input hill size: "<<m_hills.size()<<endl;
+
   for(int ih=0; ih<m_hills.size(); ih++){
     CRDEcalEDM::CRDCaloHitLongiCluster m_clus; m_clus.Clear();
 
@@ -377,7 +443,9 @@ StatusCode HoughClusteringAlg::Transform2Clusters( CRDEcalEDM::CRDHoughSpace& m_
     double ave_alpha = alpha_min + (sum_alpha/index_alpha.size()+0.5)*alpha_width;
     double ave_rho = rho_min + (sum_rho/index_rho.size()+0.5)*rho_width;
 
-    if(ave_alpha>alpha_min-alpha_width && ave_alpha<=PI/2.){
+//cout<<"    Hill #"<<ih<<": alpha = "<<ave_alpha<<", rho = "<<ave_rho<<endl;
+
+    if(ave_alpha>alpha_min-alpha_width && ave_alpha<= alpha_min+(alpha_max-alpha_min)/2.) {
     for(int io=0; io<m_Hobjects.size(); io++){
         if( ( m_Hobjects[io].getHoughLineDL().Eval(ave_alpha)<ave_rho+rho_width &&  
               m_Hobjects[io].getHoughLineUR().Eval(ave_alpha)>ave_rho-rho_width) ||
@@ -385,11 +453,11 @@ StatusCode HoughClusteringAlg::Transform2Clusters( CRDEcalEDM::CRDHoughSpace& m_
               m_Hobjects[io].getHoughLineUR().Eval(ave_alpha)<ave_rho+rho_width) )
           { 
           m_clus.AddBarShower( m_Hobjects[io].getLocalMax() ); 
-          m_clus.SetHoughPars(ave_alpha, m_Hobjects[io].getHoughLineUR().Eval(ave_alpha) ); 
+          m_clus.SetHoughPars(ave_alpha, ave_rho ); 
           }
     }}
 
-    else if(ave_alpha>PI/2. && ave_alpha<alpha_max+alpha_width){
+    else if(ave_alpha>alpha_min+(alpha_max-alpha_min)/2. && ave_alpha<alpha_max+alpha_width){
     for(int io=0; io<m_Hobjects.size(); io++){
         if( ( m_Hobjects[io].getHoughLineDR().Eval(ave_alpha)<ave_rho+rho_width &&
               m_Hobjects[io].getHoughLineUL().Eval(ave_alpha)>ave_rho-rho_width) ||
@@ -401,10 +469,11 @@ StatusCode HoughClusteringAlg::Transform2Clusters( CRDEcalEDM::CRDHoughSpace& m_
           m_clus.SetHoughPars(ave_alpha, ave_rho );
           }
     }}
+tmp_clusCol.push_back(m_clus);
 
-    if(m_clus.getBarShowers().size()<=settings.th_peak) { /*cout<<"Remove this hill: less than "<<settings.th_peak<<" hits."<<endl;*/  continue;}
-    if(settings.fl_continuetrk && !m_clus.isContinue()) { /*cout<<"Remove this hill: cluster is not continue "<<endl;*/ continue;}
-    if(!m_clus.isContinueN(settings.th_continuetrkN)) { /*cout<<"Remove this hill: does not have "<<settings.th_continuetrkN<<" continuum hits"<<endl;*/  continue; }
+    //if(m_clus.getBarShowers().size()<settings.th_peak) continue;
+    //if(settings.fl_continuetrk && !m_clus.isContinue()) continue;
+    if(!m_clus.isContinueN(settings.th_continuetrkN)) continue; 
 
     double sin_alpha = sin(m_clus.getHoughAlpha()); 
     double cos_alpha = cos(m_clus.getHoughAlpha());
@@ -414,6 +483,28 @@ StatusCode HoughClusteringAlg::Transform2Clusters( CRDEcalEDM::CRDHoughSpace& m_
     m_clusCol.push_back(m_clus);
 
   }
+
+cout<<"  Transform2Cluster: track removal cutflow: "<<endl;
+cout<<"    Initial: "<<tmp_clusCol.size()<<endl;
+cout<<"    After >= 3 hits "<<m_clusCol.size()<<endl;
+/*
+cout<<"  Print clusters: "<<endl;
+for(int ic=0; ic<tmp_clusCol.size(); ic++){
+  printf("    Nhit %d, Energy %.2f, HoughPar (%.2f, %.2f).  ", 
+          tmp_clusCol[ic].getBarShowers().size(), tmp_clusCol[ic].getE(),
+          tmp_clusCol[ic].getHoughAlpha(), tmp_clusCol[ic].getHoughRho() );
+  for(int ihit=0; ihit<tmp_clusCol[ic].getBarShowers().size(); ihit++) cout<<tmp_clusCol[ic].getBarShowers()[ihit].getDlayer()<<"  ";
+  cout<<endl;
+}
+cout<<endl;
+
+cout<<"  Print clusters: "<<endl;
+for(int ic=0; ic<m_clusCol.size(); ic++)
+  printf("    Nhit %d, Energy %.2f, HoughPar (%.2f, %.2f) \n",
+          m_clusCol[ic].getBarShowers().size(), m_clusCol[ic].getE(), 
+          m_clusCol[ic].getHoughAlpha(), m_clusCol[ic].getHoughRho() );
+cout<<endl;
+*/
 
   CleanClusters(m_clusCol);
 
@@ -426,22 +517,233 @@ StatusCode HoughClusteringAlg::Transform2Clusters( CRDEcalEDM::CRDHoughSpace& m_
 StatusCode HoughClusteringAlg::CleanClusters( std::vector<CRDEcalEDM::CRDCaloHitLongiCluster>& m_longiClusCol ){
   if(m_longiClusCol.size()==0) return StatusCode::SUCCESS;
 
+  //Depart the HoughCluster to 2 sub-clusters if it has blank in middle.
+  for(int ic=0; ic<m_longiClusCol.size(); ic++){
+    int m_nhit = m_longiClusCol[ic].getBarShowers().size(); 
+    m_longiClusCol[ic].SortBarShowersByLayer();
+
+//cout<<"In clus #"<<ic<<": hit size = "<<m_nhit<<endl;
+//cout<<"Print the clus layer: ";
+//for(int ah = 0; ah<m_nhit; ah++) cout<<m_longiClusCol[ic].getBarShowers()[ah].getDlayer()<<'\t';
+//cout<<endl;
+
+    for(int ih=0; ih<m_nhit-1; ih++){
+    if(m_longiClusCol[ic].getBarShowers()[ih+1].getDlayer() - m_longiClusCol[ic].getBarShowers()[ih].getDlayer() > 2){
+//cout<<"  Need to depart in hit #"<<ih<<endl;
+
+      CRDEcalEDM::CRDCaloHitLongiCluster clus_head; clus_head.Clear();
+      CRDEcalEDM::CRDCaloHitLongiCluster clus_tail; clus_tail.Clear();
+
+      clus_head.SetHoughPars( m_longiClusCol[ic].getHoughAlpha(), m_longiClusCol[ic].getHoughRho() );
+      clus_head.SetIntercept( m_longiClusCol[ic].getHoughIntercept() );
+      clus_tail.SetHoughPars( m_longiClusCol[ic].getHoughAlpha(), m_longiClusCol[ic].getHoughRho() );
+      clus_tail.SetIntercept( m_longiClusCol[ic].getHoughIntercept() );
+
+      for(int jh=0; jh<=ih; jh++) clus_head.AddBarShower( m_longiClusCol[ic].getBarShowers()[jh] );
+      for(int jh=ih+1; jh<m_nhit; jh++) clus_tail.AddBarShower( m_longiClusCol[ic].getBarShowers()[jh] );
+
+//cout<<"  Head cluster size: "<<clus_head.getBarShowers().size()<<", isContinueN: "<<clus_head.isContinueN(settings.th_continuetrkN)<<endl;
+//cout<<"  Tail cluster size: "<<clus_tail.getBarShowers().size()<<", isContinueN: "<<clus_tail.isContinueN(settings.th_continuetrkN)<<endl;
+
+      if( clus_head.isContinueN(settings.th_continuetrkN) ) m_longiClusCol.push_back(clus_head);
+      if( clus_tail.isContinueN(settings.th_continuetrkN) ) m_longiClusCol.push_back(clus_tail);
+
+      m_longiClusCol.erase(m_longiClusCol.begin()+ic);
+      ic--;
+      break;
+    }}
+
+  }
+cout<<"    After isolated hits removal: "<<m_longiClusCol.size()<<endl;
+
+/*
+cout<<"  Print clusters: "<<endl;
+for(int ic=0; ic<m_longiClusCol.size(); ic++)
+  printf("    Nhit %d, Energy %.2f, HoughPar (%.2f, %.2f) \n",
+          m_longiClusCol[ic].getBarShowers().size(), m_longiClusCol[ic].getE(), 
+          m_longiClusCol[ic].getHoughAlpha(), m_longiClusCol[ic].getHoughRho() );
+cout<<endl;
+*/
+
+  //Remove the repeated tracks
   for(int ic=0; ic<m_longiClusCol.size(); ic++){
   for(int jc=0; jc<m_longiClusCol.size(); jc++){
+
     if(ic>=m_longiClusCol.size()) ic--;
-    if(ic!=jc && m_longiClusCol[ic].isSubset(m_longiClusCol[jc]) ){
-      m_longiClusCol.erase(m_longiClusCol.begin()+jc );   
-      jc--;
-      if(ic>jc+1) ic--;
-    }
-    else if(ic!=jc && m_longiClusCol[ic].isOverlap(m_longiClusCol[jc],7,3) ){
-      m_longiClusCol[ic].MergeCluster( m_longiClusCol[jc] );
+    if(ic==jc) continue;
+
+    if( m_longiClusCol[ic].isSubset(m_longiClusCol[jc]) ){  //jc is the subset of ic. remove jc. 
       m_longiClusCol.erase(m_longiClusCol.begin()+jc );
       jc--;
       if(ic>jc+1) ic--;
     }
   }}
+cout<<"    After subset removal: "<<m_longiClusCol.size()<<endl;
 
+
+  //Cut on energy and intercept
+  for(int ic=0; ic<m_longiClusCol.size(); ic++){
+    if( fabs(m_longiClusCol[ic].getHoughIntercept())>=settings.th_intercept || m_longiClusCol[ic].getE()<settings.th_AxisE){
+      m_longiClusCol.erase(m_longiClusCol.begin()+ic );
+      ic--;
+    }
+  }
+cout<<"    After energy and intercetp cut: "<<m_longiClusCol.size()<<endl;
+
+
+  //Overlap with other clusters: Iter 1. 
+  for(int ic=0; ic<m_longiClusCol.size()-1; ic++){
+  for(int jc=ic+1; jc<m_longiClusCol.size(); jc++){
+    if(ic>=m_longiClusCol.size()) ic--;
+
+    if( fabs(m_longiClusCol[ic].getHoughAlpha() - m_longiClusCol[jc].getHoughAlpha()) > settings.th_dAlpha1 || 
+        fabs(m_longiClusCol[ic].getHoughRho() - m_longiClusCol[jc].getHoughRho()) > settings.th_dRho1  ) 
+      continue;
+
+    double m_ratio1 = m_longiClusCol[ic].OverlapRatioE(m_longiClusCol[jc]);
+    double m_ratio2 = m_longiClusCol[jc].OverlapRatioE(m_longiClusCol[ic]);
+
+printf("      Tag branch: Clus #%d: (R, E) = (%.2f, %.2f). Clus #%d: (%.2f, %.2f). \n", ic, m_ratio1, m_longiClusCol[ic].getE(), jc, m_ratio2, m_longiClusCol[jc].getE() );
+    
+    if(m_ratio1>settings.th_overlapE1 && m_longiClusCol[ic].getE()<m_longiClusCol[jc].getE()){
+      m_longiClusCol.erase( m_longiClusCol.begin()+ic );
+      ic--;
+      break;
+    }
+
+    if(m_ratio2>settings.th_overlapE1 && m_longiClusCol[jc].getE()<m_longiClusCol[ic].getE()){
+      m_longiClusCol.erase( m_longiClusCol.begin()+jc );
+      jc--;
+    }
+
+  }}
+
+cout<<"    After 1st iter tagging: "<<m_longiClusCol.size()<<endl;
+
+  //Overlap with other clusters: Iter 2. 
+  for(int ic=0; ic<m_longiClusCol.size()-1; ic++){
+  for(int jc=ic+1; jc<m_longiClusCol.size(); jc++){
+    if(ic>=m_longiClusCol.size()) ic--;
+
+    if( fabs(m_longiClusCol[ic].getHoughAlpha() - m_longiClusCol[jc].getHoughAlpha()) > settings.th_dAlpha2 ||
+        fabs(m_longiClusCol[ic].getHoughRho() - m_longiClusCol[jc].getHoughRho()) > settings.th_dRho2  )
+      continue;
+
+    double m_ratio1 = m_longiClusCol[ic].OverlapRatioE(m_longiClusCol[jc]);
+    double m_ratio2 = m_longiClusCol[jc].OverlapRatioE(m_longiClusCol[ic]);
+
+printf("      Tag branch: Clus #%d: (R, E) = (%.2f, %.2f). Clus #%d: (%.2f, %.2f). \n", ic, m_ratio1, m_longiClusCol[ic].getE(), jc, m_ratio2, m_longiClusCol[jc].getE() );
+
+    if(m_ratio1>settings.th_overlapE2 && m_longiClusCol[ic].getE()<m_longiClusCol[jc].getE()){
+      m_longiClusCol.erase( m_longiClusCol.begin()+ic );
+      ic--;
+      break;
+    }
+
+    if(m_ratio2>settings.th_overlapE2 && m_longiClusCol[jc].getE()<m_longiClusCol[ic].getE()){
+      m_longiClusCol.erase( m_longiClusCol.begin()+jc );
+      jc--;
+    }
+
+  }}
+cout<<"    After 2nd iter tagging: "<<m_longiClusCol.size()<<endl;
+
+
+/*
+  for(int ic=0; ic<m_longiClusCol.size()-1; ic++){
+  for(int jc=ic+1; jc<m_longiClusCol.size(); jc++){
+    if(ic>=m_longiClusCol.size()) ic--;
+
+    double m_ratio1 = m_longiClusCol[ic].OverlapRatio(m_longiClusCol[jc]); // R = Nsame[i|j]/Ntot[i]. 
+    double m_ratio2 = m_longiClusCol[jc].OverlapRatio(m_longiClusCol[ic]);
+
+    if(m_ratio1==0 && m_ratio2==0) { continue; }
+    else if(m_ratio1==0 || m_ratio2==0) { continue; }
+
+    //Case1: subset
+    else if( m_ratio1==1 ){ 
+      m_longiClusCol[jc].MergeCluster( m_longiClusCol[ic] );
+      m_longiClusCol.erase(m_longiClusCol.begin()+ic );
+      ic--;
+    }
+    else if( m_ratio2==1 ){
+      m_longiClusCol[ic].MergeCluster( m_longiClusCol[jc] );
+      m_longiClusCol.erase(m_longiClusCol.begin()+jc );
+      jc--;
+    }
+
+    //Case2: has overlap. Check cluster size first. 
+    //  Case 2.1: N_i<Nth, N_j<Nth.
+    else if(m_longiClusCol[ic].getBarShowers().size()<settings.th_GoodLayer1 && m_longiClusCol[jc].getBarShowers().size()<settings.th_GoodLayer1){
+      m_longiClusCol[ic].MergeCluster( m_longiClusCol[jc] );
+      m_longiClusCol.erase(m_longiClusCol.begin()+jc );
+      jc--;
+    }
+
+    //  Case 2.2: N_i>=Nth, N_j>=Nth
+    else if(m_longiClusCol[ic].getBarShowers().size()>=settings.th_GoodLayer1 && m_longiClusCol[jc].getBarShowers().size()>=settings.th_GoodLayer1){
+      //Case 2.2.1: R1>Rth && R2>Rth
+      if(m_ratio1>settings.th_overlap && m_ratio2>settings.th_overlap){
+        m_longiClusCol[ic].MergeCluster( m_longiClusCol[jc] );
+        m_longiClusCol.erase(m_longiClusCol.begin()+jc );
+        jc--;
+      }
+
+      //Case 2.2.2: R1<Rth || R2<Rth
+      else{
+        std::vector<CRDEcalEDM::CRDCaloBarShower> m_sharedshs; m_sharedshs.clear();
+        for(int is=0; is<m_longiClusCol[ic].getBarShowers().size(); is++){
+        for(int js=0; js<m_longiClusCol[jc].getBarShowers().size(); js++){
+          if(m_longiClusCol[ic].getBarShowers()[is]==m_longiClusCol[jc].getBarShowers()[js]) m_sharedshs.push_back(m_longiClusCol[ic].getBarShowers()[is]);
+        }}
+        if(m_longiClusCol[ic].getE()>m_longiClusCol[jc].getE()) m_longiClusCol[jc].RemoveShowers( m_sharedshs );  
+        else m_longiClusCol[ic].RemoveShowers( m_sharedshs );
+      }
+    }
+
+    //  Case 2.3: N_i>=Nth, N_j<Nth
+    else{
+      //Case 2.3.1: R1<Rth && R2<Rth
+      if(m_ratio1<settings.th_overlap && m_ratio2<settings.th_overlap){
+
+        std::vector<CRDEcalEDM::CRDCaloBarShower> m_sharedshs; m_sharedshs.clear();
+        for(int is=0; is<m_longiClusCol[ic].getBarShowers().size(); is++){
+        for(int js=0; js<m_longiClusCol[jc].getBarShowers().size(); js++){
+          if(m_longiClusCol[ic].getBarShowers()[is]==m_longiClusCol[jc].getBarShowers()[js]) m_sharedshs.push_back(m_longiClusCol[ic].getBarShowers()[is]);
+        }}
+
+        if(m_longiClusCol[ic].getE()>m_longiClusCol[jc].getE()) m_longiClusCol[jc].RemoveShowers( m_sharedshs );
+        else m_longiClusCol[ic].RemoveShowers( m_sharedshs );
+      }
+
+      //Case 2.3.2: R1>=Rth || R2>=Rth
+      else{
+        m_longiClusCol[ic].MergeCluster( m_longiClusCol[jc] );
+        m_longiClusCol.erase(m_longiClusCol.begin()+jc );
+        jc--;
+      }
+    }
+*/
+/*  for(int ic=0; ic<m_longiClusCol.size(); ic++){
+    if( m_longiClusCol[ic].getBarShowers().size()<=settings.th_peak || 
+        settings.fl_continuetrk && !m_longiClusCol[ic].isContinue() ||
+        !m_longiClusCol[ic].isContinueN(settings.th_continuetrkN) ){
+
+        m_longiClusCol.erase(m_longiClusCol.begin()+ic );
+        ic--;
+    }
+  }
+  }}
+*/
+
+/*
+cout<<"  Print clusters: "<<endl;
+for(int ic=0; ic<m_longiClusCol.size(); ic++)
+  printf("    Nhit %d, Energy %.2f, HoughPar (%.2f, %.2f, %.2f) \n",
+          m_longiClusCol[ic].getBarShowers().size(), m_longiClusCol[ic].getE(), 
+          m_longiClusCol[ic].getHoughAlpha(), m_longiClusCol[ic].getHoughRho(), m_longiClusCol[ic].getHoughIntercept() );
+cout<<endl;
+*/
   return StatusCode::SUCCESS;
 }
 

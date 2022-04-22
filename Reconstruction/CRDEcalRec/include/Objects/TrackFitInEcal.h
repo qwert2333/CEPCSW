@@ -11,10 +11,10 @@ public:
 	 TrackFitInEcal(double barAngle=0.);
 	 ~TrackFitInEcal();
 
-    void setBarAngle(double barAngle) { m_barAngle=barAngle; }
-	 void setPoint(int flagUZ, double uzPos, double uzPosErr, double depth, double depthErr);
-    void setGlobalPoint(int flagUZ, double x, double xerr, double y, double yerr, double z, double zerr);
-    void setImpactParameter( double dr, double dz ) { m_IPvar[0]=dr; m_IPvar[1]=dz; m_FixIP=true; } 
+   void setBarAngle(double barAngle) { m_barAngle=barAngle; }
+   void setPoint(int flagUZ, double uzPos, double uzPosErr, double depth, double depthErr);
+   void setGlobalPoint(int flagUZ, double x, double xerr, double y, double yerr, double z, double zerr);
+   void setImpactParameter( double dr, double dz ) { m_IPvar[0]=dr; m_IPvar[1]=dz; m_FixIP=true; } 
 	 bool fitTrack();
 	 void clear();
 

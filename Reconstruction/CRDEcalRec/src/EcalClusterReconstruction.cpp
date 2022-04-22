@@ -48,10 +48,12 @@ StatusCode EcalClusterReconstruction::RunAlgorithm( EcalClusterReconstruction::S
   cout<<"Hough Clustering"<<endl;
   m_houghclusAlg      ->RunAlgorithm( *m_HCAlgSettings, dataCol );
 
-//  cout<<"Energy splitting"<<endl;
-//  m_energysplittingAlg->RunAlgorithm( *m_ESAlgSettings, dataCol );
-//  cout<<"Chi2 matching"<<endl;
-//  m_etmatchingAlg     ->RunAlgorithm( *m_ETAlgSettings, dataCol );
+  dataCol.tmp_TowerCol = dataCol.TowerCol; 
+
+  //cout<<"Energy splitting"<<endl;
+  m_energysplittingAlg->RunAlgorithm( *m_ESAlgSettings, dataCol );
+  //cout<<"Chi2 matching"<<endl;
+  m_etmatchingAlg     ->RunAlgorithm( *m_ETAlgSettings, dataCol );
 
 
 /*
@@ -90,7 +92,7 @@ for(int ib=0; ib<dataCol.TowerCol[it].getBlocks().size(); ib++){
 }
 */
 
-  dataCol.PrintShower();
+  //dataCol.PrintShower();
   dataCol.Print3DClus();
 
   return StatusCode::SUCCESS;

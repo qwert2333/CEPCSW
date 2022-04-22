@@ -18,6 +18,7 @@ namespace CRDEcalEDM {
       void Clear() {index_alpha.clear(); index_rho.clear(); binSize.clear();}
       std::vector<int> getIndexAlpha() const { return index_alpha; }
       std::vector<int> getIndexRho() const { return index_rho; }
+      std::vector<int> getBinSize() const {return binSize; }
 
       void AddCell(int _alpha, int _rho, int _size) { index_alpha.push_back(_alpha); index_rho.push_back(_rho); binSize.push_back(_size); }
 

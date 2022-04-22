@@ -43,6 +43,7 @@ public:
   //ECal Collections
   std::vector<CRDEcalEDM::CRDCaloBlock>       BlockVec;  //All fired crystal bars, grouped as blocks
   std::vector<CRDEcalEDM::CRDCaloTower>       TowerCol;  //40*40*28 tower, containing blocks, LongiClusters, tracks.
+  std::vector<CRDEcalEDM::CRDCaloTower>       tmp_TowerCol;  //
 
   std::vector<CRDEcalEDM::CRDCaloHitTransShower> Shower2DCol;
   std::vector<CRDEcalEDM::CRDCaloHitTransShower> MIPShower2DCol; 
@@ -65,7 +66,7 @@ public:
   void Print3DClus();
   void Clear();
   void ClearBlock()  { BlockVec.clear(); }
-  void ClearTower()  { TowerCol.clear(); }
+  void ClearTower()  { TowerCol.clear(); tmp_TowerCol.clear(); }
   void ClearShower() { Shower2DCol.clear(); MIPShower2DCol.clear(); EMShower2DCol.clear(); }
   void ClearCluster(){ GoodClus3DCol.clear(); BadClus3DCol.clear(); Clus3DCol.clear(); }
   void ClearPFO()    { PFOCol.clear(); }

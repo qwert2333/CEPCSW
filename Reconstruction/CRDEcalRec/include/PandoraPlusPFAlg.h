@@ -120,13 +120,11 @@ protected:
   FloatVec m_clusX_x, m_clusX_y, m_clusX_z, m_clusX_E, m_clusX_alpha, m_clusX_rho, m_clusX_inter, m_clusX_px, m_clusX_py, m_clusX_pz;
   FloatVec m_clusY_x, m_clusY_y, m_clusY_z, m_clusY_E, m_clusY_alpha, m_clusY_rho, m_clusY_inter, m_clusY_px, m_clusY_py, m_clusY_pz;
   IntVec m_clusX_Nhit, m_clusY_Nhit, m_clusX_Nlayer, m_clusY_Nlayer;
+  FloatVec m_showerX_x, m_showerX_y, m_showerX_z, m_showerX_E;
+  FloatVec m_showerY_x, m_showerY_y, m_showerY_z, m_showerY_E;
 
   TTree *t_ShowersX;
   TTree *t_ShowersY;
-
-  int m_Nshower2D;
-  IntVec m_shower2D_dlayer, m_shower2D_part, m_shower2D_stave, m_shower2D_module, m_shower2D_type;
-  FloatVec m_shower2D_x, m_shower2D_y, m_shower2D_z, m_shower2D_E;
 
   //Stage2: check reconstructed result
   TTree *t_recoPFO;
@@ -143,7 +141,7 @@ protected:
   void ClearBar();
   void ClearLayer();
   void ClearCluster();
-  void ClearShower();
+  void ClearShower(); 
   void ClearRecPFO(); 
 
 };
