@@ -46,8 +46,10 @@ static dd4hep::Ref_t create_detector(dd4hep::Detector& theDetector,
   double Z0 = theDetector.constant<double>("ecalbarrel_zlength");
   double barx = theDetector.constant<double>("bar_x");   //Crystal size in R direction. 
   double bary = theDetector.constant<double>("bar_y");   //Crystal size in z/phi direction (z for odd layer, phi for even layer).
-  int Nsymm = theDetector.constant<double>("n_symm");    //Only support 8 and 12 now. 
-  double rotAngle = 360./Nsymm;  
+  //int Nsymm = theDetector.constant<int>("n_symm");    //Only support 8 and 12 now. 
+  //double rotAngle = 360./Nsymm;  
+  int Nsymm = 8;    //Only support 8 and 12 now. 
+  double rotAngle = 45.;  
 
   double dim_x1 = R0*tan(rotAngle*degree/2.) + h0/(2.*sin(rotAngle*degree));
   double dim_x2 = dim_x1 - h0/tan(rotAngle*degree);
@@ -175,9 +177,10 @@ static dd4hep::Ref_t create_detector(dd4hep::Detector& theDetector,
   }
   
   for(int i=0;i<Nsymm;i++){
-    double posx = -r0*sin(rotAngle) - dx*cos(rotAngle);
-    double posy = r0*cos(rotAngle) - dx*sin(rotAngle);
-    dd4hep::Transform3D transform(dd4hep::RotationZ(rotAngle)*dd4hep::RotationX(-90*degree),  dd4hep::Position(posx, posy, 0.));
+    double m_rot = rotAngle*i*degree;
+    double posx = -r0*sin(m_rot) - dx*cos(m_rot);
+    double posy = r0*cos(m_rot) - dx*sin(m_rot);
+    dd4hep::Transform3D transform(dd4hep::RotationZ(m_rot)*dd4hep::RotationX(-90*degree),  dd4hep::Position(posx, posy, 0.));
     dd4hep::PlacedVolume plv = envelopeVol.placeVolume(det_vol, transform);
     plv.addPhysVolID("module", i);
     DetElement sd(ECAL, _toString(i,"trap%3d"), detid);

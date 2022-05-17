@@ -27,19 +27,13 @@ namespace CRDEcalEDM {
       return E;
     }
 
-    dd4hep::Position CRDCaloBarShower::getPos() const{
-      dd4hep::Position pos(0,0,0);
+    TVector3 CRDCaloBarShower::getPos() const{
+      TVector3 pos(0,0,0);
       double Etot=getE();
-      for(int i=0;i<Bars.size();i++) pos += (Bars[i].getPosition() * Bars[i].getEnergy())/Etot;
+      for(int i=0;i<Bars.size();i++) pos += Bars[i].getPosition() * (Bars[i].getEnergy()/Etot);
       return pos;
     }
 
-    TVector3 CRDCaloBarShower::getPosV3() const{
-      dd4hep::Position pos = getPos();
-      TVector3 pos_v3( pos.x(), pos.y(), pos.z() );
-      return pos_v3; 
-    }
-   
     double CRDCaloBarShower::getT1() const{
       double T1=0;
       double Etot = getE();
@@ -55,7 +49,7 @@ namespace CRDEcalEDM {
     }
 
     double CRDCaloBarShower::getWidth() const{
-      dd4hep::Position centPos = getPos(); 
+      TVector3 centPos = getPos(); 
       double Etot = getE(); 
       double sigmax=0; 
       double sigmay=0; 

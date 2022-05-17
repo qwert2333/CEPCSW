@@ -11,6 +11,9 @@
     <constant name="world_x" value="world_size"/>
     <constant name="world_y" value="world_size"/>
     <constant name="world_z" value="world_size"/>
+    <constant name="n_symm"     value="8" />                                       <!--Only support 8 and 12 now -->
+    <constant name="Nblock_z"   value="11" />
+    <constant name="Nblock_phi" value="4" />
     <constant name="bar_x" value="10*mm"/>   <!--Crystal size in R direction-->
     <constant name="bar_y" value="10*mm"/>   <!--Crystal size in z/phi direction (z for odd layer, phi for even layer)-->
     <constant name="ecalbarrel_inner_radius" value="1800*mm"/>

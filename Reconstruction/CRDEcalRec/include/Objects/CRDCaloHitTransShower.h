@@ -4,8 +4,6 @@
 #include "Objects/CRDCaloBarShower.h"
 #include "Objects/CRDShadowCluster.h"
 //#include "edm4hep/CalorimeterHit.h"
-//#include "edm4hep/Vector3f.h"
-#include "TVector3.h"
 
 namespace CRDEcalEDM{
 
@@ -19,7 +17,7 @@ namespace CRDEcalEDM{
     void Clear(){
       barShowerX.Clear(); barShowerY.Clear(); /*CaloHits.clear();*/
     }
-    dd4hep::Position getPos() const;
+    TVector3 getPos() const;
     double getHitsE() const; 
     double getShowerE() const { return barShowerX.getE() + barShowerY.getE();}
 

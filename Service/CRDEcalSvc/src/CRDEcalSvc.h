@@ -12,7 +12,7 @@ public:
     StatusCode finalize() override;
 
     void setDigiHits( std::vector<CRDEcalEDM::CRDCaloBar>& _hits ) { m_digiHits = _hits; }
-    void getDigiHits( std::vector<CRDEcalEDM::CRDCaloBar>& _hits ) const { _hits = m_digiHits; }
+    void getDigiHits( std::vector<CRDEcalEDM::CRDCaloBar>& _hits ) { _hits = m_digiHits; }
     void ClearSystem() { m_digiHits.clear(); }
 
 private:

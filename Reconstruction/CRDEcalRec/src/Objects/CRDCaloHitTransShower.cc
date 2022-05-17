@@ -13,7 +13,7 @@ namespace CRDEcalEDM{
     //CaloHits = _hits;
   }
 
-  dd4hep::Position CRDCaloHitTransShower::getPos() const{
+  TVector3 CRDCaloHitTransShower::getPos() const{
     float rotAngle = module*PI/4.;
     TVector3 m_vecX(0,0,0);
     TVector3 m_vecY(0,0,0);
@@ -23,7 +23,7 @@ namespace CRDEcalEDM{
     m_vecY.RotateZ(rotAngle);
     TVector3 m_pos( m_vecY.x(), (m_vecX.y()+m_vecY.y())/2 , m_vecX.z() );
     m_pos.RotateZ(-rotAngle);
-    dd4hep::Position pos(m_pos.x(), m_pos.y(), m_pos.z());
+    TVector3 pos(m_pos.x(), m_pos.y(), m_pos.z());
     return pos;
   }
 

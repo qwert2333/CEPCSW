@@ -17,7 +17,7 @@ namespace CRDEcalEDM{
   //  double minr=10e9;
   //  edm4hep::ConstCalorimeterHit initHit;
   //  for(int i=0;i<CaloHits.size();i++){
-  //     edm4hep::Vector3f pos = CaloHits[i].getPosition();
+  //     TVector3 pos = CaloHits[i].getPosition();
   //     double rhit = sqrt(pos.x*pos.x+pos.y*pos.y+pos.z*pos.z);
   //     if(rhit<minr){ minr = rhit; initHit = CaloHits[i];}
   //  }
@@ -29,7 +29,7 @@ namespace CRDEcalEDM{
     TVector3 vec(0,0,0);
     double totE = getHitsE();
     for(int i=0;i<CaloHits.size(); i++){
-       edm4hep::Vector3f v_cent = CaloHits[i].getPosition();
+       TVector3 v_cent = CaloHits[i].getPosition();
        TVector3 m_vec(v_cent.x, v_cent.y, v_cent.z);
        vec += m_vec* (CaloHits[i].getEnergy()/totE);
     }
@@ -38,9 +38,9 @@ namespace CRDEcalEDM{
 */
   //Get shower center by weighted 2Dshower(shower in layers) position. 
   TVector3 CRDCaloHit3DCluster::getShowerCenter() const{
-    dd4hep::Position spos(0,0,0);
+    TVector3 spos(0,0,0);
     double totE = getShowerE();
-    for(int i=0;i<ShowerinLayer.size(); i++) spos += ShowerinLayer[i].getPos()*ShowerinLayer[i].getShowerE()/totE;
+    for(int i=0;i<ShowerinLayer.size(); i++) spos += ShowerinLayer[i].getPos()*(ShowerinLayer[i].getShowerE()/totE);
     TVector3 vec(spos.x(), spos.y(), spos.z());
     return vec;
   }
@@ -264,7 +264,7 @@ namespace CRDEcalEDM{
       axis *= 1./axis.Mag();
     }
     else if( ShowerinLayer.size()==2 ){
-      dd4hep::Position rpos = ShowerinLayer.back().getPos() - ShowerinLayer.front().getPos() ;
+      TVector3 rpos = ShowerinLayer.back().getPos() - ShowerinLayer.front().getPos() ;
       double mag = sqrt(rpos.Mag2());
       axis.SetXYZ(rpos.x(), rpos.y(), rpos.z());
       axis *= 1./mag;

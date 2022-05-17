@@ -35,16 +35,16 @@ namespace CRDEcalEDM{
     return E;
   }
 
-  dd4hep::Position CRDCaloBarCluster::getPos() const{
-    dd4hep::Position pos(0,0,0);
+  TVector3 CRDCaloBarCluster::getPos() const{
+    TVector3 pos(0,0,0);
     double Etot=getE();
-    for(int i=0;i<Bars.size();i++) pos += (Bars[i].getPosition() * Bars[i].getEnergy())/Etot;
+    for(int i=0;i<Bars.size();i++) pos += Bars[i].getPosition() * (Bars[i].getEnergy()/Etot);
     return pos;
   }
 
   double CRDCaloBarCluster::getScndMoment(){
     if(Bars.size()<=1) return 0.;
-    dd4hep::Position pos = getPos();
+    TVector3 pos = getPos();
     double Etot = getE();
     double scndM = 0;
     for(int i=0;i<Bars.size();i++) scndM += (Bars[i].getEnergy() * (pos-Bars[i].getPosition()).Mag2()) / Etot;

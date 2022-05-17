@@ -137,7 +137,7 @@ namespace CRDEcalEDM{
       return;
     }
     else if(barShowerCol.size()==2){
-      dd4hep::Position rpos = barShowerCol.back().getPos() - barShowerCol.front().getPos();
+      TVector3 rpos = barShowerCol.back().getPos() - barShowerCol.front().getPos();
       axis.SetXYZ( rpos.x(), rpos.y(), rpos.z() );
       axis = axis.Unit();
       return; 
@@ -149,7 +149,7 @@ namespace CRDEcalEDM{
       if(barAngle>=TMath::TwoPi()) barAngle = barAngle-TMath::TwoPi();
       track->setBarAngle(barAngle);
       for(int is=0; is<barShowerCol.size(); is++){
-        dd4hep::Position b_pos = barShowerCol[is].getPos(); 
+        TVector3 b_pos = barShowerCol[is].getPos(); 
         track->setGlobalPoint(0, b_pos.x(), posErr, b_pos.y(), posErr, b_pos.z(), posErr);
         track->setGlobalPoint(1, b_pos.x(), posErr, b_pos.y(), posErr, b_pos.z(), posErr);
       }

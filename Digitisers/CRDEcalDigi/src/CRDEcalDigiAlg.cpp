@@ -142,7 +142,7 @@ StatusCode CRDEcalDigiAlg::execute()
 
 		double Lbar = GetBarLength(hitbar);  //NOTE: Is fixed with geometry CRDEcalBarrel_v01. 
 		dd4hep::Position hitpos = m_cellIDConverter->position(id);
-		dd4hep::Position barpos(10*hitpos.x(), 10*hitpos.y(), 10*hitpos.z());	//cm to mm.
+    TVector3 barpos(10*hitpos.x(), 10*hitpos.y(), 10*hitpos.z()); //cm to mm.
 		hitbar.setPosition(barpos);
 		//hitbar.T1 = 99999; hitbar.T2 = 99999;
 		//if(_Debug>=2) std::cout<<"SimHit contribution size: "<<SimHit.contributions_size()<<std::endl;
@@ -161,8 +161,8 @@ StatusCode CRDEcalDigiAlg::execute()
 			double en = conb.getEnergy();
 			if(en == 0) continue;
 
-			dd4hep::Position steppos(conb.getStepPosition().x, conb.getStepPosition().y, conb.getStepPosition().z);
-			dd4hep::Position rpos = steppos-hitbar.getPosition();
+			TVector3 steppos(conb.getStepPosition().x, conb.getStepPosition().y, conb.getStepPosition().z);
+			TVector3 rpos = steppos-hitbar.getPosition();
 
 			m_step_x.push_back(steppos.x());
 			m_step_y.push_back(steppos.y());
@@ -259,16 +259,17 @@ StatusCode CRDEcalDigiAlg::execute()
     //End bar digitization. 
 
     //2 hits with double-readout time. 
+    edm4hep::Vector3f m_pos(hitbar.getPosition().X(), hitbar.getPosition().Y(), hitbar.getPosition().Z());
     auto digiHit1 = caloVec->create();
     digiHit1.setCellID(hitbar.getcellID());
     digiHit1.setEnergy(hitbar.getQ1());
     digiHit1.setTime(hitbar.getT1());
-    digiHit1.setPosition(hitbar.getPosition());
+    digiHit1.setPosition(m_pos);
     auto digiHit2 = caloVec->create();
     digiHit2.setCellID(hitbar.getcellID());
     digiHit2.setEnergy(hitbar.getQ2());
     digiHit2.setTime(hitbar.getT2());
-    digiHit2.setPosition(hitbar.getPosition());
+    digiHit2.setPosition(m_pos);
 
 
     auto rel = caloAssoVec->create();
@@ -297,7 +298,7 @@ StatusCode CRDEcalDigiAlg::execute()
 	}
 
 
-	m_edmsvc->setDigiHits( barCol ); 
+	m_edmsvc->setDigiHits( m_barCol ); 
   
 
 	t_SimCont->Fill();
@@ -306,7 +307,7 @@ StatusCode CRDEcalDigiAlg::execute()
 	std::cout<<"Total Bar Energy: "<<totE_bar<<std::endl;
 
   _nEvt ++ ;
-  delete SimHitCol, caloVec, caloAssoVec; 
+  //delete SimHitCol, caloVec, caloAssoVec; 
   m_simhitCol.clear();
   return StatusCode::SUCCESS;
 }
@@ -352,8 +353,10 @@ StatusCode CRDEcalDigiAlg::MergeHits( const edm4hep::SimCalorimeterHitCollection
 		m_hit.setEnergy(m_hit.getEnergy()+m_step.getEnergy());
 	}
 
-  for(auto iter = m_mergedhit.begin(); iter!=m_mergedhit.end(); iter++) m_hits.push_back( iter().SimCalorimeterHit() );  
-
+  for(auto iter = m_mergedhit.begin(); iter!=m_mergedhit.end(); iter++){
+    edm4hep::SimCalorimeterHit constsimhit = *iter; 
+    m_hits.push_back( constsimhit );  
+  }
   return StatusCode::SUCCESS; 
 }
 
@@ -361,7 +364,7 @@ StatusCode CRDEcalDigiAlg::MergeHits( const edm4hep::SimCalorimeterHitCollection
 
 double CRDEcalDigiAlg::GetBarLength(CRDEcalEDM::CRDCaloBar& bar){
 	//TODO: reading bar length from geosvc. 
-	if(bar.getSlayer()==1) return 600.;
+	if(bar.getSlayer()==1) return 410.;
 	else return 470.-bar.getDlayer()*10.;
 }
 

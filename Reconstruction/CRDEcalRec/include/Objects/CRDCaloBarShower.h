@@ -4,7 +4,6 @@
 #include <vector>
 #include "Objects/CRDCaloBar.h"
 #include "Objects/CRDShadowCluster.h"
-#include "TVector3.h"
 namespace CRDEcalEDM {
 
   class CRDCaloBarShower{
@@ -19,8 +18,7 @@ namespace CRDEcalEDM {
     bool isNeighbor(CRDEcalEDM::CRDCaloBar iBar); 
     bool inShower(CRDEcalEDM::CRDCaloBar iBar); 
 
-    dd4hep::Position getPos() const;
-    TVector3 getPosV3() const; 
+    TVector3 getPos() const;
     double getE()  const;
     double getT1() const;
     double getT2() const;
@@ -41,7 +39,7 @@ namespace CRDEcalEDM {
     void setBars(std::vector<CRDEcalEDM::CRDCaloBar>& _bars){ Bars = _bars; }
     void addBar(CRDEcalEDM::CRDCaloBar& _bar) { Bars.push_back(_bar); }
     void setSeed(CRDEcalEDM::CRDCaloBar& _seed ) { Seed = _seed; }
-    void setPos(dd4hep::Position& _pos) { pos = _pos; }
+    void setPos(TVector3& _pos) { pos = _pos; }
     void addTrkShadowClus( CRDEcalEDM::CRDShadowCluster& _candi ) { TrkShadowClusCol.push_back(_candi); }
     void addNeuShadowClus( CRDEcalEDM::CRDShadowCluster& _candi ) { NeuShadowClusCol.push_back(_candi); }
 
@@ -52,7 +50,7 @@ namespace CRDEcalEDM {
     int dlayer;
     int slayer;
 		double Energy;
-    dd4hep::Position pos;
+    TVector3 pos;
     std::vector<CRDEcalEDM::CRDCaloBar> Bars;
     CRDEcalEDM::CRDCaloBar Seed;
     std::vector<CRDEcalEDM::CRDShadowCluster> TrkShadowClusCol;

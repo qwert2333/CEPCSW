@@ -22,7 +22,7 @@ namespace CRDEcalEDM{
     void sortByPos() { std::sort(Bars.begin(), Bars.end()); }
 
     double getE() const; 
-    dd4hep::Position getPos() const;
+    TVector3 getPos() const;
     double getScndMoment();
     int getNseeds() const { return Seeds.size(); }
     std::vector<CRDEcalEDM::CRDCaloBar> getBars()  const { return Bars;  }
@@ -44,7 +44,7 @@ namespace CRDEcalEDM{
     std::vector<CRDEcalEDM::CRDCaloBar> Bars;
     std::vector<CRDEcalEDM::CRDCaloBar> Seeds;
     double Energy;
-    dd4hep::Position pos;
+    TVector3 pos;
     int Nseeds;
     double ScndMoment;  //Second moment of this cluster. 
   };
