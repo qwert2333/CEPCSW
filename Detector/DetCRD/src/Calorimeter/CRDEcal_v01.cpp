@@ -46,29 +46,31 @@ static dd4hep::Ref_t create_detector(dd4hep::Detector& theDetector,
   double Z0 = theDetector.constant<double>("ecalbarrel_zlength");
   double barx = theDetector.constant<double>("bar_x");   //Crystal size in R direction. 
   double bary = theDetector.constant<double>("bar_y");   //Crystal size in z/phi direction (z for odd layer, phi for even layer).
-  
-  double dim_x1 = R0*tan(22.5*degree) + sqrt(2)*h0/2.;
-  double dim_x2 = dim_x1 - h0;
+  int Nsymm = theDetector.constant<double>("n_symm");    //Only support 8 and 12 now. 
+  double rotAngle = 360./Nsymm;  
+
+  double dim_x1 = R0*tan(rotAngle*degree/2.) + h0/(2.*sin(rotAngle*degree));
+  double dim_x2 = dim_x1 - h0/tan(rotAngle*degree);
   double dim_y = Z0/2.;
   double dim_z = h0/2.;		                 
-  double dx = dim_x1 - R0*tan(22.5*degree);  //transport distance in x-axis
-  double r0 = R0+h0/2.;                      //rotation radius 
+  double dx = dim_x1 - R0*tan(rotAngle*degree/2.);  //transport distance in x-axis
+  double r0 = R0+h0/2.;                             //rotation radius 
   
   //Crystal bar size
-  int Nlayers = (int)h0/(2*barx);         //14 double-layers. 
-  int Nblock_z   = 11;                    //block number in z direction
-  int Nblock_phi = 4;                     //block number in phi direction
-  double barz_s0;                         //Crystal bar lenghth in sub-layer 0(phi direction). Depends on layer number. 
-  double barz_s1 = Z0/Nblock_z;           //Crystal bar lenghth in sub-layer 1(z direction, 46cm).
-  int Nbar_phi;                           //Crystal bar number in each block, in phi direction.
-  int Nbar_z = (int)barz_s1/bary;         //Crystal bar number in each block, in z direction.
+  int Nlayers = (int)h0/(2*barx);                             //14 double-layers. 
+  int Nblock_z = theDetector.constant<int>("Nblock_z");       //block number in z direction
+  int Nblock_phi = theDetector.constant<int>("Nblock_phi");   //block number in phi direction
+  double barz_s0;                                             //Crystal bar lenghth in sub-layer 0(phi direction). Depends on layer number. 
+  double barz_s1 = Z0/Nblock_z;                               //Crystal bar lenghth in sub-layer 1(z direction, ~60cm).
+  int Nbar_phi;                                               //Crystal bar number in each block, in phi direction.
+  int Nbar_z = (int)barz_s1/bary;                             //Crystal bar number in each block, in z direction.
   
   //Define detector and motherVolume(world)
   dd4hep::DetElement ECAL(det_name, detid);
   dd4hep::Volume motherVol = theDetector.pickMotherVolume(ECAL);
   
   // Create a Tube-like envelope representing the whole detector volume
-  dd4hep::PolyhedraRegular envelope(8, 22.5*degree, R0, (R0+h0), Z0);
+  dd4hep::PolyhedraRegular envelope(Nsymm, rotAngle/2.*degree, R0, (R0+h0), Z0);
   dd4hep::Material	air(theDetector.material("Air"));
   dd4hep::Volume	   envelopeVol(det_name, envelope, air);
   dd4hep::PlacedVolume	envelopePlv = motherVol.placeVolume(envelopeVol, Position(0,0,0));
@@ -107,8 +109,8 @@ static dd4hep::Ref_t create_detector(dd4hep::Detector& theDetector,
   }
 
   caloData->layoutType = LayeredCalorimeterData::BarrelLayout ;
-  caloData->inner_symmetry = 8  ;
-  caloData->outer_symmetry = 8  ;
+  caloData->inner_symmetry = Nsymm  ;
+  caloData->outer_symmetry = Nsymm  ;
   caloData->phi0 = 0 ; // hardcoded
 
   // extent of the calorimeter in the r-z-plane [ rmin, rmax, zmin, zmax ] in mm.
@@ -172,15 +174,14 @@ static dd4hep::Ref_t create_detector(dd4hep::Detector& theDetector,
     sd.setPlacement(plv);    
   }
   
-  for(int i=0;i<8;i++){
-    double rotAngle = 45*i*degree;
+  for(int i=0;i<Nsymm;i++){
     double posx = -r0*sin(rotAngle) - dx*cos(rotAngle);
-  	 double posy = r0*cos(rotAngle) - dx*sin(rotAngle);
-  	 dd4hep::Transform3D transform(dd4hep::RotationZ(rotAngle)*dd4hep::RotationX(-90*degree),  dd4hep::Position(posx, posy, 0.));
-  	 dd4hep::PlacedVolume plv = envelopeVol.placeVolume(det_vol, transform);
-  	 plv.addPhysVolID("module", i);
-  	 DetElement sd(ECAL, _toString(i,"trap%3d"), detid);
-  	 sd.setPlacement(plv);
+    double posy = r0*cos(rotAngle) - dx*sin(rotAngle);
+    dd4hep::Transform3D transform(dd4hep::RotationZ(rotAngle)*dd4hep::RotationX(-90*degree),  dd4hep::Position(posx, posy, 0.));
+    dd4hep::PlacedVolume plv = envelopeVol.placeVolume(det_vol, transform);
+    plv.addPhysVolID("module", i);
+    DetElement sd(ECAL, _toString(i,"trap%3d"), detid);
+    sd.setPlacement(plv);
   }
   
   sens.setType("calorimeter");
