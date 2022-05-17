@@ -3,17 +3,11 @@
 
 #include "k4FWCore/DataHandle.h"
 #include "GaudiAlg/GaudiAlgorithm.h"
-#include "PandoraPlusDataCol.h"
 #include "CRDEcalSvc/ICRDEcalSvc.h"
 #include "DetInterface/IGeomSvc.h"
-#include "Tools/MCParticleCreator.h"
-#include "Tools/TrackCreator.h"
-#include "Tools/VertexCreator.h"
-#include "Tools/EcalHitsCreator.h"
-#include "Tools/HcalHitsCreator.h"
-#include "Tools/PFOCreator.h"
+#include "edm4hep/MCParticleCollection.h"
+#include "edm4hep/TrackCollection.h"
 
-#include "EcalClusterReconstruction.h"
 
 #include "TVector3.h"
 #include "TRandom3.h"
@@ -52,30 +46,13 @@ protected:
 
 
   //DataCollection
-  PandoraPlusDataCol     m_DataCol;
-
 
   //Creators and their setting
-  MCParticleCreator       *m_pMCParticleCreator;
-  TrackCreator            *m_pTrackCreator;
-  VertexCreator           *m_pVertexCreator;
-  EcalHitsCreator         *m_pEcalHitsCreator;
-  HcalHitsCreator         *m_pHcalHitsCreator;
-  PFOCreator              *m_pPfoCreator;   
-
-  MCParticleCreator::Settings      *m_pMCParticleCreatorSettings;
-  TrackCreator::Settings           *m_pTrackCreatorSettings;
-  VertexCreator::Settings          *m_pVertexCreatorSettings;
-  EcalHitsCreator::Settings        *m_EcalHitsCreatorSettings;
-  HcalHitsCreator::Settings        *m_pHcalHitsCreatorSettings;
-  PFOCreator::Settings             *m_pPfoCreatorSettings;
 
   //Algorithm for PFA
-  EcalClusterReconstruction   *m_pEcalClusterRec;
 
 
   //Parameters for PFA algorithm
-  EcalClusterReconstruction::Settings       *m_pEcalClusterRecSettings;
 
 
 
@@ -99,54 +76,6 @@ protected:
 
   //PFA input end here. 
   //-----------------------------------------------------------
-  //Followings are for code testing. 
-  typedef std::vector<float> FloatVec;
-  typedef std::vector<int>   IntVec;
-  TFile* m_wfile;
-  //Stage0: check input simbars. 
-  TTree* t_SimBar;
-  FloatVec m_simBar_x, m_simBar_y, m_simBar_z, m_simBar_T1, m_simBar_T2, m_simBar_Q1, m_simBar_Q2, m_simBar_dlayer, m_simBar_part, m_simBar_stave, m_simBar_slayer, m_simBar_module;
-  std::vector<unsigned long long> m_simBar_id;
-
-  //Check local max
-  TTree *t_Layers;
-  int m_NshowerX, m_NshowerY;
-  FloatVec m_barShowerX_x, m_barShowerX_y, m_barShowerX_z, m_barShowerX_E;
-  FloatVec m_barShowerY_x, m_barShowerY_y, m_barShowerY_z, m_barShowerY_E; 
- 
-  //Check Hough clusters
-  TTree *t_HoughClusters;
-  int m_NclusX, m_NclusY;
-  FloatVec m_clusX_x, m_clusX_y, m_clusX_z, m_clusX_E, m_clusX_alpha, m_clusX_rho, m_clusX_inter, m_clusX_px, m_clusX_py, m_clusX_pz;
-  FloatVec m_clusY_x, m_clusY_y, m_clusY_z, m_clusY_E, m_clusY_alpha, m_clusY_rho, m_clusY_inter, m_clusY_px, m_clusY_py, m_clusY_pz;
-  IntVec m_clusX_Nhit, m_clusY_Nhit, m_clusX_Nlayer, m_clusY_Nlayer;
-
-  TTree *t_ShowersX;
-  TTree *t_ShowersY;
-
-  int m_Nshower2D;
-  IntVec m_shower2D_dlayer, m_shower2D_part, m_shower2D_stave, m_shower2D_module, m_shower2D_type;
-  FloatVec m_shower2D_x, m_shower2D_y, m_shower2D_z, m_shower2D_E;
-
-  //Stage2: check reconstructed result
-  TTree *t_recoPFO;
-  int m_Npfo, m_Nmc, m_N3dclus; 
-  FloatVec m_recPFO_px, m_recPFO_py, m_recPFO_pz, m_recPFO_En;
-  IntVec m_recPFO_pid;
-  FloatVec m_Clus_x, m_Clus_y, m_Clus_z, m_Clus_E; 
-  IntVec m_N2dshInClus, m_Clus_type;
-  IntVec m_mcPdgid, m_mcNdaughter, m_mcNparent, m_mcStatus; 
-  FloatVec m_mcPx, m_mcPy, m_mcPz, m_mcEn;
-  FloatVec m_scndM; 
-  FloatVec m_trk_d0, m_trk_z0, m_trk_phi, m_trk_kappa, m_trk_tanL, m_trk_p; 
-  FloatVec m_trk_vtx_x0, m_trk_vtx_y0, m_trk_vtx_z0;  
-  IntVec m_trk_location; 
-
-  void ClearBar();
-  void ClearLayer();
-  void ClearCluster();
-  void ClearShower();
-  void ClearRecPFO(); 
 
 };
 #endif

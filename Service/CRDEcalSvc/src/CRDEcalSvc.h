@@ -11,12 +11,12 @@ public:
     StatusCode initialize() override;
     StatusCode finalize() override;
 
-    void setDigiSystem( std::vector<CRDEcalEDM::CRDCaloBlock>& blockVec ) { m_CaloBlockVec = blockVec; }
-    void getDigiSystem( std::vector<CRDEcalEDM::CRDCaloBlock>& blockVec ) { blockVec = m_CaloBlockVec; }
-    void ClearSystem() { m_CaloBlockVec.clear(); }
+    void setDigiHits( std::vector<CRDEcalEDM::CRDCaloBar>& _hits ) { m_digiHits = _hits; }
+    void getDigiHits( std::vector<CRDEcalEDM::CRDCaloBar>& _hits ) const { _hits = m_digiHits; }
+    void ClearSystem() { m_digiHits.clear(); }
 
 private:
-    std::vector<CRDEcalEDM::CRDCaloBlock> m_CaloBlockVec;
+    std::vector<CRDEcalEDM::CRDCaloBar> m_digiHits;
 
 };
 

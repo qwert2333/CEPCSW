@@ -7,7 +7,7 @@
 
 namespace CRDEcalEDM{
 
-  const double Track::B = 3.;  //NOTE: hard-coding 3T B-field here!
+  const double Track::B = 3.;
   const double Track::pos[3] = {0., 0., 0.};
   const double Track::sigma = 5.;
   const double Track::front_face_ecal = 1800.;

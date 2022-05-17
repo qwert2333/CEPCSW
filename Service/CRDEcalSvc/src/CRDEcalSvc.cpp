@@ -7,7 +7,7 @@ DECLARE_COMPONENT(CRDEcalSvc)
 
 StatusCode
 CRDEcalSvc::initialize() {
-    m_CaloBlockVec.clear();
+    m_digiHits.clear();
     StatusCode sc = Service::initialize();
 
     return sc;
@@ -16,7 +16,7 @@ CRDEcalSvc::initialize() {
 StatusCode
 CRDEcalSvc::finalize() {
     // clear or reset
-    m_CaloBlockVec.clear();
+    m_digiHits.clear();
 
     StatusCode sc = Service::finalize();
     return sc;

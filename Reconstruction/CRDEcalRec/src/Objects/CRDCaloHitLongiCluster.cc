@@ -106,27 +106,26 @@ namespace CRDEcalEDM{
     for(int il=0; il<vec_layers.size(); il++){
       bool fl_continueN = true;
       for(int in=1; in<n; in++) 
-        if( find(vec_layers.begin(), vec_layers.end(), vec_layers[il]+in)!=vec_layers.end() ) { fl_continueN=false; break; }
+        if( find(vec_layers.begin(), vec_layers.end(), vec_layers[il]+in)==vec_layers.end() ) { fl_continueN=false; break; }
+
       if(fl_continueN) {flag = true; break;}
     }
     return flag;
   }
 
   bool CRDCaloHitLongiCluster::isSubset(CRDCaloHitLongiCluster& clus) const{
-    bool flag = true; 
+
     for(int is=0; is<clus.getBarShowers().size(); is++)
-      if( find(barShowerCol.begin(), barShowerCol.end(), clus.getBarShowers()[is])==barShowerCol.end() ) {flag=false; break;}
-    return flag; 
+      if( find(barShowerCol.begin(), barShowerCol.end(), clus.getBarShowers()[is])==barShowerCol.end() ) {return false; }
+    return true;
   }
 
-  bool CRDCaloHitLongiCluster::isOverlap( CRDCaloHitLongiCluster& clus, int Nhit_main, int Nhit_diff ) const{
-    bool flag; 
-    int Ndiffhit = 0;
+  double CRDCaloHitLongiCluster::OverlapRatioE( CRDCaloHitLongiCluster& clus) const{
+    double Eshare = 0.;
     for(int is=0; is<clus.getBarShowers().size(); is++)
-      if( find(barShowerCol.begin(), barShowerCol.end(), clus.getBarShowers()[is])==barShowerCol.end() ) Ndiffhit++; 
+      if( find(barShowerCol.begin(), barShowerCol.end(), clus.getBarShowers()[is])!=barShowerCol.end() ) Eshare += clus.getBarShowers()[is].getE(); 
 
-    if(barShowerCol.size()>=Nhit_main && clus.getBarShowers().size()>=Nhit_main && Ndiffhit<=Nhit_diff) return true; 
-    return false;
+    return Eshare / getE() ;
   }
 
 
@@ -156,9 +155,11 @@ namespace CRDEcalEDM{
       }
 
       track->fitTrack();
-      double fitPhi = track->getTrkPar(2);
-      double fitTheta = track->getTrkPar(3);
+      double fitPhi = track->getPhi();
+      double fitTheta = track->getTheta();
 
+      trk_dr = track->getDr();
+      trk_dz = track->getDz();
       axis.SetMag(1.); 
       axis.SetPhi(fitPhi);
       axis.SetTheta(fitTheta);
@@ -173,6 +174,12 @@ namespace CRDEcalEDM{
     FitAxis();
   }
 
+  void CRDCaloHitLongiCluster::RemoveShowers( std::vector<CRDEcalEDM::CRDCaloBarShower>& _showers ){
+    for(int is=0; is<_showers.size(); is++){
+      auto iter = std::remove(barShowerCol.begin(), barShowerCol.end(), _showers[is]);
+      barShowerCol.erase( iter, barShowerCol.end() );
+    }
+  }
 
 
 };

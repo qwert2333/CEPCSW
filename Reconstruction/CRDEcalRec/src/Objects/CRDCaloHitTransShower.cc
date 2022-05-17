@@ -7,10 +7,10 @@
 using namespace std;
 namespace CRDEcalEDM{
 
-  CRDCaloHitTransShower::CRDCaloHitTransShower(CRDEcalEDM::CRDCaloBarShower _bars1, CRDEcalEDM::CRDCaloBarShower _bars2, std::vector<edm4hep::ConstCalorimeterHit> _hits ){
+  CRDCaloHitTransShower::CRDCaloHitTransShower(CRDEcalEDM::CRDCaloBarShower _bars1, CRDEcalEDM::CRDCaloBarShower _bars2 /*, std::vector<edm4hep::ConstCalorimeterHit> _hits*/ ){
     barShowerX = _bars1;
     barShowerY = _bars2; 
-    CaloHits = _hits;
+    //CaloHits = _hits;
   }
 
   dd4hep::Position CRDCaloHitTransShower::getPos() const{
@@ -27,6 +27,7 @@ namespace CRDEcalEDM{
     return pos;
   }
 
+/*
   double CRDCaloHitTransShower::getHitsE() const{
     double en=0;
     for(int i=0;i<CaloHits.size();i++) en+=CaloHits[i].getEnergy();
@@ -50,7 +51,7 @@ namespace CRDEcalEDM{
 
     return width; 
   }
-
+*/
   void CRDCaloHitTransShower::setShadowClusType( int _flag ){
     if(_flag==1)      { m_isTrkShower=true; m_isNeuShower=false; }
     else if(_flag==0) { m_isTrkShower=false; m_isNeuShower=true; }

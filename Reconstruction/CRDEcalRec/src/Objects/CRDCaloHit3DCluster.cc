@@ -13,19 +13,19 @@ namespace CRDEcalEDM{
 
 
   //Get the initial hit in this shower. defined as closest to IP. 
-  edm4hep::ConstCalorimeterHit CRDCaloHit3DCluster::getClusterInitialHit() const{
-    double minr=10e9;
-    edm4hep::ConstCalorimeterHit initHit;
-    for(int i=0;i<CaloHits.size();i++){
-       edm4hep::Vector3f pos = CaloHits[i].getPosition();
-       double rhit = sqrt(pos.x*pos.x+pos.y*pos.y+pos.z*pos.z);
-       if(rhit<minr){ minr = rhit; initHit = CaloHits[i];}
-    }
-    return initHit;
-  }
+  //edm4hep::ConstCalorimeterHit CRDCaloHit3DCluster::getClusterInitialHit() const{
+  //  double minr=10e9;
+  //  edm4hep::ConstCalorimeterHit initHit;
+  //  for(int i=0;i<CaloHits.size();i++){
+  //     edm4hep::Vector3f pos = CaloHits[i].getPosition();
+  //     double rhit = sqrt(pos.x*pos.x+pos.y*pos.y+pos.z*pos.z);
+  //     if(rhit<minr){ minr = rhit; initHit = CaloHits[i];}
+  //  }
+  //  return initHit;
+  //}
   
   //Get shower center by weighted hit position. 
-  TVector3 CRDCaloHit3DCluster::getHitCenter() const{
+/*  TVector3 CRDCaloHit3DCluster::getHitCenter() const{
     TVector3 vec(0,0,0);
     double totE = getHitsE();
     for(int i=0;i<CaloHits.size(); i++){
@@ -35,7 +35,7 @@ namespace CRDEcalEDM{
     }
     return vec;
   }
-
+*/
   //Get shower center by weighted 2Dshower(shower in layers) position. 
   TVector3 CRDCaloHit3DCluster::getShowerCenter() const{
     dd4hep::Position spos(0,0,0);
@@ -46,12 +46,12 @@ namespace CRDEcalEDM{
   }
 
   //Sum over the hit energy
-  double CRDCaloHit3DCluster::getHitsE() const{
+/*  double CRDCaloHit3DCluster::getHitsE() const{
     double en=0;
     for(int i=0;i<CaloHits.size(); i++) en+=CaloHits[i].getEnergy();
     return en;
   }
-
+*/
   //Sum over the 2Dshower energy
   double CRDCaloHit3DCluster::getShowerE() const{
     double en=0;
@@ -168,7 +168,7 @@ namespace CRDEcalEDM{
     return StdDev; 
   }
 
-
+/*
   std::vector<double> CRDCaloHit3DCluster::getClusterWidth() const{
     std::vector<double> widthVec; widthVec.clear(); 
     widthVec.resize(14);
@@ -207,16 +207,16 @@ namespace CRDEcalEDM{
 
     return widthVec; 
   }
-
+*/
 
   double CRDCaloHit3DCluster::getMaxWidth() const{
     double re_width = -99; 
-    std::vector<double> widthVec = getClusterWidth();    
-    re_width = *std::max_element(widthVec.begin(), widthVec.end());
+    //std::vector<double> widthVec = getClusterWidth();    
+    //re_width = *std::max_element(widthVec.begin(), widthVec.end());
     return re_width; 
   }
 
-
+/*
   void CRDCaloHit3DCluster::FitProfile(){
     FitAxis();
     edm4hep::ConstCalorimeterHit initHit = getClusterInitialHit();
@@ -255,8 +255,8 @@ namespace CRDEcalEDM{
     //delete c1;
     delete h_hitz; 
   }
-
-
+*/
+/*
   void CRDCaloHit3DCluster::FitAxis(){
     if(ShowerinLayer.size()==0) axis.SetXYZ(0,0,0);
     else if(ShowerinLayer.size()==1){ 
@@ -295,14 +295,14 @@ namespace CRDEcalEDM{
     axis.SetTheta(fitTheta);
   } 
   }
-
+*/
   void CRDCaloHit3DCluster::AddShower(CRDEcalEDM::CRDCaloHitTransShower& shower){
     ShowerinLayer.push_back(shower);
-    std::vector<edm4hep::ConstCalorimeterHit> m_hits = shower.getCaloHits();
-    CaloHits.insert(CaloHits.end(), m_hits.begin(), m_hits.end());
+    //std::vector<edm4hep::ConstCalorimeterHit> m_hits = shower.getCaloHits();
+    //CaloHits.insert(CaloHits.end(), m_hits.begin(), m_hits.end());
     showerEnergy += shower.getShowerE();
-    hitsEnergy += shower.getHitsE();
-    FitAxis();
+    //hitsEnergy += shower.getHitsE();
+    //FitAxis();
   }
 
   void CRDCaloHit3DCluster::MergeCluster(CRDEcalEDM::CRDCaloHit3DCluster& clus){
