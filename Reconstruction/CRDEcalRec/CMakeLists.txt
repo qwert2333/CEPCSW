@@ -25,6 +25,9 @@ gaudi_add_library(CRDEcalRecLib
 
 gaudi_add_module(CRDEcalRec
                  SOURCES src/PandoraPlusPFAlg.cpp
+                         src/Tools/MCParticleCreator.cpp
+                         src/Tools/TrackCreator.cpp
+                         src/Tools/EcalHitsCreator.cpp
                  LINK    CRDEcalRecLib
                          CRDEcalSvcLib
 )

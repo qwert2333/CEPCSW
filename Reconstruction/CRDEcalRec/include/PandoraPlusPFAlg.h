@@ -5,9 +5,7 @@
 #include "GaudiAlg/GaudiAlgorithm.h"
 #include "CRDEcalSvc/ICRDEcalSvc.h"
 #include "DetInterface/IGeomSvc.h"
-#include "edm4hep/MCParticleCollection.h"
-#include "edm4hep/TrackCollection.h"
-
+#include "PandoraPlusDataCol.h"
 
 #include "TVector3.h"
 #include "TRandom3.h"
@@ -46,8 +44,20 @@ protected:
 
 
   //DataCollection
+  PandoraPlusDataCol     m_DataCol;   //TODO: decide if set it to const. 
+
 
   //Creators and their setting
+  MCParticleCreator       *m_pMCParticleCreator;
+  TrackCreator            *m_pTrackCreator;
+  EcalHitsCreator         *m_pEcalHitsCreator;
+  //PFOCreator              *m_pPfoCreator;
+  
+
+  MCParticleCreator::Settings   m_pMCParticleCreatorSettings;
+  TrackCreator::Settings        m_pTrackCreatorSettings;
+  EcalHitsCreator::Settings     m_EcalHitsCreatorSettings;
+
 
   //Algorithm for PFA
 
@@ -56,20 +66,29 @@ protected:
 
 
 
-  //Input collection
-  DataHandle<edm4hep::MCParticleCollection> r_MCParticleCol{"MCParticle", Gaudi::DataHandle::Reader, this};
-  DataHandle<edm4hep::TrackCollection>      r_MarlinTrkCol{"MarlinTrkTracks", Gaudi::DataHandle::Reader, this};
+  //Readin collection names
+  Gaudi::Property< std::string > name_MCParticleCol{ this, "MCParticleCollection", "MCParticle" };
+  Gaudi::Property< std::vector<std::string> > name_TrackCol{ this, "TrackCollections", {"MarlinTrkTracks"} };
+  Gaudi::Property< std::vector<std::string> > name_EcalHits{ this, "ECalCaloHitCollections", {"ECALBarrel"} };
+  Gaudi::Property< std::vector<std::string> > name_EcalReadout{ this, "ECalReadOutNames", {"EcalBarrelCollection"} }; 
+
 
   //Parameters for algorithm settings.
   //TODO: use a xml file to readin all parameters. 
-  mutable Gaudi::Property<std::string> _filename{this, "OutFileName", "testout.root", "Output file name"};
-  mutable Gaudi::Property<float> _seed{this,   "Seed", 2131, "Random Seed"};
-  mutable Gaudi::Property<int>  _Debug{this,   "Debug", 0, "Debug level"};
-  mutable Gaudi::Property<int>  _Nskip{this,   "SkipEvt", 0, "Skip event"};
-  //Gaudi::Property< std::vector<std::string> >  m_MCParticleCollections{ this, "MCParticleCollections", {"MCParticle"} };
+  Gaudi::Property<float> m_seed{this,   "Seed", 2131, "Random Seed"};
+  Gaudi::Property<int>   m_Debug{this,   "Debug", 0, "Debug level"};
+  Gaudi::Property<int>   m_Nskip{this,   "SkipEvt", 0, "Skip event"};
+  Gaudi::Property<bool>  m_WriteAna {this, "WriteAna", false, "Write Ntuples for analysis"};
 
   // Output collections
-  // output: PFOs 
+  DataHandle<edm4hep::MCParticleCollection>     w_mcParCol  {"MCParticle", Gaudi::DataHandle::Reader, this};
+  DataHandle<edm4hep::ClusterCollection>                w_ClusterCollection {"PandoraClusters",Gaudi::DataHandle::Writer, this};
+  DataHandle<edm4hep::ReconstructedParticleCollection>  w_ReconstructedParticleCollection {"PandoraPFOs"    ,Gaudi::DataHandle::Writer, this};
+  DataHandle<edm4hep::VertexCollection>                 w_VertexCollection {"PandoraPFANewStartVertices",Gaudi::DataHandle::Writer, this};
+  DataHandle<edm4hep::MCRecoParticleAssociationCollection>  w_MCRecoParticleAssociationCollection {"pfoMCRecoParticleAssociation",Gaudi::DataHandle::Writer, this};
+
+  //For Ana
+  Gaudi::Property<std::string> _filename{this, "OutFileName", "testout.root", "Output file name"};
 
 
 

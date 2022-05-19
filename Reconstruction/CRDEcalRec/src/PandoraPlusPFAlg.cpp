@@ -16,15 +16,18 @@ PandoraPlusPFAlg::PandoraPlusPFAlg(const std::string& name, ISvcLocator* svcLoc)
   : GaudiAlgorithm(name, svcLoc),
     _nEvt(0)
 {
-   declareProperty("MCParticle",      r_MCParticleCol, "Handle of the Input MCParticle collection");
-   declareProperty("MarlinTrkTracks", r_MarlinTrkCol,  "Handle of the Input Track collection");
  
    
 }
 
 StatusCode PandoraPlusPFAlg::initialize()
 {
+  //Initialize Creator settings
 
+  //Initialize Creators
+  m_pMCParticleCreator = new MCParticleCreator( m_pMCParticleCreatorSettings );
+  m_pTrackCreator      = new TrackCreator( m_pTrackCreatorSettings );
+  m_pEcalHitsCreator   = new EcalHitsCreator( m_EcalHitsCreatorSettings );
 
   //Initialize services
   m_edmsvc = service<ICRDEcalSvc>("CRDEcalSvc");
@@ -46,20 +49,18 @@ StatusCode PandoraPlusPFAlg::execute()
 
 
   //InitializeForNewEvent(); 
+  m_DataCol.Clear();
 
-  //Get dataCol from service
-
+  //Readin collections 
+  m_pMCParticleCreator->CreateMCParticle( m_DataCol );
+  m_pTrackCreator->CreateTracks( m_DataCol );
+  m_pEcalHitsCreator->CreateEcalHits( m_DataCol );
 
   //Perform PFA algorithm
 
 
-  //std::cout<<"Reconstruction is done. Create PFO"<<std::endl;
 
-
-  //PFA algorithm is end!
-  //-----------------------------------------------------
-  //Followings are for code check. 
-
+  //Write Ana tuples
 
 
   //Reset
