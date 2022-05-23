@@ -16,8 +16,8 @@ StatusCode EcalHitsCreator::CreateEcalHits( PandoraPlusDataCol& m_DataCol ){
   for(unsigned int icol=0; icol<settings.m_EcalCaloHitCollections.size(); icol++){
     std::string col_name = settings.m_EcalCaloHitCollections[icol];
 
-    DataHandle<edm4hep::CalorimeterHit> r_CaloHitCol{col_name, Gaudi::DataHandle::Reader, this};
-    const edm4hep::CalorimeterHitCollection* const_CaloHitCol = r_CaloHitCol.get(); 
+    DataHandle<edm4hep::CalorimeterHitCollection>*  r_CaloHitCol = new DataHandle<edm4hep::CalorimeterHitCollection>(col_name, Gaudi::DataHandle::Reader, this);
+    const edm4hep::CalorimeterHitCollection* const_CaloHitCol = r_CaloHitCol->get(); 
 
     std::vector<edm4hep::CalorimeterHit> m_HitCol; m_HitCol.clear(); 
     for(unsigned int ihit=0; ihit<const_CaloHitCol->size(); ihit++){

@@ -7,25 +7,21 @@ TrackCreator::TrackCreator(const Settings& m_settings) : settings( m_settings ){
 
 } 
 
-StatusCode CreateTracks( PandoraPlusDataCol& m_DataCol ){
+StatusCode TrackCreator::CreateTracks( PandoraPlusDataCol& m_DataCol, std::vector<DataHandle<edm4hep::TrackCollection>*> m_TrkCol ){
 
-  if(settings.m_trackCollections.size()==0) StatusCode::SUCCESS;
+  if(settings.m_trackCollections.size()==0 || m_TrkCol.size()==0) StatusCode::SUCCESS;
   m_DataCol.collectionMap_Track.clear(); 
 
-  for(int icol=0; icol<settings.m_trackCollections.size(); icol++){
+  //Readin from collection
+  for(int icol=0; icol<m_TrkCol.size(); icol++){
     std::string col_name = settings.m_trackCollections[icol];
+    const edm4hep::TrackCollection* const_TrkCol = m_TrkCol[icol]->get(); 
 
-    DataHandle<edm4hep::TrackCollection>    r_TrkCol{col_name, Gaudi::DataHandle::Reader, this};
-    const edm4hep::TrackCollection*         const_TrkCol = r_TrkCol.get(); 
-
-    std::vector<edm4hep::Track> m_TrkCol; m_TrkCol.clear();
-    for(unsigned int itrk=0; itrk<const_TrkCol->size(); itrk++){
-      edm4hep::Track m_trk = const_TrkCol->at(itrk);
-      m_TrkCol.push_back(m_trk);
-    }
-
-    m_DataCol.collectionMap_Track[col_name] = m_TrkCol; 
+    for(unsigned int itrk=0; itrk<const_TrkCol->size(); itrk++) m_DataCol.collectionMap_Track[col_name].push_back( const_TrkCol->at(itrk) ) ; 
   }
+
+  //Convert to local object
+
 
   return StatusCode::SUCCESS;
 }

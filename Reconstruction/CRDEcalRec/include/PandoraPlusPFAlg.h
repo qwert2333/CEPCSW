@@ -7,6 +7,9 @@
 #include "DetInterface/IGeomSvc.h"
 #include "PandoraPlusDataCol.h"
 
+#include "Tools/TrackCreator.h"
+#include "Tools/EcalHitsCreator.h"
+
 #include "TVector3.h"
 #include "TRandom3.h"
 #include "TFile.h"
@@ -48,13 +51,10 @@ protected:
 
 
   //Creators and their setting
-  MCParticleCreator       *m_pMCParticleCreator;
   TrackCreator            *m_pTrackCreator;
   EcalHitsCreator         *m_pEcalHitsCreator;
   //PFOCreator              *m_pPfoCreator;
-  
 
-  MCParticleCreator::Settings   m_pMCParticleCreatorSettings;
   TrackCreator::Settings        m_pTrackCreatorSettings;
   EcalHitsCreator::Settings     m_EcalHitsCreatorSettings;
 
@@ -71,6 +71,14 @@ protected:
   Gaudi::Property< std::vector<std::string> > name_TrackCol{ this, "TrackCollections", {"MarlinTrkTracks"} };
   Gaudi::Property< std::vector<std::string> > name_EcalHits{ this, "ECalCaloHitCollections", {"ECALBarrel"} };
   Gaudi::Property< std::vector<std::string> > name_EcalReadout{ this, "ECalReadOutNames", {"EcalBarrelCollection"} }; 
+
+  //Readin collections
+  typedef DataHandle<edm4hep::TrackCollection>           TrkType;
+  typedef DataHandle<edm4hep::CalorimeterHitCollection>  CaloType;
+
+  DataHandle<edm4hep::MCParticleCollection> r_MCParticleCol{name_MCParticleCol, Gaudi::DataHandle::Reader, this};
+  std::vector<TrkType*> r_TrkCol;
+  std::vector<CaloType*> r_EcalHitCol; 
 
 
   //Parameters for algorithm settings.

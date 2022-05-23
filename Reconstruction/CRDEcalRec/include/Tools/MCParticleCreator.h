@@ -22,7 +22,7 @@ public:
   MCParticleCreator( const Settings& m_settings );
   ~MCParticleCreator() {};
 
-  StatusCode CreateMCParticle( PandoraPlusDataCol& m_DataCol ); 
+  StatusCode CreateMCParticles( PandoraPlusDataCol& m_DataCol ); 
 
   //StatusCode CreateTrackMCParticleRelation(){ return StatusCode::SUCCESS; };
 
@@ -31,6 +31,7 @@ public:
   //StatusCode CreateHcalHitsMCParticleRelation(){ return StatusCode::SUCCESS; };
 
   StatusCode Reset() { return StatusCode::SUCCESS; };
+
 
 private: 
 

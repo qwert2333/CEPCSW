@@ -3,7 +3,6 @@
 
 #include "k4FWCore/DataHandle.h"
 #include "PandoraPlusDataCol.h"
-#include "CRDEcalSvc/ICRDEcalSvc.h"
 
 class EcalHitsCreator{
 
@@ -22,7 +21,7 @@ public:
   EcalHitsCreator( const Settings& m_settings );
   ~EcalHitsCreator() {};
 
-  StatusCode CreateEcalHits( PandoraPlusDataCol& m_DataCol ); 
+  StatusCode CreateEcalHits( PandoraPlusDataCol& m_DataCol, std::vector<DataHandle<edm4hep::CalorimeterHitCollection>*> m_EcalHitCol ); 
 
   StatusCode Reset() { return StatusCode::SUCCESS; };
 

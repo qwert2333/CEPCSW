@@ -16,7 +16,7 @@ geomsvc.compact = geometry_path
 from Configurables import k4DataSvc
 podioevent = k4DataSvc("EventDataSvc")
 podioevent.inputs = [
-"Sim_Gam.root"
+"CRD-oi-v0j-Sim00.root"
 #"/scratchfs/atlas/guofy/CEPCEcalSim/TwoParticles/ForGhost/Sim_GamGamGhost_50mm.root"
 #"/scratchfs/atlas/guofy/CEPCEcalSim/TwoParticles/Diphoton/GamGam_50mm.root"
 #"/scratchfs/atlas/guofy/CEPCEcalSim/TwoParticles/HadGam/GamHad_100mm.root"

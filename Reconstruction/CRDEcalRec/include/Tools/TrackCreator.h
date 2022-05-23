@@ -20,13 +20,13 @@ public:
   TrackCreator( const Settings& m_settings );
   ~TrackCreator() {};
 
-  StatusCode CreateTracks( PandoraPlusDataCol& m_DataCol ); 
+  StatusCode CreateTracks( PandoraPlusDataCol& m_DataCol, std::vector<DataHandle<edm4hep::TrackCollection>*> m_TrkCol); 
 
-
-  StatusCode Reset(){};
+  StatusCode Reset() { return StatusCode::SUCCESS; };
 
 private: 
-  const Settings  settings; 
+
+  const Settings settings; 
   
 
 };
