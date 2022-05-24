@@ -30,10 +30,18 @@ dsvc = k4DataSvc("EventDataSvc")
 # Geometry Svc
 ##############################################################################
 
-geometry_path = os.getenv("WorkDIR")+"/Detector/DetCRD/compact/CRD_o1_v01/CRD_o1_v01-onlyEcalB.xml"
+#geometry_option = "CRD_o1_v01/CRD_o1_v01.xml"
+geometry_option = "CRD_o1_v02/CRD_o1_v02-onlyEcalB.xml"
+
+if not os.getenv("DETCRDROOT"):
+    print("Can't find the geometry. Please setup envvar DETCRDROOT." )
+    sys.exit(-1)
+
+geometry_path = os.path.join(os.getenv("DETCRDROOT"), "compact", geometry_option)
 if not os.path.exists(geometry_path):
     print("Can't find the compact geometry file: %s"%geometry_path)
     sys.exit(-1)
+
 
 from Configurables import GeomSvc
 geosvc = GeomSvc("GeomSvc")
@@ -53,10 +61,10 @@ gun = GtGunTool("GtGunTool")
 gun.Particles =  ["gamma"]
 gun.EnergyMins = [10.] # GeV
 gun.EnergyMaxs = [10.] # GeV
-gun.ThetaMins  = [80.]    # deg
-gun.ThetaMaxs  = [100.]  # deg
+gun.ThetaMins  = [90.]    # deg
+gun.ThetaMaxs  = [90.]  # deg
 gun.PhiMins    = [0.]    # deg
-gun.PhiMaxs    = [90.]  # deg
+gun.PhiMaxs    = [0.]  # deg
 gun.PositionXs = [0.] # mm
 gun.PositionYs = [0.] # mm
 gun.PositionZs = [0.] # mm
@@ -118,7 +126,7 @@ cal_sensdettool.CalNamesMergeDisable = ["EcalBarrel"]
 ##############################################################################
 from Configurables import PodioOutput
 out = PodioOutput("outputalg")
-out.filename = "Sim_Gam.root"
+out.filename = "Sim_Ecal.root"
 out.outputCommands = ["keep *"]
 
 ##############################################################################

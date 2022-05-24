@@ -20,41 +20,58 @@
 #include "Objects/Track.h"
 
 #include "k4FWCore/DataHandle.h"
-#include "GaudiAlg/GaudiAlgorithm.h"
-#include "Gaudi/Property.h"
 #include "edm4hep/MCParticleCollection.h"
+#include "edm4hep/MCParticle.h"
+#include "edm4hep/Track.h"
 #include "edm4hep/TrackCollection.h"
-#include "edm4hep/CalorimeterHitCollection.h"
-#include "edm4hep/VertexCollection.h"
-#include "edm4hep/MCRecoCaloAssociation.h"
-#include "edm4hep/MCRecoTrackerAssociation.h"
-#include "edm4hep/ClusterCollection.h"
-#include "edm4hep/ReconstructedParticleCollection.h"
-#include "edm4hep/MCRecoCaloAssociationCollection.h"
-#include "edm4hep/MCRecoTrackerAssociationCollection.h"
-#include "edm4hep/MCRecoParticleAssociationCollection.h"
 
 #define PI 3.141592653
 #define C 299.79  // unit: mm/ns
 
+using namespace std;
 class PandoraPlusDataCol{
 public:
+ 
+  //MCParticle Collections
+  std::vector<edm4hep::MCParticle>            MCParticleCol;
 
-  PandoraPlusDataCol() {}; 
-  void Clear() {}; 
+  //Track Collections
+  //std::vector<edm4hep::Track>                 TrackCol; 
+  std::vector<CRDEcalEDM::Track>              TrackCol; 
 
-  //Readin CollectionMap
-  std::map<std::string, std::vector<edm4hep::MCParticle> >                collectionMap_MC;
-  std::map<std::string, std::vector<edm4hep::CalorimeterHit> >            collectionMap_CaloHit;
-  std::map<std::string, std::vector<edm4hep::Vertex> >                    collectionMap_Vertex;
-  std::map<std::string, std::vector<edm4hep::Track> >                     collectionMap_Track;
-  std::map<std::string, std::vector<edm4hep::MCRecoCaloAssociation> >     collectionMap_CaloRel;
-  std::map<std::string, std::vector<edm4hep::MCRecoTrackerAssociation> >  collectionMap_TrkRel;
+  //Vertex Collections
 
-  //Self used objects
-  std::vector<CRDEcalEDM::CRDCaloBlock>   BlockVec; 
-  std::vector<CRDEcalEDM::CRDCaloTower>   TowerCol;
+  //ECal Collections
+  std::vector<CRDEcalEDM::CRDCaloBlock>       BlockVec;  //All fired crystal bars, grouped as blocks
+  std::vector<CRDEcalEDM::CRDCaloTower>       TowerCol;  //40*40*28 tower, containing blocks, LongiClusters, tracks.
+  std::vector<CRDEcalEDM::CRDCaloTower>       tmp_TowerCol;  //
 
+  std::vector<CRDEcalEDM::CRDCaloHitTransShower> Shower2DCol;
+  std::vector<CRDEcalEDM::CRDCaloHitTransShower> MIPShower2DCol; 
+  std::vector<CRDEcalEDM::CRDCaloHitTransShower> EMShower2DCol; 
+  std::vector<CRDEcalEDM::CRDCaloHit3DCluster> GoodClus3DCol;
+  std::vector<CRDEcalEDM::CRDCaloHit3DCluster> BadClus3DCol;
+  std::vector<CRDEcalEDM::CRDCaloHit3DCluster> Clus3DCol;
+
+
+  //PFO Collections
+  std::vector< CRDEcalEDM::PFObject >     PFOCol; 
+
+  //Hcal Collections
+
+
+  //Function
+  void PrintTower(); 
+  void PrintLayer();
+  void PrintShower();
+  void Print3DClus();
+  void Clear();
+  void ClearBlock()  { BlockVec.clear(); }
+  void ClearTower()  { TowerCol.clear(); tmp_TowerCol.clear(); }
+  void ClearShower() { Shower2DCol.clear(); MIPShower2DCol.clear(); EMShower2DCol.clear(); }
+  void ClearCluster(){ GoodClus3DCol.clear(); BadClus3DCol.clear(); Clus3DCol.clear(); }
+  void ClearPFO()    { PFOCol.clear(); }
+  void ClearTrack()  { TrackCol.clear(); }
 
 };
 #endif

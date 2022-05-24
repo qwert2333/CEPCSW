@@ -1,8 +1,13 @@
 from Gaudi.Configuration import *
 
 ############## GeomSvc #################
-geometry_path = os.getenv("WorkDIR")+"/Detector/DetCRD/compact/CRD_o1_v01/CRD_o1_v01-onlyEcalB.xml"
-#geometry_path = os.getenv("WorkDIR")+"/Detector/DetCRD/compact/ecalBarrel_withBField.xml"
+geometry_option = "CRD_o1_v02/CRD_o1_v02-onlyEcalB.xml"
+
+if not os.getenv("DETCRDROOT"):
+    print("Can't find the geometry. Please setup envvar DETCRDROOT." )
+    sys.exit(-1)
+
+geometry_path = os.path.join(os.getenv("DETCRDROOT"), "compact", geometry_option)
 if not os.path.exists(geometry_path):
     print("Can't find the compact geometry file: %s"%geometry_path)
     sys.exit(-1)
@@ -16,7 +21,7 @@ geomsvc.compact = geometry_path
 from Configurables import k4DataSvc
 podioevent = k4DataSvc("EventDataSvc")
 podioevent.inputs = [
-"CRD-oi-v0j-Sim00.root"
+"Sim_Ecal.root"
 #"/scratchfs/atlas/guofy/CEPCEcalSim/TwoParticles/ForGhost/Sim_GamGamGhost_50mm.root"
 #"/scratchfs/atlas/guofy/CEPCEcalSim/TwoParticles/Diphoton/GamGam_50mm.root"
 #"/scratchfs/atlas/guofy/CEPCEcalSim/TwoParticles/HadGam/GamHad_100mm.root"
@@ -54,6 +59,18 @@ EcalDigi.Debug=1
 EcalDigi.OutFileName = "testTree_Gam.root"
 #########################################
 
+
+
+######### Reconstruction ################
+from Configurables import PandoraPlusPFAlg
+PandoraPlusPFAlg = PandoraPlusPFAlg("PandoraPlusPFAlg")
+PandoraPlusPFAlg.Seed = 1024
+#PandoraPlusPFAlg.SkipEvt = 1
+PandoraPlusPFAlg.Debug = 0
+PandoraPlusPFAlg.OutFileName = "testRec_Gam.root"
+########################################
+
+
 ##############################################################################
 # POD I/O
 ##############################################################################
@@ -67,7 +84,7 @@ out.outputCommands = ["keep *"]
 
 from Configurables import ApplicationMgr
 ApplicationMgr( 
-    TopAlg=[inp, EcalDigi, out],
+    TopAlg=[inp, EcalDigi, PandoraPlusPFAlg],
     EvtSel="NONE",
     EvtMax=10,
     ExtSvc=[podioevent, geomsvc, Ecaldatasvc],

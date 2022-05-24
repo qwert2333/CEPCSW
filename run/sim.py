@@ -87,6 +87,7 @@ detsimalg.AnaElems = [
     "Edm4hepWriterAnaElemTool"
 ]
 detsimalg.RootDetElem = "WorldDetElemTool"
+detsimalg.PhysicsList = "QGSP_BERT_EMV"
 
 from Configurables import MarlinEvtSeeder
 evtseeder = MarlinEvtSeeder("EventSeeder")

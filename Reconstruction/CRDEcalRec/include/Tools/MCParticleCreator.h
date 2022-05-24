@@ -12,30 +12,40 @@ public:
   public:
     Settings(){};
 
-    std::string m_mcParticleCollections;        // MC particle collection. 
-    std::string m_CaloHitRelationCollections;   // SimCaloHit to CaloHit particle relations
-    float m_BField; 
-
   };
   
   //initialize a CaloHitCreator
-  MCParticleCreator( const Settings& m_settings );
+  MCParticleCreator( Settings& settings ){};
   ~MCParticleCreator() {};
 
-  StatusCode CreateMCParticles( PandoraPlusDataCol& m_DataCol ); 
+  StatusCode ReadSettings( Settings& settings ){ return StatusCode::SUCCESS; };
 
-  //StatusCode CreateTrackMCParticleRelation(){ return StatusCode::SUCCESS; };
+  StatusCode GetMCParticle( PandoraPlusDataCol& dataCol, 
+                            const edm4hep::MCParticleCollection& const_MCPCol){
 
-  //StatusCode CreateEcalBarMCParticleRelation(){ return StatusCode::SUCCESS; };
+    std::vector<edm4hep::MCParticle> m_MCPcol; m_MCPcol.clear(); 
+    for(int imc=0;imc<const_MCPCol.size(); imc++){ 
+      edm4hep::MCParticle m_MCp = const_MCPCol[imc];
+      //if( m_MCp.daughters_size()!=0 ) continue; 
+      m_MCPcol.push_back( const_MCPCol[imc] );
 
-  //StatusCode CreateHcalHitsMCParticleRelation(){ return StatusCode::SUCCESS; };
+    }
+    dataCol.MCParticleCol = m_MCPcol;
+    return StatusCode::SUCCESS; 
+  };
 
-  StatusCode Reset() { return StatusCode::SUCCESS; };
+  StatusCode CreateTrackMCParticleRelation(){ return StatusCode::SUCCESS; };
 
+  StatusCode CreateEcalBarMCParticleRelation(){ return StatusCode::SUCCESS; };
+
+  StatusCode CreateHcalHitsMCParticleRelation(){ return StatusCode::SUCCESS; };
+
+
+  void Reset(){};
 
 private: 
 
-  const Settings   settings;  
+  
 
 
 

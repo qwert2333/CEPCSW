@@ -45,6 +45,4 @@ Keep the collection names compatible between the prototype and the existing CEPC
 * SETCollection
 
 ## Update in branch dev-EcalRec-v1.1: 
-* Add tracker simulation and track fit (Si tracker only now).
-* Add tracks (MarlinTrkTracks) in CRDEcalRec 
-* Correct the cell ID: along with z/phi direction
+* Update to CEPCSW LCG 101.0.0

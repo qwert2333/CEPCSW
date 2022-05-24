@@ -63,7 +63,8 @@ namespace CRDEcalEDM {
     void setClusterYCol( std::vector<CRDEcalEDM::CRDCaloBarCluster> _col ) { barClusYCol=_col; }
 
     void addTrk( CRDEcalEDM::Track& _trk ) { trkCol.push_back(_trk); }
-
+    void addBar( CRDEcalEDM::CRDCaloBar& _bar ) { if(_bar.getSlayer()==0) barXCol.push_back(_bar); if(_bar.getSlayer()==1) barYCol.push_back(_bar); }
+    
     void PrintShadowClus() const; 
 
   private:
