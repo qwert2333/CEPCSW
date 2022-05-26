@@ -16,7 +16,7 @@ rndmgensvc = RndmGenSvc("RndmGenSvc")
 rndmgensvc.Engine = rndmengine.name()
 
 #geometry_option = "CRD_o1_v01/CRD_o1_v01.xml"
-geometry_option = "CRD_o1_v02/CRD_o1_v02.xml"
+geometry_option = "CRD_o1_v01/CRD_o1_v01.xml"
 #...
 
 if not os.getenv("DETCRDROOT"):
@@ -144,6 +144,16 @@ digiSET.ResolutionV = [0.086]
 digiSET.UsePlanarTag = True
 #digiSET.OutputLevel = DEBUG
 
+# two strip tracker hits -> one space point
+from Configurables import SpacePointBuilderAlg
+spSET = SpacePointBuilderAlg("SETBuilder")
+spSET.TrackerHitCollection = sethitname
+spSET.TrackerHitAssociationCollection = "SETTrackerHitAssociation"
+spSET.SpacePointCollection = setspname
+spSET.SpacePointAssociationCollection = "SETSpacePointAssociation"
+#spSET.OutputLevel = DEBUG
+
+
 digiFTD = PlanarDigiAlg("FTDDigi")
 digiFTD.IsStrip = False
 digiFTD.SimTrackHitCollection = "FTDCollection"
@@ -154,11 +164,6 @@ digiFTD.ResolutionV = [0.003, 0.003, 0.0072, 0.0072, 0.0072, 0.0072, 0.0072]
 digiFTD.UsePlanarTag = True
 #digiFTD.OutputLevel = DEBUG
 
-from Configurables import DCHDigiAlg
-digiDC = DCHDigiAlg("DCHDigi")
-digiDC.DigiDCHitCollection = dchitname
-#digiDC.OutputLevel = DEBUG
-
 # two strip tracker hits -> one space point
 from Configurables import SpacePointBuilderAlg
 spFTD = SpacePointBuilderAlg("FTDBuilder")
@@ -167,6 +172,11 @@ spFTD.TrackerHitAssociationCollection = "FTDTrackerHitAssociation"
 spFTD.SpacePointCollection = ftdspname
 spFTD.SpacePointAssociationCollection = "FTDSpacePointAssociation"
 #spFTD.OutputLevel = DEBUG
+
+from Configurables import DCHDigiAlg
+digiDC = DCHDigiAlg("DCHDigi")
+digiDC.DigiDCHitCollection = dchitname
+#digiDC.OutputLevel = DEBUG
 
 # tracking
 from Configurables import SiliconTrackingAlg
@@ -220,7 +230,7 @@ full.TPCTrackerHits = dchitname # add TPC or DC tracker hit here, if TPC or DC t
 full.SETTrackerHits = sethitname
 full.FTDPixelTrackerHits = ftdhitname
 full.FTDSpacePoints = ftdspname
-full.SITRawHits     = sithitname
+full.SITRawHits     = "NotNeedForPixelSIT"
 full.SETRawHits     = sethitname
 full.FTDRawHits     = ftdhitname
 full.TPCTracks = "ClupatraTracks" # add standalone TPC or DC track here
@@ -228,7 +238,7 @@ full.SiTracks  = "SubsetTracks"
 full.OutputTracks  = "MarlinTrkTracks"
 #full.SITHitToTrackDistance = 3.
 #full.SETHitToTrackDistance = 5.
-full.OutputLevel = DEBUG
+#full.OutputLevel = DEBUG
 
 dedxoption = "BetheBlochEquationDedxSimTool"
 from Configurables import DriftChamberSensDetTool
@@ -257,7 +267,7 @@ out.outputCommands = ["keep *"]
 from Configurables import ApplicationMgr
 ApplicationMgr(
     #TopAlg = [genalg, detsimalg, digiVXD, digiSIT, digiSET, digiFTD, spFTD, digiDC, tracking, forward, subset, out],
-    TopAlg = [genalg, detsimalg, digiVXD, digiSIT, digiSET, digiFTD, spFTD, digiDC, tracking, forward, subset, full, out],
+    TopAlg = [genalg, detsimalg, digiVXD, digiSIT, digiSET, digiFTD, spSET, digiDC, tracking, forward, subset, full, out],
     #TopAlg = [genalg, detsimalg, out],
     EvtSel = 'NONE',
     EvtMax = 10,

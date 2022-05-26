@@ -31,7 +31,7 @@ dsvc = k4DataSvc("EventDataSvc")
 ##############################################################################
 
 #geometry_option = "CRD_o1_v01/CRD_o1_v01.xml"
-geometry_option = "CRD_o1_v02/CRD_o1_v02-onlyEcalB.xml"
+geometry_option = "CRD_o1_v01/CRD_o1_v01-onlyEcalB.xml"
 
 if not os.getenv("DETCRDROOT"):
     print("Can't find the geometry. Please setup envvar DETCRDROOT." )
