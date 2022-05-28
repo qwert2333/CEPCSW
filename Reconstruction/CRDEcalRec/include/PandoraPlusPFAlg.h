@@ -137,6 +137,11 @@ protected:
   FloatVec m_mcPx, m_mcPy, m_mcPz, m_mcEn;
   FloatVec m_scndM; 
 
+  int m_Ntrk; 
+  FloatVec m_trkstate_d0, m_trkstate_z0, m_trkstate_phi, m_trkstate_tanL, m_trkstate_omega; 
+  FloatVec m_trkstate_refx, m_trkstate_refy, m_trkstate_refz; 
+  IntVec m_trkstate_location; 
+
 
   void ClearBar();
   void ClearLayer();

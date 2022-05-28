@@ -21,10 +21,7 @@ geomsvc.compact = geometry_path
 from Configurables import k4DataSvc
 podioevent = k4DataSvc("EventDataSvc")
 podioevent.inputs = [
-"Sim_Ecal.root"
-#"/scratchfs/atlas/guofy/CEPCEcalSim/TwoParticles/ForGhost/Sim_GamGamGhost_50mm.root"
-#"/scratchfs/atlas/guofy/CEPCEcalSim/TwoParticles/Diphoton/GamGam_50mm.root"
-#"/scratchfs/atlas/guofy/CEPCEcalSim/TwoParticles/HadGam/GamHad_100mm.root"
+"CRD_SimMu_FullDet.root"
 ]
 ##########################################
 
@@ -37,7 +34,7 @@ Ecaldatasvc = CRDEcalSvc("CRDEcalSvc")
 from Configurables import PodioInput
 inp = PodioInput("InputReader")
 #inp.collections = ["EcalBarrelCollection", "EcalEndcapRingCollection", "EcalEndcapsCollection", "MCParticle"]
-inp.collections = ["EcalBarrelCollection", "MCParticle"]
+inp.collections = ["EcalBarrelCollection", "MCParticle", "MarlinTrkTracks"]
 ##########################################
 
 ########## Digitalization ################
@@ -56,7 +53,7 @@ EcalDigi.TimeResolution = 0.5        #unit: ns
 EcalDigi.EnergyThreshold = 0.0001   #0.1 MeV
 EcalDigi.ChargeThresholdFrac = 0.05
 EcalDigi.Debug=1
-EcalDigi.OutFileName = "testTree_Gam.root"
+EcalDigi.OutFileName = "testTree_Mu.root"
 #########################################
 
 
@@ -67,7 +64,7 @@ PandoraPlusPFAlg = PandoraPlusPFAlg("PandoraPlusPFAlg")
 PandoraPlusPFAlg.Seed = 1024
 #PandoraPlusPFAlg.SkipEvt = 1
 PandoraPlusPFAlg.Debug = 0
-PandoraPlusPFAlg.OutFileName = "testRec_Gam.root"
+PandoraPlusPFAlg.OutFileName = "testRec_Mu.root"
 ########################################
 
 

@@ -31,7 +31,7 @@ gaudi_add_module(CRDEcalRec
                          src/Algorithm/EnergySplittingAlg.cpp
                          src/Algorithm/ConeClustering2DAlg.cpp
                          src/Algorithm/HoughClusteringAlg.cpp
-                         src/Algorithm/ShadowMakingAlg.cpp
+                         #src/Algorithm/ShadowMakingAlg.cpp
                          src/Algorithm/EnergyTimeMatchingAlg.cpp
                          src/Algorithm/ConeClusteringAlg.cpp
                          src/Algorithm/BasicClusterIDAlg.cpp

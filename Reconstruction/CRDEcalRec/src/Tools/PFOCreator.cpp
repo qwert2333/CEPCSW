@@ -26,6 +26,7 @@ StatusCode PFOCreator::CreatePFO(PandoraPlusDataCol& dataCol){
     m_clusCol[icl].IdentifyCluster();
     CRDEcalEDM::PFObject m_pfo; m_pfo.Clear();
     m_pfo.setEcalShower(m_clusCol[icl]);
+/*
     for(int it=0; it<m_trkCol.size(); it++){
       double clus_x = m_clusCol[icl].getShowerCenter().x();
       double var = (m_trkCol[it].getD0()*cos( m_trkCol[it].getPhi0() ) - clus_x)/sin( m_trkCol[it].getPhi0() );
@@ -49,21 +50,22 @@ StatusCode PFOCreator::CreatePFO(PandoraPlusDataCol& dataCol){
     }
     else if(!m_pfo.ContainTrack() && m_clusCol[icl].getType()==1) m_pfo.setPdgID(22);
     else m_pfo.setPdgID(2112);
-
+*/
 
     TLorentzVector pfoP4;
-    if(m_pfo.ContainTrack()){
-      TVector3 pfoP3 = m_pfo.getTrack().getMomentum();
-      if( fabs(m_pfo.getPdgID()==11) )  pfoP4.SetVectM( pfoP3,  Me);
-      if( fabs(m_pfo.getPdgID()==13) )  pfoP4.SetVectM( pfoP3,  Mmu);
-      if( fabs(m_pfo.getPdgID()==211) ) pfoP4.SetVectM( pfoP3,  Mpi);
-    }
-    else{
+//    if(m_pfo.ContainTrack()){
+//      TVector3 pfoP3 = m_pfo.getTrack().getMomentum();
+//      if( fabs(m_pfo.getPdgID()==11) )  pfoP4.SetVectM( pfoP3,  Me);
+//      if( fabs(m_pfo.getPdgID()==13) )  pfoP4.SetVectM( pfoP3,  Mmu);
+//      if( fabs(m_pfo.getPdgID()==211) ) pfoP4.SetVectM( pfoP3,  Mpi);
+//    }
+//    else{
       TVector3 pfoP3 = m_clusCol[icl].getAxis();
       pfoP3.SetMag( m_clusCol[icl].getShowerE() );
-      if( m_pfo.getPdgID()==22 )   pfoP4.SetVectM( pfoP3,  Mgamma);
-      if( m_pfo.getPdgID()==2112 ) pfoP4.SetVectM( pfoP3,  Mn);
-    }
+      pfoP4.SetVectM( pfoP3,  Mgamma);
+//      if( m_pfo.getPdgID()==22 )   pfoP4.SetVectM( pfoP3,  Mgamma);
+//      if( m_pfo.getPdgID()==2112 ) pfoP4.SetVectM( pfoP3,  Mn);
+//    }
     m_pfo.setP4(pfoP4);
 
 

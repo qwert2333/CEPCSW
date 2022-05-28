@@ -160,6 +160,17 @@ StatusCode PandoraPlusPFAlg::initialize()
   t_recoPFO->Branch("mcEn", &m_mcEn);
   t_recoPFO->Branch("Nmc",  &m_Nmc);
   t_recoPFO->Branch("scndM", &m_scndM);
+  t_recoPFO->Branch("m_Ntrk", &m_Ntrk);
+  t_recoPFO->Branch("m_trkstate_d0", &m_trkstate_d0);
+  t_recoPFO->Branch("m_trkstate_z0", &m_trkstate_z0);
+  t_recoPFO->Branch("m_trkstate_phi", &m_trkstate_phi);
+  t_recoPFO->Branch("m_trkstate_tanL", &m_trkstate_tanL);
+  t_recoPFO->Branch("m_trkstate_omega", &m_trkstate_omega);
+  t_recoPFO->Branch("m_trkstate_refx", &m_trkstate_refx);
+  t_recoPFO->Branch("m_trkstate_refy", &m_trkstate_refy);
+  t_recoPFO->Branch("m_trkstate_refz", &m_trkstate_refz);
+  t_recoPFO->Branch("m_trkstate_location", &m_trkstate_location);
+
 
   return GaudiAlgorithm::initialize();
 }
@@ -177,10 +188,10 @@ StatusCode PandoraPlusPFAlg::execute()
 
   //Get dataCol from service
   const edm4hep::MCParticleCollection* const_MCPCol = r_MCParticleCol.get();
-  //const edm4hep::TrackCollection*      const_TrkCol = r_MarlinTrkCol.get(); 
+  const edm4hep::TrackCollection*      const_TrkCol = r_MarlinTrkCol.get(); 
   if( const_MCPCol!=NULL ) m_pMCParticleCreator->GetMCParticle( m_DataCol, *const_MCPCol);
-  //if( const_TrkCol!=NULL ) m_pTrackCreator->     GetTracks( m_DataCol, *const_TrkCol );
-  m_pTrackCreator->     GetTracks( m_DataCol );
+  if( const_TrkCol!=NULL ) m_pTrackCreator->     GetTracks( m_DataCol, *const_TrkCol );
+  //else m_pTrackCreator->     GetTracks( m_DataCol );
   m_pVertexCreator->    GetVertex( m_DataCol );
   m_pEcalHitsCreator->  GetEcalBars( m_DataCol, *m_edmsvc); 
   m_pHcalHitsCreator->  GetHcalHits( m_DataCol );
@@ -192,7 +203,7 @@ StatusCode PandoraPlusPFAlg::execute()
   m_pMCParticleCreator->CreateHcalHitsMCParticleRelation();
 
   //Match track with Ecal super-cell.
-  m_pTrackCreator->MatchTrkEcalRelation( m_DataCol);
+  //m_pTrackCreator->MatchTrkEcalRelation( m_DataCol);
 
 
   //Perform PFA algorithm
@@ -202,7 +213,7 @@ StatusCode PandoraPlusPFAlg::execute()
 
 
   //std::cout<<"Reconstruction is done. Create PFO"<<std::endl;
-  m_pPfoCreator->CreatePFO( m_DataCol ); 
+  //m_pPfoCreator->CreatePFO( m_DataCol ); 
 
 
   //PFA algorithm is end!
@@ -364,9 +375,10 @@ StatusCode PandoraPlusPFAlg::execute()
   }
   t_ShowersX->Fill();
   t_ShowersY->Fill();
+
   //Save PFO
   ClearRecPFO();
-  std::vector< CRDEcalEDM::PFObject > m_pfoCol = m_DataCol.PFOCol;
+/*  std::vector< CRDEcalEDM::PFObject > m_pfoCol = m_DataCol.PFOCol;
   m_Npfo = m_pfoCol.size(); 
   for(int ipfo=0;ipfo<m_Npfo;ipfo++){
     m_recPFO_px.push_back(m_pfoCol[ipfo].getP4().Px());
@@ -375,6 +387,7 @@ StatusCode PandoraPlusPFAlg::execute()
     m_recPFO_En.push_back(m_pfoCol[ipfo].getEnergy()); 
     m_recPFO_pid.push_back(m_pfoCol[ipfo].getPdgID());
   }
+*/
 
   std::vector<CRDEcalEDM::CRDCaloHit3DCluster> m_clus = m_DataCol.Clus3DCol;
   m_N3dclus = m_clus.size();
@@ -405,6 +418,23 @@ StatusCode PandoraPlusPFAlg::execute()
     m_mcPz.push_back( m_MCPCol[imc].getMomentum()[2] );
     m_mcEn.push_back( m_MCPCol[imc].getEnergy() );
   }
+
+  //Save tracks
+  std::vector<CRDEcalEDM::Track> m_trkCol = m_DataCol.TrackCol; 
+  m_Ntrk = m_trkCol.size(); 
+  for(int itrk=0; itrk<m_Ntrk; itrk++){
+    for(int istate=0; istate<m_trkCol[itrk].trackStates_size(); istate++){
+      m_trkstate_d0.push_back( m_trkCol[itrk].getTrackStates(istate).D0 );
+      m_trkstate_z0.push_back( m_trkCol[itrk].getTrackStates(istate).Z0 );
+      m_trkstate_phi.push_back( m_trkCol[itrk].getTrackStates(istate).phi0 );
+      m_trkstate_tanL.push_back( m_trkCol[itrk].getTrackStates(istate).tanLambda );
+      m_trkstate_omega.push_back( m_trkCol[itrk].getTrackStates(istate).Omega );
+      m_trkstate_refx.push_back( m_trkCol[itrk].getTrackStates(istate).referencePoint.X() );
+      m_trkstate_refy.push_back( m_trkCol[itrk].getTrackStates(istate).referencePoint.Y() );
+      m_trkstate_refz.push_back( m_trkCol[itrk].getTrackStates(istate).referencePoint.Z() );
+      m_trkstate_location.push_back( m_trkCol[itrk].getTrackStates(istate).location );
+  }}
+
   t_recoPFO->Fill();
 
   //Reset
@@ -548,6 +578,18 @@ void PandoraPlusPFAlg::ClearRecPFO(){
   m_Nmc=-99;
   m_N3dclus=-99;
   m_scndM.clear(); 
+
+  m_Ntrk=-99;
+  m_trkstate_d0.clear(); 
+  m_trkstate_z0.clear();
+  m_trkstate_phi.clear();
+  m_trkstate_tanL.clear();
+  m_trkstate_omega.clear();
+  m_trkstate_refx.clear();
+  m_trkstate_refy.clear();
+  m_trkstate_refz.clear();
+  m_trkstate_location.clear();
+
 }
 
 #endif

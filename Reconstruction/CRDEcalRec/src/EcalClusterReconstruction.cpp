@@ -7,7 +7,7 @@ void EcalClusterReconstruction::Initialize(){
   m_ESAlgSettings  = new EnergySplittingAlg::Settings();
   m_CC2AlgSettings = new ConeClustering2DAlg::Settings();
   m_HCAlgSettings  = new HoughClusteringAlg::Settings();
-  m_CMAlgSettings  = new ShadowMakingAlg::Settings(); 
+  //m_CMAlgSettings  = new ShadowMakingAlg::Settings(); 
   m_ETAlgSettings  = new EnergyTimeMatchingAlg::Settings();
   m_CCAlgSettings  = new ConeClusteringAlg::Settings();
   m_CLAlgSettings  = new ClusterMergingAlg::Settings();
@@ -19,7 +19,7 @@ void EcalClusterReconstruction::Initialize(){
   m_energysplittingAlg  = new EnergySplittingAlg();
   m_coneclus2DAlg       = new ConeClustering2DAlg();
   m_houghclusAlg        = new HoughClusteringAlg();
-  m_shadowmakingAlg     = new ShadowMakingAlg(); 
+  //m_shadowmakingAlg     = new ShadowMakingAlg(); 
   m_etmatchingAlg       = new EnergyTimeMatchingAlg();
   m_coneclusterAlg      = new ConeClusteringAlg();
   m_clustermergingAlg   = new ClusterMergingAlg();
@@ -35,7 +35,7 @@ StatusCode EcalClusterReconstruction::RunAlgorithm( EcalClusterReconstruction::S
   m_ESAlgSettings->SetInitialValue();
   m_CC2AlgSettings->SetInitialValue();
   m_HCAlgSettings->SetInitialValue();
-  m_CMAlgSettings->SetInitialValue(); 
+  //m_CMAlgSettings->SetInitialValue(); 
   m_ETAlgSettings->SetInitialValue();
   m_CCAlgSettings->SetInitialValue();
   m_CLAlgSettings->SetInitialValue();
@@ -105,7 +105,7 @@ StatusCode EcalClusterReconstruction::ClearAlgorithm(){
   delete m_energysplittingAlg;
   delete m_coneclus2DAlg; 
   delete m_houghclusAlg;
-  delete m_shadowmakingAlg; 
+  //delete m_shadowmakingAlg; 
   delete m_etmatchingAlg;
   delete m_coneclusterAlg;
   delete m_clustermergingAlg;
@@ -114,7 +114,7 @@ StatusCode EcalClusterReconstruction::ClearAlgorithm(){
   delete m_ESAlgSettings;
   delete m_CC2AlgSettings; 
   delete m_HCAlgSettings;
-  delete m_CMAlgSettings; 
+  //delete m_CMAlgSettings; 
   delete m_ETAlgSettings;
   delete m_CCAlgSettings;
   delete m_CLAlgSettings;
