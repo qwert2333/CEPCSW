@@ -1,7 +1,7 @@
 from Gaudi.Configuration import *
 
 ############## GeomSvc #################
-geometry_option = "CRD_o1_v02/CRD_o1_v02-onlyEcalB.xml"
+geometry_option = "CRD_o1_v01/CRD_o1_v01.xml"
 
 if not os.getenv("DETCRDROOT"):
     print("Can't find the geometry. Please setup envvar DETCRDROOT." )
@@ -21,7 +21,7 @@ geomsvc.compact = geometry_path
 from Configurables import k4DataSvc
 podioevent = k4DataSvc("EventDataSvc")
 podioevent.inputs = [
-"CRD_SimMu_FullDet.root"
+"CRD_SimGam_FullDet.root"
 ]
 ##########################################
 
@@ -34,10 +34,12 @@ Ecaldatasvc = CRDEcalSvc("CRDEcalSvc")
 from Configurables import PodioInput
 inp = PodioInput("InputReader")
 #inp.collections = ["EcalBarrelCollection", "EcalEndcapRingCollection", "EcalEndcapsCollection", "MCParticle"]
-inp.collections = ["EcalBarrelCollection", "MCParticle", "MarlinTrkTracks"]
+inp.collections = ["EcalBarrelCollection", "HcalBarrelCollection", "MCParticle", "MarlinTrkTracks"]
 ##########################################
 
 ########## Digitalization ################
+
+##ECAL##
 from Configurables import CRDEcalDigiAlg
 EcalDigi = CRDEcalDigiAlg("CRDEcalDigiAlg")
 EcalDigi.ReadOutName = "EcalBarrelCollection"
@@ -56,6 +58,19 @@ EcalDigi.Debug=1
 EcalDigi.OutFileName = "testTree_Mu.root"
 #########################################
 
+##HCAL##
+from Configurables import G2CDArborAlg
+caloDigi = G2CDArborAlg("G2CDArborAlg")
+caloDigi.ReadLCIO = False
+#caloDigi.CalibrECAL = [48.16, 96.32]
+caloDigi.CalibrECAL = [46.538, 93.0769]
+caloDigi.ECALCollections = []
+caloDigi.ECALReadOutNames= []
+caloDigi.DigiECALCollection = []
+caloDigi.HCALCollections = ["HcalBarrelCollection"]
+caloDigi.HCALReadOutNames= ["HcalBarrelCollection"]
+caloDigi.DigiHCALCollection = ["HCALBarrel"]
+caloDigi.EventReportEvery = 100
 
 
 ######### Reconstruction ################
@@ -81,9 +96,9 @@ out.outputCommands = ["keep *"]
 
 from Configurables import ApplicationMgr
 ApplicationMgr( 
-    TopAlg=[inp, EcalDigi, PandoraPlusPFAlg],
+    TopAlg=[inp, EcalDigi,caloDigi, PandoraPlusPFAlg, out],
     EvtSel="NONE",
-    EvtMax=10,
+    EvtMax=3,
     ExtSvc=[podioevent, geomsvc, Ecaldatasvc],
     #OutputLevel=DEBUG
 )

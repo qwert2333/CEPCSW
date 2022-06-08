@@ -118,7 +118,7 @@ example_dettool = AnExampleDetElemTool("AnExampleDetElemTool")
 from Configurables import CalorimeterSensDetTool
 from Configurables import DriftChamberSensDetTool
 cal_sensdettool = CalorimeterSensDetTool("CalorimeterSensDetTool")
-cal_sensdettool.CalNamesMergeDisable = ["EcalBarrel"]
+cal_sensdettool.CalNamesMergeDisable = ["CaloDetector"]
 
 
 ##############################################################################

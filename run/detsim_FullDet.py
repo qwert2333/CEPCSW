@@ -42,7 +42,7 @@ from Configurables import SLCIORdr
 from Configurables import HepMCRdr
 from Configurables import GenPrinter
 gun = GtGunTool("GtGunTool")
-gun.Particles = ["pi-"]
+gun.Particles = ["gamma"]
 #gun.Particles = ["nu_e"]
 gun.PositionXs = [0]
 gun.PositionYs = [0.]
@@ -52,7 +52,7 @@ gun.EnergyMaxs = [10.] # GeV
 gun.ThetaMins  = [90]    # deg
 gun.ThetaMaxs  = [90]  # deg
 gun.PhiMins    = [0]    # deg
-gun.PhiMaxs    = [0]  # deg
+gun.PhiMaxs    = [360]  # deg
 # stdheprdr = StdHepRdr("StdHepRdr")
 # stdheprdr.Input = "/cefs/data/stdhep/CEPC250/2fermions/E250.Pbhabha.e0.p0.whizard195/bhabha.e0.p0.00001.stdhep"
 # lciordr = SLCIORdr("SLCIORdr")
@@ -105,7 +105,7 @@ example_dettool = AnExampleDetElemTool("AnExampleDetElemTool")
 from Configurables import CalorimeterSensDetTool
 from Configurables import DriftChamberSensDetTool
 cal_sensdettool = CalorimeterSensDetTool("CalorimeterSensDetTool")
-cal_sensdettool.CalNamesMergeDisable = ["EcalBarrel"]
+cal_sensdettool.CalNamesMergeDisable = ["CaloDetector"]
 
 # digitization
 vxdhitname  = "VXDTrackerHits"
@@ -260,7 +260,7 @@ elif dedxoption == "BetheBlochEquationDedxSimTool":
 # output
 from Configurables import PodioOutput
 out = PodioOutput("outputalg")
-out.filename = "CRD_SimHad_FullDet.root"
+out.filename = "CRD_SimGam_FullDet.root"
 out.outputCommands = ["keep *"]
 
 # ApplicationMgr
