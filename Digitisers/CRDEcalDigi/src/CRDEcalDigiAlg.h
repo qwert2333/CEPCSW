@@ -10,9 +10,8 @@
 #include "edm4hep/CalorimeterHitCollection.h"
 #include "edm4hep/SimCalorimeterHitCollection.h"
 #include "edm4hep/MCRecoCaloAssociationCollection.h"
-#include "CRDEcalSvc/ICRDEcalSvc.h"
-#include "Objects/CRDCaloBlock.h"
-#include "Objects/CRDCaloStep.h"
+#include "CaloBar.h"
+#include "HitStep.h"
 
 #include <DDRec/DetectorData.h>
 #include <DDRec/CellIDPositionConverter.h>
@@ -28,7 +27,6 @@
 #define C 299.79  // unit: mm/ns
 #define PI 3.141592653
 
-using namespace CRDEcalEDM;
 class CRDEcalDigiAlg : public GaudiAlgorithm
 {
  
@@ -52,9 +50,7 @@ public:
 
   StatusCode MergeHits(const edm4hep::SimCalorimeterHitCollection& m_col, std::vector<edm4hep::SimCalorimeterHit>& m_hits);  
 
-	double GetBarLength(CRDEcalEDM::CRDCaloBar& bar); //TODO: should read from geom file! 
-	//dd4hep::Position GetCellPos(dd4hep::Position& pos, CRDEcalEDM::CRDCaloBar& bar);
-	//edm4hep::MutableSimCalorimeterHit find(edm4hep::SimCalorimeterHitCollection& m_col, dd4hep::Position& pos);
+	double GetBarLength(CaloBar& bar); //TODO: should read from geom file! 
 	edm4hep::MutableSimCalorimeterHit find(const std::vector<edm4hep::MutableSimCalorimeterHit>& m_col, unsigned long long& cellid) const;
 
 	void Clear();
@@ -62,7 +58,7 @@ public:
 protected:
 
   SmartIF<IGeomSvc> m_geosvc;
-  SmartIF<ICRDEcalSvc> m_edmsvc;
+  //SmartIF<ICRDEcalSvc> m_edmsvc;
   typedef std::vector<float> FloatVec;
 
 	int _nEvt ;

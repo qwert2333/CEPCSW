@@ -4,30 +4,33 @@
 #include "PandoraPlusDataCol.h"
 #include "TVector3.h"
 
-class TrackCreator{
+namespace PandoraPlus{
+  class TrackCreator{
 
-public: 
+  public: 
 
-  class Settings{
-  public:
-    Settings(){};
+    class Settings{
+    public:
+      Settings(){};
+   
+      float m_BField; 
+      std::vector<std::string>  m_trackCollections; 
+   
+    };
+    
+    //initialize a CaloHitCreator
+    TrackCreator( const Settings& m_settings );
+    ~TrackCreator() {};
+   
+    StatusCode CreateTracks( PandoraPlusDataCol& m_DataCol, 
+                             std::vector<DataHandle<edm4hep::TrackCollection>*>& r_TrackCols ); 
+   
+   
+    StatusCode Reset(){};
 
-    std::vector<std::string>  m_trackCollections; 
-
+  private: 
+    const Settings  settings; 
+  
   };
-  
-  //initialize a CaloHitCreator
-  TrackCreator( const Settings& m_settings );
-  ~TrackCreator() {};
-
-  StatusCode CreateTracks( PandoraPlusDataCol& m_DataCol ); 
-
-
-  StatusCode Reset(){};
-
-private: 
-  const Settings  settings; 
-  
-
 };
 #endif

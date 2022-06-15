@@ -1,14 +1,14 @@
 # Modules
 gaudi_add_library(CRDEcalRecLib
-                  SOURCES src/Objects/CRDCaloBar.cc
-                          src/Objects/CRDCaloBarCluster.cc
-                          src/Objects/CRDCaloBarShower.cc
-                          src/Objects/CRDCaloBlock.cc
-                          src/Objects/CRDCaloHitTransShower.cc
-                          src/Objects/CRDCaloHitLongiCluster.cc
-                          src/Objects/CRDCaloHit3DCluster.cc
+                  SOURCES src/Objects/CaloBar.cc
+                          src/Objects/CaloBarShower.cc
+                          src/Objects/CaloBarCluster.cc
+                          src/Objects/CaloBlock.cc
+                          src/Objects/CaloTower.cc
+                          src/Objects/TransShower.cc
+                          src/Objects/CaloCluster.cc .
                           src/Objects/Track.cc
-                          src/Objects/TrackFitInEcal.cpp
+                          src/Objects/LongiCluster.cc
                   LINK    k4FWCore::k4FWCore
                           GearSvc
                           DetInterface
@@ -25,11 +25,18 @@ gaudi_add_library(CRDEcalRecLib
 
 gaudi_add_module(CRDEcalRec
                  SOURCES src/PandoraPlusPFAlg.cpp
+                         src/PandoraPlusDataCol.cpp
                          src/Tools/MCParticleCreator.cpp
                          src/Tools/TrackCreator.cpp
-                         src/Tools/EcalHitsCreator.cpp
+                         src/Tools/CaloHitsCreator.cpp
+                         src/Tools/OutputCreator.cpp
+                         src/Algorithm/ExampleAlg.cpp
+                         src/Algorithm/GlobalClusteringAlg.cpp
+                         src/Algorithm/LocalMaxFindingAlg.cpp
+                         src/Algorithm/HoughClusteringAlg.cpp
+                         src/Algorithm/EnergySplittingAlg.cpp
+                         src/Algorithm/EnergyTimeMatchingAlg.cpp
                  LINK    CRDEcalRecLib
-                         CRDEcalSvcLib
 )
 target_include_directories(CRDEcalRec PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}>/include

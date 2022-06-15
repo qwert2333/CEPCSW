@@ -72,7 +72,7 @@ StatusCode CRDEcalDigiAlg::initialize()
 	t_SimBar->Branch("simBar_cellID", &m_simBar_cellID);
 
 	std::cout<<"CRDEcalDigiAlg::m_scale="<<m_scale<<std::endl;
-	m_geosvc = service<IGeomSvc>("GeoSvc");
+	m_geosvc = service<IGeomSvc>("GeomSvc");
 	if ( !m_geosvc )  throw "CRDEcalDigiAlg :Failed to find GeomSvc ...";
 	dd4hep::Detector* m_dd4hep = m_geosvc->lcdd();
 	if ( !m_dd4hep )  throw "CRDEcalDigiAlg :Failed to get dd4hep::Detector ...";
@@ -83,8 +83,8 @@ StatusCode CRDEcalDigiAlg::initialize()
 		return StatusCode::FAILURE;
 	}
 
-	m_edmsvc = service<ICRDEcalSvc>("CRDEcalSvc");
-	if ( !m_edmsvc )  throw "CRDEcalDigiAlg :Failed to find CRDEcalSvc ...";
+	//m_edmsvc = service<ICRDEcalSvc>("CRDEcalSvc");
+	//if ( !m_edmsvc )  throw "CRDEcalDigiAlg :Failed to find CRDEcalSvc ...";
 
 	rndm.SetSeed(_seed);
 	std::cout<<"CRDEcalDigiAlg::initialize"<<std::endl;
@@ -97,7 +97,7 @@ StatusCode CRDEcalDigiAlg::execute()
 	std::cout<<"Processing event: "<<_nEvt<<std::endl;
    if(_nEvt<_Nskip){ _nEvt++; return StatusCode::SUCCESS; }
 
-  m_edmsvc->ClearSystem(); 
+  //m_edmsvc->ClearSystem(); 
 	Clear();
 
  	const edm4hep::SimCalorimeterHitCollection* SimHitCol =  r_SimCaloCol.get();
@@ -105,7 +105,7 @@ StatusCode CRDEcalDigiAlg::execute()
 	edm4hep::CalorimeterHitCollection* caloVec = w_DigiCaloCol.createAndPut();
 	edm4hep::MCRecoCaloAssociationCollection* caloAssoVec = w_CaloAssociationCol.createAndPut();
  	std::vector<edm4hep::SimCalorimeterHit> m_simhitCol; m_simhitCol.clear();
-  std::vector<CRDEcalEDM::CRDCaloBar> m_barCol; m_barCol.clear(); 
+  std::vector<CaloBar> m_barCol; m_barCol.clear(); 
 
   if(SimHitCol == 0) 
   {
@@ -130,7 +130,7 @@ StatusCode CRDEcalDigiAlg::execute()
 
 
 		unsigned long long id = SimHit.getCellID();
-		CRDEcalEDM::CRDCaloBar hitbar;
+		CaloBar hitbar;
 		hitbar.setcellID( id);
 		hitbar.setcellID(	m_decoder->get(id, "system"), 
 											m_decoder->get(id, "module"), 
@@ -148,8 +148,8 @@ StatusCode CRDEcalDigiAlg::execute()
 		//if(_Debug>=2) std::cout<<"SimHit contribution size: "<<SimHit.contributions_size()<<std::endl;
 
 
-		std::vector<CRDEcalEDM::CRDCaloStep> DigiLvec; DigiLvec.clear();
-		std::vector<CRDEcalEDM::CRDCaloStep> DigiRvec; DigiRvec.clear();
+		std::vector<HitStep> DigiLvec; DigiLvec.clear();
+		std::vector<HitStep> DigiRvec; DigiRvec.clear();
 		double totQ1 = 0;
 		double totQ2 = 0;
 
@@ -223,7 +223,7 @@ StatusCode CRDEcalDigiAlg::execute()
 			totQ1 += Qi_left;
 			totQ2 += Qi_right;
 	
-			CRDEcalEDM::CRDCaloStep stepoutL, stepoutR;
+			HitStep stepoutL, stepoutR;
 			stepoutL.setQ(Qi_left); stepoutL.setT(Ti_left);
 			stepoutR.setQ(Qi_right); stepoutR.setT(Ti_right);
 			DigiLvec.push_back(stepoutL);
@@ -298,7 +298,7 @@ StatusCode CRDEcalDigiAlg::execute()
 	}
 
 
-	m_edmsvc->setDigiHits( m_barCol ); 
+	//m_edmsvc->setDigiHits( m_barCol ); 
   
 
 	t_SimCont->Fill();
@@ -321,7 +321,7 @@ StatusCode CRDEcalDigiAlg::finalize()
 
   info() << "Processed " << _nEvt << " events " << endmsg;
   delete m_wfile, t_SimCont, t_SimBar; 
-  delete m_cellIDConverter, m_decoder, m_geosvc, m_edmsvc;
+  delete m_cellIDConverter, m_decoder, m_geosvc;
   return GaudiAlgorithm::finalize();
 }
 
@@ -362,14 +362,14 @@ StatusCode CRDEcalDigiAlg::MergeHits( const edm4hep::SimCalorimeterHitCollection
 
 
 
-double CRDEcalDigiAlg::GetBarLength(CRDEcalEDM::CRDCaloBar& bar){
+double CRDEcalDigiAlg::GetBarLength(CaloBar& bar){
 	//TODO: reading bar length from geosvc. 
 	if(bar.getSlayer()==1) return 410.;
 	else return 470.-bar.getDlayer()*10.;
 }
 
 /*
-dd4hep::Position CRDEcalDigiAlg::GetCellPos(dd4hep::Position& pos, CRDEcalEDM::CRDCaloBar& bar){
+dd4hep::Position CRDEcalDigiAlg::GetCellPos(dd4hep::Position& pos, CaloBar& bar){
 	dd4hep::Position rpos = pos-bar.getPosition();
 	TVector3 vec(0,0,0); 
 	if(bar.getSlayer()==1) vec.SetXYZ(0, 0, floor(rpos.z()/10)*10+5 );

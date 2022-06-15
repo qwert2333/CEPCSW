@@ -5,7 +5,8 @@ from Configurables import k4DataSvc
 dsvc = k4DataSvc("EventDataSvc")
 
 from Configurables import RndmGenSvc, HepRndm__Engine_CLHEP__RanluxEngine_
-seed = [42]
+
+seed = [10]
 # rndmengine = HepRndm__Engine_CLHEP__RanluxEngine_() # The default engine in Gaudi
 rndmengine = HepRndm__Engine_CLHEP__HepJamesRandom_("RndmGenSvc.Engine") # The default engine in Geant4
 rndmengine.SetSingleton = True
@@ -14,10 +15,9 @@ rndmengine.Seeds = seed
 rndmgensvc = RndmGenSvc("RndmGenSvc")
 rndmgensvc.Engine = rndmengine.name()
 
-# option for standalone tracker study 
-#geometry_option = "CRD_o1_v01/CRD_o1_v01-onlyTracker.xml"
+#geometry_option = "CRD_o1_v01/CRD_o1_v01.xml"
 geometry_option = "CRD_o1_v01/CRD_o1_v01.xml"
-#geometry_option = "ecalBarrel.xml"
+#...
 
 if not os.getenv("DETCRDROOT"):
     print("Can't find the geometry. Please setup envvar DETCRDROOT." )
@@ -42,16 +42,17 @@ from Configurables import SLCIORdr
 from Configurables import HepMCRdr
 from Configurables import GenPrinter
 gun = GtGunTool("GtGunTool")
-gun.Particles =  ["gamma"]
-gun.EnergyMins = [10.] # GeV
-gun.EnergyMaxs = [10.] # GeV
+gun.Particles = ["mu-"]
+#gun.Particles = ["nu_e"]
+gun.PositionXs = [0.]
+gun.PositionYs = [0.]
+gun.PositionZs = [0.]
+gun.EnergyMins = [20.] # GeV
+gun.EnergyMaxs = [20.] # GeV
 gun.ThetaMins  = [90.]    # deg
 gun.ThetaMaxs  = [90.]  # deg
-gun.PhiMins    = [0.]    # deg
-gun.PhiMaxs    = [0.]  # deg
-gun.PositionXs = [0.] # mm
-gun.PositionYs = [0.] # mm
-gun.PositionZs = [0.] # mm
+gun.PhiMins    = [-7.]    # deg
+gun.PhiMaxs    = [-7.]  # deg
 # stdheprdr = StdHepRdr("StdHepRdr")
 # stdheprdr.Input = "/cefs/data/stdhep/CEPC250/2fermions/E250.Pbhabha.e0.p0.whizard195/bhabha.e0.p0.00001.stdhep"
 # lciordr = SLCIORdr("SLCIORdr")
@@ -83,7 +84,7 @@ detsimalg.RunCmds = [
 ]
 detsimalg.AnaElems = [
     # example_anatool.name()
-    # "ExampleAnaElemTool"
+#    "ExampleAnaElemTool",
     "Edm4hepWriterAnaElemTool"
 ]
 detsimalg.RootDetElem = "WorldDetElemTool"
@@ -97,6 +98,14 @@ gearsvc = GearSvc("GearSvc")
 
 from Configurables import TrackSystemSvc
 tracksystemsvc = TrackSystemSvc("TrackSystemSvc")
+
+from Configurables import AnExampleDetElemTool
+example_dettool = AnExampleDetElemTool("AnExampleDetElemTool")
+
+from Configurables import CalorimeterSensDetTool
+from Configurables import DriftChamberSensDetTool
+cal_sensdettool = CalorimeterSensDetTool("CalorimeterSensDetTool")
+cal_sensdettool.CalNamesMergeDisable = ["CaloDetector"]
 
 # digitization
 vxdhitname  = "VXDTrackerHits"
@@ -135,6 +144,16 @@ digiSET.ResolutionV = [0.086]
 digiSET.UsePlanarTag = True
 #digiSET.OutputLevel = DEBUG
 
+# two strip tracker hits -> one space point
+from Configurables import SpacePointBuilderAlg
+spSET = SpacePointBuilderAlg("SETBuilder")
+spSET.TrackerHitCollection = sethitname
+spSET.TrackerHitAssociationCollection = "SETTrackerHitAssociation"
+spSET.SpacePointCollection = setspname
+spSET.SpacePointAssociationCollection = "SETSpacePointAssociation"
+#spSET.OutputLevel = DEBUG
+
+
 digiFTD = PlanarDigiAlg("FTDDigi")
 digiFTD.IsStrip = False
 digiFTD.SimTrackHitCollection = "FTDCollection"
@@ -145,11 +164,6 @@ digiFTD.ResolutionV = [0.003, 0.003, 0.0072, 0.0072, 0.0072, 0.0072, 0.0072]
 digiFTD.UsePlanarTag = True
 #digiFTD.OutputLevel = DEBUG
 
-from Configurables import DCHDigiAlg
-digiDC = DCHDigiAlg("DCHDigi")
-digiDC.DigiDCHitCollection = dchitname
-#digiDC.OutputLevel = DEBUG
-
 # two strip tracker hits -> one space point
 from Configurables import SpacePointBuilderAlg
 spFTD = SpacePointBuilderAlg("FTDBuilder")
@@ -158,6 +172,11 @@ spFTD.TrackerHitAssociationCollection = "FTDTrackerHitAssociation"
 spFTD.SpacePointCollection = ftdspname
 spFTD.SpacePointAssociationCollection = "FTDSpacePointAssociation"
 #spFTD.OutputLevel = DEBUG
+
+from Configurables import DCHDigiAlg
+digiDC = DCHDigiAlg("DCHDigi")
+digiDC.DigiDCHitCollection = dchitname
+#digiDC.OutputLevel = DEBUG
 
 # tracking
 from Configurables import SiliconTrackingAlg
@@ -212,31 +231,47 @@ full.SETTrackerHits = sethitname
 full.FTDPixelTrackerHits = ftdhitname
 full.FTDSpacePoints = ftdspname
 full.SITRawHits     = "NotNeedForPixelSIT"
-full.SETRawHits     = "NotNeedForPixelSET"
+full.SETRawHits     = sethitname
 full.FTDRawHits     = ftdhitname
 full.TPCTracks = "ClupatraTracks" # add standalone TPC or DC track here
 full.SiTracks  = "SubsetTracks"
 full.OutputTracks  = "MarlinTrkTracks"
-full.SITHitToTrackDistance = 3.
-full.SETHitToTrackDistance = 5.
+#full.SITHitToTrackDistance = 3.
+#full.SETHitToTrackDistance = 5.
 #full.OutputLevel = DEBUG
 
-#TODO: more reconstruction, PFA etc.
+dedxoption = "BetheBlochEquationDedxSimTool"
+from Configurables import DriftChamberSensDetTool
+dc_sensdettool = DriftChamberSensDetTool("DriftChamberSensDetTool")
+dc_sensdettool.DedxSimTool = dedxoption
+
+from Configurables import DummyDedxSimTool
+from Configurables import BetheBlochEquationDedxSimTool
+
+if dedxoption == "DummyDedxSimTool":
+    dedx_simtool = DummyDedxSimTool("DummyDedxSimTool")
+elif dedxoption == "BetheBlochEquationDedxSimTool":
+    dedx_simtool = BetheBlochEquationDedxSimTool("BetheBlochEquationDedxSimTool")
+    dedx_simtool.material_Z = 2
+    dedx_simtool.material_A = 4
+    dedx_simtool.scale = 10
+    dedx_simtool.resolution = 0.0001
 
 # output
 from Configurables import PodioOutput
 out = PodioOutput("outputalg")
-out.filename = "Gam_sim.root"
+out.filename = "CRD_SimMu_FullDet_200evt.root"
 out.outputCommands = ["keep *"]
 
 # ApplicationMgr
 from Configurables import ApplicationMgr
 ApplicationMgr(
-    #TopAlg = [genalg, detsimalg, digiVXD, digiSIT, digiSET, digiFTD, spFTD, digiDC, tracking, forward, subset, clupatra, full, out],
-    TopAlg = [genalg, detsimalg, digiVXD, digiSIT, digiSET, digiFTD, spFTD, digiDC, tracking, forward, subset, full, out],
+    #TopAlg = [genalg, detsimalg, digiVXD, digiSIT, digiSET, digiFTD, spFTD, digiDC, tracking, forward, subset, out],
+    TopAlg = [genalg, detsimalg, digiVXD, digiSIT, digiSET, digiFTD, spSET, digiDC, tracking, forward, subset, full, out],
+    #TopAlg = [genalg, detsimalg, out],
     EvtSel = 'NONE',
-    EvtMax = 10,
+    EvtMax = 200,
     ExtSvc = [rndmengine, rndmgensvc, dsvc, evtseeder, geosvc, gearsvc, tracksystemsvc],
-    HistogramPersistency = 'ROOT',
-    OutputLevel = INFO
+    #ExtSvc = [rndmengine, rndmgensvc, dsvc, geosvc],
+    OutputLevel=INFO
 )

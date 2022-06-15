@@ -1,22 +1,20 @@
-#ifndef _PANDORAPLUS_DATA_SVC_
-#define _PANDORAPLUS_DATA_SVC_
+#ifndef _PANDORAPLUS_DATA_H
+#define _PANDORAPLUS_DATA_H
 #include <iostream>
 #include <algorithm>
 #include <map>
 
-#include "Objects/CRDCaloBar.h"
-#include "Objects/CRDCaloBlock.h"
-#include "Objects/CRDCaloTower.h"
-#include "Objects/CRDCaloBarShower.h"
-#include "Objects/CRDCaloBarCluster.h"
-#include "Objects/CRDCaloLayer.h"
-#include "Objects/CRDHoughObject.h"
-#include "Objects/CRDHoughSpace.h"
-#include "Objects/CRDShadowCluster.h"
-#include "Objects/CRDCaloHitTransShower.h"
-#include "Objects/CRDCaloHitLongiCluster.h"
-#include "Objects/CRDCaloHit3DCluster.h"
-#include "Objects/PFObject.h"
+#include "Objects/CaloBar.h"
+#include "Objects/CaloBlock.h"
+#include "Objects/CaloTower.h"
+#include "Objects/CaloBarShower.h"
+#include "Objects/CaloBarCluster.h"
+#include "Objects/HoughObject.h"
+#include "Objects/HoughSpace.h"
+#include "Objects/LongiCluster.h"
+#include "Objects/TransShower.h"
+#include "Objects/CaloCluster.h"
+//#include "Objects/PFObject.h"
 #include "Objects/Track.h"
 
 #include "k4FWCore/DataHandle.h"
@@ -24,15 +22,26 @@
 #include "edm4hep/MCParticle.h"
 #include "edm4hep/Track.h"
 #include "edm4hep/TrackCollection.h"
+#include "edm4hep/CalorimeterHit.h"
+#include "edm4hep/CalorimeterHitCollection.h"
+#include "edm4hep/Vertex.h"
+#include "edm4hep/VertexCollection.h"
+#include "edm4hep/ClusterCollection.h"
+#include "edm4hep/ReconstructedParticleCollection.h"
+#include "edm4hep/MCRecoCaloAssociation.h"
+#include "edm4hep/MCRecoTrackerAssociation.h"
+#include "edm4hep/MCRecoParticleAssociationCollection.h"
 
 #define PI 3.141592653
-#define C 299.79  // unit: mm/ns
-
+//#define C 299.79  // unit: mm/ns
+using namespace std;
+const double C = 299.79;
 class PandoraPlusDataCol{
 public:
 
-  PandoraPlusDataCol(); 
-  void Clear(); 
+  PandoraPlusDataCol() {}; 
+  ~PandoraPlusDataCol() { Clear(); }
+  StatusCode Clear(); 
 
   //Readin CollectionMap
   std::map<std::string, std::vector<edm4hep::MCParticle> >       collectionMap_MC;
@@ -43,9 +52,13 @@ public:
   std::map<std::string, std::vector<edm4hep::MCRecoTrackerAssociation> > collectionMap_TrkRel;
 
   //Self used objects
-  std::vector<CRDEcalEDM::CRDCaloBlock>   BlockVec; 
-  std::vector<CRDEcalEDM::CRDCaloTower>   TowerCol;
+  std::vector<PandoraPlus::Track*>       TrackCol;
 
+  std::vector<PandoraPlus::CaloBar*>     BarCol;  
+  std::vector<PandoraPlus::CaloBlock*>   BlockCol; 
+  std::vector<PandoraPlus::CaloTower*>   TowerCol;
+  std::vector<PandoraPlus::TransShower*> TransShowerCol;
+  std::vector<PandoraPlus::CaloCluster*> ClusterCol;
 
 };
 #endif
