@@ -18,13 +18,15 @@ namespace PandoraPlus{
     hits.clear();
     showerMax=0; chi2=0; alpha=0; beta=0; ExpEn=0; axis.SetXYZ(0,0,0); type=-1;
   }
+
   void CaloCluster::Clean(){
-    for(int i=0; i<showers.size(); i++) { /*delete showers[i];*/ showers[i] = NULL; }
-    for(int i=0; i<tracks.size(); i++) { /*delete tracks[i];*/ tracks[i] = NULL; }
-    for(int i=0; i<daughter_clusters.size(); i++) { /*delete daughter_clusters[i];*/ daughter_clusters[i] = NULL; }
-    for(int i=0; i<hits.size(); i++) { /*delete hits[i];*/ hits[i] = NULL; }
+    for(int i=0; i<showers.size(); i++) { delete showers[i]; showers[i] = NULL; }
+    for(int i=0; i<tracks.size(); i++)  { delete tracks[i];  tracks[i] = NULL; }
+    for(int i=0; i<daughter_clusters.size(); i++) { delete daughter_clusters[i]; daughter_clusters[i] = NULL; }
+    for(int i=0; i<hits.size(); i++) { delete hits[i]; hits[i] = NULL; }
     Clear();
   }
+
   void CaloCluster::Check(){
     for(int i=0; i<showers.size(); i++)
       if(!showers[i]) { showers.erase(showers.begin()+i); i--; }

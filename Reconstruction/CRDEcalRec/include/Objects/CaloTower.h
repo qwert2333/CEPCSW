@@ -11,7 +11,7 @@ namespace PandoraPlus{
   class CaloTower{
   public: 
     CaloTower(){};
-    ~CaloTower() { Clean(); }
+    ~CaloTower() { Clear(); }
 
     void Clear();
     void Check();

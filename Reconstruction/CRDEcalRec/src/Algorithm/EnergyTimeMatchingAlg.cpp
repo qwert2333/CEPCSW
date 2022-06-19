@@ -108,6 +108,7 @@ cout<<"  EnergyTimeMatchingAlg: Tower #"<<it<<", Not use chi2 matching"<<endl;
         std::vector<PandoraPlus::TransShower*> m_showerinlayer; m_showerinlayer.clear();
 
         GetFullMatchedShowers( showerXCol, showerYCol, m_showerinlayer );
+        m_datacol.bk_TransShowerCol.insert( m_datacol.bk_TransShowerCol.end(), m_showerinlayer.begin(), m_showerinlayer.end() );
         
         m_transhowerCol.insert( m_transhowerCol.end(), m_showerinlayer.begin(), m_showerinlayer.end() );   
       }
@@ -130,19 +131,6 @@ cout<<"  EnergyTimeMatchingAlg: Longitudinal cluster size: X "<<m_longiClXCol.si
       
       //Case 2.1: 1*1
       if(NclusX==1 && NclusY==1){
-/*
-cout<<"  EnergyTimeMatchingAlg: Printout input LongiClusters X "<<endl;
-for(int ii=0; ii<m_longiClXCol[0]->getBarShowers().size(); ii++)
-printf("    #%d shower: pos/E=(%.2f, %.2f, %.2f, %.3f), cellID=(%d, %d, %d, %d, %d) \n", 
-    m_longiClXCol[0]->getBarShowers()[ii]->getPos().x(), m_longiClXCol[0]->getBarShowers()[ii]->getPos().y(), m_longiClXCol[0]->getBarShowers()[ii]->getPos().z(), 
-    m_longiClXCol[0]->getBarShowers()[ii]->getE(), 
-    m_longiClXCol[0]->getBarShowers()[ii]->getModule(), m_longiClXCol[0]->getBarShowers()[ii]->getStave(), m_longiClXCol[0]->getBarShowers()[ii]->getPart(), 
-    m_longiClXCol[0]->getBarShowers()[ii]->getDlayer(), m_longiClXCol[0]->getBarShowers()[ii]->getSlayer() );
-cout<<"  EnergyTimeMatchingAlg: Printout input LongiClusters Y "<<endl;
-for(int ii=0; ii<m_longiClYCol[0]->getBarShowers().size(); ii++)
-printf("    #%d shower: pos/E=(%.2f, %.2f, %.2f, %.3f), cellID=(%d, %d, %d, %d, %d) \n", m_longiClYCol[0]->getBarShowers()[ii]->getPos().x(), m_longiClYCol[0]->getBarShowers()[ii]->getPos().y(), m_longiClYCol[0]->getBarShowers()[ii]->getPos().z(), m_longiClYCol[0]->getBarShowers()[ii]->getE(), m_longiClYCol[0]->getBarShowers()[ii]->getModule(), m_longiClYCol[0]->getBarShowers()[ii]->getStave(), m_longiClYCol[0]->getBarShowers()[ii]->getPart(), m_longiClYCol[0]->getBarShowers()[ii]->getDlayer(), m_longiClYCol[0]->getBarShowers()[ii]->getSlayer() );
-*/
-
         PandoraPlus::CaloCluster* tmp_clus = new PandoraPlus::CaloCluster();
         XYClusterMatchingL0(m_longiClXCol[0], m_longiClYCol[0], tmp_clus); 
         tmp_clusters.push_back(tmp_clus);
@@ -168,7 +156,12 @@ cout<<"  EnergyTimeMatchingAlg: After cluster matching. 3D cluster size: "<<tmp_
         std::vector<const PandoraPlus::TransShower*> m_showersinclus = tmp_clusters[ic]->getShowers(); 
 cout<<"  EnergyTimeMatchingAlg: In Cluster #"<<ic<<": shower size = "<<m_showersinclus.size()<<endl;
         //m_transhowerCol.insert(m_transhowerCol.end(), m_showersinclus.begin(), m_showersinclus.end());
-        for(int is=0; is<m_showersinclus.size(); is++) m_transhowerCol.push_back( const_cast<PandoraPlus::TransShower *>(m_showersinclus[is]) );
+        for(int is=0; is<m_showersinclus.size(); is++){ 
+          m_transhowerCol.push_back( const_cast<PandoraPlus::TransShower *>(m_showersinclus[is]) );
+          m_datacol.bk_TransShowerCol.push_back( const_cast<PandoraPlus::TransShower *>(m_showersinclus[is]) );
+        }
+
+        m_datacol.bk_ClusterCol.push_back( tmp_clusters[ic] );
       }
     }
 cout<<"  EnergyTimeMatchingAlg: present 2D shower size: "<<m_transhowerCol.size()<<", 3D cluster size: "<<m_clusterCol.size()<<endl;

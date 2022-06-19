@@ -12,7 +12,7 @@ namespace PandoraPlus{
     CaloBar(unsigned long long _cellID, int _system, int _module, int _slayer, int _dlayer, int _part, int _stave, int _bar, TVector3 _pos, double _Q1, double _Q2, double _T1, double _T2)
     : cellID(_cellID), system(_system), module(_module), stave(_stave), dlayer(_dlayer), part(_part), slayer(_slayer), bar(_bar), position(_pos), Q1(_Q1), Q2(_Q2), T1(_T1), T2(_T2) {}; 
     CaloBar() {};
-    ~CaloBar() {};
+    ~CaloBar() { Clear(); };
     void Clear() { position.SetXYZ(0.,0.,0.); Q1=-1; Q2=-1; T1=-99; T2=-99; }
 
     inline bool operator < (const CaloBar &x) const {

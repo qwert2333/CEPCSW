@@ -84,7 +84,7 @@ cout<<endl;
     //Need to transfer const blocks to mutable. 
     std::vector<PandoraPlus::CaloBlock*> m_blocksInTower; m_blocksInTower.clear();
     for(int ib=0; ib<p_towerCol->at(it)->getBlocks().size(); ib++){
-      PandoraPlus::CaloBlock* m_block = new PandoraPlus::CaloBlock();
+      PandoraPlus::CaloBlock* m_block = new PandoraPlus::CaloBlock();  m_datacol.bk_BlockCol.push_back(m_block);
       *m_block = *(p_towerCol->at(it)->getBlocks()[ib]);
       m_block->ClearShower();
       m_blocksInTower.push_back(m_block);
@@ -127,6 +127,9 @@ printf("  In Tower #%d: HoughCLX range: (%d, %d), HoughCLY range: (%d, %d) \n", 
 
       if( dlayer>maxLayerY || dlayer<minLayerY ) Clustering( m_barColY, m_barClusYCol );
       else Clustering( m_barColY, m_barClusYCol, m_clusYCol );
+
+      m_datacol.bk_BarClusCol.insert( m_datacol.bk_BarClusCol.end(), m_barClusXCol.begin(), m_barClusXCol.end() );
+      m_datacol.bk_BarClusCol.insert( m_datacol.bk_BarClusCol.end(), m_barClusYCol.begin(), m_barClusYCol.end() );
 
       //m_blocksInTower[ib].setClusterXCol(m_barClusXCol);
       //m_blocksInTower[ib].setClusterYCol(m_barClusYCol);
@@ -180,6 +183,10 @@ for(int i=0; i<m_barClusYCol.size(); i++){
      
       m_blocksInTower[ib]->setShowerXCol( m_barShowerXCol );
       m_blocksInTower[ib]->setShowerYCol( m_barShowerYCol );     
+
+      for(int is=0; is<m_barShowerXCol.size(); is++) m_datacol.bk_BarShowerCol.push_back( const_cast<PandoraPlus::CaloBarShower*>(m_barShowerXCol[is]) );
+      for(int is=0; is<m_barShowerYCol.size(); is++) m_datacol.bk_BarShowerCol.push_back( const_cast<PandoraPlus::CaloBarShower*>(m_barShowerYCol[is]) );
+
 /*
 printf("    Clustering in Block #%d: Layer = %d, bar size (%d, %d), cluster size (%d, %d), shower size (%d, %d) \n", ib, dlayer, m_barColX.size(), m_barColY.size(), m_barClusXCol.size(), m_barClusYCol.size(), m_barShowerXCol.size(), m_barShowerYCol.size());
 
@@ -312,10 +319,15 @@ StatusCode EnergySplittingAlg::LongiClusterLinking( std::vector<const PandoraPlu
   }
 
 //cout<<endl;
-cout<<"  LongiClusterLinking: #normal shower = "<<m_showers.size()<<", #shower wo trk = "<<m_showerswotrk.size()<<endl;
 
-//cout<<"  Normal shower position: "<<endl;
-//for(int is=0; is<m_showers.size(); is++) printf("    (%.2f, %.2f, %.2f) \n", m_showers[is]->getPos().x(), m_showers[is]->getPos().y(), m_showers[is]->getPos().z());
+
+//cout<<"  LongiClusterLinking: #normal shower = "<<m_showers.size()<<", #shower wo trk = "<<m_showerswotrk.size()<<endl;
+
+//cout<<"  Normal shower: "<<endl;
+//for(int is=0; is<m_showers.size(); is++){ 
+//  cout<<"    Address: "<<m_showers[is];
+//  printf(" pos (%.2f, %.2f, %.2f) \n", m_showers[is]->getPos().x(), m_showers[is]->getPos().y(), m_showers[is]->getPos().z());
+//}
 
   //Update old Hough clusters
   for(int ic=0; ic<m_oldClusCol.size(); ic++){
@@ -332,7 +344,7 @@ cout<<"  LongiClusterLinking: #normal shower = "<<m_showers.size()<<", #shower w
             m_showers[js]->getStave()  ==m_shower->getStave() && 
             m_showers[js]->getPart()   ==m_shower->getPart() && 
             m_showers[js]->getDlayer() ==m_shower->getDlayer() && 
-            (m_showers[js]->getPos()-m_shower->getPos()).Mag()<10 ) {m_selshower = m_showers[js]; fl_foundshower=true; break; }
+            (m_showers[js]->getSeed()->getPosition()-m_shower->getPos()).Mag()<10 ) {m_selshower = m_showers[js]; fl_foundshower=true; break; }
       }
       if(fl_foundshower && m_selshower!=NULL) m_newClus->addBarShower( m_selshower );
 //else{ printf(" In Cluster #%d: shower #%d does not find the new shower. Layer = %d. \n ", ic, is, m_shower->getDlayer()); }
@@ -344,6 +356,7 @@ cout<<"  LongiClusterLinking: #normal shower = "<<m_showers.size()<<", #shower w
     m_cluscol.push_back( m_newClus );
   }
 
+/*
 cout<<"    Before merging shower: printout LongiClusters "<<endl;
 for(int aa=0; aa<m_cluscol.size(); aa++){
 printf("      LongiCluster pos: (%.2f, %.2f, %.2f) \n", m_cluscol[aa]->getPos().x(), m_cluscol[aa]->getPos().y(), m_cluscol[aa]->getPos().z() );
@@ -355,7 +368,7 @@ printf("    #%d shower: pos/E=(%.2f, %.2f, %.2f, %.3f), cellID=(%d, %d, %d, %d, 
     m_cluscol[aa]->getBarShowers()[ii]->getDlayer(), m_cluscol[aa]->getBarShowers()[ii]->getSlayer() );
 
 }
-
+*/
 
   //Merge showers into closest Hough cluster
   std::sort( m_showerswotrk.begin(), m_showerswotrk.end(), compLayer );
@@ -364,6 +377,7 @@ printf("    #%d shower: pos/E=(%.2f, %.2f, %.2f, %.3f), cellID=(%d, %d, %d, %d, 
 
   //for(int ib=0; ib<m_blocks.size(); ib++) m_blocks[ib]->Check();
 
+/*
 cout<<"    After merging shower: printout LongiClusters "<<endl;
 for(int aa=0; aa<m_cluscol.size(); aa++){
 printf("      LongiCluster pos: (%.2f, %.2f, %.2f) \n", m_cluscol[aa]->getPos().x(), m_cluscol[aa]->getPos().y(), m_cluscol[aa]->getPos().z() );
@@ -375,7 +389,7 @@ printf("    #%d shower: pos/E=(%.2f, %.2f, %.2f, %.3f), cellID=(%d, %d, %d, %d, 
     m_cluscol[aa]->getBarShowers()[ii]->getDlayer(), m_cluscol[aa]->getBarShowers()[ii]->getSlayer() );
 
 }
-
+*/
 
   //convert to const
   for(int icl=0; icl<m_cluscol.size(); icl++) m_outClusCol.push_back(m_cluscol[icl]);
@@ -427,15 +441,20 @@ StatusCode EnergySplittingAlg::Clustering( std::vector<const PandoraPlus::CaloBa
       m_clusCol[ic]->addSeed( *iter );
     
   }}
-
-//cout<<"Clustering: After seed finding. Cluster size: "<<m_clusCol.size()<<endl;
-//cout<<"  Bar size in cluster: ";
-//for(int j=0; j<m_clusCol.size(); j++) cout<<m_clusCol[j]->getBars().size()<<'\t';
-//cout<<endl;
-//cout<<"  Seed size in cluster: ";
-//for(int j=0; j<m_clusCol.size(); j++) cout<<m_clusCol[j]->getSeeds().size()<<'\t';
-//cout<<endl;
-
+/*
+cout<<"Clustering: After seed finding. Cluster size: "<<m_clusCol.size()<<endl;
+cout<<"  Bar size in cluster: ";
+for(int j=0; j<m_clusCol.size(); j++) cout<<m_clusCol[j]->getBars().size()<<'\t';
+cout<<endl;
+cout<<"  Seed size in cluster: ";
+for(int j=0; j<m_clusCol.size(); j++) cout<<m_clusCol[j]->getSeeds().size()<<'\t';
+cout<<endl;
+cout<<"    Seed position: "<<endl;
+for(int j=0; j<m_clusCol.size(); j++){
+  for(int a=0; a<m_clusCol[j]->getSeeds().size(); a++) printf("    (%.3f, %.3f, %.3f ), ", m_clusCol[j]->getSeeds()[a]->getPosition().x(),  m_clusCol[j]->getSeeds()[a]->getPosition().y(),  m_clusCol[j]->getSeeds()[a]->getPosition().z() );
+  cout<<endl;
+}
+*/
   //Merge clusters without seed
   for(int ic=0; ic<m_clusCol.size(); ic++){
     if(m_clusCol[ic]->getNseeds()==0){
@@ -496,7 +515,12 @@ StatusCode EnergySplittingAlg::Clustering( std::vector<const PandoraPlus::CaloBa
 
 
 StatusCode EnergySplittingAlg::ClusterSplitting( PandoraPlus::CaloBarCluster* m_cluster, std::vector<const PandoraPlus::CaloBarShower*>& outshCol ){
-//cout<<"ClusterSplitting: input cluster seed size = "<<m_cluster.getNseeds()<<", second moment = "<<m_cluster.getScndMoment()<<endl;
+//cout<<"ClusterSplitting: input cluster seed size = "<<m_cluster->getSeeds().size()<<endl;
+//cout<<"Seed position: ";
+//for(int a=0; a<m_cluster->getNseeds(); a++) printf(" (%.2f, %.2f, %.2f) \t", m_cluster->getSeeds()[a]->getPosition().x(), 
+//                                                                             m_cluster->getSeeds()[a]->getPosition().y(),
+//                                                                             m_cluster->getSeeds()[a]->getPosition().z() );
+//cout<<endl;
 
   //No seed in cluster: return empty vector.
   if(m_cluster->getNseeds()==0) { std::cout<<"WARNING: Still have no-seed cluster!!"<<std::endl; return StatusCode::SUCCESS; }
@@ -518,10 +542,12 @@ StatusCode EnergySplittingAlg::ClusterSplitting( PandoraPlus::CaloBarCluster* m_
   double Eseed[Nshower] = {0};
   double weight[Nbars][Nshower] = {0};
   TVector3 SeedPos[Nshower];
-  for(int is=0;is<Nshower;is++) SeedPos[is] = m_cluster->getSeeds()[is]->getPosition();
+  TVector3 SeedPos_Origin[Nshower];
+  for(int is=0;is<Nshower;is++){ SeedPos[is] = m_cluster->getSeeds()[is]->getPosition(); SeedPos_Origin[is]=SeedPos[is]; }
   CalculateInitialEseed(m_cluster->getSeeds(), SeedPos, Eseed);
 
   bool isConverge = false;
+  bool isShifted = false; 
   int iter=0;
   TVector3 SeedPos_prev[Nshower];
   do{
@@ -551,14 +577,23 @@ StatusCode EnergySplittingAlg::ClusterSplitting( PandoraPlus::CaloBarCluster* m_
     }
     isConverge=true;
     for(int is=0;is<Nshower;is++) if( (SeedPos_prev[is]-SeedPos[is]).Mag2()>2.89 ){ isConverge=false; break;}
+ 
+    isShifted = false;
+    for(int is=0;is<Nshower;is++) if( (SeedPos[is]-SeedPos_Origin[is]).Mag2()<15 ){ isShifted=true; break;}
     iter++;
+
+//cout<<"Iter #"<<iter<<": Seed pos ";
+//for(int a=0; a<Nshower; a++) printf(" (%.2f, %.2f, %.2f) \t", SeedPos[a].x(), SeedPos[a].y(), SeedPos[a].z());
+//cout<<endl;
   }
-  while(iter<20 && !isConverge);
+  while(iter<20 && !isConverge && !isShifted );
   if(iter>=20){
     std::cout<<"WARNING: Iteration time larger than 20! Might not converge!"<<std::endl;
     std::cout<<"  For Check: NBars: "<<m_cluster->getBars().size()<<"  Nseeds: "<<Nshower<<std::endl;
   }
 
+//cout<<"After weight calculation. "<<endl;
+  for(int is=0;is<Nshower;is++) SeedPos[is] = m_cluster->getSeeds()[is]->getPosition();
   for(int is=0;is<Nshower;is++){
     PandoraPlus::CaloBarShower* shower = new PandoraPlus::CaloBarShower();
     std::vector<const PandoraPlus::CaloBar*> Bars; Bars.clear();
@@ -573,10 +608,25 @@ StatusCode EnergySplittingAlg::ClusterSplitting( PandoraPlus::CaloBarCluster* m_
       Bars.push_back(bar);
     }
     if(iseed<0) { std::cout<<"ERROR: Can not find seed(max energy bar) in this shower! Please Check!"<<std::endl; iseed=0;}
+    if( (Bars[iseed]->getPosition()-SeedPos[is]).Mag()>15 ) { std::cout<<"ERROR: MaxEnergy bar is too far with original seed! Please Check! iSeed = "<<iseed<<std::endl; }
 
     shower->setBars(Bars);
     shower->setSeed(Bars[iseed]);
     shower->setIDInfo(); 
+
+/*
+cout<<"  Print shower #"<<is<<endl;
+printf("    Shower Nbars = %d, pos/E (%.2f, %.2f, %.2f, %.3f) \n", shower->getBars().size(), 
+                                                                   shower->getPos().x(), shower->getPos().y(), shower->getPos().z(), shower->getE() );
+printf("    Seed pos/E (%.2f, %.2f, %.2f, %.3f) \n", shower->getSeed()->getPosition().x(), shower->getSeed()->getPosition().y(), shower->getSeed()->getPosition().z(), shower->getSeed()->getEnergy() );
+cout<<"    Bars: "<<endl;
+for(int a=0; a<shower->getBars().size(); a++) 
+  printf("      Bar pos/E (%.2f, %.2f, %.2f, %.3f) \n",  shower->getBars()[a]->getPosition().x(), 
+                                                         shower->getBars()[a]->getPosition().y(),
+                                                         shower->getBars()[a]->getPosition().z(),
+                                                         shower->getBars()[a]->getEnergy() );
+*/
+
     outshCol.push_back(shower);
   }
   
@@ -626,15 +676,15 @@ StatusCode EnergySplittingAlg::MergeToClosestCluster( const PandoraPlus::CaloBar
   int dlayer = m_shower->getDlayer();
   TVector3 sh_pos = m_shower->getPos();
 
-cout<<"  Cluster range: ("<<minLayer<<", "<<maxLayer<<") "<<endl;
-cout<<"  Merging shower into cluster: Input shower ";
-printf(" (%.3f, %.3f, %.3f, %.3f), layer #%d \n", sh_pos.X(), sh_pos.Y(), sh_pos.Z(), m_shower->getE(), dlayer);
+//cout<<"  Cluster range: ("<<minLayer<<", "<<maxLayer<<") "<<endl;
+//cout<<"  Merging shower into cluster: Input shower ";
+//printf(" (%.3f, %.3f, %.3f, %.3f), layer #%d \n", sh_pos.X(), sh_pos.Y(), sh_pos.Z(), m_shower->getE(), dlayer);
 
   double minR = 999;
   int index_cluster = -1;
   double m_distance = 0;
   for(int ic=0; ic<m_clusters.size(); ic++ ){
-printf("    Cluster #%d: pos (%.2f, %.2f, %.2f) \n", ic, m_clusters[ic]->getPos().x(), m_clusters[ic]->getPos().y(), m_clusters[ic]->getPos().z());
+//printf("    Cluster #%d: pos (%.2f, %.2f, %.2f) \n", ic, m_clusters[ic]->getPos().x(), m_clusters[ic]->getPos().y(), m_clusters[ic]->getPos().z());
     if(dlayer<=minLayer)
       m_distance = (sh_pos-m_clusters[ic]->getBarShowersInLayer(m_clusters[ic]->getBeginningDlayer())[0]->getPos()).Mag();     
     else if(dlayer>=maxLayer)
@@ -642,12 +692,12 @@ printf("    Cluster #%d: pos (%.2f, %.2f, %.2f) \n", ic, m_clusters[ic]->getPos(
     else
       m_distance = (sh_pos-m_clusters[ic]->getPos()).Mag();
 
-cout<<"    Cluster #"<<ic<<": distance with shower = "<<m_distance<<endl;
+//cout<<"    Cluster #"<<ic<<": distance with shower = "<<m_distance<<endl;
     
     if( m_distance<minR )  { minR=m_distance; index_cluster=ic; }
   }
 
-printf("  minR = %.3f, in #cl %d \n", minR, index_cluster);
+//printf("  minR = %.3f, in #cl %d \n", minR, index_cluster);
 
   if(index_cluster>=0) m_clusters[index_cluster]->addBarShower( m_shower );
   //delete m_shower; m_shower = NULL;

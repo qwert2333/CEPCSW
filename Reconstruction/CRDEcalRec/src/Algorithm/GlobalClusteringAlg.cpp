@@ -35,6 +35,8 @@ StatusCode GlobalClusteringAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
 
     if(!fl_foundbl){
       PandoraPlus::CaloBlock* m_block = new PandoraPlus::CaloBlock();
+      m_datacol.bk_BlockCol.push_back(m_block);
+
       m_block->addBar( m_bars[ibar] );
       m_block->setIDInfo(m_bars[ibar]->getModule(),  m_bars[ibar]->getStave(), m_bars[ibar]->getDlayer(), m_bars[ibar]->getPart());
       m_blocks.push_back(m_block);

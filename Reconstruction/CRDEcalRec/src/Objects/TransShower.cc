@@ -7,6 +7,14 @@
 using namespace std;
 namespace PandoraPlus{
 
+  void TransShower::Clean() {
+    delete barShowerX; barShowerX = NULL; 
+    delete barShowerY; barShowerY = NULL;
+    for(int ih=0; ih<hits.size(); ih++) { delete hits[ih]; hits[ih]=NULL; }
+    Clear();
+  }
+
+
   TVector3 TransShower::getPos() const{
     float rotAngle = module*TMath::Pi()/4.;
     TVector3 m_vecX = barShowerX->getPos();

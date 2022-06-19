@@ -12,8 +12,8 @@ namespace PandoraPlus {
   }
 
  void CaloBarShower::Clean(){
-    /*delete Seed;*/ Seed = NULL;
-    for(int i=0; i<Bars.size(); i++) { /*delete Bars[i];*/ Bars[i] = NULL; }
+    delete Seed; Seed = NULL;
+    for(int i=0; i<Bars.size(); i++) { delete Bars[i]; Bars[i] = NULL; }
     Clear();
   }
 

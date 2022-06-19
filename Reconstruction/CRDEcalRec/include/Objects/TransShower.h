@@ -15,11 +15,14 @@ namespace PandoraPlus{
     {};
  
     TransShower() {};
-    ~TransShower() {};
+    ~TransShower() { Clear(); };
 
-    //void Clear(){
-    //  barShowerX = NULL; barShowerY = NULL; hits.clear();
-    //}
+    void Clear(){
+      barShowerX = NULL; barShowerY = NULL; hits.clear();
+    }
+    void Clean(); 
+
+
     TVector3 getPos() const;
     //double getHitsE() const; 
     double getShowerE() const { return barShowerX->getE() + barShowerY->getE();}

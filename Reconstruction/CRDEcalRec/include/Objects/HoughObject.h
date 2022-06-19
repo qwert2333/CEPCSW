@@ -9,9 +9,10 @@ namespace PandoraPlus {
 
   public: 
     HoughObject() {};
-    ~HoughObject() { Clean(); };
+    ~HoughObject() { Clear(); };
 
-    void Clean() { originLocalMax=NULL; }
+    void Clean() { delete originLocalMax; }
+    void Clear() { originLocalMax=nullptr; ConformalPoint.SetX(0.); ConformalPoint.SetY(0.);}
 
     //inline bool operator == (const HoughObject &x) const{
     //  return  originLocalMax == x.originLocalMax;
@@ -27,7 +28,6 @@ namespace PandoraPlus {
     TF1 getHoughLineDR() const { return HoughLine_dr; }
     TF1 getHoughLineDL() const { return HoughLine_dl; }
 
-    void Clear() { originLocalMax=nullptr; ConformalPoint.SetX(0.); ConformalPoint.SetY(0.);}
     void SetCellSize(double _cell) { cellSize=_cell; }
     void SetLocalMax( const PandoraPlus::CaloBarShower* _localmax ) { originLocalMax=_localmax; }
     void SetConformalPoint(TVector2& _vec) { ConformalPoint=_vec;}

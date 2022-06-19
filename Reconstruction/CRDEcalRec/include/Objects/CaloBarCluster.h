@@ -15,7 +15,7 @@ namespace PandoraPlus{
     CaloBarCluster() {}; 
     CaloBarCluster( std::vector<const PandoraPlus::CaloBar*> _bars, std::vector<const PandoraPlus::CaloBar*> _seeds)
     : Bars(_bars), Seeds(_seeds) {};
-    ~CaloBarCluster() { Clean(); }
+    ~CaloBarCluster() { Clear(); }
 
     void Clear();
     void Clean();

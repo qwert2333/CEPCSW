@@ -40,8 +40,9 @@ class PandoraPlusDataCol{
 public:
 
   PandoraPlusDataCol() {}; 
-  ~PandoraPlusDataCol() { Clear(); }
+  ~PandoraPlusDataCol() { Clean(); }
   StatusCode Clear(); 
+  StatusCode Clean();
 
   //Readin CollectionMap
   std::map<std::string, std::vector<edm4hep::MCParticle> >       collectionMap_MC;
@@ -59,6 +60,20 @@ public:
   std::vector<PandoraPlus::CaloTower*>   TowerCol;
   std::vector<PandoraPlus::TransShower*> TransShowerCol;
   std::vector<PandoraPlus::CaloCluster*> ClusterCol;
+
+
+  //Backup collections, for memory clean. 
+  std::vector<PandoraPlus::Track*>          bk_TrackCol;
+
+  std::vector<PandoraPlus::CaloBar*>        bk_BarCol;
+  std::vector<PandoraPlus::CaloBlock*>      bk_BlockCol;
+  std::vector<PandoraPlus::CaloTower*>      bk_TowerCol;
+  std::vector<PandoraPlus::CaloBarCluster*> bk_BarClusCol;
+  std::vector<PandoraPlus::CaloBarShower*>  bk_BarShowerCol;
+  std::vector<PandoraPlus::TransShower*>    bk_TransShowerCol;
+  std::vector<PandoraPlus::LongiCluster*>   bk_LongiClusCol;
+  std::vector<PandoraPlus::CaloCluster*>    bk_ClusterCol;
+
 
 };
 #endif

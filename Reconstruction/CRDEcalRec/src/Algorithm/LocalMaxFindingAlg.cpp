@@ -27,6 +27,12 @@ StatusCode LocalMaxFindingAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol){
   for(int ib=0;ib<Nblocks;ib++){
     GetLocalMax( m_blocks[ib] );
 
+    for(int is=0; is<m_blocks[ib]->getShowerXCol().size(); is++)
+      m_datacol.bk_BarShowerCol.push_back( const_cast<PandoraPlus::CaloBarShower *>(m_blocks[ib]->getShowerXCol()[is]) );
+    for(int is=0; is<m_blocks[ib]->getShowerYCol().size(); is++)
+      m_datacol.bk_BarShowerCol.push_back( const_cast<PandoraPlus::CaloBarShower *>(m_blocks[ib]->getShowerYCol()[is]) );
+
+
     int b_module = m_blocks[ib]->getModule();
     int b_stave  = m_blocks[ib]->getStave();
     int b_part   = m_blocks[ib]->getPart();
@@ -39,7 +45,8 @@ StatusCode LocalMaxFindingAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol){
     }
 
     if(!m_tower){
-      m_tower = new PandoraPlus::CaloTower();
+      m_tower = new PandoraPlus::CaloTower(); m_datacol.bk_TowerCol.push_back(m_tower);
+
       m_tower->setTowerID( m_blocks.at(ib)->getModule(),
                            m_blocks.at(ib)->getStave(),
                            m_blocks.at(ib)->getPart() );

@@ -10,7 +10,7 @@ namespace PandoraPlus {
 
   public: 
     CaloBarShower() {}; 
-    ~CaloBarShower() { Clean(); }
+    ~CaloBarShower() { Clear(); }
 
     inline bool operator == (const CaloBarShower &x) const{
       return Bars == x.Bars;

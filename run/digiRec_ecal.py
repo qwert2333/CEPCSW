@@ -45,7 +45,7 @@ EcalDigi.ReadOutName = "EcalBarrelCollection"
 EcalDigi.SimCaloHitCollection = "EcalBarrelCollection"
 EcalDigi.CaloHitCollection = "ECALBarrel"
 EcalDigi.CaloAssociationCollection = "RecoCaloAssociation_ECALBarrel"
-#EcalDigi.SkipEvt = 63
+#EcalDigi.SkipEvt = 23
 EcalDigi.Seed = 2079
 #Digitalization parameters
 EcalDigi.CalibrECAL = 1
@@ -78,7 +78,7 @@ PandoraPlusPFAlg = PandoraPlusPFAlg("PandoraPlusPFAlg")
 PandoraPlusPFAlg.Seed = 1024
 PandoraPlusPFAlg.BField = 3.
 PandoraPlusPFAlg.Debug = 0
-PandoraPlusPFAlg.SkipEvt = 0
+#PandoraPlusPFAlg.SkipEvt = 23
 PandoraPlusPFAlg.WriteAna = 1
 PandoraPlusPFAlg.AnaFileName = "testRec_2Gam.root"
 ##----Readin collections----
@@ -126,9 +126,9 @@ out.outputCommands = ["keep *"]
 from Configurables import ApplicationMgr
 ApplicationMgr( 
     TopAlg=[inp, EcalDigi,caloDigi, PandoraPlusPFAlg, out],
-    #TopAlg=[inp, EcalDigi, caloDigi, out],
+    #TopAlg=[inp, EcalDigi, PandoraPlusPFAlg],
     EvtSel="NONE",
-    EvtMax=1,
+    EvtMax=100,
     ExtSvc=[podioevent, geomsvc],
     #OutputLevel=DEBUG
 )

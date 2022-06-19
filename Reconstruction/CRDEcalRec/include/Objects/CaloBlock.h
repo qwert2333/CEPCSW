@@ -10,7 +10,7 @@ namespace PandoraPlus {
   public: 
     CaloBlock(int _module, int _stave, int _dlayer, int _part): module(_module), stave(_stave), dlayer(_dlayer), part(_part) {};
     CaloBlock() {};
-    ~CaloBlock() { Clean(); };
+    ~CaloBlock() { Clear(); };
 
     void Clear();
     void ClearShower();

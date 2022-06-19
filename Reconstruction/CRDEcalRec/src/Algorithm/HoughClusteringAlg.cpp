@@ -171,6 +171,11 @@ for(int ih=0; ih<m_HoughSpaceY.getHills().size(); ih++){
     Transform2Clusters(m_HoughSpaceX, m_HoughObjectsX, m_longiClusXCol);
     Transform2Clusters(m_HoughSpaceY, m_HoughObjectsY, m_longiClusYCol);
 
+    for(int ic=0; ic<m_longiClusXCol.size(); ic++) m_datacol.bk_LongiClusCol.push_back( const_cast<PandoraPlus::LongiCluster*>(m_longiClusXCol[ic]) );
+    for(int ic=0; ic<m_longiClusYCol.size(); ic++) m_datacol.bk_LongiClusCol.push_back( const_cast<PandoraPlus::LongiCluster*>(m_longiClusYCol[ic]) );
+
+
+
 cout<<"  HoughCluster size: "<<m_longiClusXCol.size()<<" / "<<m_longiClusYCol.size()<<endl;
 /*
 cout<<"  Print LongiClusterX: size = "<<m_longiClusXCol.size()<<endl;

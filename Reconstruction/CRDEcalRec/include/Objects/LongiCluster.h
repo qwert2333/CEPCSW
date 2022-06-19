@@ -11,7 +11,7 @@ namespace PandoraPlus{
   class LongiCluster{
   public: 	
     LongiCluster(){};
-    ~LongiCluster(){};
+    ~LongiCluster(){ Clear(); };
 
   void Clear() { axis.SetXYZ(0.,0.,0.); barShowerCol.clear(); }
   void Clean();

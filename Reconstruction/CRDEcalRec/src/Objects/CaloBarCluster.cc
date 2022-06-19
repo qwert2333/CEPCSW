@@ -14,8 +14,8 @@ namespace PandoraPlus{
   }
 
   void CaloBarCluster::Clean() {
-    for(int i=0; i<Bars.size(); i++) { /*delete Bars[i];*/ Bars[i]=NULL; }
-    for(int i=0; i<Seeds.size(); i++) { /*delete Seeds[i];*/ Seeds[i]=NULL; }
+    for(int i=0; i<Bars.size(); i++) { delete Bars[i]; Bars[i]=NULL; }
+    for(int i=0; i<Seeds.size(); i++) { delete Seeds[i]; Seeds[i]=NULL; }
     Clear();
   }
 

@@ -47,6 +47,8 @@ namespace PandoraPlus{
       if(hit.second.size()!=2){ std::cout<<"WARNING: didn't find correct hit pairs! "<<std::endl; continue; }
 
       PandoraPlus::CaloBar* m_bar = new PandoraPlus::CaloBar(); 
+      m_DataCol.bk_BarCol.push_back(m_bar);  //For every new object: save it into DataCol.backupCol. 
+
       unsigned long long id = hit.first; 
       m_bar->setcellID( id );
       m_bar->setcellID( map_decoder["ECALBarrel"]->get(id, "system"),

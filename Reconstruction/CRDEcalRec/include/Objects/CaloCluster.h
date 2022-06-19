@@ -19,7 +19,7 @@ namespace PandoraPlus{
   class CaloCluster{
   public:
     CaloCluster(){};
-    ~CaloCluster() { Clean(); }
+    ~CaloCluster() { Clear(); }
 
     void Clear();
     void Clean();

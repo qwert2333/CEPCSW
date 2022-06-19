@@ -8,7 +8,7 @@ namespace PandoraPlus {
   class HoughSpace{
   public: 
     HoughSpace() {};
-    ~HoughSpace() { m_sapceMap.Reset(); m_hills.clear(); }
+    ~HoughSpace() { Clear(); }
     void Clear() { m_sapceMap.Reset();  m_hills.clear(); }
 
     //Sub-object classes: Hill. 

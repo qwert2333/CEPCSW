@@ -217,7 +217,7 @@ for(int ib=0; ib<m_DataCol.TowerCol[it]->getBlocks().size(); ib++){
 }
 */
 
-  for(int ic=0; ic<m_DataCol.ClusterCol.size(); ic++) m_DataCol.ClusterCol[ic]->Print();
+//for(int ic=0; ic<m_DataCol.ClusterCol.size(); ic++) m_DataCol.ClusterCol[ic]->Print();
 
 
   m_pOutputCreator->CreateRecCaloHits( m_DataCol, w_RecCaloCol );
@@ -298,7 +298,8 @@ for(int ib=0; ib<m_DataCol.TowerCol[it]->getBlocks().size(); ib++){
   }
   t_Cluster->Fill();
 
-  //Reset
+  //Clean Events
+  m_DataCol.Clean();
 
   std::cout<<"Event: "<<_nEvt<<" is done"<<std::endl;
   _nEvt ++ ;

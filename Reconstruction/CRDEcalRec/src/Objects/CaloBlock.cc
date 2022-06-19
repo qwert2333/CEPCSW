@@ -30,10 +30,10 @@ namespace PandoraPlus{
   }
 
   void CaloBlock::Clean(){
-    for(int i=0; i<barXCol.size(); i++) { /*delete barXCol[i];*/ barXCol[i]=NULL; }
-    for(int i=0; i<barYCol.size(); i++) { /*delete barYCol[i];*/ barYCol[i]=NULL; }
-    for(int i=0; i<barShowerXCol.size(); i++) { /*delete barShowerXCol[i];*/ barShowerXCol[i]=NULL; }
-    for(int i=0; i<barShowerYCol.size(); i++) { /*delete barShowerYCol[i];*/ barShowerYCol[i]=NULL; }
+    for(int i=0; i<barXCol.size(); i++) { delete barXCol[i]; barXCol[i]=NULL; }
+    for(int i=0; i<barYCol.size(); i++) { delete barYCol[i]; barYCol[i]=NULL; }
+    for(int i=0; i<barShowerXCol.size(); i++) { delete barShowerXCol[i]; barShowerXCol[i]=NULL; }
+    for(int i=0; i<barShowerYCol.size(); i++) { delete barShowerYCol[i]; barShowerYCol[i]=NULL; }
     Clear();
   }
 

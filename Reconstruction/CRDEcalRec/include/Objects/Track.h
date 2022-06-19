@@ -9,7 +9,7 @@ namespace PandoraPlus {
   class Track{
   public:
     Track() {}
-    ~Track() {}; 
+    ~Track() { Clear(); }; 
   void Clear() { m_trackStates.clear(); }
 
   int trackStates_size() const { return m_trackStates.size(); }
