@@ -41,7 +41,7 @@ namespace PandoraPlus{
   double OverlapRatioE( const LongiCluster* clus ) const;
 
   //void FitAxis(); 
-  void addBarShower( const PandoraPlus::CaloBarShower* _shower ) { barShowerCol.push_back(_shower); /*FitAxis();*/ }
+  void addBarShower( const PandoraPlus::CaloBarShower* _shower ); 
   void SortBarShowersByLayer() { std::sort(barShowerCol.begin(), barShowerCol.end(), compLayer); }
   void setBarShowers( std::vector<const PandoraPlus::CaloBarShower*> _barshwoers ) { barShowerCol = _barshwoers; }
   void setHoughPars(double _a, double _r) { Hough_alpha=_a; Hough_rho=_r; }

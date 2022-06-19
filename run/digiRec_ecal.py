@@ -22,8 +22,9 @@ from Configurables import k4DataSvc
 podioevent = k4DataSvc("EventDataSvc")
 podioevent.inputs = [
 #"CRD_SimMu_FullDet.root"
-"CRD_SimMu_FullDet_200evt.root"
+#"SimSamples/CRD_SimMu_FullDet_200evt.root"
 #"CRD_Sim2Gam_FullDet.root"
+"SimSamples/CRD_Sim2Gam_FullDet_200evt.root"
 ]
 ##########################################
 
@@ -93,21 +94,21 @@ PandoraPlusPFAlg.HCalReadOutNames = ["HcalBarrelCollection"]
 PandoraPlusPFAlg.AlgList = ["ExampleAlg", 
                             "GlobalClusteringAlg", 
                             "LocalMaxFindingAlg",
-                            "HoughClusteringAlg",
-                            "EnergySplittingAlg"]
-#                            "EnergyTimeMatchingAlg"]
+                            "HoughClusteringAlg", 
+                            "EnergySplittingAlg",
+                            "EnergyTimeMatchingAlg"]
 PandoraPlusPFAlg.AlgParNames = [ ["Par1", "Par2"], 
                                  ["Par1"], 
                                  ["Eth_localMax", "Eth_MaxWithNeigh"], 
                                  ["th_Layers", "th_AxisE"],  #Can leave empty, but MUST have one block. 
-                                 [""]]
-#                                 [""] ]
+                                 [""], 
+                                 [""] ]
 PandoraPlusPFAlg.AlgParValues = [ [1., 3.14], 
                                   [1.], 
                                   [0.005, 0.],
-                                  [10, 0.05],  #Same as ParNames.
+                                  [10, 1.],  #Same as ParNames.
+                                  [0.], 
                                   [0.] ]
-#                                  [0.] ]
 
 ########################################
 
@@ -127,7 +128,7 @@ ApplicationMgr(
     TopAlg=[inp, EcalDigi,caloDigi, PandoraPlusPFAlg, out],
     #TopAlg=[inp, EcalDigi, caloDigi, out],
     EvtSel="NONE",
-    EvtMax=200,
+    EvtMax=1,
     ExtSvc=[podioevent, geomsvc],
     #OutputLevel=DEBUG
 )

@@ -27,7 +27,7 @@ public:
   StatusCode ClearAlgorithm(); 
 
 
-  StatusCode LongiClusterLinking( std::vector<PandoraPlus::CaloBlock*>& m_blocks, std::vector<const PandoraPlus::LongiCluster*>& m_oldClusCol, std::vector<const PandoraPlus::LongiCluster*>& m_outClusCol );
+  StatusCode LongiClusterLinking( std::vector<const PandoraPlus::CaloBlock*>& m_blocks, std::vector<const PandoraPlus::LongiCluster*>& m_oldClusCol, std::vector<const PandoraPlus::LongiCluster*>& m_outClusCol );
 
   StatusCode Clustering( std::vector<const PandoraPlus::CaloBar*>& barCol, std::vector<PandoraPlus::CaloBarCluster*>& outClus, std::vector<const PandoraPlus::LongiCluster*>& m_longiClusCol );
 
@@ -49,6 +49,11 @@ public:
 
 
 private: 
+
+  static bool compBar( const PandoraPlus::CaloBar* bar1, const PandoraPlus::CaloBar* bar2 )
+    { return bar1->getBar() < bar2->getBar(); }
+  static bool compLayer( const PandoraPlus::CaloBarShower* sh1, const PandoraPlus::CaloBarShower* sh2 )
+    { return sh1->getDlayer() < sh2->getDlayer(); }
 
 };
 

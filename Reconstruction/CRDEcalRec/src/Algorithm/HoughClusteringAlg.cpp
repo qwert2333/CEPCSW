@@ -79,7 +79,6 @@ cout<<"    Conformal Point (HoughObjectX): "<<endl;
 for(int i=0; i<m_HoughObjectsX.size(); i++) printf("(%.2f, %.2f) \t", m_HoughObjectsX[i].getConformPointUR().X(), m_HoughObjectsX[i].getConformPointUR().Y());
 cout<<endl;
 
-
 cout<<"    Local max (HoughObjectY): "<<endl;
 for(int i=0; i<m_HoughObjectsY.size(); i++) printf("(%.2f, %.2f, %.2f) \t", m_HoughObjectsY[i].getLocalMax()->getPos().x(), m_HoughObjectsY[i].getLocalMax()->getPos().y(), m_HoughObjectsY[i].getLocalMax()->getPos().z() );
 cout<<endl;
@@ -87,6 +86,7 @@ cout<<"    Conformal Point (HoughObjectY): "<<endl;
 for(int i=0; i<m_HoughObjectsY.size(); i++) printf("(%.2f, %.2f) \t", m_HoughObjectsY[i].getConformPointUR().X(), m_HoughObjectsY[i].getConformPointUR().Y());
 cout<<endl;
 */
+
 
 //cout<<"  HoughClusteringAlg: Hough transformation"<<endl;
 
@@ -170,8 +170,33 @@ for(int ih=0; ih<m_HoughSpaceY.getHills().size(); ih++){
     std::vector<const PandoraPlus::LongiCluster*> m_longiClusYCol; m_longiClusYCol.clear(); 
     Transform2Clusters(m_HoughSpaceX, m_HoughObjectsX, m_longiClusXCol);
     Transform2Clusters(m_HoughSpaceY, m_HoughObjectsY, m_longiClusYCol);
-cout<<" HoughCluster size: "<<m_longiClusXCol.size()<<" / "<<m_longiClusYCol.size()<<endl;
 
+cout<<"  HoughCluster size: "<<m_longiClusXCol.size()<<" / "<<m_longiClusYCol.size()<<endl;
+/*
+cout<<"  Print LongiClusterX: size = "<<m_longiClusXCol.size()<<endl;
+for(int il=0; il<m_longiClusXCol.size(); il++){
+  printf("    Clus#%d: Hough Par = (%.3f, %.3f, %.3f), shower layers: \n", il, m_longiClusXCol[il]->getHoughAlpha(), m_longiClusXCol[il]->getHoughRho(), m_longiClusXCol[il]->getHoughIntercept());
+  for(int is=0; is<m_longiClusXCol[il]->getBarShowers().size(); is++) 
+    printf("      Dlayer = %d, Pos/E = (%.2f, %.2f, %.2f, %.3f) \n", m_longiClusXCol[il]->getBarShowers()[is]->getDlayer(), 
+                                                                     m_longiClusXCol[il]->getBarShowers()[is]->getPos().x(),
+                                                                     m_longiClusXCol[il]->getBarShowers()[is]->getPos().y(),
+                                                                     m_longiClusXCol[il]->getBarShowers()[is]->getPos().z(),
+                                                                     m_longiClusXCol[il]->getBarShowers()[is]->getE() );
+  cout<<endl;
+}
+
+cout<<"  Print LongiClusterY: size = "<<m_longiClusYCol.size()<<endl;
+for(int il=0; il<m_longiClusYCol.size(); il++){
+  printf("    Clus#%d: Hough Par = (%.3f, %.3f, %.3f), shower layers: \n", il, m_longiClusYCol[il]->getHoughAlpha(), m_longiClusYCol[il]->getHoughRho(), m_longiClusYCol[il]->getHoughIntercept());
+  for(int is=0; is<m_longiClusYCol[il]->getBarShowers().size(); is++)
+    printf("      Dlayer = %d, Pos/E = (%.2f, %.2f, %.2f, %.3f) \n", m_longiClusYCol[il]->getBarShowers()[is]->getDlayer(),
+                                                                     m_longiClusYCol[il]->getBarShowers()[is]->getPos().x(),
+                                                                     m_longiClusYCol[il]->getBarShowers()[is]->getPos().y(),
+                                                                     m_longiClusYCol[il]->getBarShowers()[is]->getPos().z(),
+                                                                     m_longiClusYCol[il]->getBarShowers()[is]->getE() );
+  cout<<endl;
+}
+*/
     p_towers->at(it)->setLongiClusters(m_longiClusXCol, m_longiClusYCol); 
   }//End loop tower
 
@@ -605,7 +630,7 @@ cout<<endl;
   }
 //cout<<"    After energy and intercetp cut: "<<m_longiClusCol.size()<<endl;
 
-/*
+
   //Overlap with other clusters: Iter 1. 
   for(int ic=0; ic<m_longiClusCol.size()-1; ic++){
   for(int jc=ic+1; jc<m_longiClusCol.size(); jc++){
@@ -618,7 +643,7 @@ cout<<endl;
     double m_ratio1 = m_longiClusCol[ic]->OverlapRatioE(m_longiClusCol[jc]);
     double m_ratio2 = m_longiClusCol[jc]->OverlapRatioE(m_longiClusCol[ic]);
 
-printf("      Tag branch: Clus #%d: (R, E) = (%.2f, %.2f). Clus #%d: (%.2f, %.2f). \n", ic, m_ratio1, m_longiClusCol[ic]->getE(), jc, m_ratio2, m_longiClusCol[jc]->getE() );
+//printf("      Tag branch: Clus #%d: (R, E) = (%.2f, %.2f). Clus #%d: (%.2f, %.2f). \n", ic, m_ratio1, m_longiClusCol[ic]->getE(), jc, m_ratio2, m_longiClusCol[jc]->getE() );
     
     if(m_ratio1>settings.map_floatPars["th_overlapE1"] && m_longiClusCol[ic]->getE()<m_longiClusCol[jc]->getE()){
       delete m_longiClusCol[ic]; m_longiClusCol[ic] = NULL;
@@ -635,7 +660,7 @@ printf("      Tag branch: Clus #%d: (R, E) = (%.2f, %.2f). Clus #%d: (%.2f, %.2f
 
   }}
 
-cout<<"    After 1st iter tagging: "<<m_longiClusCol.size()<<endl;
+//cout<<"    After 1st iter tagging: "<<m_longiClusCol.size()<<endl;
 
   //Overlap with other clusters: Iter 2. 
   for(int ic=0; ic<m_longiClusCol.size()-1; ic++){
@@ -649,7 +674,7 @@ cout<<"    After 1st iter tagging: "<<m_longiClusCol.size()<<endl;
     double m_ratio1 = m_longiClusCol[ic]->OverlapRatioE(m_longiClusCol[jc]);
     double m_ratio2 = m_longiClusCol[jc]->OverlapRatioE(m_longiClusCol[ic]);
 
-printf("      Tag branch: Clus #%d: (R, E) = (%.2f, %.2f). Clus #%d: (%.2f, %.2f). \n", ic, m_ratio1, m_longiClusCol[ic]->getE(), jc, m_ratio2, m_longiClusCol[jc]->getE() );
+//printf("      Tag branch: Clus #%d: (R, E) = (%.2f, %.2f). Clus #%d: (%.2f, %.2f). \n", ic, m_ratio1, m_longiClusCol[ic]->getE(), jc, m_ratio2, m_longiClusCol[jc]->getE() );
 
     if(m_ratio1>settings.map_floatPars["th_overlapE2"] && m_longiClusCol[ic]->getE()<m_longiClusCol[jc]->getE()){
       delete m_longiClusCol[ic]; m_longiClusCol[ic]=NULL;
@@ -665,8 +690,8 @@ printf("      Tag branch: Clus #%d: (R, E) = (%.2f, %.2f). Clus #%d: (%.2f, %.2f
     }
 
   }}
-cout<<"    After 2nd iter tagging: "<<m_longiClusCol.size()<<endl;
-*/
+//cout<<"    After 2nd iter tagging: "<<m_longiClusCol.size()<<endl;
+
 
 /*
   for(int ic=0; ic<m_longiClusCol.size()-1; ic++){

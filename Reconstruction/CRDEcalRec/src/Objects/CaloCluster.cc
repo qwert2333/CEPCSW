@@ -308,5 +308,31 @@ namespace PandoraPlus{
   }
 
 
+  void CaloCluster::Print() const{
+    cout<<"---------Print out Cluster-----------"<<endl;
+
+    cout<<"--Print showers: size = "<<showers.size()<<endl;
+    for(int i=0; i<showers.size(); i++){
+      cout<<"  Shower #"<<i<<": Address "<<showers[i]<<", Layer = "<<showers[i]->getDlayer(); 
+      printf(", pos/E (%.2f, %.2f, %.2f, %.3f) \n", showers[i]->getPos().x(), showers[i]->getPos().y(), showers[i]->getPos().z(), showers[i]->getShowerE() );
+      cout<<"  BarShowerX address: "<<showers[i]->getShowerX(); 
+      printf(", pos/E (%.2f, %.2f, %.2f, %.3f) \n", showers[i]->getShowerX()->getPos().x(), 
+                                                    showers[i]->getShowerX()->getPos().y(), 
+                                                    showers[i]->getShowerX()->getPos().x(), 
+                                                    showers[i]->getShowerX()->getE() );
+      cout<<"  BarShowerY address: "<<showers[i]->getShowerY();
+      printf(", pos/E (%.2f, %.2f, %.2f, %.3f) \n", showers[i]->getShowerY()->getPos().x(),
+                                                    showers[i]->getShowerY()->getPos().y(),
+                                                    showers[i]->getShowerY()->getPos().x(),
+                                                    showers[i]->getShowerY()->getE() );
+    }
+
+    cout<<"---------End Print Cluster---------"<<endl;
+    cout<<endl;
+
+  }
+
+
+
 };
 #endif

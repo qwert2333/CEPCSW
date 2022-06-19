@@ -42,17 +42,17 @@ from Configurables import SLCIORdr
 from Configurables import HepMCRdr
 from Configurables import GenPrinter
 gun = GtGunTool("GtGunTool")
-gun.Particles = ["mu-"]
+gun.Particles = ["gamma", "gamma"]
 #gun.Particles = ["nu_e"]
-gun.PositionXs = [0.]
-gun.PositionYs = [0.]
-gun.PositionZs = [0.]
-gun.EnergyMins = [20.] # GeV
-gun.EnergyMaxs = [20.] # GeV
-gun.ThetaMins  = [90.]    # deg
-gun.ThetaMaxs  = [90.]  # deg
-gun.PhiMins    = [-7.]    # deg
-gun.PhiMaxs    = [-7.]  # deg
+gun.PositionXs = [0., 0.]
+gun.PositionYs = [0., 0.]
+gun.PositionZs = [0., 0.]
+gun.EnergyMins = [10.,10. ] # GeV
+gun.EnergyMaxs = [10.,10.] # GeV
+gun.ThetaMins  = [91.,89]    # deg
+gun.ThetaMaxs  = [91.,89]  # deg
+gun.PhiMins    = [0., 0.]    # deg
+gun.PhiMaxs    = [0., 0.]  # deg
 # stdheprdr = StdHepRdr("StdHepRdr")
 # stdheprdr.Input = "/cefs/data/stdhep/CEPC250/2fermions/E250.Pbhabha.e0.p0.whizard195/bhabha.e0.p0.00001.stdhep"
 # lciordr = SLCIORdr("SLCIORdr")
@@ -260,7 +260,7 @@ elif dedxoption == "BetheBlochEquationDedxSimTool":
 # output
 from Configurables import PodioOutput
 out = PodioOutput("outputalg")
-out.filename = "CRD_SimMu_FullDet_200evt.root"
+out.filename = "CRD_Sim2Gam_FullDet_200evt.root"
 out.outputCommands = ["keep *"]
 
 # ApplicationMgr

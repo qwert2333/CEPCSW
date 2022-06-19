@@ -181,6 +181,45 @@ StatusCode PandoraPlusPFAlg::execute()
   cout<<"Run Algorithms"<<endl;
   m_algorithmManager.RunAlgorithm( m_DataCol );
 
+/*
+cout<<"Block Info: "<<endl;
+for(int ib=0; ib<m_DataCol.BlockCol.size(); ib++){
+  printf("  #%d Block: ID=(%d, %d, %d, %d). Bar shower size: X=%d, Y=%d \n", ib, m_DataCol.BlockCol[ib]->getModule(), m_DataCol.BlockCol[ib]->getStave(), m_DataCol.BlockCol[ib]->getPart(), m_DataCol.BlockCol[ib]->getDlayer(), m_DataCol.BlockCol[ib]->getShowerXCol().size(), m_DataCol.BlockCol[ib]->getShowerYCol().size() );
+
+  cout<<"  Print BarShowersX "<<endl;
+  for(int is=0 ;is<m_DataCol.BlockCol[ib]->getShowerXCol().size(); is++)
+  printf("    #%d showerX: cellID=(%d, %d, %d, %d) \n", is, m_DataCol.BlockCol[ib]->getShowerXCol()[is]->getModule(), m_DataCol.BlockCol[ib]->getShowerXCol()[is]->getStave(), m_DataCol.BlockCol[ib]->getShowerXCol()[is]->getPart(), m_DataCol.BlockCol[ib]->getShowerXCol()[is]->getDlayer() );
+
+  cout<<"  Print BarShowersY "<<endl;
+  for(int is=0 ;is<m_DataCol.BlockCol[ib]->getShowerYCol().size(); is++)
+  printf("    #%d showerX: cellID=(%d, %d, %d, %d) \n", is, m_DataCol.BlockCol[ib]->getShowerYCol()[is]->getModule(), m_DataCol.BlockCol[ib]->getShowerYCol()[is]->getStave(), m_DataCol.BlockCol[ib]->getShowerYCol()[is]->getPart(), m_DataCol.BlockCol[ib]->getShowerYCol()[is]->getDlayer() );
+}
+
+cout<<endl;
+cout<<endl;
+
+cout<<"Tower Info: size = "<<m_DataCol.TowerCol.size()<<endl;
+for(int it=0; it<m_DataCol.TowerCol.size(); it++){
+  printf("  #%d Tower: ID=(%d, %d, %d). Block size: %d \n", it, m_DataCol.TowerCol[it]->getModule(), m_DataCol.TowerCol[it]->getStave(), m_DataCol.TowerCol[it]->getPart(), m_DataCol.TowerCol[it]->getBlocks().size() );
+
+for(int ib=0; ib<m_DataCol.TowerCol[it]->getBlocks().size(); ib++){
+  printf("    #%d Block: ID=(%d, %d, %d, %d). Bar shower size: X=%d, Y=%d \n", ib, m_DataCol.TowerCol[it]->getBlocks()[ib]->getModule(), m_DataCol.TowerCol[it]->getBlocks()[ib]->getStave(), m_DataCol.TowerCol[it]->getBlocks()[ib]->getPart(), m_DataCol.TowerCol[it]->getBlocks()[ib]->getDlayer(), m_DataCol.TowerCol[it]->getBlocks()[ib]->getShowerXCol().size(), m_DataCol.TowerCol[it]->getBlocks()[ib]->getShowerYCol().size() );
+
+  cout<<"    Print BarShowersX "<<endl;
+  for(int is=0 ;is<m_DataCol.TowerCol[it]->getBlocks()[ib]->getShowerXCol().size(); is++)
+  printf("      #%d showerX: cellID=(%d, %d, %d, %d) \n", is, m_DataCol.TowerCol[it]->getBlocks()[ib]->getShowerXCol()[is]->getModule(), m_DataCol.TowerCol[it]->getBlocks()[ib]->getShowerXCol()[is]->getStave(), m_DataCol.TowerCol[it]->getBlocks()[ib]->getShowerXCol()[is]->getPart(), m_DataCol.TowerCol[it]->getBlocks()[ib]->getShowerXCol()[is]->getDlayer() );
+
+  cout<<"    Print BarShowersY "<<endl;
+  for(int is=0 ;is<m_DataCol.TowerCol[it]->getBlocks()[ib]->getShowerYCol().size(); is++)
+  printf("      #%d showerX: cellID=(%d, %d, %d, %d) \n", is, m_DataCol.TowerCol[it]->getBlocks()[ib]->getShowerYCol()[is]->getModule(), m_DataCol.TowerCol[it]->getBlocks()[ib]->getShowerYCol()[is]->getStave(), m_DataCol.TowerCol[it]->getBlocks()[ib]->getShowerYCol()[is]->getPart(), m_DataCol.TowerCol[it]->getBlocks()[ib]->getShowerYCol()[is]->getDlayer() );
+
+}
+}
+*/
+
+  for(int ic=0; ic<m_DataCol.ClusterCol.size(); ic++) m_DataCol.ClusterCol[ic]->Print();
+
+
   m_pOutputCreator->CreateRecCaloHits( m_DataCol, w_RecCaloCol );
   m_pOutputCreator->CreateCluster( m_DataCol, w_ClusterCollection );
   m_pOutputCreator->CreatePFO( m_DataCol, w_ReconstructedParticleCollection );

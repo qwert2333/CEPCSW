@@ -108,7 +108,7 @@ StatusCode LocalMaxFindingAlg::GetLocalMax(PandoraPlus::CaloBlock* m_block){
 }
 
 StatusCode LocalMaxFindingAlg::GetLocalMaxBar( std::vector<const PandoraPlus::CaloBar*>& barCol, std::vector<const PandoraPlus::CaloBar*>& localMaxCol ){
-  std::sort( barCol.begin(), barCol.end() );
+  std::sort( barCol.begin(), barCol.end(), compBar );
 
   for(int ib=0; ib<barCol.size(); ib++){
     std::vector<const PandoraPlus::CaloBar*> m_neighbors = getNeighbors( barCol[ib], barCol );

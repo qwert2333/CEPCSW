@@ -22,9 +22,10 @@ namespace PandoraPlus{
 
   TVector3 LongiCluster::getPos() const{
     TVector3 pos(0, 0, 0);
+    double Etot = getE();
     for(int i=0; i<barShowerCol.size(); i++){
       TVector3 m_pos(barShowerCol[i]->getPos().x(), barShowerCol[i]->getPos().y(), barShowerCol[i]->getPos().z());
-      pos += m_pos;
+      pos += m_pos * (barShowerCol[i]->getE()/Etot);
     }
     return pos; 
   }
@@ -157,6 +158,27 @@ namespace PandoraPlus{
     }
   }
   */
+
+  void LongiCluster::addBarShower( const PandoraPlus::CaloBarShower* _shower ){
+    int index = -1;
+    for(int i=0; i<barShowerCol.size(); i++)
+      if(_shower->getDlayer()==barShowerCol[i]->getDlayer() ){ index=i; break; }
+    
+    if(index<0){
+      barShowerCol.push_back( _shower );
+      //FitAxis();
+    }
+    else{
+      PandoraPlus::CaloBarShower* newshower = new PandoraPlus::CaloBarShower();
+      newshower->setBars( barShowerCol[index]->getBars() );
+      newshower->setSeed( barShowerCol[index]->getSeed() );
+      for(int i=0; i<_shower->getBars().size(); i++) newshower->addBar( _shower->getBars()[i] );
+      newshower->setIDInfo();
+
+      barShowerCol.erase( barShowerCol.begin()+index );  //WARNING: potential memory leakage! 
+      barShowerCol.push_back( newshower );
+    }
+  }
 
   void LongiCluster::MergeCluster(const LongiCluster* clus ){
     for(int is=0; is<clus->getBarShowers().size(); is++){

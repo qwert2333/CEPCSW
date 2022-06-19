@@ -28,5 +28,8 @@ public:
 
 private: 
 
+  static bool compBar( const PandoraPlus::CaloBar* bar1, const PandoraPlus::CaloBar* bar2 )
+      { return bar1->getBar() < bar2->getBar(); }
+
 };
 #endif

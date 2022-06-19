@@ -69,6 +69,7 @@ namespace PandoraPlus{
     void setShowers( std::vector<const PandoraPlus::TransShower*>& _svec ) { showers = _svec;}
     void setCaloHits( std::vector<const PandoraPlus::CaloHit*> _hits ) { hits = _hits; }
     void setType( int _t ) { type = _t; }
+    void Print() const; 
 
   private: 
     std::vector<const PandoraPlus::TransShower*> showers;

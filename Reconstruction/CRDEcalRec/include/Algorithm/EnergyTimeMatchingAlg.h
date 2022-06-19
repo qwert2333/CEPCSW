@@ -38,6 +38,8 @@ public:
   StatusCode GetMatchedShowersL1(const PandoraPlus::CaloBarShower* shower1, std::vector<const PandoraPlus::CaloBarShower*>& showerNCol, std::vector<PandoraPlus::TransShower*>& outshCol ); //1*N
   StatusCode GetMatchedShowersL2(std::vector<const PandoraPlus::CaloBarShower*>& barShowerXCol, std::vector<const PandoraPlus::CaloBarShower*>& barShowerYCol, std::vector<PandoraPlus::TransShower*>& outshCol ); 
 
+  StatusCode GetMatchedShowersL3(std::vector<const PandoraPlus::CaloBarShower*>& barShowerXCol, std::vector<const PandoraPlus::CaloBarShower*>& barShowerYCol, std::vector<PandoraPlus::TransShower*>& outshCol );
+
   double** GetClusterChi2Map(std::vector<std::vector<const PandoraPlus::CaloBarShower*>>& barShowerXCol, std::vector<std::vector<const PandoraPlus::CaloBarShower*>>& barShowerYCol);
 
 private: 
