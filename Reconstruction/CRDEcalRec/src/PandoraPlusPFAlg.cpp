@@ -119,6 +119,7 @@ StatusCode PandoraPlusPFAlg::initialize()
     t_SimBar = new TTree("SimBarHit", "SimBarHit");
     t_Layers = new TTree("RecLayers","RecLayers");
     t_Cluster = new TTree("RecClusters", "RecClusters");
+    t_Clustering = new TTree("Clustering", "Clustering");
 
     t_SimBar->Branch("simBar_x", &m_simBar_x);
     t_SimBar->Branch("simBar_y", &m_simBar_y);
@@ -152,6 +153,25 @@ StatusCode PandoraPlusPFAlg::initialize()
     t_Cluster->Branch("Clus_z", &m_Clus_z);
     t_Cluster->Branch("Clus_E", &m_Clus_E);
     t_Cluster->Branch("Nhit", &m_Nhit);
+
+    //neighbor clustering
+    t_Clustering->Branch("m_3dcluster", &m_3dcluster);
+    t_Clustering->Branch("m_2dcluster", &m_2dcluster);
+    t_Clustering->Branch("m_1dcluster", &m_1dcluster);
+    t_Clustering->Branch("m_barcluster", &m_barcluster);
+    t_Clustering->Branch("m_bar", &m_bar);
+    t_Clustering->Branch("m_E_3dcluster", &m_E_3dcluster);
+    t_Clustering->Branch("m_E_2dcluster", &m_E_2dcluster);
+    t_Clustering->Branch("m_E_1dcluster", &m_E_1dcluster);
+    t_Clustering->Branch("m_E_barcluster", &m_E_barcluster);
+    t_Clustering->Branch("m_E_bar", &m_E_bar);
+    t_Clustering->Branch("m_bar_tag", &m_bar_tag);
+    t_Clustering->Branch("m_bar_energy", &m_bar_energy);
+    t_Clustering->Branch("m_bar_dlayer", &m_bar_dlayer);
+    t_Clustering->Branch("m_bar_slayer", &m_bar_slayer);
+    t_Clustering->Branch("m_bar_x", &m_bar_x);
+    t_Clustering->Branch("m_bar_y", &m_bar_y);
+    t_Clustering->Branch("m_bar_z", &m_bar_z);
 
   }
 
@@ -298,6 +318,52 @@ for(int ib=0; ib<m_DataCol.TowerCol[it]->getBlocks().size(); ib++){
   }
   t_Cluster->Fill();
 
+	//neighbor clustering
+	ClearClustering();
+	std::vector<PandoraPlus::Calo3DCluster*>  tmp_3dclusters = m_DataCol.Cluster3DCol;
+	std::vector<PandoraPlus::Calo2DCluster*>  tmp_2dclusters = m_DataCol.Cluster2DCol;
+	std::vector<PandoraPlus::Calo1DCluster*>  tmp_1dclusters = m_DataCol.Cluster1DCol;
+	std::vector<PandoraPlus::CaloBar*>  tmp_bars = m_DataCol.BarCol;
+	
+	m_3dcluster = tmp_3dclusters.size();
+	m_2dcluster = tmp_2dclusters.size();
+	m_1dcluster = tmp_1dclusters.size();
+	m_bar = tmp_bars.size();
+	for(int i=0; i<tmp_3dclusters.size(); i++)
+	{
+		PandoraPlus::Calo3DCluster* tmp_3dcluster = tmp_3dclusters.at(i);
+		m_E_3dcluster.push_back(tmp_3dcluster->getEnergy()); //
+		std::vector<const PandoraPlus::CaloBar*> allthebars = tmp_3dcluster->getBars(); //
+		for(int n=0; n<allthebars.size(); n++)
+		{
+			const PandoraPlus::CaloBar* the_bar = allthebars.at(n); //need to be fixed
+			m_bar_tag.push_back(tmp_3dcluster->getEnergy());
+			m_bar_energy.push_back(the_bar->getEnergy());
+			m_bar_dlayer.push_back(the_bar->getDlayer());
+			m_bar_slayer.push_back(the_bar->getSlayer());
+			m_bar_x.push_back(the_bar->getPosition().x());
+			m_bar_y.push_back(the_bar->getPosition().y());
+			m_bar_z.push_back(the_bar->getPosition().z());
+		}
+	}
+	for(int j=0; j<tmp_2dclusters.size(); j++)
+	{
+		PandoraPlus::Calo2DCluster* tmp_2dcluster = tmp_2dclusters.at(j);
+		m_E_2dcluster.push_back(tmp_2dcluster->getEnergy());
+	}
+	for(int k=0; k<tmp_1dclusters.size(); k++)
+	{
+		PandoraPlus::Calo1DCluster* tmp_1dcluster = tmp_1dclusters.at(k);
+		m_E_1dcluster.push_back(tmp_1dcluster->getEnergy());
+	}
+	for(int m=0; m<tmp_bars.size(); m++)
+	{
+		PandoraPlus::CaloBar* tmp_bar = tmp_bars.at(m);
+		m_E_bar.push_back(tmp_bar->getEnergy());
+	}
+
+	t_Clustering->Fill();
+
   //Clean Events
   m_DataCol.Clean();
 
@@ -313,8 +379,9 @@ StatusCode PandoraPlusPFAlg::finalize()
   t_SimBar->Write();
   t_Layers->Write();
   t_Cluster->Write();
+  t_Clustering->Write();
   m_wfile->Close();
-  delete m_wfile, t_SimBar, t_Layers, t_Cluster;
+  delete m_wfile, t_SimBar, t_Layers, t_Cluster, t_Clustering;
 
   delete m_pMCParticleCreator;
   delete m_pTrackCreator; 
@@ -371,5 +438,25 @@ void PandoraPlusPFAlg::ClearCluster(){
   m_Clus_z.clear();
   m_Clus_E.clear();
   m_Nhit.clear();
+}
+
+void PandoraPlusPFAlg::ClearClustering(){
+	m_3dcluster=0;
+	m_2dcluster=0;
+	m_1dcluster=0;
+	m_barcluster=0;
+	m_bar=0;
+	m_E_3dcluster.clear();
+	m_E_2dcluster.clear();
+	m_E_1dcluster.clear();
+	m_E_barcluster.clear();
+	m_E_bar.clear();
+	m_bar_tag.clear();
+	m_bar_energy.clear();
+	m_bar_dlayer.clear();
+	m_bar_slayer.clear(); 
+	m_bar_x.clear();
+	m_bar_y.clear();
+	m_bar_z.clear();
 }
 #endif

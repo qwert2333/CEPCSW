@@ -15,6 +15,9 @@ StatusCode PandoraPlusDataCol::Clear(){
   BarCol.clear();
   BlockCol.clear();
   TowerCol.clear(); 
+  Cluster1DCol.clear();
+  Cluster2DCol.clear(); 
+  Cluster3DCol.clear();
 
   return StatusCode::SUCCESS; 
 };
