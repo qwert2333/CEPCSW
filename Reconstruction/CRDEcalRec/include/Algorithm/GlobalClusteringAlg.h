@@ -30,7 +30,7 @@ public:
   bool ifAdjacent(PandoraPlus::Calo2DCluster* m_2dcluster, PandoraPlus::Calo3DCluster* m_3dcluster);
   template<typename T1, typename T2> bool ifSameTower(T1* m_uncluster, T2* m_incluster);
   bool ifModuleAdjacent(const PandoraPlus::CaloBar* bar_2d, const PandoraPlus::CaloBar* bar_3d);
-  void Towering(std::vector<PandoraPlus::Calo3DCluster*>& m_3dcluster);
+  void Towering(std::vector<PandoraPlus::Calo3DCluster*>& m_3dcluster,std::vector<PandoraPlus::CaloTower*>& m_tower);
 
 private:
 

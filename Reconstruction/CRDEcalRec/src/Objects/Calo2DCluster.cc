@@ -7,10 +7,9 @@
 namespace PandoraPlus{
 
   void Calo2DCluster::Clear() {
-    // barXCol.clear();
-    // barYCol.clear();
-    // barShowerXCol.clear();
-    // barShowerYCol.clear();
+    m_v1dclusters.clear(); 
+	m_u1dclusters.clear(); 
+	m_1dclusters.clear(); 
   }
 
   // void Calo2DCluster::ClearShower() {
@@ -19,8 +18,12 @@ namespace PandoraPlus{
   // }
 
   void Calo2DCluster::Check(){
-    // for(int i=0; i<barXCol.size(); i++)
-      // if(!barXCol[i]) { barXCol.erase(barXCol.begin()+i); i--; }
+    for(int i=0; i<m_v1dclusters.size(); i++)
+      if(!m_v1dclusters[i]) { m_v1dclusters.erase(m_v1dclusters.begin()+i); i--; }
+	for(int i=0; i<m_u1dclusters.size(); i++)
+      if(!m_u1dclusters[i]) { m_u1dclusters.erase(m_u1dclusters.begin()+i); i--; }
+	for(int i=0; i<m_1dclusters.size(); i++)
+      if(!m_1dclusters[i]) { m_1dclusters.erase(m_1dclusters.begin()+i); i--; }
     // for(int i=0; i<barYCol.size(); i++)
       // if(!barYCol[i]) { barYCol.erase(barYCol.begin()+i); i--; }
     // for(int i=0; i<barShowerXCol.size(); i++)
@@ -30,11 +33,14 @@ namespace PandoraPlus{
   }
 
   void Calo2DCluster::Clean(){
+	for(int i=0; i<m_v1dclusters.size(); i++){ delete m_v1dclusters[i]; m_v1dclusters[i]=NULL; }
+	for(int i=0; i<m_u1dclusters.size(); i++){ delete m_u1dclusters[i]; m_u1dclusters[i]=NULL; }
+    for(int i=0; i<m_1dclusters.size(); i++){ delete m_1dclusters[i]; m_1dclusters[i]=NULL; }
     // for(int i=0; i<barXCol.size(); i++) { delete barXCol[i]; barXCol[i]=NULL; }
     // for(int i=0; i<barYCol.size(); i++) { delete barYCol[i]; barYCol[i]=NULL; }
     // for(int i=0; i<barShowerXCol.size(); i++) { delete barShowerXCol[i]; barShowerXCol[i]=NULL; }
     // for(int i=0; i<barShowerYCol.size(); i++) { delete barShowerYCol[i]; barShowerYCol[i]=NULL; }
-    // Clear();
+    Clear();
   }
   
 	std::vector<int> Calo2DCluster::getTowerID() const

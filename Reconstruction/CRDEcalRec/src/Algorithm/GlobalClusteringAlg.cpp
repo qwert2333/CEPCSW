@@ -102,6 +102,8 @@ template<typename T1, typename T2> void GlobalClusteringAlg::Clustering(std::vec
             }
             for(int m=1; m<record.size(); m++)
             {
+				delete m_output[record.at(m)]; 
+				m_output[record.at(m)]=NULL;
                 m_output.erase(m_output.begin()+record.at(m)); //memory
             }
             record.clear();
@@ -265,7 +267,8 @@ bool GlobalClusteringAlg::ifModuleAdjacent(const PandoraPlus::CaloBar* bar_2d, c
 {
 	PandoraPlus::CaloBar* bob = new PandoraPlus::CaloBar(); //just first layer
 	PandoraPlus::CaloBar* alice = new PandoraPlus::CaloBar(); //second new
-	
+	// m_datacol.bk_BarCol.push_back(bob);
+	// m_datacol.bk_BarCol.push_back(alice);
 	if(bar_2d->getModule()==m_module && bar_3d->getModule()==1)
 	{
 		bob = bar_2d->Clone();
@@ -296,40 +299,103 @@ bool GlobalClusteringAlg::ifModuleAdjacent(const PandoraPlus::CaloBar* bar_2d, c
 	if(bob->getDlayer()==1 && bob->getSlayer()==0 && bob->getPart()==m_part && alice->getSlayer()==0 && alice->getPart()==1 && 
 	bob->getStave()==alice->getStave() && bob->getBar()==alice->getBar())
 	{
+		delete bob;
+		delete alice;
 		return true;
 	}
 	else
 	{
+		delete bob;
+		delete alice;
 		return false;
 	}	
 }
-
-void GlobalClusteringAlg::Towering(std::vector<PandoraPlus::Calo3DCluster*>& m_3dcluster)
+//
+void GlobalClusteringAlg::Towering(std::vector<PandoraPlus::Calo3DCluster*>& m_3dcluster,std::vector<PandoraPlus::CaloTower*>& m_tower)
 {
+	int record = 0;
 	for(int i=0; i<m_3dcluster.size(); i++)
 	{
 		PandoraPlus::Calo3DCluster* cluster3d = m_3dcluster.at(i);
 		std::vector<const PandoraPlus::CaloBar*> m_bar = cluster3d->getBars();
 		std::vector<PandoraPlus::Calo1DCluster*> m_1dcluster; m_1dcluster.clear();
 		std::vector<PandoraPlus::Calo2DCluster*> m_2dcluster; m_2dcluster.clear();
-		std::vector<PandoraPlus::CaloTower*> m_tower; m_tower.clear();
+		//
 		for(int j=0; j<m_bar.size(); j++)
 		{
-			PandoraPlus::CaloBar* bar = m_bar.at(j);
-			if(m_1dcluster.size()>0)
+			const PandoraPlus::CaloBar* bar = m_bar.at(j);
+
+			for(int k=0; k<m_1dcluster.size(); k++)
 			{
-				if(m_1dcluster.at(0)->getBar().at(0)->getModule() == bar->getModule() && m_1dcluster.at(0)->getPart() == bar->getPart() && m_1dcluster.at(0)->getStave() == bar->getStave())
+				if(m_1dcluster.at(k)->getBars().at(0)->getModule() == bar->getModule() && m_1dcluster.at(k)->getBars().at(0)->getPart() == bar->getPart() && m_1dcluster.at(k)->getBars().at(0)->getStave() == bar->getStave()
+				&& m_1dcluster.at(k)->getBars().at(0)->getDlayer() == bar->getDlayer() && m_1dcluster.at(k)->getBars().at(0)->getSlayer() == bar->getSlayer())
 				{
-					
+					m_1dcluster.at(k)->addCluster(bar);
+					record = 1;
+					break;
 				}
 			}
+
+			if(record==1)
+			{
+				record = 0;
+				continue;
+			}
+
 			PandoraPlus::Calo1DCluster* cluster1d = new PandoraPlus::Calo1DCluster(); //first new
 			cluster1d->addCluster(bar);
 			bar = nullptr;
-			m_1dcluster.push_back(cluster1d);
-			
-			
+			m_1dcluster.push_back(cluster1d);	
 		}
+		//
+		record = 0;
+		for(int j=0; j<m_1dcluster.size(); j++)
+		{
+			PandoraPlus::Calo1DCluster* cluster1d = m_1dcluster.at(j);
+			for(int k=0; k<m_2dcluster.size(); k++)
+			{
+				if(cluster1d->getTowerID().at(0)==m_2dcluster.at(k)->getTowerID().at(0))
+				{
+					m_2dcluster.at(k)->addCluster(cluster1d);
+					record = 1;
+					break;
+				}
+			}
+			if(record==1)
+			{
+				record = 0;
+				continue;
+			}
+			PandoraPlus::Calo2DCluster* cluster2d = new PandoraPlus::Calo2DCluster(); //first new
+			cluster2d->addCluster(cluster1d);
+			cluster1d = nullptr;
+			m_2dcluster.push_back(cluster2d);
+		}
+		//
+		record = 0;
+		for(int j=0; j<m_2dcluster.size(); j++)
+		{
+			PandoraPlus::Calo2DCluster* cluster2d = m_2dcluster.at(j);
+			for(int k=0; k<m_tower.size(); k++)
+			{
+				if(cluster2d->getTowerID().at(0)==(m_tower.at(k)->getModule()*16*16 + m_tower.at(k)->getPart()*16 + m_tower.at(k)->getStave()))  //(m_tower.at(k)->getModule()*16*16 + m_tower.at(k)->getPart()*16 + m_tower.at(k)->getStave())
+				{
+					m_tower.at(k)->addCluster(cluster2d);
+					record = 1;
+					break;
+				}
+			}
+			if(record==1)
+			{
+				record = 0;
+				continue;
+			}
+			PandoraPlus::CaloTower* tower = new PandoraPlus::CaloTower(); //first new
+			tower->addCluster(cluster2d);
+			cluster2d = nullptr;
+			m_tower.push_back(tower);
+		}
+
 	}
 	
 }
