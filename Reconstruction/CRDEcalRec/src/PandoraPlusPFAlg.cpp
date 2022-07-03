@@ -79,6 +79,7 @@ StatusCode PandoraPlusPFAlg::initialize()
   //Register Algorithms
   //--- Initialize algorithm maps ---
   m_algorithmManager.RegisterAlgorithmFactory("ExampleAlg",             new ExampleAlg::Factory);
+  m_algorithmManager.RegisterAlgorithmFactory("TrackExtrapolatingAlg",  new TrackExtrapolatingAlg::Factory);
   m_algorithmManager.RegisterAlgorithmFactory("GlobalClusteringAlg",    new GlobalClusteringAlg::Factory);
   m_algorithmManager.RegisterAlgorithmFactory("LocalMaxFindingAlg",     new LocalMaxFindingAlg::Factory);
   m_algorithmManager.RegisterAlgorithmFactory("HoughClusteringAlg",     new HoughClusteringAlg::Factory);
@@ -128,6 +129,7 @@ StatusCode PandoraPlusPFAlg::initialize()
     t_SimBar = new TTree("SimBarHit", "SimBarHit");
     t_Layers = new TTree("RecLayers","RecLayers");
     t_Cluster = new TTree("RecClusters", "RecClusters");
+    t_Track = new TTree("RecTracks", "RecTracks");
 
     t_SimBar->Branch("simBar_x", &m_simBar_x);
     t_SimBar->Branch("simBar_y", &m_simBar_y);
@@ -161,6 +163,19 @@ StatusCode PandoraPlusPFAlg::initialize()
     t_Cluster->Branch("Clus_z", &m_Clus_z);
     t_Cluster->Branch("Clus_E", &m_Clus_E);
     t_Cluster->Branch("Nhit", &m_Nhit);
+
+    // Tracks
+    t_Track->Branch("m_Ntrk", &m_Ntrk);
+    t_Track->Branch("m_trkstate_d0", &m_trkstate_d0);
+    t_Track->Branch("m_trkstate_z0", &m_trkstate_z0);
+    t_Track->Branch("m_trkstate_phi", &m_trkstate_phi);
+    t_Track->Branch("m_trkstate_tanL", &m_trkstate_tanL);
+    t_Track->Branch("m_trkstate_kappa", &m_trkstate_kappa);
+    t_Track->Branch("m_trkstate_omega", &m_trkstate_omega);
+    t_Track->Branch("m_trkstate_refx", &m_trkstate_refx);
+    t_Track->Branch("m_trkstate_refy", &m_trkstate_refy);
+    t_Track->Branch("m_trkstate_refz", &m_trkstate_refz);
+    t_Track->Branch("m_trkstate_location", &m_trkstate_location);
 
   }
 
@@ -307,6 +322,25 @@ for(int ib=0; ib<m_DataCol.TowerCol[it]->getBlocks().size(); ib++){
   }
   t_Cluster->Fill();
 
+  // Save Track info
+  ClearTrack();
+  std::vector<PandoraPlus::Track*> m_trkCol = m_DataCol.TrackCol;
+  m_Ntrk = m_trkCol.size();
+  for(int itrk=0; itrk<m_Ntrk; itrk++){
+    for(int istate=0; istate<m_trkCol[itrk]->trackStates_size(); istate++){
+      m_trkstate_d0.push_back( m_trkCol[itrk]->getTrackStates(istate).D0 );
+      m_trkstate_z0.push_back( m_trkCol[itrk]->getTrackStates(istate).Z0 );
+      m_trkstate_phi.push_back( m_trkCol[itrk]->getTrackStates(istate).phi0 );
+      m_trkstate_tanL.push_back( m_trkCol[itrk]->getTrackStates(istate).tanLambda );
+      m_trkstate_kappa.push_back( m_trkCol[itrk]->getTrackStates(istate).Kappa);
+      m_trkstate_omega.push_back( m_trkCol[itrk]->getTrackStates(istate).Omega );
+      m_trkstate_refx.push_back( m_trkCol[itrk]->getTrackStates(istate).referencePoint.X() );
+      m_trkstate_refy.push_back( m_trkCol[itrk]->getTrackStates(istate).referencePoint.Y() );
+      m_trkstate_refz.push_back( m_trkCol[itrk]->getTrackStates(istate).referencePoint.Z() );
+      m_trkstate_location.push_back( m_trkCol[itrk]->getTrackStates(istate).location );
+  }}
+  t_Track->Fill();
+
   //Clean Events
   m_DataCol.Clean();
 
@@ -322,8 +356,9 @@ StatusCode PandoraPlusPFAlg::finalize()
   t_SimBar->Write();
   t_Layers->Write();
   t_Cluster->Write();
+  t_Track->Write();
   m_wfile->Close();
-  delete m_wfile, t_SimBar, t_Layers, t_Cluster;
+  delete m_wfile, t_SimBar, t_Layers, t_Cluster, t_Track;
 
   delete m_pMCParticleCreator;
   delete m_pTrackCreator; 
@@ -380,5 +415,19 @@ void PandoraPlusPFAlg::ClearCluster(){
   m_Clus_z.clear();
   m_Clus_E.clear();
   m_Nhit.clear();
+}
+
+void PandoraPlusPFAlg::ClearTrack(){
+  m_Ntrk=-99;
+  m_trkstate_d0.clear(); 
+  m_trkstate_z0.clear();
+  m_trkstate_phi.clear();
+  m_trkstate_tanL.clear();
+  m_trkstate_kappa.clear();
+  m_trkstate_omega.clear();
+  m_trkstate_refx.clear();
+  m_trkstate_refy.clear();
+  m_trkstate_refz.clear();
+  m_trkstate_location.clear();
 }
 #endif

@@ -22,6 +22,7 @@
 #include "Algorithm/EnergySplittingAlg.h"
 #include "Algorithm/EnergyTimeMatchingAlg.h"
 #include "Algorithm/ConeClusteringAlg.h"
+#include "Algorithm/TrackExtrapolatingAlg.h"
 
 #include "TVector3.h"
 #include "TRandom3.h"
@@ -147,9 +148,16 @@ protected:
   FloatVec m_Clus_x, m_Clus_y, m_Clus_z, m_Clus_E;
   IntVec m_Nhit;
 
+  TTree * t_Track;
+  int m_Ntrk; 
+  FloatVec m_trkstate_d0, m_trkstate_z0, m_trkstate_phi, m_trkstate_tanL, m_trkstate_omega, m_trkstate_kappa;
+  FloatVec m_trkstate_refx, m_trkstate_refy, m_trkstate_refz; 
+  IntVec m_trkstate_location; 
+
   void ClearBar();
   void ClearLayer();
   void ClearCluster();
+  void ClearTrack();
 
 };
 #endif

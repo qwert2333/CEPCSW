@@ -32,6 +32,7 @@ gaudi_add_module(CRDEcalRec
                          src/Tools/OutputCreator.cpp
                          src/Tools/TrackFitInEcal.cpp
                          src/Algorithm/ExampleAlg.cpp
+                         src/Algorithm/TrackExtrapolatingAlg.cpp
                          src/Algorithm/GlobalClusteringAlg.cpp
                          src/Algorithm/LocalMaxFindingAlg.cpp
                          src/Algorithm/HoughClusteringAlg.cpp
