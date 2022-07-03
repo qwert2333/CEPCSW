@@ -10,12 +10,14 @@ namespace PandoraPlus{
   class Settings{
   public: 
     Settings(){};
-    ~Settings(){ map_intPars.clear(); map_floatPars.clear(); map_boolPars.clear(); }
+    ~Settings(){ Clear(); }
    
-    void Clear() { map_intPars.clear(); map_floatPars.clear(); map_boolPars.clear(); }
-    std::map<std::string, int>   map_intPars; 
-    std::map<std::string, float> map_floatPars; 
-    std::map<std::string, bool>  map_boolPars; 
+    void Clear() { map_intPars.clear();  map_floatPars.clear(); map_boolPars.clear(); map_stringPars.clear(); map_stringVecPars.clear(); }
+    std::map<std::string, int>    map_intPars; 
+    std::map<std::string, double> map_floatPars; 
+    std::map<std::string, bool>   map_boolPars; 
+    std::map<std::string, std::string> map_stringPars; 
+    std::map<std::string, std::vector<std::string> > map_stringVecPars;
 
   };
 

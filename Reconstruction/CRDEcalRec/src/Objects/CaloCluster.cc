@@ -2,7 +2,6 @@
 #define CALO_CLUSTER_C
 
 #include "Objects/CaloCluster.h"
-//#include "Objects/TrackFitInEcal.h"
 #include "TH1.h"
 #include "TF1.h"
 #include "TVector3.h"
@@ -40,29 +39,29 @@ namespace PandoraPlus{
 
 
   //Get the initial hit in this shower. defined as closest to IP. 
-  //edm4hep::ConstCalorimeterHit CaloCluster::getClusterInitialHit() const{
-  //  double minr=10e9;
-  //  edm4hep::ConstCalorimeterHit initHit;
-  //  for(int i=0;i<CaloHits.size();i++){
-  //     TVector3 pos = CaloHits[i].getPosition();
-  //     double rhit = sqrt(pos.x*pos.x+pos.y*pos.y+pos.z*pos.z);
-  //     if(rhit<minr){ minr = rhit; initHit = CaloHits[i];}
-  //  }
-  //  return initHit;
-  //}
+  const PandoraPlus::CaloHit* CaloCluster::getClusterInitialHit() const{
+    double minr=10e9;
+    PandoraPlus::CaloHit* initHit = nullptr; 
+    int index = -1;
+    for(int i=0;i<hits.size();i++){
+       double rhit = hits[i]->getPosition().Mag();
+       if(rhit<minr){ minr = rhit; index=i; }
+    }
+    if(index>0) return hits[index];
+    else return nullptr;
+  }
   
   //Get shower center by weighted hit position. 
-/*  TVector3 CaloCluster::getHitCenter() const{
+  TVector3 CaloCluster::getHitCenter() const{
     TVector3 vec(0,0,0);
     double totE = getHitsE();
-    for(int i=0;i<CaloHits.size(); i++){
-       TVector3 v_cent = CaloHits[i].getPosition();
-       TVector3 m_vec(v_cent.x, v_cent.y, v_cent.z);
-       vec += m_vec* (CaloHits[i].getEnergy()/totE);
+    for(int i=0;i<hits.size(); i++){
+       TVector3 v_cent = hits[i]->getPosition();
+       vec += v_cent * (hits[i]->getEnergy()/totE);
     }
     return vec;
   }
-*/
+
   //Get shower center by weighted 2Dshower(shower in layers) position. 
   TVector3 CaloCluster::getShowerCenter() const{
     TVector3 spos(0,0,0);
@@ -72,12 +71,12 @@ namespace PandoraPlus{
   }
 
   //Sum over the hit energy
-/*  double CaloCluster::getHitsE() const{
+  double CaloCluster::getHitsE() const{
     double en=0;
-    for(int i=0;i<CaloHits.size(); i++) en+=CaloHits[i].getEnergy();
+    for(int i=0;i<hits.size(); i++) en+=hits[i]->getEnergy();
     return en;
   }
-*/
+
   //Sum over the 2Dshower energy
   double CaloCluster::getShowerE() const{
     double en=0;
@@ -164,6 +163,13 @@ namespace PandoraPlus{
     return StdDev; 
   }
 
+  TVector3 CaloCluster::getAxis() {
+    if(showers.size()==0) FitAxisHit();
+    else FitAxis();
+    return axis;
+  }
+
+
 /*
   std::vector<double> CaloCluster::getClusterWidth() const{
     std::vector<double> widthVec; widthVec.clear(); 
@@ -181,7 +187,7 @@ namespace PandoraPlus{
       std::vector<edm4hep::ConstCalorimeterHit> m_hits; m_hits.clear();
       double totE = 0;
       for(int is=0; is<m_showers.size(); is++){
-        std::vector<edm4hep::ConstCalorimeterHit> m_calohits = m_showers[is].getCaloHits();
+        std::vector<edm4hep::ConstCalorimeterHit> m_calohits = m_showers[is].gethits();
         m_hits.insert(m_hits.end(), m_calohits.begin(), m_calohits.end() );
         totE += m_showers[is].getHitsE();
       }
@@ -223,10 +229,10 @@ namespace PandoraPlus{
     //TCanvas *c1 = new TCanvas(); 
     //c1->cd(); 
     TH1D *h_hitz = new TH1D("h_hitz", "h_hitz", 14,0,28);
-    for(int i=0;i<CaloHits.size();i++){
-       TVector3 vec_ihit(CaloHits[i].getPosition().x, CaloHits[i].getPosition().y, CaloHits[i].getPosition().z);
+    for(int i=0;i<hits.size();i++){
+       TVector3 vec_ihit(hits[i].getPosition().x, hits[i].getPosition().y, hits[i].getPosition().z);
        TVector3 vec_rel = vec_ihit-vec_init;
-       h_hitz->Fill(vec_rel.Dot(vec_axis)/X0, CaloHits[i].getEnergy() );
+       h_hitz->Fill(vec_rel.Dot(vec_axis)/X0, hits[i].getEnergy() );
     }
     TF1 *func = new TF1("fc1", "[2]*[1]*pow([1]*x, ([0]-1))*exp(-[1]*x)/TMath::Gamma([0])", 0, 25);
     func->SetParName(0, "alpha");
@@ -252,38 +258,42 @@ namespace PandoraPlus{
     delete h_hitz; 
   }
 */
-/*
+
   void CaloCluster::FitAxis(){
+
     if(showers.size()==0) axis.SetXYZ(0,0,0);
+
     else if(showers.size()==1){ 
-      axis.SetXYZ(showers[0].getPos().x(), showers[0].getPos().y(),showers[0].getPos().z());
+      axis = showers[0]->getPos();
       axis *= 1./axis.Mag();
     }
+
     else if( showers.size()==2 ){
-      TVector3 rpos = showers.back().getPos() - showers.front().getPos() ;
-      double mag = sqrt(rpos.Mag2());
-      axis.SetXYZ(rpos.x(), rpos.y(), rpos.z());
-      axis *= 1./mag;
+
+      axis = showers[1]->getPos() - showers[0]->getPos() ;
+      int sign = (showers[1]->getDlayer()>showers[0]->getDlayer() ? 1 : -1);
+      axis *= (double)sign/axis.Mag();
     }
+
     else if(showers.size()>2){
-      track->clear();
+      trackFitter.clear();
       //track->setImpactParameter(0, 230.); //fix dr=0, dz=230.
 
-      double barAngle = (showers[0].getModule()+2)*TMath::Pi()/4.;
+      double barAngle = (showers[0]->getModule()+2)*TMath::Pi()/4.;
       double posErr = 10./sqrt(12); 
       if(barAngle>=TMath::TwoPi()) barAngle = barAngle-TMath::TwoPi();
-      track->setBarAngle(barAngle);
+      trackFitter.setBarAngle(barAngle);
       for(int is=0;is<showers.size();is++){
-        PandoraPlus::CRDCaloBarShower barsX = showers[is].getShowerX(); //U
-        PandoraPlus::CRDCaloBarShower barsY = showers[is].getShowerY(); //Z
+        TVector3 pos_barsX = showers[is]->getShowerX()->getPos(); //U
+        TVector3 pos_barsY = showers[is]->getShowerY()->getPos(); //Z
 //printf("\t DEBUG: input pointX (%.3f, %.3f, %.3f) \n", barsX.getPos().x(), barsX.getPos().y(), barsX.getPos().z());
 //printf("\t DEBUG: input pointY (%.3f, %.3f, %.3f) \n", barsY.getPos().x(), barsY.getPos().y(), barsY.getPos().z());
-        track->setGlobalPoint(1, barsX.getPos().x(), posErr, barsX.getPos().y(), posErr, barsX.getPos().z(), posErr);
-        track->setGlobalPoint(0, barsY.getPos().x(), posErr, barsY.getPos().y(), posErr, barsY.getPos().z(), posErr);
+        trackFitter.setGlobalPoint(1, pos_barsX.x(), posErr, pos_barsX.y(), posErr, pos_barsX.z(), posErr);
+        trackFitter.setGlobalPoint(0, pos_barsY.x(), posErr, pos_barsY.y(), posErr, pos_barsY.z(), posErr);
       }
-    track->fitTrack();
-    double fitPhi = track->getTrkPar(2);
-    double fitTheta = track->getTrkPar(3);
+    trackFitter.fitTrack();
+    double fitPhi =   trackFitter.getTrkPar(2);
+    double fitTheta = trackFitter.getTrkPar(3);
 //printf("\t DEBUG: fitted phi and theta: %.3f \t %.3f \n", fitPhi, fitTheta);
 
     axis.SetMag(1.);
@@ -291,7 +301,72 @@ namespace PandoraPlus{
     axis.SetTheta(fitTheta);
   } 
   }
+
+  void CaloCluster::FitAxisHit(){
+    int Nhit = hits.size(); 
+    if(Nhit==0) axis.SetXYZ(0,0,0);
+    else if(Nhit==1){
+      axis = hits[0]->getPosition();
+      axis *= 1./axis.Mag();
+    }
+    else if( Nhit==2 ){
+      axis = hits[1]->getPosition() - hits[0]->getPosition() ;
+      int sign = (hits[1]->getLayer()>hits[0]->getLayer() ? 1 : -1);
+      axis *= (double)sign/axis.Mag();
+    }
+
+    else{
+/*      float sumX = 0;
+      float sumY = 0;
+      float sumZ = 0;
+      float sumXZ = 0;
+      float sumYZ = 0;
+      float sumZZ = 0;
+      for(int i=0; i<Nhit; i++){
+        TVector3 pos = hits[i]->getPosition();
+   
+        sumX += pos.x();
+        sumY += pos.y();
+        sumZ += pos.z();
+        sumXZ += pos.x()*pos.z();
+        sumYZ += pos.y()*pos.z();
+        sumZZ += pos.z()*pos.z();
+      }
+   
+      float k1 = (Nhit*sumXZ - sumX*sumZ)/(Nhit*sumZZ-sumZ*sumZ);
+      float k2 = (Nhit*sumYZ - sumY*sumZ)/(Nhit*sumZZ-sumZ*sumZ);
+   
+      axis.SetXYZ(k1, k2, 1);
+      TVector3 pos0 = hits[0]->getPosition();
+      int sign = (axis.Dot(pos0)>0  ? 1 : -1  );
+      axis *= (double)sign/axis.Mag();
 */
+      trackFitter.clear();
+      //track->setImpactParameter(0, 230.); //fix dr=0, dz=230.
+
+      //double barAngle = (showers[0]->getModule()+2)*TMath::Pi()/4.;
+      //if(barAngle>=TMath::TwoPi()) barAngle = barAngle-TMath::TwoPi();
+      //trackFitter.setBarAngle(barAngle);
+      trackFitter.setBarAngle(0.);
+      double posErr = 10./sqrt(12);
+      for(int is=0;is<hits.size();is++){
+        TVector3 pos = hits[is]->getPosition(); //U
+//printf("\t DEBUG: input pointX (%.3f, %.3f, %.3f) \n", barsX.getPos().x(), barsX.getPos().y(), barsX.getPos().z());
+//printf("\t DEBUG: input pointY (%.3f, %.3f, %.3f) \n", barsY.getPos().x(), barsY.getPos().y(), barsY.getPos().z());
+        trackFitter.setGlobalPoint(1, pos.x(), posErr, pos.y(), posErr, pos.z(), posErr);
+        trackFitter.setGlobalPoint(0, pos.x(), posErr, pos.y(), posErr, pos.z(), posErr);
+      }
+    trackFitter.fitTrack();
+    double fitPhi =   trackFitter.getTrkPar(2);
+    double fitTheta = trackFitter.getTrkPar(3);
+//printf("\t DEBUG: fitted phi and theta: %.3f \t %.3f \n", fitPhi, fitTheta);
+
+    axis.SetMag(1.);
+    axis.SetPhi(fitPhi);
+    axis.SetTheta(fitTheta);
+
+    }
+  }
 
   void CaloCluster::MergeCluster(const PandoraPlus::CaloCluster* clus){
     for(int i=0;i<clus->getShowers().size();i++){

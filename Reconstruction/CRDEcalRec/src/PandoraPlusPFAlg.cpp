@@ -36,18 +36,18 @@ StatusCode PandoraPlusPFAlg::initialize()
 
 
   //Initialize Creator settings
-  m_pMCParticleCreatorSettings.m_mcParticleCollections = name_MCParticleCol;
+  m_pMCParticleCreatorSettings.map_stringPars["MCParticleCollections"] = name_MCParticleCol.value();
 
-  m_pTrackCreatorSettings.m_trackCollections = name_TrackCol;
-  m_pTrackCreatorSettings.m_BField = m_BField; 
+  m_pTrackCreatorSettings.map_stringVecPars["trackCollections"] = name_TrackCol.value();
+  m_pTrackCreatorSettings.map_floatPars["BField"] = m_BField; 
 
   std::vector<std::string> name_CaloHits = name_EcalHits; 
   std::vector<std::string> name_CaloReadout = name_EcalReadout;
   name_CaloHits.insert( name_CaloHits.end(), name_HcalHits.begin(), name_HcalHits.end() );
   name_CaloReadout.insert(name_CaloReadout.end(), name_HcalReadout.begin(), name_HcalReadout.end());
 
-  m_CaloHitsCreatorSettings.m_CaloHitCollections = name_CaloHits;
-  //m_CaloHitsCreatorSettings.m_CaloReadouts = name_CaloReadout;
+  m_CaloHitsCreatorSettings.map_stringVecPars["CaloHitCollections"] = name_CaloHits;
+  m_CaloHitsCreatorSettings.map_stringPars["EcalType"] = m_EcalType.value();
 
   //Initialize Creators
   m_pMCParticleCreator = new MCParticleCreator( m_pMCParticleCreatorSettings );
@@ -58,20 +58,22 @@ StatusCode PandoraPlusPFAlg::initialize()
   //Readin collections
 
   //---MC particle---
-  r_MCParticleCol = new DataHandle<edm4hep::MCParticleCollection> (name_MCParticleCol, Gaudi::DataHandle::Reader, this);
+  if(!name_MCParticleCol.empty()) r_MCParticleCol = new DataHandle<edm4hep::MCParticleCollection> (name_MCParticleCol, Gaudi::DataHandle::Reader, this);
 
   //---Tracks---
-  for(auto& _trk : name_TrackCol) r_TrackCols.push_back( new TrackType(_trk, Gaudi::DataHandle::Reader, this) );
+  for(auto& _trk : name_TrackCol) if(!_trk.empty()) r_TrackCols.push_back( new TrackType(_trk, Gaudi::DataHandle::Reader, this) );
 
   //---Calo Hits---
-  for(auto& _ecal : name_EcalHits){ 
-    r_ECalHitCols.push_back( new CaloType(_ecal, Gaudi::DataHandle::Reader, this) );
-    r_CaloHitCols.push_back( new CaloType(_ecal, Gaudi::DataHandle::Reader, this) );
-  }
+  for(auto& _ecal : name_EcalHits){
+    if(!_ecal.empty()){ 
+      r_ECalHitCols.push_back( new CaloType(_ecal, Gaudi::DataHandle::Reader, this) );
+      r_CaloHitCols.push_back( new CaloType(_ecal, Gaudi::DataHandle::Reader, this) );
+  }}
   for(auto& _hcal : name_HcalHits){ 
-    r_HCalHitCols.push_back( new CaloType(_hcal, Gaudi::DataHandle::Reader, this) );
-    r_CaloHitCols.push_back( new CaloType(_hcal, Gaudi::DataHandle::Reader, this) );
-  }
+    if(!_hcal.empty()){
+      r_HCalHitCols.push_back( new CaloType(_hcal, Gaudi::DataHandle::Reader, this) );
+      r_CaloHitCols.push_back( new CaloType(_hcal, Gaudi::DataHandle::Reader, this) );
+  }}
 
 
   //Register Algorithms
@@ -82,13 +84,19 @@ StatusCode PandoraPlusPFAlg::initialize()
   m_algorithmManager.RegisterAlgorithmFactory("HoughClusteringAlg",     new HoughClusteringAlg::Factory);
   m_algorithmManager.RegisterAlgorithmFactory("EnergySplittingAlg",     new EnergySplittingAlg::Factory);
   m_algorithmManager.RegisterAlgorithmFactory("EnergyTimeMatchingAlg",  new EnergyTimeMatchingAlg::Factory);
+  m_algorithmManager.RegisterAlgorithmFactory("ConeClusteringAlg",      new ConeClusteringAlg::Factory);
+  m_algorithmManager.RegisterAlgorithmFactory("ConeClusteringAlgHCAL",  new ConeClusteringAlg::Factory);
 
 
   //--- Create algorithm from readin settings ---
   for(int ialg=0; ialg<name_Algs.value().size(); ialg++){
     Settings m_settings; 
-    for(int ipar=0; ipar<name_AlgPars.value()[ialg].size(); ipar++)
-      m_settings.map_floatPars[name_AlgPars.value()[ialg].at(ipar)] = value_AlgPars.value()[ialg].at(ipar);
+    for(int ipar=0; ipar<name_AlgPars.value()[ialg].size(); ipar++){
+      if(type_AlgPars.value()[ialg].at(ipar)=="double") m_settings.map_floatPars[name_AlgPars.value()[ialg].at(ipar)] = std::stod( (string)value_AlgPars.value()[ialg].at(ipar) );
+      if(type_AlgPars.value()[ialg].at(ipar)=="string") m_settings.map_stringPars[name_AlgPars.value()[ialg].at(ipar)] = value_AlgPars.value()[ialg].at(ipar) ;
+      if(type_AlgPars.value()[ialg].at(ipar)=="bool") m_settings.map_boolPars[name_AlgPars.value()[ialg].at(ipar)] = (bool)std::stoi( value_AlgPars.value()[ialg].at(ipar) );
+    }
+
     m_algorithmManager.RegisterAlgorithm( name_Algs.value()[ialg], m_settings );
   }
 
@@ -98,6 +106,7 @@ StatusCode PandoraPlusPFAlg::initialize()
   if ( !m_geosvc )  throw "PandoraPlusPFAlg :Failed to find GeomSvc ...";
 
   for(unsigned int i=0; i<name_CaloReadout.size(); i++){
+    if(name_CaloReadout[i].empty()) continue;
     dd4hep::DDSegmentation::BitFieldCoder* tmp_decoder = m_geosvc->getDecoder(name_CaloReadout[i]);
     if (!tmp_decoder) {
       error() << "Failed to get the decoder for: " << name_CaloReadout[i] << endmsg;
@@ -287,7 +296,7 @@ for(int ib=0; ib<m_DataCol.TowerCol[it]->getBlocks().size(); ib++){
 
   //Save Cluster info
   ClearCluster();
-  std::vector<PandoraPlus::CaloCluster*> m_clusvec = m_DataCol.ClusterCol;
+  std::vector<PandoraPlus::CaloCluster*> m_clusvec = m_DataCol.map_CaloCluster["EcalCluster"];
   m_Nclus = m_clusvec.size();
   for(int ic=0; ic<m_clusvec.size(); ic++){
     m_Clus_x.push_back( m_clusvec[ic]->getShowerCenter().x() );

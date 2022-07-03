@@ -10,7 +10,7 @@ namespace PandoraPlus{
 
 
   StatusCode MCParticleCreator::CreateMCParticle( PandoraPlusDataCol& m_DataCol, DataHandle<edm4hep::MCParticleCollection>& r_MCParticleCol ){
-    if(settings.m_mcParticleCollections.empty()) return StatusCode::SUCCESS;
+    if(settings.map_stringPars.at("MCParticleCollections").empty()) return StatusCode::SUCCESS;
     m_DataCol.collectionMap_MC.clear();
 
     const edm4hep::MCParticleCollection* const_MCPCol = r_MCParticleCol.get();
@@ -21,7 +21,7 @@ namespace PandoraPlus{
       m_MCPvec.push_back(m_MCp);
     }
 
-    m_DataCol.collectionMap_MC[settings.m_mcParticleCollections] = m_MCPvec; 
+    m_DataCol.collectionMap_MC[ settings.map_stringPars.at("MCParticleCollections") ] = m_MCPvec; 
 
     return StatusCode::SUCCESS;
   };

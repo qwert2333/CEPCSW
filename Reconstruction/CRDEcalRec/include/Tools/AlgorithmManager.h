@@ -42,6 +42,7 @@ namespace PandoraPlus{
     //StatusCode CreateAlgorithm(const std::map<std::string, Settings>& m_algorithmSettings); 
     StatusCode RunAlgorithm( PandoraPlusDataCol& m_datacol ){
       for(auto iter : m_algorithmNames){
+cout<<"Processing Algorithm: "<<iter<<endl;
         m_algorithmMap[iter]->Initialize();
         m_algorithmMap[iter]->RunAlgorithm(m_datacol);
         m_algorithmMap[iter]->ClearAlgorithm();

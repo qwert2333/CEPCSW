@@ -2,6 +2,7 @@
 #define MCPARTICLE_CREATOR_H
 
 #include "PandoraPlusDataCol.h"
+#include "Tools/Algorithm.h"
 
 namespace PandoraPlus{
 
@@ -9,15 +10,6 @@ namespace PandoraPlus{
 
   public: 
 
-    class Settings{
-    public:
-      Settings(){};
-
-      std::string m_mcParticleCollections;        // MC particle collection. 
-      std::string m_CaloHitRelationCollections;   // SimCaloHit to CaloHit particle relations
-
-    };
-    
     //initialize a CaloHitCreator
     MCParticleCreator( const Settings& m_settings );
     ~MCParticleCreator() {};
@@ -34,8 +26,7 @@ namespace PandoraPlus{
     StatusCode Reset() { return StatusCode::SUCCESS; };
 
   private: 
-
-    const Settings   settings;  
+    const PandoraPlus::Settings   settings;  
 
   };
 

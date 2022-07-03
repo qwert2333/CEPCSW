@@ -7,7 +7,10 @@ StatusCode ExampleAlg::ReadSettings(Settings& m_settings){
   settings = m_settings;
 
   //Initialize parameters
-  if(settings.map_floatPars.find("Par1")==settings.map_floatPars.end()) settings.map_floatPars["Par1"] = 0;
+  if(settings.map_stringPars.find("Par1")==settings.map_stringPars.end()) settings.map_stringPars["Par1"] = "HERE";
+  if(settings.map_floatPars.find("Par2")==settings.map_floatPars.end()) settings.map_floatPars["Par2"] = 0;
+  if(settings.map_boolPars.find("Par3")==settings.map_boolPars.end()) settings.map_boolPars["Par3"] = 0;
+
   return StatusCode::SUCCESS;
 };
 
@@ -33,7 +36,12 @@ StatusCode ExampleAlg::ClearAlgorithm(){
 
 
 StatusCode ExampleAlg::SelfAlg1(){
-  std::cout<<"  Processing SelfAlg1: print Par1 = "<<settings.map_floatPars["Par1"]<<std::endl;
+  std::cout<<"  Processing SelfAlg1: print Setting parameters"<<std::endl;
+
+  for(auto &iter : settings.map_stringPars) cout<<iter.first<<": "<<iter.second<<endl;
+  for(auto &iter : settings.map_floatPars) cout<<iter.first<<": "<<iter.second<<endl;
+  for(auto &iter : settings.map_boolPars) cout<<iter.first<<": "<<iter.second<<endl;
+
 
   return StatusCode::SUCCESS;
 };
