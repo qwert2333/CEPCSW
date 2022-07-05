@@ -1,5 +1,5 @@
-#ifndef CALO3D_CLUSTER_C
-#define CALO3D_CLUSTER_C
+#ifndef CALO_3DCLUSTER_C
+#define CALO_3DCLUSTER_C
 
 #include "Objects/Calo3DCluster.h"
 #include <cmath>

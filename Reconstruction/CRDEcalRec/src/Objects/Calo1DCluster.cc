@@ -1,5 +1,5 @@
-#ifndef CALO1D_CLUSTER_C
-#define CALO1D_CLUSTER_C
+#ifndef CALO_1DCLUSTER_C
+#define CALO_1DCLUSTER_C
 
 #include "Objects/CaloBar.h"
 #include "Objects/Calo1DCluster.h"
@@ -26,12 +26,76 @@ namespace PandoraPlus{
       if(!Seeds[i]) { Seeds.erase(Seeds.begin()+i); i--; }
   }
 
-  bool Calo1DCluster::isNeighbor(const PandoraPlus::CaloBar* iBar) const{
-    for(int i=0;i<Bars.size();i++){
-      if(!inCluster(iBar) && (iBar->getBar()==Bars[i]->getBar()+1 || iBar->getBar()==Bars[i]->getBar()-1) ) return true;
-    }
-    return false;
-  }
+  // bool Calo1DCluster::isNeighbor(const PandoraPlus::CaloBar* iBar) const{
+  //   std::vector<const PandoraPlus::CaloBar*> m_1dcluster = Bars;
+  //   for(int i1d = 0; i1d<m_1dcluster.size(); i1d++)
+  //   {
+  //     if(m_bar->getModule()==m_1dcluster[i1d]->getModule() && m_bar->getDlayer()==m_1dcluster[i1d]->getDlayer() && m_bar->getSlayer()==m_1dcluster[i1d]->getSlayer())
+  //     {
+  //       if(m_1dcluster[i1d]->getSlayer()==0)
+  //       {
+  //         if(m_1dcluster[i1d]->getBar()==1)
+  //         {
+  //           if(
+  //           (m_bar->getBar()==m_phibarnumber && m_bar->getStave()==(m_1dcluster[i1d]->getStave()-1) && abs(m_bar->getPart()-m_1dcluster[i1d]->getPart())<=1)||
+  //           ((m_bar->getBar()==1 || m_bar->getBar()==2)  && m_bar->getStave()==m_1dcluster[i1d]->getStave() && abs(m_bar->getPart()-m_1dcluster[i1d]->getPart())<=1)
+  //           )
+  //           {
+  //             return true;
+  //           }
+  //         }
+  //         else if(m_1dcluster[i1d]->getBar()==m_phibarnumber)
+  //         {
+  //           if(
+  //           (m_bar->getBar()==1 && m_bar->getStave()==(m_1dcluster[i1d]->getStave()+1) && abs(m_bar->getPart()-m_1dcluster[i1d]->getPart())<=1)||
+  //           ((m_bar->getBar()==m_phibarnumber || m_bar->getBar()==(m_phibarnumber-1))  && m_bar->getStave()==m_1dcluster[i1d]->getStave() && abs(m_bar->getPart()-m_1dcluster[i1d]->getPart())<=1)
+  //           )
+  //           {
+  //             return true;
+  //           }
+  //         }
+  //         else
+  //         {
+  //           if(abs(m_bar->getBar()-m_1dcluster[i1d]->getBar())<=1 && m_bar->getStave()==m_1dcluster[i1d]->getStave() && abs(m_bar->getPart()-m_1dcluster[i1d]->getPart())<=1)
+  //           {
+  //             return true;
+  //           }
+  //         }
+  //       }
+  //       else
+  //       {
+  //         if(m_1dcluster[i1d]->getBar()==1)
+  //         {
+  //           if(
+  //           (m_bar->getBar()==(m_zbarnumber-2*(m_bar->getDlayer()-1)) && m_bar->getPart()==(m_1dcluster[i1d]->getPart()-1) && abs(m_bar->getStave()-m_1dcluster[i1d]->getStave())<=1)||
+  //           ((m_bar->getBar()==1 || m_bar->getBar()==2)  && m_bar->getPart()==m_1dcluster[i1d]->getPart() && abs(m_bar->getStave()-m_1dcluster[i1d]->getStave())<=1)
+  //           )
+  //           {
+  //             return true;
+  //           }
+  //         }
+  //         else if(m_1dcluster[i1d]->getBar()==(m_zbarnumber-2*(m_bar->getDlayer()-1)))
+  //         {
+  //           if(
+  //           (m_bar->getBar()==1 && m_bar->getPart()==(m_1dcluster[i1d]->getPart()+1) && abs(m_bar->getStave()-m_1dcluster[i1d]->getStave())<=1)||
+  //           ((m_bar->getBar()==(m_zbarnumber-2*(m_bar->getDlayer()-1)) || m_bar->getBar()==((m_zbarnumber-2*(m_bar->getDlayer()-1))-1))  && m_bar->getPart()==m_1dcluster[i1d]->getPart() && abs(m_bar->getStave()-m_1dcluster[i1d]->getStave())<=1)
+  //           )
+  //           {
+  //             return true;
+  //           }
+  //         }
+  //         else
+  //         {
+  //           if(abs(m_bar->getBar()-m_1dcluster[i1d]->getBar())<=1 && m_bar->getPart()==m_1dcluster[i1d]->getPart() && abs(m_bar->getStave()-m_1dcluster[i1d]->getStave())<=1)
+  //           {
+  //             return true;
+  //           }
+  //         }
+  //       }
+  //     }		
+  //   }
+  //   return false;
+  // }
 
   bool Calo1DCluster::inCluster(const PandoraPlus::CaloBar* iBar) const{
     return (find(Bars.begin(), Bars.end(), iBar)!=Bars.end() );
@@ -50,60 +114,60 @@ namespace PandoraPlus{
     return pos;
   }
 
-  // double Calo1DCluster::getScndMoment() const{
-    // if(Bars.size()<=1) return 0.;
-    // TVector3 pos = getPos();
-    // double Etot = getE();
-    // double scndM = 0;
-    // for(int i=0;i<Bars.size();i++) scndM += (Bars[i]->getEnergy() * (pos-Bars[i]->getPosition()).Mag2()) / Etot;
-    // return scndM;
-  // }
+  double Calo1DCluster::getScndMoment() const{
+    if(Bars.size()<=1) return 0.;
+    TVector3 pos = getPos();
+    double Etot = getEnergy();
+    double scndM = 0;
+    for(int i=0;i<Bars.size();i++) scndM += (Bars[i]->getEnergy() * (pos-Bars[i]->getPosition()).Mag2()) / Etot;
+    return scndM;
+  }
 
-  // bool Calo1DCluster::getGlobalRange( double& xmin,  double& ymin, double& zmin, double& xmax, double& ymax, double& zmax ) const{
-    // if(Bars.size()==0) return false; 
+  bool Calo1DCluster::getGlobalRange( double& xmin,  double& ymin, double& zmin, double& xmax, double& ymax, double& zmax ) const{
+    if(Bars.size()==0) return false; 
 
-    // std::vector<double> posx; posx.clear();
-    // std::vector<double> posy; posx.clear();
-    // std::vector<double> posz; posx.clear();
-    // for(int i=0; i<Bars.size(); i++){  
-      // posx.push_back(Bars[i]->getPosition().x());  
-      // posy.push_back(Bars[i]->getPosition().y());
-      // posz.push_back(Bars[i]->getPosition().z());
-    // }
-    // auto xminptr = std::min_element( std::begin(posx), std::end(posx) );
-    // auto xmaxptr = std::max_element( std::begin(posx), std::end(posx) );
-    // auto yminptr = std::min_element( std::begin(posy), std::end(posy) );
-    // auto ymaxptr = std::max_element( std::begin(posy), std::end(posy) );
-    // auto zminptr = std::min_element( std::begin(posz), std::end(posz) );
-    // auto zmaxptr = std::max_element( std::begin(posz), std::end(posz) );
+    std::vector<double> posx; posx.clear();
+    std::vector<double> posy; posx.clear();
+    std::vector<double> posz; posx.clear();
+    for(int i=0; i<Bars.size(); i++){  
+      posx.push_back(Bars[i]->getPosition().x());  
+      posy.push_back(Bars[i]->getPosition().y());
+      posz.push_back(Bars[i]->getPosition().z());
+    }
+    auto xminptr = std::min_element( std::begin(posx), std::end(posx) );
+    auto xmaxptr = std::max_element( std::begin(posx), std::end(posx) );
+    auto yminptr = std::min_element( std::begin(posy), std::end(posy) );
+    auto ymaxptr = std::max_element( std::begin(posy), std::end(posy) );
+    auto zminptr = std::min_element( std::begin(posz), std::end(posz) );
+    auto zmaxptr = std::max_element( std::begin(posz), std::end(posz) );
 
-    // int slayer = Bars[0]->getSlayer(); 
-    // if(slayer==0){
-      // xmin = -9999.;    xmax = 9999.; 
-      // ymin = -9999.;    ymax = 9999.; 
-      // zmin = *zminptr-6.;  zmax = *zmaxptr+6.;
-    // }
-    // else if(slayer==1){
-      // xmin = *xminptr-6;  xmax = *xmaxptr+6;
-      // ymin = *yminptr-6;  ymax = *ymaxptr+6;
-      // zmin = -9999;     zmax = 9999; 
-    // }
-    // else return false; 
+    int slayer = Bars[0]->getSlayer(); 
+    if(slayer==0){
+      xmin = -9999.;    xmax = 9999.; 
+      ymin = -9999.;    ymax = 9999.; 
+      zmin = *zminptr-6.;  zmax = *zmaxptr+6.;
+    }
+    else if(slayer==1){
+      xmin = *xminptr-6;  xmax = *xmaxptr+6;
+      ymin = *yminptr-6;  ymax = *ymaxptr+6;
+      zmin = -9999;     zmax = 9999; 
+    }
+    else return false; 
 
-    // return true;
-  // }
+    return true;
+  }
 
-  // int Calo1DCluster::getLeftEdge(){
-    // std::sort(Bars.begin(), Bars.end());
-    // if(Bars.size()==0) return -99;
-    // return Bars[0]->getBar();
-  // }
+  int Calo1DCluster::getLeftEdge(){
+    std::sort(Bars.begin(), Bars.end());
+    if(Bars.size()==0) return -99;
+    return Bars[0]->getBar();
+  }
 
-  // int Calo1DCluster::getRightEdge(){
-    // std::sort(Bars.begin(), Bars.end());
-    // if(Bars.size()==0) return -99;
-    // return Bars[Bars.size()-1]->getBar();
-  // }  
+  int Calo1DCluster::getRightEdge(){
+    std::sort(Bars.begin(), Bars.end());
+    if(Bars.size()==0) return -99;
+    return Bars[Bars.size()-1]->getBar();
+  }  
 
 
   void Calo1DCluster::PrintBars() const{

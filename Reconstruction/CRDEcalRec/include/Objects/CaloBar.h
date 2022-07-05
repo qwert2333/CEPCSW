@@ -16,7 +16,7 @@ namespace PandoraPlus{
     void Clear() { position.SetXYZ(0.,0.,0.); Q1=-1; Q2=-1; T1=-99; T2=-99; }
 
     inline bool operator < (const CaloBar &x) const {
-      return bar<x.bar ;
+      return ((part<x.part) || (part==x.part && stave<x.stave) ||  (part==x.part && stave==x.stave && bar<x.bar));
     }
     inline bool operator == (const CaloBar &x) const{
       return ( (cellID == x.cellID) && getEnergy()==x.getEnergy() );

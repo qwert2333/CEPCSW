@@ -6,6 +6,14 @@ using namespace PandoraPlus;
 
 StatusCode GlobalClusteringAlg::ReadSettings(PandoraPlus::Settings& m_settings){
   settings = m_settings;
+/*   if(settings.map_intPars.find("m_module")==settings.map_intPars.end()) settings.map_intPars["m_module"] = 7;
+  if(settings.map_intPars.find("m_modulestart")==settings.map_intPars.end()) settings.map_intPars["m_modulestart"] = 0;
+  if(settings.map_intPars.find("m_part")==settings.map_intPars.end()) settings.map_intPars["m_part"] = 4;
+  if(settings.map_intPars.find("m_stave")==settings.map_intPars.end()) settings.map_intPars["m_stave"] = 11;
+  if(settings.map_intPars.find("m_superlayer")==settings.map_intPars.end()) settings.map_intPars["m_superlayer"] = 14;
+  if(settings.map_intPars.find("m_startnumber")==settings.map_intPars.end()) settings.map_intPars["m_startnumber"] = 1;
+  if(settings.map_intPars.find("m_phibarnumber")==settings.map_intPars.end()) settings.map_intPars["m_phibarnumber"] = 60;
+  if(settings.map_intPars.find("m_zbarnumber")==settings.map_intPars.end()) settings.map_intPars["m_zbarnumber"] = 47; */
   return StatusCode::SUCCESS;
 };
 
@@ -18,43 +26,55 @@ StatusCode GlobalClusteringAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
   // //Readin: m_DataCol.BarCol
   // //Output: m_Datacol.BlockCol
 
-  // std::vector<PandoraPlus::CaloBar*> m_bars = m_datacol.BarCol; 
-  // std::vector<PandoraPlus::CaloBlock*> m_blocks; m_blocks.clear();
-
-  // for(int ibar=0; ibar<m_bars.size(); ibar++){
-
-  //   bool fl_foundbl = false;
-  //   for(int ibl=0; ibl<m_blocks.size(); ibl++)
-  //     if( m_bars[ibar]->getModule() == m_blocks[ibl]->getModule() &&
-  //         m_bars[ibar]->getStave()  == m_blocks[ibl]->getStave() &&
-  //         m_bars[ibar]->getPart()   == m_blocks[ibl]->getPart() &&
-  //         m_bars[ibar]->getDlayer() == m_blocks[ibl]->getDlayer() ){
-  //       m_blocks[ibl]->addBar( m_bars[ibar] );
-  //       fl_foundbl=true;
-  //     }
-
-  //   if(!fl_foundbl){
-  //     PandoraPlus::CaloBlock* m_block = new PandoraPlus::CaloBlock();
-  //     m_datacol.bk_BlockCol.push_back(m_block);
-
-  //     m_block->addBar( m_bars[ibar] );
-  //     m_block->setIDInfo(m_bars[ibar]->getModule(),  m_bars[ibar]->getStave(), m_bars[ibar]->getDlayer(), m_bars[ibar]->getPart());
-  //     m_blocks.push_back(m_block);
-  //   }
-  // }
-  // m_datacol.BlockCol = m_blocks;
-
   std::vector<PandoraPlus::CaloBar*> m_bars = m_datacol.BarCol; 
+  std::vector<PandoraPlus::CaloBlock*> m_blocks; m_blocks.clear();
+
+  for(int ibar=0; ibar<m_bars.size(); ibar++){
+
+    bool fl_foundbl = false;
+    for(int ibl=0; ibl<m_blocks.size(); ibl++)
+      if( m_bars[ibar]->getModule() == m_blocks[ibl]->getModule() &&
+          m_bars[ibar]->getStave()  == m_blocks[ibl]->getStave() &&
+          m_bars[ibar]->getPart()   == m_blocks[ibl]->getPart() &&
+          m_bars[ibar]->getDlayer() == m_blocks[ibl]->getDlayer() ){
+        m_blocks[ibl]->addBar( m_bars[ibar] );
+        fl_foundbl=true;
+      }
+
+    if(!fl_foundbl){
+      PandoraPlus::CaloBlock* m_block = new PandoraPlus::CaloBlock();
+      m_datacol.bk_BlockCol.push_back(m_block);
+
+      m_block->addBar( m_bars[ibar] );
+      m_block->setIDInfo(m_bars[ibar]->getModule(),  m_bars[ibar]->getStave(), m_bars[ibar]->getDlayer(), m_bars[ibar]->getPart());
+      m_blocks.push_back(m_block);
+    }
+  }
+  m_datacol.BlockCol = m_blocks;
+
+//   std::vector<PandoraPlus::CaloBar*> m_bars = m_datacol.BarCol; 
 	std::vector<PandoraPlus::Calo1DCluster*> m_1dclusters; m_1dclusters.clear();
 	std::vector<PandoraPlus::Calo2DCluster*> m_2dclusters; m_2dclusters.clear();
 	std::vector<PandoraPlus::Calo3DCluster*> m_3dclusters; m_3dclusters.clear();
 	
 	cout<<"check bar data: "<<m_bars.size()<<endl;
 	Clustering(m_bars, m_1dclusters);
+	for(int i1d=0; i1d<m_1dclusters.size(); i1d++)
+	{
+		m_datacol.bk_Cluster1DCol.push_back(m_1dclusters.at(i1d));
+	}
 	cout<<"check 1d data: "<<m_1dclusters.size()<<endl;
 	Clustering(m_1dclusters, m_2dclusters);
+	for(int i2d=0; i2d<m_2dclusters.size(); i2d++)
+	{
+		m_datacol.bk_Cluster2DCol.push_back(m_2dclusters.at(i2d));
+	}
 	cout<<"check 2d data: "<<m_2dclusters.size()<<endl;
 	Clustering(m_2dclusters, m_3dclusters);
+	for(int i3d=0; i3d<m_3dclusters.size(); i3d++)
+	{
+		m_datacol.bk_Cluster3DCol.push_back(m_3dclusters.at(i3d));
+	}
 	cout<<"check 3d data: "<<m_3dclusters.size()<<endl;
 
 	m_datacol.Cluster1DCol = m_1dclusters;
@@ -69,7 +89,7 @@ StatusCode GlobalClusteringAlg::ClearAlgorithm(){
   return StatusCode::SUCCESS;
 };
 
-template<typename T1, typename T2> void GlobalClusteringAlg::Clustering(std::vector<T1*> &m_input, std::vector<T2*> &m_output) 
+template<typename T1, typename T2> StatusCode GlobalClusteringAlg::Clustering(std::vector<T1*> &m_input, std::vector<T2*> &m_output) 
 {
     std::vector<int> record;
     record.clear();
@@ -81,7 +101,7 @@ template<typename T1, typename T2> void GlobalClusteringAlg::Clustering(std::vec
 
         for(int j=0; j<m_output.size(); j++)
         {
-            if(ifNeighbor(lowlevelcluster, m_output.at(j)))
+            if(ifAdjacent(lowlevelcluster,m_output.at(j))) // //m_output.at(j).isNeighbor(lowlevelcluster)
             {
                 record.push_back(j);
 				// number = number + 1;
@@ -118,13 +138,8 @@ template<typename T1, typename T2> void GlobalClusteringAlg::Clustering(std::vec
         m_output.push_back(highlevelcluster);
 		// cout<<"3: "<<m_output.size()<<endl;
     }
-	
+	return StatusCode::SUCCESS;
 	//cout<<"how many neighbors: "<<number<<endl;
-}
-
-template<typename T1, typename T2> bool GlobalClusteringAlg::ifNeighbor(T1* m_uncluster, T2* m_incluster) 
-{
-	return ifAdjacent(m_uncluster, m_incluster);
 }
 
 //bar->1d
@@ -206,14 +221,8 @@ bool GlobalClusteringAlg::ifAdjacent(PandoraPlus::CaloBar* m_bar, PandoraPlus::C
 //1d->2d
 bool GlobalClusteringAlg::ifAdjacent(PandoraPlus::Calo1DCluster* m_1dcluster, PandoraPlus::Calo2DCluster* m_2dcluster)
 {
-	if(m_1dcluster->getBars().at(0)->getDlayer() == m_2dcluster->getCluster().at(0)->getCluster().at(0)->getDlayer())
-	{
-		return ifSameTower(m_1dcluster,m_2dcluster);
-	}
-	else
-	{
-		return false;
-	}
+	assert(m_1dcluster->getBars().size() > 0 && m_2dcluster->getCluster().at(0)->getCluster().size()>0);
+	return (m_1dcluster->getBars().at(0)->getDlayer() == m_2dcluster->getCluster().at(0)->getCluster().at(0)->getDlayer() && ifSameTower(m_1dcluster,m_2dcluster));
 }
 
 //2d->3d
@@ -234,15 +243,18 @@ bool GlobalClusteringAlg::ifAdjacent(PandoraPlus::Calo2DCluster* m_2dcluster, Pa
 		for(int j=0; j<bars_3d.size(); j++)
 		{
 			const PandoraPlus::CaloBar* alice = bars_3d.at(j);
-			
+			// cout<<i<<j<<endl;
 			if(ifModuleAdjacent(bob,alice))
 			{
+				// cout<<"ifModuleAdjacent"<<endl;
 				return true;
 			}
 		}
 	}
-	
+
 	return false;
+
+	
 }
 
 //some other templates and functions
@@ -265,53 +277,62 @@ template<typename T1, typename T2> bool GlobalClusteringAlg::ifSameTower(T1* m_u
 
 bool GlobalClusteringAlg::ifModuleAdjacent(const PandoraPlus::CaloBar* bar_2d, const PandoraPlus::CaloBar* bar_3d)
 {
-	PandoraPlus::CaloBar* bob = new PandoraPlus::CaloBar(); //just first layer
-	PandoraPlus::CaloBar* alice = new PandoraPlus::CaloBar(); //second new
+	PandoraPlus::CaloBar bob; //just first layer
+	PandoraPlus::CaloBar alice; //second new
 	// m_datacol.bk_BarCol.push_back(bob);
 	// m_datacol.bk_BarCol.push_back(alice);
-	if(bar_2d->getModule()==m_module && bar_3d->getModule()==1)
+	if(bar_2d->getModule()==m_module && bar_3d->getModule()==m_modulestart)
 	{
-		bob = bar_2d->Clone();
-		alice = bar_3d->Clone();
+		bob = *bar_2d;
+		alice = *bar_3d;
+		return ifAdjacent(bob, alice);
+		
 	}
-	else if(bar_2d->getModule()==1 && bar_3d->getModule()==m_module)
+	else if(bar_2d->getModule()==m_modulestart && bar_3d->getModule()==m_module)
 	{
-		bob = bar_3d->Clone();
-		alice = bar_2d->Clone();
+		bob = *bar_3d;
+		alice = *bar_2d;
+		return ifAdjacent(bob, alice);
 	}
 	else if(bar_2d->getModule() == bar_3d->getModule())
 	{
 		return false;
 	}
-	else if(bar_2d->getModule() < bar_3d->getModule())
+	else if((bar_2d->getModule() < bar_3d->getModule()) && (bar_2d->getModule() - bar_3d->getModule())==-1)
 	{
-		bob = bar_2d->Clone();
-		alice = bar_3d->Clone();
+		bob = *bar_2d;
+		alice = *bar_3d;
+		return ifAdjacent(bob, alice);
 	}
+	else if((bar_2d->getModule() > bar_3d->getModule()) && (bar_2d->getModule() - bar_3d->getModule())==1)
+	{
+		bob = *bar_3d;
+		alice = *bar_2d;
+		return ifAdjacent(bob, alice);
+	}	
 	else
 	{
-		bob = bar_3d->Clone();
-		alice = bar_2d->Clone();
+		return false;
 	}	
-	
-	// if(getDlayer(bob.getCluster().begin()->first)==1 && getSlayer(bob.getCluster().begin()->first)==0 && getPart(bob.getCluster().begin()->first)==m_part
-	// && getSlayer(alice.getCluster().begin()->first)==0 && getPart(alice.getCluster().begin()->first)==1)
-	if(bob->getDlayer()==1 && bob->getSlayer()==0 && bob->getPart()==m_part && alice->getSlayer()==0 && alice->getPart()==1 && 
-	bob->getStave()==alice->getStave() && bob->getBar()==alice->getBar())
+}
+
+//
+bool GlobalClusteringAlg::ifAdjacent(PandoraPlus::CaloBar &bob, PandoraPlus::CaloBar &alice)
+{
+	if( (bob.getDlayer()==1 && bob.getSlayer()==0 && bob.getPart()==m_part && alice.getSlayer()==0 && alice.getPart()==1 && bob.getStave()==alice.getStave() && abs(bob.getBar()-alice.getBar())<=1 ) ||
+		(bob.getDlayer()==1 && bob.getSlayer()==0 && bob.getPart()==m_part && alice.getSlayer()==1 && alice.getPart()==1 && bob.getStave()==alice.getStave() && alice.getBar()==1) ||
+		(bob.getDlayer()==1 && bob.getSlayer()==0 && bob.getPart()==m_part && alice.getSlayer()==0 && alice.getPart()==1 && abs(bob.getStave()-alice.getStave())<=1 && ((bob.getBar()==1&&alice.getBar()==60)||(bob.getBar()==60&&alice.getBar()==1)))
+	) 
 	{
-		delete bob;
-		delete alice;
 		return true;
 	}
 	else
 	{
-		delete bob;
-		delete alice;
 		return false;
-	}	
+	}
 }
 //
-void GlobalClusteringAlg::Towering(std::vector<PandoraPlus::Calo3DCluster*>& m_3dcluster,std::vector<PandoraPlus::CaloTower*>& m_tower)
+StatusCode GlobalClusteringAlg::Towering(std::vector<PandoraPlus::Calo3DCluster*>& m_3dcluster,std::vector<PandoraPlus::CaloTower*>& m_tower)
 {
 	int record = 0;
 	for(int i=0; i<m_3dcluster.size(); i++)
@@ -397,7 +418,7 @@ void GlobalClusteringAlg::Towering(std::vector<PandoraPlus::Calo3DCluster*>& m_3
 		}
 
 	}
-	
+	return StatusCode::SUCCESS;
 }
 
 #endif

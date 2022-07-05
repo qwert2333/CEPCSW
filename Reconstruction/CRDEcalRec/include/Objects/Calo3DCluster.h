@@ -1,5 +1,5 @@
-#ifndef CALO3D_CLUSTER_H
-#define CALO3D_CLUSTER_H
+#ifndef CALO_3DCLUSTER_H
+#define CALO_3DCLUSTER_H
 
 #include "Objects/Calo2DCluster.h"
 #include "Objects/CaloTower.h"

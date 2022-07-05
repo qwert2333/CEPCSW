@@ -47,7 +47,7 @@ namespace PandoraPlus{
     int part;
 
     std::vector<const Track *> trkCol;
-	std::vector<const CaloBlock*> blockCol;
+	  std::vector<const CaloBlock*> blockCol;
     std::vector<const Calo2DCluster*> Cluster2DCol; 
     std::vector<const LongiCluster*> longiClusXCol;
     std::vector<const LongiCluster*> longiClusYCol;
