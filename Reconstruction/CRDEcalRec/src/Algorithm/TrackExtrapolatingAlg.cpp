@@ -89,10 +89,10 @@ std::cout<<"    --------------------Processing track "<<itrk<<"-----------------
     PandoraPlus::TrackState ECAL_trk_state;
     GetECALTrackState(p_tracks->at(itrk), ECAL_trk_state);
     
-std::cout<<"      track location: "<<ECAL_trk_state.location<<std::endl;
-std::cout<<"      track reference point: ("<<ECAL_trk_state.referencePoint.X()<<", "
-                                         <<ECAL_trk_state.referencePoint.Y()<<", "
-                                         <<ECAL_trk_state.referencePoint.Z()<<")"<<std::endl;
+// std::cout<<"      track location: "<<ECAL_trk_state.location<<std::endl;
+// std::cout<<"      track reference point: ("<<ECAL_trk_state.referencePoint.X()<<", "
+//                                          <<ECAL_trk_state.referencePoint.Y()<<", "
+//                                          <<ECAL_trk_state.referencePoint.Z()<<")"<<std::endl;
 
     ExtrapolateByLayer(normal_vectors, layer_points, ECAL_trk_state, p_tracks->at(itrk));
   } // end loop tracks
@@ -196,19 +196,19 @@ StatusCode TrackExtrapolatingAlg::ExtrapolateByLayer(const std::vector<TVector2>
                               const PandoraPlus::TrackState & ECAL_trk_state, 
                               PandoraPlus::Track* p_track){
     float rho = GetRho(ECAL_trk_state);
-std::cout<<"        yyy: rho="<<rho<<std::endl;
+// std::cout<<"        yyy: rho="<<rho<<std::endl;
     TVector2 center = GetCenterOfCircle(ECAL_trk_state, rho);
-std::cout<<"        yyy: center="<<center.X()<<", "<<center.Y()<<std::endl;    
+// std::cout<<"        yyy: center="<<center.X()<<", "<<center.Y()<<std::endl;    
     float alpha0 = GetRefAlpha0(ECAL_trk_state, center); 
-std::cout<<"        yyy: alpha0="<<alpha0<<std::endl;
+// std::cout<<"        yyy: alpha0="<<alpha0<<std::endl;
     bool is_rtbk = IsReturn(rho, center);
 
     // Evaluate delta_phi
     std::vector<float> delta_phi;
     for(int im=0; im<normal_vectors.size(); im++){  // for each module
       float beta = ATan2(normal_vectors[im].X(), normal_vectors[im].Y());
-std::cout<<"        yyy: im module "<<im<<", beta = "<<beta<<", num of layer points = "
-          <<layer_points[im].size()<<std::endl;
+// std::cout<<"        yyy: im module "<<im<<", beta = "<<beta<<", num of layer points = "
+          // <<layer_points[im].size()<<std::endl;
       float denominator = rho * Sqrt( (normal_vectors[im].X()*normal_vectors[im].X()) +
                                       (normal_vectors[im].Y()*normal_vectors[im].Y()) );
       for(int il=0; il<layer_points[im].size(); il++){  // for each layer
@@ -241,12 +241,10 @@ std::cout<<"        yyy: im module "<<im<<", beta = "<<beta<<", num of layer poi
 
     // extrpolated track points. Will be stored as reference point in TrackState
     std::vector<TVector3> ext_points;
-std::cout<<"num of delta_phi="<<delta_phi.size()<<std::endl;
+// std::cout<<"num of delta_phi="<<delta_phi.size()<<std::endl;
     for(int ip=0; ip<delta_phi.size(); ip++){
       float x = center.X() + (rho*Cos(alpha0+delta_phi[ip]));
       float y = center.Y() + (rho*Sin(alpha0+delta_phi[ip]));
-      // float z = ECAL_trk_state.referencePoint.Z() + ECAL_trk_state.Z0 + 
-      //           (delta_phi[ip]*rho*ECAL_trk_state.tanLambda);
       float z;
       if(ECAL_trk_state.Kappa > 0){
         z = ECAL_trk_state.referencePoint.Z() + ECAL_trk_state.Z0 - 
@@ -255,8 +253,8 @@ std::cout<<"num of delta_phi="<<delta_phi.size()<<std::endl;
         z = ECAL_trk_state.referencePoint.Z() + ECAL_trk_state.Z0 + 
                 (delta_phi[ip]*rho*ECAL_trk_state.tanLambda);
       }
-std::cout<<"        yyy: delta_phi["<<ip<<"]="<<delta_phi[ip]<<std::endl;
-std::cout<<"        yyy: extp="<< x<<", "<<y<<", "<<z<<std::endl<<std::endl;
+// std::cout<<"        yyy: delta_phi["<<ip<<"]="<<delta_phi[ip]<<std::endl;
+// std::cout<<"        yyy: extp="<< x<<", "<<y<<", "<<z<<std::endl<<std::endl;
       TVector3 extp(x,y,z);
       if(Sqrt(extp.X()*extp.X() + extp.Y()*extp.Y()) < settings.map_floatPars["outermost_distance"]
          && Sqrt(extp.X()*extp.X() + extp.Y()*extp.Y()) > settings.map_floatPars["innermost_distance"]-0.5*settings.map_floatPars["layer_width"]){
@@ -265,7 +263,7 @@ std::cout<<"        yyy: extp="<< x<<", "<<y<<", "<<z<<std::endl<<std::endl;
         ext_points.push_back(extp);
       }     
     }
-std::cout<<"num of eext_points="<<ext_points.size()<<std::endl;
+// std::cout<<"num of eext_points="<<ext_points.size()<<std::endl;
     // Add track state to the track
     for(int ip=0; ip<ext_points.size(); ip++){
       TrackState t_state = ECAL_trk_state;
