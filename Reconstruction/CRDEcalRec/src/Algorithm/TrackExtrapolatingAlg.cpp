@@ -207,6 +207,8 @@ std::cout<<"        yyy: alpha0="<<alpha0<<std::endl;
     std::vector<float> delta_phi;
     for(int im=0; im<normal_vectors.size(); im++){  // for each module
       float beta = ATan2(normal_vectors[im].X(), normal_vectors[im].Y());
+std::cout<<"        yyy: im module "<<im<<", beta = "<<beta<<", num of layer points = "
+          <<layer_points[im].size()<<std::endl;
       float denominator = rho * Sqrt( (normal_vectors[im].X()*normal_vectors[im].X()) +
                                       (normal_vectors[im].Y()*normal_vectors[im].Y()) );
       for(int il=0; il<layer_points[im].size(); il++){  // for each layer
@@ -216,16 +218,21 @@ std::cout<<"        yyy: alpha0="<<alpha0<<std::endl;
                           (center.Y()*normal_vectors[im].Y()) ;
         if(Abs(numerator/denominator)>1) continue;
         float t_as = ASin(numerator/denominator);
+        float t_ab = ASin(Sin(alpha0+beta));
 
-        float t_dphi1 = t_as - alpha0 - beta;
-        float t_dphi2 = (t_as>0) ? (Pi()-t_as-alpha0-beta) : (-Pi()-t_as-alpha0-beta);
-        if(ECAL_trk_state.Kappa < 0){
+        float t_dphi1 = t_as - t_ab;
+        float t_dphi2 = Pi()-t_as - t_ab;
+        if(ECAL_trk_state.Kappa < 0){ 
           delta_phi.push_back(t_dphi1); 
-          if(is_rtbk){ delta_phi.push_back(t_dphi2); }
+          if(is_rtbk){
+            delta_phi.push_back(t_dphi2);
+          }
         }
         else{
-          delta_phi.push_back(t_dphi2);
-          if(is_rtbk){ delta_phi.push_back(t_dphi1); }
+          delta_phi.push_back(-t_dphi1); 
+          if(is_rtbk){
+            delta_phi.push_back(-t_dphi2);
+          }
         }
         
       }
@@ -234,19 +241,31 @@ std::cout<<"        yyy: alpha0="<<alpha0<<std::endl;
 
     // extrpolated track points. Will be stored as reference point in TrackState
     std::vector<TVector3> ext_points;
+std::cout<<"num of delta_phi="<<delta_phi.size()<<std::endl;
     for(int ip=0; ip<delta_phi.size(); ip++){
       float x = center.X() + (rho*Cos(alpha0+delta_phi[ip]));
       float y = center.Y() + (rho*Sin(alpha0+delta_phi[ip]));
-      float z = ECAL_trk_state.referencePoint.Z() + ECAL_trk_state.Z0 + 
+      // float z = ECAL_trk_state.referencePoint.Z() + ECAL_trk_state.Z0 + 
+      //           (delta_phi[ip]*rho*ECAL_trk_state.tanLambda);
+      float z;
+      if(ECAL_trk_state.Kappa > 0){
+        z = ECAL_trk_state.referencePoint.Z() + ECAL_trk_state.Z0 - 
                 (delta_phi[ip]*rho*ECAL_trk_state.tanLambda);
+      }else{
+        z = ECAL_trk_state.referencePoint.Z() + ECAL_trk_state.Z0 + 
+                (delta_phi[ip]*rho*ECAL_trk_state.tanLambda);
+      }
+std::cout<<"        yyy: delta_phi["<<ip<<"]="<<delta_phi[ip]<<std::endl;
+std::cout<<"        yyy: extp="<< x<<", "<<y<<", "<<z<<std::endl<<std::endl;
       TVector3 extp(x,y,z);
       if(Sqrt(extp.X()*extp.X() + extp.Y()*extp.Y()) < settings.map_floatPars["outermost_distance"]
          && Sqrt(extp.X()*extp.X() + extp.Y()*extp.Y()) > settings.map_floatPars["innermost_distance"]-0.5*settings.map_floatPars["layer_width"]){
-std::cout<<"        yyy: extp="<< extp.X()<<", "<<extp.Y()<<", "<<extp.Z()<<std::endl;
+// std::cout<<"        yyy: delta_phi["<<ip<<"]="<<delta_phi[ip]<<std::endl;
+// std::cout<<"        yyy: extp="<< extp.X()<<", "<<extp.Y()<<", "<<extp.Z()<<std::endl<<std::endl;
         ext_points.push_back(extp);
       }     
     }
-
+std::cout<<"num of eext_points="<<ext_points.size()<<std::endl;
     // Add track state to the track
     for(int ip=0; ip<ext_points.size(); ip++){
       TrackState t_state = ECAL_trk_state;
