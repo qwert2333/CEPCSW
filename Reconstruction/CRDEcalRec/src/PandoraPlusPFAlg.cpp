@@ -172,6 +172,10 @@ StatusCode PandoraPlusPFAlg::initialize()
     t_Clustering->Branch("m_bar_x", &m_bar_x);
     t_Clustering->Branch("m_bar_y", &m_bar_y);
     t_Clustering->Branch("m_bar_z", &m_bar_z);
+    t_Clustering->Branch("m_bar_module", &m_bar_module);
+    t_Clustering->Branch("m_bar_part", &m_bar_part);
+    t_Clustering->Branch("m_bar_stave", &m_bar_stave);
+    t_Clustering->Branch("m_bar_bar", &m_bar_bar);
 
   }
 
@@ -344,6 +348,10 @@ for(int ib=0; ib<m_DataCol.TowerCol[it]->getBlocks().size(); ib++){
 			m_bar_x.push_back(the_bar->getPosition().x());
 			m_bar_y.push_back(the_bar->getPosition().y());
 			m_bar_z.push_back(the_bar->getPosition().z());
+			m_bar_module.push_back(the_bar->getModule());
+			m_bar_part.push_back(the_bar->getPart());
+			m_bar_stave.push_back(the_bar->getStave());
+      m_bar_bar.push_back(the_bar->getBar());
 		}
 	}
 	for(int j=0; j<tmp_2dclusters.size(); j++)
@@ -458,5 +466,9 @@ void PandoraPlusPFAlg::ClearClustering(){
 	m_bar_x.clear();
 	m_bar_y.clear();
 	m_bar_z.clear();
+  m_bar_module.clear();
+  m_bar_part.clear();
+  m_bar_stave.clear();
+  m_bar_bar.clear();
 }
 #endif

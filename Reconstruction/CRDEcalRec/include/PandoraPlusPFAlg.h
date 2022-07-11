@@ -148,7 +148,7 @@ protected:
   TTree* t_Clustering;
   int m_3dcluster, m_2dcluster, m_1dcluster, m_barcluster, m_bar; //efficiency
   FloatVec m_E_3dcluster, m_E_2dcluster, m_E_1dcluster, m_E_barcluster, m_E_bar; //resolution
-  FloatVec m_bar_tag, m_bar_energy, m_bar_dlayer, m_bar_slayer, m_bar_x, m_bar_y, m_bar_z; //distribution check
+  FloatVec m_bar_tag, m_bar_energy, m_bar_dlayer, m_bar_slayer, m_bar_x, m_bar_y, m_bar_z, m_bar_module, m_bar_part, m_bar_stave, m_bar_bar; //distribution check
 
   void ClearBar();
   void ClearLayer();
