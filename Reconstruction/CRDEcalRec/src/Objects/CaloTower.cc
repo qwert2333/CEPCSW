@@ -7,7 +7,8 @@ namespace PandoraPlus{
 
   void CaloTower::Clear(){
     trkCol.clear();
-    blockCol.clear();
+	  blockCol.clear();
+    Cluster2DCol.clear();
     longiClusXCol.clear();
     longiClusYCol.clear();
   }
@@ -17,6 +18,8 @@ namespace PandoraPlus{
     trkCol.clear();
     CleanBlock();
     CleanLongiClusters();
+    for(auto iter : Cluster2DCol) if(!iter) {delete iter; iter=NULL;}
+    Cluster2DCol.clear();
   }
 
   void CaloTower::CleanBlock() {

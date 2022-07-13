@@ -148,15 +148,24 @@ protected:
   FloatVec m_Clus_x, m_Clus_y, m_Clus_z, m_Clus_E;
   IntVec m_Nhit;
 
+
+  //check neighbor clustering
+  TTree* t_Clustering;
+  int m_3dcluster, m_2dcluster, m_1dcluster, m_barcluster, m_bar; //efficiency
+  FloatVec m_E_3dcluster, m_E_2dcluster, m_E_1dcluster, m_E_barcluster, m_E_bar; //resolution
+  FloatVec m_bar_tag, m_bar_energy, m_bar_dlayer, m_bar_slayer, m_bar_x, m_bar_y, m_bar_z, m_bar_module, m_bar_part, m_bar_stave, m_bar_bar; //distribution check
+
   TTree * t_Track;
   int m_Ntrk; 
   FloatVec m_trkstate_d0, m_trkstate_z0, m_trkstate_phi, m_trkstate_tanL, m_trkstate_omega, m_trkstate_kappa;
   FloatVec m_trkstate_refx, m_trkstate_refy, m_trkstate_refz; 
   IntVec m_trkstate_location; 
 
+
   void ClearBar();
   void ClearLayer();
   void ClearCluster();
+  void ClearClustering();
   void ClearTrack();
 
 };
