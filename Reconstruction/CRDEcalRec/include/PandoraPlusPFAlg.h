@@ -1,6 +1,7 @@
 #ifndef PANDORAPLUS_ALG_H
 #define PANDORAPLUS_ALG_H
 
+#include <string>
 #include "k4FWCore/DataHandle.h"
 #include "GaudiAlg/GaudiAlgorithm.h"
 #include <DDRec/DetectorData.h>
@@ -20,6 +21,8 @@
 #include "Algorithm/HoughClusteringAlg.h"
 #include "Algorithm/EnergySplittingAlg.h"
 #include "Algorithm/EnergyTimeMatchingAlg.h"
+#include "Algorithm/ConeClusteringAlg.h"
+#include "Algorithm/TrackExtrapolatingAlg.h"
 
 #include "TVector3.h"
 #include "TRandom3.h"
@@ -59,7 +62,7 @@ protected:
 
 
   //DataCollection
-  PandoraPlusDataCol     m_DataCol;   //TODO: decide if set it to const. 
+  PandoraPlusDataCol     m_DataCol; 
 
 
   //Creators and their setting
@@ -67,16 +70,16 @@ protected:
   TrackCreator            *m_pTrackCreator;
   CaloHitsCreator         *m_pCaloHitsCreator;
   OutputCreator           *m_pOutputCreator;
-  
 
-  MCParticleCreator::Settings   m_pMCParticleCreatorSettings;
-  TrackCreator::Settings        m_pTrackCreatorSettings;
-  CaloHitsCreator::Settings     m_CaloHitsCreatorSettings;
-  OutputCreator::Settings       m_OutputCreatorSettings;
+  Settings   m_pMCParticleCreatorSettings;
+  Settings   m_pTrackCreatorSettings;
+  Settings   m_CaloHitsCreatorSettings;
+  Settings   m_OutputCreatorSettings;
+
 
   //Parameters for PFA algorithm
   Settings m_GlobalSettings; 
-  //std::map<std::string, Settings> m_algorithmSettings; 
+
 
   //Algorithm for PFA
   PandoraPlus::AlgorithmManager m_algorithmManager; 
@@ -101,19 +104,19 @@ protected:
 
 
   //Global parameters.
-  Gaudi::Property<float> m_BField{this,   "BField", 3., "Magnetic field"};
-  Gaudi::Property<float> m_seed{this,   "Seed", 2131, "Random Seed"};
-  Gaudi::Property<int>   m_Debug{this,   "Debug", 0, "Debug level"};
-  Gaudi::Property<int>   m_Nskip{this,   "SkipEvt", 0, "Skip event"};
-
+  Gaudi::Property<float>  m_BField{this,  "BField", 3., "Magnetic field"};
+  Gaudi::Property<float>  m_seed{this,    "Seed", 2131, "Random Seed"};
+  Gaudi::Property<int>    m_Debug{this,   "Debug", 0, "Debug level"};
+  Gaudi::Property<int>    m_Nskip{this,   "SkipEvt", 0, "Skip event"};
+  Gaudi::Property<std::string>   m_EcalType{this, "EcalType", "BarEcal", "ECAL type"};
 
   
   //Algorithms: 
-  typedef std::vector<double> FloatVector;
   typedef std::vector<std::string> StringVector;
   Gaudi::Property< StringVector > name_Algs{ this, "AlgList", {} };
   Gaudi::Property< std::vector<StringVector> > name_AlgPars{ this, "AlgParNames", {} };
-  Gaudi::Property< std::vector<FloatVector> > value_AlgPars{this, "AlgParValues", {} };
+  Gaudi::Property< std::vector<StringVector> > type_AlgPars{ this, "AlgParTypes", {} };
+  Gaudi::Property< std::vector<StringVector> > value_AlgPars{this, "AlgParValues", {} };
 
 
   // Output collections
@@ -122,6 +125,7 @@ protected:
   DataHandle<edm4hep::ReconstructedParticleCollection>  w_ReconstructedParticleCollection {"PandoraPFOs"    ,Gaudi::DataHandle::Writer, this};
   DataHandle<edm4hep::VertexCollection>                 w_VertexCollection {"PandoraPFANewStartVertices",Gaudi::DataHandle::Writer, this};
   DataHandle<edm4hep::MCRecoParticleAssociationCollection>  w_MCRecoParticleAssociationCollection {"pfoMCRecoParticleAssociation",Gaudi::DataHandle::Writer, this};
+
 
   //For Ana
   Gaudi::Property<bool>  m_WriteAna {this, "WriteAna", false, "Write Ntuples for analysis"};
@@ -144,15 +148,25 @@ protected:
   FloatVec m_Clus_x, m_Clus_y, m_Clus_z, m_Clus_E;
   IntVec m_Nhit;
 
+
   //check neighbor clustering
   TTree* t_Clustering;
   int m_3dcluster, m_2dcluster, m_1dcluster, m_barcluster, m_bar; //efficiency
   FloatVec m_E_3dcluster, m_E_2dcluster, m_E_1dcluster, m_E_barcluster, m_E_bar; //resolution
   FloatVec m_bar_tag, m_bar_energy, m_bar_dlayer, m_bar_slayer, m_bar_x, m_bar_y, m_bar_z, m_bar_module, m_bar_part, m_bar_stave, m_bar_bar; //distribution check
 
+  TTree * t_Track;
+  int m_Ntrk; 
+  FloatVec m_trkstate_d0, m_trkstate_z0, m_trkstate_phi, m_trkstate_tanL, m_trkstate_omega, m_trkstate_kappa;
+  FloatVec m_trkstate_refx, m_trkstate_refy, m_trkstate_refz; 
+  IntVec m_trkstate_location; 
+
+
   void ClearBar();
   void ClearLayer();
   void ClearCluster();
   void ClearClustering();
+  void ClearTrack();
+
 };
 #endif

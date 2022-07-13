@@ -10,7 +10,7 @@ namespace PandoraPlus{
   };
 
   StatusCode TrackCreator::CreateTracks( PandoraPlusDataCol& m_DataCol, std::vector<DataHandle<edm4hep::TrackCollection>*>& r_TrackCols ){
-    if(r_TrackCols.size()==0 || settings.m_trackCollections.size()==0) StatusCode::SUCCESS;
+    if(r_TrackCols.size()==0 || settings.map_stringVecPars.at("trackCollections").size()==0) StatusCode::SUCCESS;
 
     //Save readin collections
     m_DataCol.collectionMap_Track.clear(); 
@@ -23,7 +23,7 @@ namespace PandoraPlus{
         m_TrkCol.push_back(m_trk);
       }
 
-      m_DataCol.collectionMap_Track[settings.m_trackCollections[icol]] = m_TrkCol; 
+      m_DataCol.collectionMap_Track[ settings.map_stringVecPars.at("trackCollections")[icol] ] = m_TrkCol; 
     }
 
 
@@ -42,7 +42,7 @@ namespace PandoraPlus{
         m_trkst.phi0 = const_TrkCol[itrk].getTrackStates(its).phi;
         m_trkst.tanLambda = const_TrkCol[itrk].getTrackStates(its).tanLambda;
         m_trkst.Omega = const_TrkCol[itrk].getTrackStates(its).omega;
-        m_trkst.Kappa = m_trkst.Omega*1000./(0.3*settings.m_BField);   
+        m_trkst.Kappa = m_trkst.Omega*1000./(0.3*settings.map_floatPars.at("BField"));   
         m_trkst.location = const_TrkCol[itrk].getTrackStates(its).location;
         m_trkst.referencePoint.SetXYZ( const_TrkCol[itrk].getTrackStates(its).referencePoint[0],
                                        const_TrkCol[itrk].getTrackStates(its).referencePoint[1],
@@ -51,6 +51,7 @@ namespace PandoraPlus{
         m_trk->AddTrackState( m_trkst );
       }
       m_trkCol.push_back(m_trk);
+      m_DataCol.bk_TrackCol.push_back( m_trk );
     }}
     m_DataCol.TrackCol = m_trkCol;
 

@@ -36,18 +36,18 @@ StatusCode PandoraPlusPFAlg::initialize()
 
 
   //Initialize Creator settings
-  m_pMCParticleCreatorSettings.m_mcParticleCollections = name_MCParticleCol;
+  m_pMCParticleCreatorSettings.map_stringPars["MCParticleCollections"] = name_MCParticleCol.value();
 
-  m_pTrackCreatorSettings.m_trackCollections = name_TrackCol;
-  m_pTrackCreatorSettings.m_BField = m_BField; 
+  m_pTrackCreatorSettings.map_stringVecPars["trackCollections"] = name_TrackCol.value();
+  m_pTrackCreatorSettings.map_floatPars["BField"] = m_BField; 
 
   std::vector<std::string> name_CaloHits = name_EcalHits; 
   std::vector<std::string> name_CaloReadout = name_EcalReadout;
   name_CaloHits.insert( name_CaloHits.end(), name_HcalHits.begin(), name_HcalHits.end() );
   name_CaloReadout.insert(name_CaloReadout.end(), name_HcalReadout.begin(), name_HcalReadout.end());
 
-  m_CaloHitsCreatorSettings.m_CaloHitCollections = name_CaloHits;
-  //m_CaloHitsCreatorSettings.m_CaloReadouts = name_CaloReadout;
+  m_CaloHitsCreatorSettings.map_stringVecPars["CaloHitCollections"] = name_CaloHits;
+  m_CaloHitsCreatorSettings.map_stringPars["EcalType"] = m_EcalType.value();
 
   //Initialize Creators
   m_pMCParticleCreator = new MCParticleCreator( m_pMCParticleCreatorSettings );
@@ -58,37 +58,46 @@ StatusCode PandoraPlusPFAlg::initialize()
   //Readin collections
 
   //---MC particle---
-  r_MCParticleCol = new DataHandle<edm4hep::MCParticleCollection> (name_MCParticleCol, Gaudi::DataHandle::Reader, this);
+  if(!name_MCParticleCol.empty()) r_MCParticleCol = new DataHandle<edm4hep::MCParticleCollection> (name_MCParticleCol, Gaudi::DataHandle::Reader, this);
 
   //---Tracks---
-  for(auto& _trk : name_TrackCol) r_TrackCols.push_back( new TrackType(_trk, Gaudi::DataHandle::Reader, this) );
+  for(auto& _trk : name_TrackCol) if(!_trk.empty()) r_TrackCols.push_back( new TrackType(_trk, Gaudi::DataHandle::Reader, this) );
 
   //---Calo Hits---
-  for(auto& _ecal : name_EcalHits){ 
-    r_ECalHitCols.push_back( new CaloType(_ecal, Gaudi::DataHandle::Reader, this) );
-    r_CaloHitCols.push_back( new CaloType(_ecal, Gaudi::DataHandle::Reader, this) );
-  }
+  for(auto& _ecal : name_EcalHits){
+    if(!_ecal.empty()){ 
+      r_ECalHitCols.push_back( new CaloType(_ecal, Gaudi::DataHandle::Reader, this) );
+      r_CaloHitCols.push_back( new CaloType(_ecal, Gaudi::DataHandle::Reader, this) );
+  }}
   for(auto& _hcal : name_HcalHits){ 
-    r_HCalHitCols.push_back( new CaloType(_hcal, Gaudi::DataHandle::Reader, this) );
-    r_CaloHitCols.push_back( new CaloType(_hcal, Gaudi::DataHandle::Reader, this) );
-  }
+    if(!_hcal.empty()){
+      r_HCalHitCols.push_back( new CaloType(_hcal, Gaudi::DataHandle::Reader, this) );
+      r_CaloHitCols.push_back( new CaloType(_hcal, Gaudi::DataHandle::Reader, this) );
+  }}
 
 
   //Register Algorithms
   //--- Initialize algorithm maps ---
   m_algorithmManager.RegisterAlgorithmFactory("ExampleAlg",             new ExampleAlg::Factory);
+  m_algorithmManager.RegisterAlgorithmFactory("TrackExtrapolatingAlg",  new TrackExtrapolatingAlg::Factory);
   m_algorithmManager.RegisterAlgorithmFactory("GlobalClusteringAlg",    new GlobalClusteringAlg::Factory);
   m_algorithmManager.RegisterAlgorithmFactory("LocalMaxFindingAlg",     new LocalMaxFindingAlg::Factory);
   m_algorithmManager.RegisterAlgorithmFactory("HoughClusteringAlg",     new HoughClusteringAlg::Factory);
   m_algorithmManager.RegisterAlgorithmFactory("EnergySplittingAlg",     new EnergySplittingAlg::Factory);
   m_algorithmManager.RegisterAlgorithmFactory("EnergyTimeMatchingAlg",  new EnergyTimeMatchingAlg::Factory);
+  m_algorithmManager.RegisterAlgorithmFactory("ConeClusteringAlg",      new ConeClusteringAlg::Factory);
+  m_algorithmManager.RegisterAlgorithmFactory("ConeClusteringAlgHCAL",  new ConeClusteringAlg::Factory);
 
 
   //--- Create algorithm from readin settings ---
   for(int ialg=0; ialg<name_Algs.value().size(); ialg++){
     Settings m_settings; 
-    for(int ipar=0; ipar<name_AlgPars.value()[ialg].size(); ipar++)
-      m_settings.map_floatPars[name_AlgPars.value()[ialg].at(ipar)] = value_AlgPars.value()[ialg].at(ipar);
+    for(int ipar=0; ipar<name_AlgPars.value()[ialg].size(); ipar++){
+      if(type_AlgPars.value()[ialg].at(ipar)=="double") m_settings.map_floatPars[name_AlgPars.value()[ialg].at(ipar)] = std::stod( (string)value_AlgPars.value()[ialg].at(ipar) );
+      if(type_AlgPars.value()[ialg].at(ipar)=="string") m_settings.map_stringPars[name_AlgPars.value()[ialg].at(ipar)] = value_AlgPars.value()[ialg].at(ipar) ;
+      if(type_AlgPars.value()[ialg].at(ipar)=="bool") m_settings.map_boolPars[name_AlgPars.value()[ialg].at(ipar)] = (bool)std::stoi( value_AlgPars.value()[ialg].at(ipar) );
+    }
+
     m_algorithmManager.RegisterAlgorithm( name_Algs.value()[ialg], m_settings );
   }
 
@@ -98,6 +107,7 @@ StatusCode PandoraPlusPFAlg::initialize()
   if ( !m_geosvc )  throw "PandoraPlusPFAlg :Failed to find GeomSvc ...";
 
   for(unsigned int i=0; i<name_CaloReadout.size(); i++){
+    if(name_CaloReadout[i].empty()) continue;
     dd4hep::DDSegmentation::BitFieldCoder* tmp_decoder = m_geosvc->getDecoder(name_CaloReadout[i]);
     if (!tmp_decoder) {
       error() << "Failed to get the decoder for: " << name_CaloReadout[i] << endmsg;
@@ -120,6 +130,8 @@ StatusCode PandoraPlusPFAlg::initialize()
     t_Layers = new TTree("RecLayers","RecLayers");
     t_Cluster = new TTree("RecClusters", "RecClusters");
     t_Clustering = new TTree("Clustering", "Clustering");
+    t_Track = new TTree("RecTracks", "RecTracks");
+
 
     t_SimBar->Branch("simBar_x", &m_simBar_x);
     t_SimBar->Branch("simBar_y", &m_simBar_y);
@@ -154,6 +166,7 @@ StatusCode PandoraPlusPFAlg::initialize()
     t_Cluster->Branch("Clus_E", &m_Clus_E);
     t_Cluster->Branch("Nhit", &m_Nhit);
 
+
     //neighbor clustering
     t_Clustering->Branch("m_3dcluster", &m_3dcluster);
     t_Clustering->Branch("m_2dcluster", &m_2dcluster);
@@ -176,6 +189,20 @@ StatusCode PandoraPlusPFAlg::initialize()
     t_Clustering->Branch("m_bar_part", &m_bar_part);
     t_Clustering->Branch("m_bar_stave", &m_bar_stave);
     t_Clustering->Branch("m_bar_bar", &m_bar_bar);
+
+    // Tracks
+    t_Track->Branch("m_Ntrk", &m_Ntrk);
+    t_Track->Branch("m_trkstate_d0", &m_trkstate_d0);
+    t_Track->Branch("m_trkstate_z0", &m_trkstate_z0);
+    t_Track->Branch("m_trkstate_phi", &m_trkstate_phi);
+    t_Track->Branch("m_trkstate_tanL", &m_trkstate_tanL);
+    t_Track->Branch("m_trkstate_kappa", &m_trkstate_kappa);
+    t_Track->Branch("m_trkstate_omega", &m_trkstate_omega);
+    t_Track->Branch("m_trkstate_refx", &m_trkstate_refx);
+    t_Track->Branch("m_trkstate_refy", &m_trkstate_refy);
+    t_Track->Branch("m_trkstate_refz", &m_trkstate_refz);
+    t_Track->Branch("m_trkstate_location", &m_trkstate_location);
+
 
   }
 
@@ -311,7 +338,7 @@ for(int ib=0; ib<m_DataCol.TowerCol[it]->getBlocks().size(); ib++){
 
   //Save Cluster info
   ClearCluster();
-  std::vector<PandoraPlus::CaloCluster*> m_clusvec = m_DataCol.ClusterCol;
+  std::vector<PandoraPlus::CaloCluster*> m_clusvec = m_DataCol.map_CaloCluster["EcalCluster"];
   m_Nclus = m_clusvec.size();
   for(int ic=0; ic<m_clusvec.size(); ic++){
     m_Clus_x.push_back( m_clusvec[ic]->getShowerCenter().x() );
@@ -321,6 +348,7 @@ for(int ib=0; ib<m_DataCol.TowerCol[it]->getBlocks().size(); ib++){
     m_Nhit.push_back( m_clusvec[ic]->getShowers().size() );
   }
   t_Cluster->Fill();
+
 
 	//neighbor clustering
 	ClearClustering();
@@ -372,6 +400,26 @@ for(int ib=0; ib<m_DataCol.TowerCol[it]->getBlocks().size(); ib++){
 
 	t_Clustering->Fill();
 
+  // Save Track info
+  ClearTrack();
+  std::vector<PandoraPlus::Track*> m_trkCol = m_DataCol.TrackCol;
+  m_Ntrk = m_trkCol.size();
+  for(int itrk=0; itrk<m_Ntrk; itrk++){
+    for(int istate=0; istate<m_trkCol[itrk]->trackStates_size(); istate++){
+      m_trkstate_d0.push_back( m_trkCol[itrk]->getTrackStates(istate).D0 );
+      m_trkstate_z0.push_back( m_trkCol[itrk]->getTrackStates(istate).Z0 );
+      m_trkstate_phi.push_back( m_trkCol[itrk]->getTrackStates(istate).phi0 );
+      m_trkstate_tanL.push_back( m_trkCol[itrk]->getTrackStates(istate).tanLambda );
+      m_trkstate_kappa.push_back( m_trkCol[itrk]->getTrackStates(istate).Kappa);
+      m_trkstate_omega.push_back( m_trkCol[itrk]->getTrackStates(istate).Omega );
+      m_trkstate_refx.push_back( m_trkCol[itrk]->getTrackStates(istate).referencePoint.X() );
+      m_trkstate_refy.push_back( m_trkCol[itrk]->getTrackStates(istate).referencePoint.Y() );
+      m_trkstate_refz.push_back( m_trkCol[itrk]->getTrackStates(istate).referencePoint.Z() );
+      m_trkstate_location.push_back( m_trkCol[itrk]->getTrackStates(istate).location );
+  }}
+  t_Track->Fill();
+
+
   //Clean Events
   m_DataCol.Clean();
 
@@ -390,6 +438,11 @@ StatusCode PandoraPlusPFAlg::finalize()
   t_Clustering->Write();
   m_wfile->Close();
   delete m_wfile, t_SimBar, t_Layers, t_Cluster, t_Clustering;
+
+  t_Track->Write();
+  m_wfile->Close();
+  delete m_wfile, t_SimBar, t_Layers, t_Cluster, t_Track;
+
 
   delete m_pMCParticleCreator;
   delete m_pTrackCreator; 
@@ -448,6 +501,7 @@ void PandoraPlusPFAlg::ClearCluster(){
   m_Nhit.clear();
 }
 
+
 void PandoraPlusPFAlg::ClearClustering(){
 	m_3dcluster=0;
 	m_2dcluster=0;
@@ -470,5 +524,19 @@ void PandoraPlusPFAlg::ClearClustering(){
   m_bar_part.clear();
   m_bar_stave.clear();
   m_bar_bar.clear();
+
+void PandoraPlusPFAlg::ClearTrack(){
+  m_Ntrk=-99;
+  m_trkstate_d0.clear(); 
+  m_trkstate_z0.clear();
+  m_trkstate_phi.clear();
+  m_trkstate_tanL.clear();
+  m_trkstate_kappa.clear();
+  m_trkstate_omega.clear();
+  m_trkstate_refx.clear();
+  m_trkstate_refy.clear();
+  m_trkstate_refz.clear();
+  m_trkstate_location.clear();
+
 }
 #endif

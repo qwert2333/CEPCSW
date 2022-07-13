@@ -2,18 +2,15 @@
 #define OUTPUT_CREATOR_H
 
 #include "k4FWCore/DataHandle.h"
+#include "edm4hep/MutableCalorimeterHit.h"
+#include "edm4hep/Vector3f.h"
 #include "PandoraPlusDataCol.h"
+#include "Tools/Algorithm.h"
 
 namespace PandoraPlus{
 
   class OutputCreator{
   public: 
-
-    class Settings{
-    public:
-      Settings(){};
-
-    };
 
     OutputCreator( const Settings& m_settings);
     ~OutputCreator() {};
@@ -27,8 +24,7 @@ namespace PandoraPlus{
     StatusCode Reset() { return StatusCode::SUCCESS; }
 
   private: 
-
-    const Settings   settings;
+    const PandoraPlus::Settings   settings;
   
   };
 };

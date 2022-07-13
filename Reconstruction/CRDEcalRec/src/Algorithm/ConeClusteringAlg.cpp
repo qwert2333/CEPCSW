@@ -3,167 +3,177 @@
 
 #include "Algorithm/ConeClusteringAlg.h"
 
-ConeClusteringAlg::ConeClusteringAlg(){
-
-}
-
-
-void ConeClusteringAlg::Settings::SetInitialValue(){
-  th_ConeTheta_l1 = PI/6.; 
-  th_ConeR_l1 = 30.; //30mm
-  th_ConeTheta_l2 = PI/10.;  
-  th_ConeR_l2 = 30.; //30mm
-  th_ClusChi2 = 10e17;
-  fl_GoodClusLevel = 2;
-  fl_UseCandidate=0; 
-  clusType = ""; 
-}
-
-void ConeClusteringAlg::Settings::SetConeValue( double _coneTheta_l1, double _coneR_l1, double _coneTheta_l2, double _coneR_l2){
-  th_ConeTheta_l1 = _coneTheta_l1; 
-  th_ConeR_l1     = _coneR_l1;
-  th_ConeTheta_l2 = _coneTheta_l2;
-  th_ConeR_l2     = _coneR_l2;
-}
-
-StatusCode ConeClusteringAlg::Initialize(){
-  return StatusCode::SUCCESS;
-}
-
-
-StatusCode ConeClusteringAlg::RunAlgorithm( ConeClusteringAlg::Settings& m_settings, PandoraPlusDataCol& m_datacol){
+StatusCode ConeClusteringAlg::ReadSettings(Settings& m_settings){
   settings = m_settings;
 
-  std::vector<CRDEcalEDM::CRDCaloHit2DShower> m_2DshowerCol; m_2DshowerCol.clear();
-  if( settings.clusType=="MIP" )     m_2DshowerCol = m_datacol.MIPShower2DCol;
-  else if( settings.clusType=="EM" ) m_2DshowerCol = m_datacol.EMShower2DCol;
-  else m_2DshowerCol = m_datacol.Shower2DCol;
-
-  if(m_2DshowerCol.size()==0){ 
-    std::cout<<"Warning: Empty input in ConeClusteringAlg. Please check previous algorithm!"<<endl;  
-    if(settings.fl_overwrite) m_datacol.ClearCluster();
-    return StatusCode::SUCCESS; 
-  }
-
-//for(int is=0; is<m_2DshowerCol.size(); is++)
-//  printf("      Shower %d: (%.1f, %.1f, %.1f, %.3f) \n", is,
-//                                                         m_2DshowerCol[is].getPos().x(),
-//                                                         m_2DshowerCol[is].getPos().y(),
-//                                                         m_2DshowerCol[is].getPos().z(),
-//                                                         m_2DshowerCol[is].getShowerE()  );
+  //Option: readin information
+  if(settings.map_stringPars.find("ReadinHit")==settings.map_stringPars.end())        settings.map_stringPars["ReadinHit"] = "EcalTransShower";
+  if(settings.map_stringPars.find("OutputCluster")==settings.map_stringPars.end())    settings.map_stringPars["OutputCluster"] = "EcalBarCluster";
 
 
-  std::vector<CRDEcalEDM::CRDCaloHit3DCluster> m_trkClusterCol;  m_trkClusterCol.clear();
-  std::vector<CRDEcalEDM::CRDCaloHit3DCluster> m_neuClusterCol;  m_neuClusterCol.clear();
+  //Set initial values
+  if(settings.map_floatPars.find("th_ConeTheta_l1")==settings.map_floatPars.end())    settings.map_floatPars["th_ConeTheta_l1"] = TMath::Pi()/4.;
+  if(settings.map_floatPars.find("th_ConeR_l1")==settings.map_floatPars.end())        settings.map_floatPars["th_ConeR_l1"] = 30.;
+  if(settings.map_floatPars.find("th_ConeTheta_l2")==settings.map_floatPars.end())    settings.map_floatPars["th_ConeTheta_l2"] = TMath::Pi()/6.;
+  if(settings.map_floatPars.find("th_ConeR_l2")==settings.map_floatPars.end())        settings.map_floatPars["th_ConeR_l2"] = 30.;
+  if(settings.map_floatPars.find("th_ClusChi2")==settings.map_floatPars.end())        settings.map_floatPars["th_ClusChi2"] = 10e17;
+  if(settings.map_floatPars.find("fl_GoodClusLevel")==settings.map_floatPars.end())   settings.map_floatPars["fl_GoodClusLevel"] = 4;
+  //For Cluster merging 
+  if(settings.map_floatPars.find("axis_Angle")==settings.map_floatPars.end())         settings.map_floatPars["axis_Angle"] = TMath::Pi()/6.;
+  if(settings.map_floatPars.find("relP_Angle")==settings.map_floatPars.end())         settings.map_floatPars["relP_Angle"] = TMath::Pi()/5.;
+  if(settings.map_floatPars.find("skipLayer")==settings.map_floatPars.end())          settings.map_floatPars["skipLayer"] = 3;
+  if(settings.map_floatPars.find("fl_MergeGoodClus")==settings.map_floatPars.end())   settings.map_floatPars["fl_MergeGoodClus"] = 1;
+  if(settings.map_floatPars.find("fl_MergeBadClus")==settings.map_floatPars.end())    settings.map_floatPars["fl_MergeBadClus"] = 1;
+  if(settings.map_floatPars.find("fl_MergeEMTail")==settings.map_floatPars.end())     settings.map_floatPars["fl_MergeEMTail"] = 1;
 
-  std::map<int, std::vector<CRDEcalEDM::CRDCaloHit2DShower> > m_orderedTrkShower;  m_orderedTrkShower.clear(); //map<layer, showers>
-  std::map<int, std::vector<CRDEcalEDM::CRDCaloHit2DShower> > m_orderedNeuShower;  m_orderedNeuShower.clear(); //map<layer, showers>
-  for(int is=0;is<m_2DshowerCol.size();is++){
-    if(settings.fl_UseCandidate==0) m_orderedNeuShower[m_2DshowerCol[is].getDlayer()].push_back(m_2DshowerCol[is]);
-    else{
-      if(m_2DshowerCol[is].isTrkShower()) m_orderedTrkShower[m_2DshowerCol[is].getDlayer()].push_back(m_2DshowerCol[is]);
-      else m_orderedNeuShower[m_2DshowerCol[is].getDlayer()].push_back(m_2DshowerCol[is]);
-    }
-  }
+  return StatusCode::SUCCESS;
+};
 
-//cout<<"  Ordered NeuShower size: "<<m_orderedNeuShower.size()<<endl;
-//cout<<"  Ordered TrkShower size: "<<m_orderedTrkShower.size()<<endl;
-
-  //Longitudinal linking
-  LongiConeLinking( m_orderedNeuShower, m_neuClusterCol );
-  if(settings.fl_UseCandidate>0 && m_orderedTrkShower.size()>0) LongiConeLinking( m_orderedTrkShower, m_trkClusterCol ); 
-//cout<<"  NeuCluster size: "<<m_neuClusterCol.size(); 
-//cout<<"  TrkCluster size: "<<m_trkClusterCol.size()<<endl; 
-
-//for(int icl=0; icl<m_neuClusterCol.size(); icl++){
-//for(int a=0; a<m_neuClusterCol[icl].get2DShowers().size(); a++)
-//  printf("      Shower %d: (%.1f, %.1f, %.1f, %.1f) \n", a,
-//                                                         m_neuClusterCol[icl].get2DShowers()[a].getPos().x(),
-//                                                         m_neuClusterCol[icl].get2DShowers()[a].getPos().y(),
-//                                                         m_neuClusterCol[icl].get2DShowers()[a].getPos().z(),
-//                                                         m_neuClusterCol[icl].get2DShowers()[a].getShowerE()  );
-//}
-
-  std::vector<CRDEcalEDM::CRDCaloHit3DCluster> m_ClusterCol;  m_ClusterCol.clear();
-  m_ClusterCol.insert(m_ClusterCol.end(), m_neuClusterCol.begin(), m_neuClusterCol.end() );
-  if(m_trkClusterCol.size()>0) m_ClusterCol.insert(m_ClusterCol.end(), m_trkClusterCol.begin(), m_trkClusterCol.end() );
-
-//cout<<"  Cluster size: "<<m_ClusterCol.size()<<endl;
-
-  //Check cluster quality.
-  std::vector< CRDEcalEDM::CRDCaloHit3DCluster >  goodClus; goodClus.clear();
-  std::vector< CRDEcalEDM::CRDCaloHit3DCluster >  badClus; badClus.clear(); 
-  for(int icl=0; icl<m_ClusterCol.size(); icl++){
-    //if(CheckClusterQuality(m_ClusterCol[icl]) >= settings.fl_GoodClusLevel) goodClus.push_back(m_ClusterCol[icl]);
-    //if( m_ClusterCol[icl].get2DShowers().size() >= settings.fl_GoodClusLevel) goodClus.push_back(m_ClusterCol[icl]);
-    int m_Nlayer = m_ClusterCol[icl].getEndDlayer()-m_ClusterCol[icl].getBeginningDlayer();
-    if( m_Nlayer >= settings.fl_GoodClusLevel) goodClus.push_back(m_ClusterCol[icl]);
-    else badClus.push_back(m_ClusterCol[icl]);
-  }
-
-//cout<<"  Good cluster size: "<<goodClus.size()<<endl;
-//cout<<"  Bad cluster size: "<<badClus.size()<<endl;
-
-  if(settings.fl_overwrite) m_datacol.ClearCluster();
-  m_datacol.GoodClus3DCol.insert(m_datacol.GoodClus3DCol.end(), goodClus.begin(), goodClus.end() );
-  m_datacol.BadClus3DCol.insert( m_datacol.BadClus3DCol.end(),  badClus.begin(), badClus.end() );
-  m_datacol.Clus3DCol.insert( m_datacol.Clus3DCol.end(), m_ClusterCol.begin(), m_ClusterCol.end() );
+StatusCode ConeClusteringAlg::Initialize(){
 
   return StatusCode::SUCCESS;
 }
 
 
-StatusCode ConeClusteringAlg::LongiConeLinking(
-  std::map<int, std::vector<CRDEcalEDM::CRDCaloHit2DShower> >& orderedShower, 
-  std::vector<CRDEcalEDM::CRDCaloHit3DCluster>& ClusterCol)
-{
-  if(orderedShower.size()==0) return StatusCode::SUCCESS;
-//cout<<"Start LongiConeLinking: orderedShower.size = "<<orderedShower.size()<<endl;
+StatusCode ConeClusteringAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol){
+cout<<"  ConeClustering: Readin "<<settings.map_stringPars["ReadinHit"]<<", Output: "<<settings.map_stringPars["OutputCluster"]<<endl;
 
-   std::map<int, std::vector<CRDEcalEDM::CRDCaloHit2DShower>>::iterator iter = orderedShower.begin();
+  std::vector<PandoraPlus::CaloHit*> m_hitCol; m_hitCol.clear(); 
+  //Get readin info
+  if(settings.map_stringPars["ReadinHit"] == "EcalTransShower"){
+
+    std::vector<PandoraPlus::TransShower*>* p_Tshowers = &(m_datacol.TransShowerCol);
+    if(p_Tshowers->size()==0){ 
+      std::cout<<"Warning: Empty input in ConeClusteringAlg. Please check previous algorithm!"<<endl;  
+      return StatusCode::SUCCESS; 
+    }
+    //Convert transShower to hit
+    for(int is=0; is<p_Tshowers->size(); is++){
+      PandoraPlus::CaloHit* m_hit = new PandoraPlus::CaloHit();
+      m_hit->setEnergy( p_Tshowers->at(is)->getShowerE() );
+      m_hit->setPosition( p_Tshowers->at(is)->getPos() );
+      m_hit->setLayer( p_Tshowers->at(is)->getDlayer() );
+      //m_hit->setParentShower( p_Tshowers->at(is) );
+      m_hitCol.push_back(m_hit);
+      m_datacol.bk_HitCol.push_back(m_hit);
+    }
+    p_Tshowers = nullptr;
+  }
+  else m_hitCol = m_datacol.map_CaloHit[settings.map_stringPars["ReadinHit"]]; 
+  if(m_hitCol.size()==0) { std::cout<<"Warning: Empty input in ConeClusteringAlg. Please check previous algorithm!"<<endl; return StatusCode::SUCCESS; }
+
+
+
+cout<<"ConeClustering: Print Input Hits"<<endl;
+for(int i=0; i<m_hitCol.size(); i++)
+  printf("  Hit #%d: pos/E (%.2f, %.2f, %.2f, %.3f), Layer %d. \n", i,  
+        m_hitCol[i]->getPosition().x(), m_hitCol[i]->getPosition().y(), m_hitCol[i]->getPosition().z(), m_hitCol[i]->getEnergy(), m_hitCol[i]->getLayer() );
+cout<<"ConeClustering: End Print"<<endl;
+
+
+
+
+
+
+
+  //Store the ordered hits.
+  std::map<int, std::vector<PandoraPlus::CaloHit*> > m_orderedHit;  m_orderedHit.clear(); //map<layer, showers>
+  for(int ih=0;ih<m_hitCol.size();ih++)
+    m_orderedHit[m_hitCol[ih]->getLayer()].push_back(m_hitCol[ih]);
+
+
+  //Longitudinal linking
+  std::vector<PandoraPlus::CaloCluster*> m_clusterCol;  m_clusterCol.clear();
+  LongiConeLinking( m_orderedHit, m_clusterCol );
+  m_datacol.bk_ClusterCol.insert(  m_datacol.bk_ClusterCol.end(), m_clusterCol.begin(), m_clusterCol.end() );
+cout<<"  Cluster size: "<<m_clusterCol.size()<<endl;
+
+
+  //Check cluster quality.
+  std::vector<PandoraPlus::CaloCluster*>  goodClus;
+  std::vector<PandoraPlus::CaloCluster*>  badClus;
+  for(int icl=0; icl<m_clusterCol.size(); icl++){
+    if( m_clusterCol[icl]->getCaloHits().size() >= settings.map_floatPars["fl_GoodClusLevel"]) goodClus.push_back(m_clusterCol[icl]);
+    else badClus.push_back(m_clusterCol[icl]);
+  }
+
+cout<<"  Good cluster: "<<goodClus.size()<<endl;
+cout<<"  Bad cluster: "<<badClus.size()<<endl;
+
+  //Merge clusters
+  //MergeGoodClusters( goodClus );
+  //for(int icl=0;icl<badClus.size();icl++) MergeBadToGoodCluster(goodClus, badClus[icl] ); 
+  //MergeGoodClusters( goodClus );
+  //MergeEMTail( goodClus );
+
+  //m_datacol.GoodClus3DCol.insert(m_datacol.GoodClus3DCol.end(), goodClus.begin(), goodClus.end() );
+  //m_datacol.BadClus3DCol.insert( m_datacol.BadClus3DCol.end(),  badClus.begin(), badClus.end() );
+  //m_datacol.Clus3DCol.insert( m_datacol.Clus3DCol.end(), m_clusterCol.begin(), m_clusterCol.end() );
+
+  m_datacol.map_CaloCluster[settings.map_stringPars["OutputCluster"]] = m_clusterCol;
+
+  return StatusCode::SUCCESS;
+}
+
+StatusCode ConeClusteringAlg::ClearAlgorithm(){
+  settings.Clear();
+
+  return StatusCode::SUCCESS;
+}
+
+StatusCode ConeClusteringAlg::LongiConeLinking(  const std::map<int, std::vector<PandoraPlus::CaloHit*> >& orderedHit, 
+                                                 std::vector<PandoraPlus::CaloCluster*>& ClusterCol)
+{
+
+  if(orderedHit.size()==0) return StatusCode::SUCCESS;
+
+  auto iter = orderedHit.begin();
   //In first layer: initial clusters. All showers in the first layer are regarded as cluster seed.
   //cluster initial direction = R.
-  std::vector<CRDEcalEDM::CRDCaloHit2DShower> ShowersinFirstLayer;  ShowersinFirstLayer.clear();
-  ShowersinFirstLayer = iter->second;
-//cout<<" First layer: "<<iter->first<<", shower size: "<<ShowersinFirstLayer.size()<<endl;
-  for(int i=0;i<ShowersinFirstLayer.size(); i++){
-    CRDEcalEDM::CRDCaloHit3DCluster m_clus; m_clus.Clear(); 
-    m_clus.AddShower(ShowersinFirstLayer[i]);
+  std::vector<PandoraPlus::CaloHit*> HitsinFirstLayer = iter->second;
+  for(int i=0;i<HitsinFirstLayer.size(); i++){
+    PandoraPlus::CaloCluster* m_clus = new PandoraPlus::CaloCluster();
+    m_clus->addHit(HitsinFirstLayer[i]);
     ClusterCol.push_back(m_clus);
   }
   iter++;
 
+cout<<"    LongiConeLinking: Cluster seed in first layer: "<<ClusterCol.size()<<endl;
 
   //Use different cone angle for 1->2/2->3 and 3->n case
   //Loop later layers
-  for(iter;iter!=orderedShower.end();iter++){
-    std::vector<CRDEcalEDM::CRDCaloHit2DShower> ShowersinLayer = iter->second;
-    for(int is=0; is<ShowersinLayer.size(); is++){
-      CRDEcalEDM::CRDCaloHit2DShower m_shower = ShowersinLayer[is];
+  for(iter; iter!=orderedHit.end(); iter++){
+    std::vector<PandoraPlus::CaloHit*> HitsinLayer = iter->second;
+cout<<"    In Layer: "<<iter->first<<"  Hit size: "<<HitsinLayer.size()<<endl;
+
+    for(int is=0; is<HitsinLayer.size(); is++){
+      PandoraPlus::CaloHit* m_hit = HitsinLayer[is];
+printf("     New Hit: (%.3f, %.3f, %.3f), Layer %d \n", m_hit->getPosition().x(), m_hit->getPosition().y(), m_hit->getPosition().z(),  m_hit->getLayer() );
+cout<<"     Cluster size: "<<ClusterCol.size()<<endl;
+
       for(int ic=0; ic<ClusterCol.size(); ic++ ){
-        int m_N2dshs = ClusterCol[ic].get2DShowers().size();
-        CRDEcalEDM::CRDCaloHit2DShower shower_in_clus = ClusterCol[ic].get2DShowers().back();
-        dd4hep::Position relR = m_shower.getPos()-shower_in_clus.getPos();
-        TVector3 relR_vec(relR.x(), relR.y(), relR.z());
-        if(  (m_N2dshs<3  && m_N2dshs>0 && relR_vec.Angle(ClusterCol[ic].getAxis())< settings.th_ConeTheta_l1 && relR_vec.Mag()< settings.th_ConeR_l1) ||
-             (m_N2dshs>=3               && relR_vec.Angle(ClusterCol[ic].getAxis())< settings.th_ConeTheta_l2 && relR_vec.Mag()< settings.th_ConeR_l2)  ){
+        int m_Nhits = ClusterCol[ic]->getCaloHits().size();
+        const PandoraPlus::CaloHit* hit_in_clus = ClusterCol[ic]->getCaloHits().back();
+        TVector3 relR_vec = m_hit->getPosition() - hit_in_clus->getPosition();
+printf("      New hit: (%.2f, %.2f, %.2f), Cluster last: (%.2f, %.2f, %.2f, %d), Cluster axis: (%.2f, %.2f, %.2f) \n",
+    m_hit->getPosition().x(), m_hit->getPosition().y(),m_hit->getPosition().z(),
+    hit_in_clus->getPosition().x(), hit_in_clus->getPosition().y(), hit_in_clus->getPosition().z(), hit_in_clus->getLayer(), 
+    ClusterCol[ic]->getAxis().x(), ClusterCol[ic]->getAxis().y(), ClusterCol[ic]->getAxis().z() );
 
-//printf("      Merged shower: (%.2f, %.2f, %.2f), Cluster last: (%.2f, %.2f, %.2f), Cluster axis: (%.2f, %.2f, %.2f) \n", 
-//    m_shower.getPos().x(), m_shower.getPos().y(),m_shower.getPos().z(), 
-//    shower_in_clus.getPos().x(), shower_in_clus.getPos().y(), shower_in_clus.getPos().z(),
-//    ClusterCol[ic].getAxis().x(), ClusterCol[ic].getAxis().y(), ClusterCol[ic].getAxis().z() );
+        if(  (m_Nhits<3 && m_Nhits>0 && relR_vec.Angle(ClusterCol[ic]->getAxis())< settings.map_floatPars["th_ConeTheta_l1"] && relR_vec.Mag()< settings.map_floatPars["th_ConeR_l1"]) ||
+             (m_Nhits>=3             && relR_vec.Angle(ClusterCol[ic]->getAxis())< settings.map_floatPars["th_ConeTheta_l2"] && relR_vec.Mag()< settings.map_floatPars["th_ConeR_l2"])  ){
 
-          ClusterCol[ic].AddShower(m_shower);
-          ShowersinLayer.erase(ShowersinLayer.begin()+is);
+          ClusterCol[ic]->addHit(m_hit);
+          HitsinLayer.erase(HitsinLayer.begin()+is);
           is--;
           break;
         }
       }
     }//end loop showers in layer.
-    if(ShowersinLayer.size()>0){
-      for(int i=0;i<ShowersinLayer.size(); i++){
-        CRDEcalEDM::CRDCaloHit3DCluster m_clus;
-        m_clus.AddShower(ShowersinLayer[i]);
+    if(HitsinLayer.size()>0){
+      for(int i=0;i<HitsinLayer.size(); i++){
+        PandoraPlus::CaloCluster* m_clus = new PandoraPlus::CaloCluster();
+        m_clus->addHit(HitsinLayer[i]);
         ClusterCol.push_back(m_clus);
     }}//end new cluster
   }//end loop layers.
@@ -172,41 +182,41 @@ StatusCode ConeClusteringAlg::LongiConeLinking(
   return StatusCode::SUCCESS;
 }
 
+StatusCode ConeClusteringAlg::MergeGoodClusters( std::vector<PandoraPlus::CaloCluster*>& m_clusCol ){
 
-int ConeClusteringAlg::CheckClusterQuality(CRDEcalEDM::CRDCaloHit3DCluster& clus){
-  //Quality in different level: 
-  //L0: return 0. <=1 layers(2DShowers), fluctuations in layer. 
-  //L1: return 1. 2 layers(2DShower), little hadronic shower, wrong combination.
-  //L2: return 2. At least 3 layers, but not pass energy ladder(E1, E2, E3). Hadronic shower/mip. 
-  //L3: return 3. Pass L0 and L1 and energy ladder. EM shower/hadronic shower. 
+  return StatusCode::SUCCESS;
+}
 
-  return clus.get2DShowers().size(); 
-/*  if(clus.get2DShowers().size()<=1 ) { return 0; }
+StatusCode ConeClusteringAlg::MergeBadToGoodCluster( std::vector<PandoraPlus::CaloCluster*>& m_goodClusCol, PandoraPlus::CaloCluster* m_badClus ){
+  PandoraPlus::CaloCluster* m_clus = GetClosestGoodCluster( m_goodClusCol, m_badClus );
+  if(!m_clus) return StatusCode::FAILURE;
 
-  //Criterion1: at least 3 layers. 
-  if(clus.get2DShowers().size()<=3 ) { return 1; }
-
-  //Criterion2: first 3 layser should satisfy: (E2/E1>3 && E3/E2>1.2) || (E3/E2>2). 
-  bool isSeed;
-  std::vector<CRDEcalEDM::CRDCaloHit2DShower> m_2Dshowers = clus.get2DShowers();
-  std::map<int, CRDEcalEDM::CRDCaloHit2DShower > m_orderedShower;  //map<layer, showers>
-  for(int is=0;is<m_2Dshowers.size();is++){
-     m_orderedShower[m_2Dshowers[is].getDlayer()] = m_2Dshowers[is];
-  }
-  std::map<int, CRDEcalEDM::CRDCaloHit2DShower>::iterator iter = m_orderedShower.begin();
-  CRDEcalEDM::CRDCaloHit2DShower showerbegin[3];
-  showerbegin[0] = iter->second;  iter++; 
-  showerbegin[1] = iter->second;  iter++; 
-  showerbegin[2] = iter->second;
-  if( (showerbegin[1].getShowerE()/showerbegin[0].getShowerE()>3 && showerbegin[2].getShowerE()/showerbegin[1].getShowerE()>1.2) ||
-       showerbegin[2].getShowerE()/showerbegin[1].getShowerE()>2 )
-  isSeed = true; 
-  if(!isSeed) return 2;
-
-  return 3;
-*/
+  auto iter = find( m_goodClusCol.begin(), m_goodClusCol.end(), m_clus );
+  if(iter==m_goodClusCol.end()) return StatusCode::FAILURE;
+  else m_clus->MergeCluster( m_badClus );
+    
+  return StatusCode::SUCCESS;
 }
 
 
+
+PandoraPlus::CaloCluster* ConeClusteringAlg::GetClosestGoodCluster( std::vector< PandoraPlus::CaloCluster* >& m_goodClusCol, PandoraPlus::CaloCluster* m_badClus ){
+
+  TVector3 m_clusCent = m_badClus->getShowerCenter();
+  PandoraPlus::CaloCluster* m_clus = nullptr;
+  double minTheta=999;
+  for(int i=0;i<m_goodClusCol.size();i++){
+     TVector3 vec_goodClus = m_goodClusCol[i]->getShowerCenter();
+     TVector3 vec_goodAxis = m_goodClusCol[i]->getAxis();
+     double theta = vec_goodAxis.Cross(m_clusCent-vec_goodClus).Mag();
+
+     if(theta<minTheta){
+        minTheta=theta;
+        m_clus = m_goodClusCol[i];
+     }
+  }
+
+  return m_clus;
+}
 
 #endif

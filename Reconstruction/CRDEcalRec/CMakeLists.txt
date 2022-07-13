@@ -33,12 +33,15 @@ gaudi_add_module(CRDEcalRec
                          src/Tools/TrackCreator.cpp
                          src/Tools/CaloHitsCreator.cpp
                          src/Tools/OutputCreator.cpp
+                         src/Tools/TrackFitInEcal.cpp
                          src/Algorithm/ExampleAlg.cpp
+                         src/Algorithm/TrackExtrapolatingAlg.cpp
                          src/Algorithm/GlobalClusteringAlg.cpp
                          src/Algorithm/LocalMaxFindingAlg.cpp
                          src/Algorithm/HoughClusteringAlg.cpp
                          src/Algorithm/EnergySplittingAlg.cpp
                          src/Algorithm/EnergyTimeMatchingAlg.cpp
+                         src/Algorithm/ConeClusteringAlg.cpp
                  LINK    CRDEcalRecLib
 )
 target_include_directories(CRDEcalRec PUBLIC

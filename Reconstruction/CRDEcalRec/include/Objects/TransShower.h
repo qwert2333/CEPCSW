@@ -6,6 +6,8 @@
 #include <vector>
 
 namespace PandoraPlus{
+
+  class CaloHit; 
   class TransShower{
   public: 	
     TransShower(const CaloBarShower* _bars1, const CaloBarShower* _bars2, std::vector<const CaloHit*> _hits)

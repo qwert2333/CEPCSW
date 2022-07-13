@@ -6,13 +6,14 @@ StatusCode EnergyTimeMatchingAlg::ReadSettings(Settings& m_settings){
   settings = m_settings;
 
   //Set initial value
-  if(settings.map_floatPars.find("chi2Wi_E")==settings.map_floatPars.end())      settings.map_floatPars["chi2Wi_E"] = 1.;
-  if(settings.map_floatPars.find("chi2Wi_T")==settings.map_floatPars.end())      settings.map_floatPars["chi2Wi_T"] = 10.;
-  if(settings.map_floatPars.find("sigmaE")==settings.map_floatPars.end())        settings.map_floatPars["sigmaE"] = 0.10;
-  if(settings.map_floatPars.find("sigmaPos")==settings.map_floatPars.end())      settings.map_floatPars["sigmaPos"] = 34.89;
-  if(settings.map_floatPars.find("nMat")==settings.map_floatPars.end())          settings.map_floatPars["nMat"] = 2.15;
-  if(settings.map_floatPars.find("fl_UseChi2")==settings.map_floatPars.end())    settings.map_floatPars["fl_UseChi2"] = 1;
-  if(settings.map_floatPars.find("Debug")==settings.map_floatPars.end())         settings.map_floatPars["Debug"] = 0;
+  if(settings.map_floatPars.find("chi2Wi_E")==settings.map_floatPars.end())         settings.map_floatPars["chi2Wi_E"] = 1.;
+  if(settings.map_floatPars.find("chi2Wi_T")==settings.map_floatPars.end())         settings.map_floatPars["chi2Wi_T"] = 10.;
+  if(settings.map_floatPars.find("sigmaE")==settings.map_floatPars.end())           settings.map_floatPars["sigmaE"] = 0.10;
+  if(settings.map_floatPars.find("sigmaPos")==settings.map_floatPars.end())         settings.map_floatPars["sigmaPos"] = 34.89;
+  if(settings.map_floatPars.find("nMat")==settings.map_floatPars.end())             settings.map_floatPars["nMat"] = 2.15;
+  if(settings.map_floatPars.find("fl_UseChi2")==settings.map_floatPars.end())       settings.map_floatPars["fl_UseChi2"] = 1;
+  if(settings.map_boolPars.find("fl_WriteCluster")==settings.map_boolPars.end())    settings.map_boolPars["fl_WriteCluster"] = 1;
+  if(settings.map_floatPars.find("Debug")==settings.map_floatPars.end())            settings.map_floatPars["Debug"] = 0;
 
   return StatusCode::SUCCESS;
 };
@@ -170,7 +171,7 @@ cout<<"  EnergyTimeMatchingAlg: present 2D shower size: "<<m_transhowerCol.size(
 
   p_towerCol = nullptr; 
   m_datacol.TransShowerCol = m_transhowerCol;
-  m_datacol.ClusterCol = m_clusterCol;
+  if(settings.map_boolPars["fl_WriteCluster"]) m_datacol.map_CaloCluster["EcalCluster"] = m_clusterCol;
 
 cout<<"End EnergyTimeMatchingAlg"<<endl;
   return StatusCode::SUCCESS;

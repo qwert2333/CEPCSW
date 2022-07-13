@@ -2,6 +2,7 @@
 #define TRACK_CREATOR_H
 
 #include "PandoraPlusDataCol.h"
+#include "Tools/Algorithm.h"
 #include "TVector3.h"
 
 namespace PandoraPlus{
@@ -9,15 +10,6 @@ namespace PandoraPlus{
 
   public: 
 
-    class Settings{
-    public:
-      Settings(){};
-   
-      float m_BField; 
-      std::vector<std::string>  m_trackCollections; 
-   
-    };
-    
     //initialize a CaloHitCreator
     TrackCreator( const Settings& m_settings );
     ~TrackCreator() {};
@@ -29,7 +21,7 @@ namespace PandoraPlus{
     StatusCode Reset(){};
 
   private: 
-    const Settings  settings; 
+    const PandoraPlus::Settings  settings; 
   
   };
 };

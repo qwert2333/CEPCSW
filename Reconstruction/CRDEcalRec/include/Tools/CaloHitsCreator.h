@@ -3,6 +3,7 @@
 
 #include "k4FWCore/DataHandle.h"
 #include "PandoraPlusDataCol.h"
+#include "Tools/Algorithm.h"
 #include <DDRec/DetectorData.h>
 #include <DDRec/CellIDPositionConverter.h>
 #include <DD4hep/Segmentations.h>
@@ -12,16 +13,6 @@ namespace PandoraPlus{
   class CaloHitsCreator{
 
   public: 
-
-    class Settings{
-    public: 
-      Settings(){};
-   
-      std::vector<std::string> m_CaloHitCollections; 
-      //std::vector<std::string> m_CaloReadouts; 
-   
-    };
-    
     //initialize a CaloHitCreator
     CaloHitsCreator( const Settings& m_settings );
     ~CaloHitsCreator() {};
@@ -35,7 +26,7 @@ namespace PandoraPlus{
     StatusCode Reset() { return StatusCode::SUCCESS; };
 
   private: 
-    const Settings  settings; 
+    const PandoraPlus::Settings  settings; 
 
   };
 };
