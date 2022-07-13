@@ -16,9 +16,9 @@ StatusCode TrackExtrapolatingAlg::ReadSettings(Settings& m_settings){
   //Initialize parameters
   // if(settings.map_floatPars.find("Par1")==settings.map_floatPars.end()) settings.map_floatPars["Par1"] = 0;
   if(settings.map_floatPars.find("innermost_distance")==settings.map_floatPars.end()) 
-    settings.map_floatPars["innermost_distance"] = 1865;
+    settings.map_floatPars["innermost_distance"] = 1860;
   if(settings.map_floatPars.find("outermost_distance")==settings.map_floatPars.end()) 
-    settings.map_floatPars["outermost_distance"] = 2400;
+    settings.map_floatPars["outermost_distance"] = 2140;
   if(settings.map_intPars.find("Nlayers")==settings.map_intPars.end()) 
     settings.map_intPars["Nlayers"] = 28;
   if(settings.map_floatPars.find("layer_width")==settings.map_floatPars.end())
@@ -81,7 +81,7 @@ std::cout<<"  Track size: "<<p_tracks->size()<<std::endl;
   GetLayerPoints(normal_vectors, layer_points);
 
   for(int itrk=0; itrk<p_tracks->size(); itrk++){
-std::cout<<"    --------------------Processing track "<<itrk<<"--------------------"<<std::endl;
+// std::cout<<"    --------------------Processing track "<<itrk<<"--------------------"<<std::endl;
     // Only tracks that reach ECAL should be processed.
     if(!IsReachECAL(p_tracks->at(itrk))) continue;
 
@@ -140,7 +140,7 @@ StatusCode TrackExtrapolatingAlg::GetLayerPoints(const std::vector<TVector2> & n
     std::vector<TVector2> t_points;
     for(int il=0; il<settings.map_intPars["Nlayers"]; il++){
       TVector2 t_p;
-      float dist = settings.map_floatPars["layer_width"]*il + settings.map_floatPars["innermost_distance"];
+      float dist = settings.map_floatPars["layer_width"]*il + settings.map_floatPars["innermost_distance"] + 5;
       float xx = (normal_vectors[im].X()/normal_vectors[im].Mod()) * dist;
       float yy = (normal_vectors[im].Y()/normal_vectors[im].Mod()) * dist;
       t_p.SetX(xx); t_p.SetY(yy);
@@ -196,19 +196,14 @@ StatusCode TrackExtrapolatingAlg::ExtrapolateByLayer(const std::vector<TVector2>
                               const PandoraPlus::TrackState & ECAL_trk_state, 
                               PandoraPlus::Track* p_track){
     float rho = GetRho(ECAL_trk_state);
-// std::cout<<"        yyy: rho="<<rho<<std::endl;
     TVector2 center = GetCenterOfCircle(ECAL_trk_state, rho);
-// std::cout<<"        yyy: center="<<center.X()<<", "<<center.Y()<<std::endl;    
     float alpha0 = GetRefAlpha0(ECAL_trk_state, center); 
-// std::cout<<"        yyy: alpha0="<<alpha0<<std::endl;
     bool is_rtbk = IsReturn(rho, center);
-
     // Evaluate delta_phi
-    std::vector<float> delta_phi;
+    std::vector<std::vector<float>> delta_phi;
     for(int im=0; im<normal_vectors.size(); im++){  // for each module
+      std::vector<float> t_delta_phi;
       float beta = ATan2(normal_vectors[im].X(), normal_vectors[im].Y());
-// std::cout<<"        yyy: im module "<<im<<", beta = "<<beta<<", num of layer points = "
-          // <<layer_points[im].size()<<std::endl;
       float denominator = rho * Sqrt( (normal_vectors[im].X()*normal_vectors[im].X()) +
                                       (normal_vectors[im].Y()*normal_vectors[im].Y()) );
       for(int il=0; il<layer_points[im].size(); il++){  // for each layer
@@ -223,47 +218,51 @@ StatusCode TrackExtrapolatingAlg::ExtrapolateByLayer(const std::vector<TVector2>
         float t_dphi1 = t_as - t_ab;
         float t_dphi2 = Pi()-t_as - t_ab;
         if(ECAL_trk_state.Kappa < 0){ 
-          delta_phi.push_back(t_dphi1); 
+          t_delta_phi.push_back(t_dphi1); 
           if(is_rtbk){
-            delta_phi.push_back(t_dphi2);
+            t_delta_phi.push_back(t_dphi2);
           }
         }
         else{
-          delta_phi.push_back(-t_dphi1); 
+          t_delta_phi.push_back(-t_dphi1); 
           if(is_rtbk){
-            delta_phi.push_back(-t_dphi2);
+            t_delta_phi.push_back(-t_dphi2);
           }
         }
         
       }
+      delta_phi.push_back(t_delta_phi);
     }
-    sort(delta_phi.begin(), delta_phi.end());
 
     // extrpolated track points. Will be stored as reference point in TrackState
     std::vector<TVector3> ext_points;
-// std::cout<<"num of delta_phi="<<delta_phi.size()<<std::endl;
-    for(int ip=0; ip<delta_phi.size(); ip++){
-      float x = center.X() + (rho*Cos(alpha0+delta_phi[ip]));
-      float y = center.Y() + (rho*Sin(alpha0+delta_phi[ip]));
-      float z;
-      if(ECAL_trk_state.Kappa > 0){
-        z = ECAL_trk_state.referencePoint.Z() + ECAL_trk_state.Z0 - 
-                (delta_phi[ip]*rho*ECAL_trk_state.tanLambda);
-      }else{
-        z = ECAL_trk_state.referencePoint.Z() + ECAL_trk_state.Z0 + 
-                (delta_phi[ip]*rho*ECAL_trk_state.tanLambda);
-      }
-// std::cout<<"        yyy: delta_phi["<<ip<<"]="<<delta_phi[ip]<<std::endl;
-// std::cout<<"        yyy: extp="<< x<<", "<<y<<", "<<z<<std::endl<<std::endl;
-      TVector3 extp(x,y,z);
-      if(Sqrt(extp.X()*extp.X() + extp.Y()*extp.Y()) < settings.map_floatPars["outermost_distance"]
-         && Sqrt(extp.X()*extp.X() + extp.Y()*extp.Y()) > settings.map_floatPars["innermost_distance"]-0.5*settings.map_floatPars["layer_width"]){
-// std::cout<<"        yyy: delta_phi["<<ip<<"]="<<delta_phi[ip]<<std::endl;
-// std::cout<<"        yyy: extp="<< extp.X()<<", "<<extp.Y()<<", "<<extp.Z()<<std::endl<<std::endl;
+    for(int im=0; im<delta_phi.size(); im++){
+      for(int ip=0; ip<delta_phi[im].size(); ip++){
+        float x = center.X() + (rho*Cos(alpha0+delta_phi[im][ip]));
+        float y = center.Y() + (rho*Sin(alpha0+delta_phi[im][ip]));
+        float z;
+        if(ECAL_trk_state.Kappa > 0){
+          z = ECAL_trk_state.referencePoint.Z() + ECAL_trk_state.Z0 - 
+                  (delta_phi[im][ip]*rho*ECAL_trk_state.tanLambda);
+        }else{
+          z = ECAL_trk_state.referencePoint.Z() + ECAL_trk_state.Z0 + 
+                  (delta_phi[im][ip]*rho*ECAL_trk_state.tanLambda);
+        }
+
+        TVector3 t_vec3(x,y,z);
+        float rotate_angle = (6-im)*Pi()/4; 
+        t_vec3.RotateZ(rotate_angle);
+
+        if(Sqrt(x*x+y*y) > settings.map_floatPars["outermost_distance"]/Cos(22.5/180*Pi())+100) continue;
+        if(Sqrt(x*x+y*y) < settings.map_floatPars["innermost_distance"]) continue;
+        if(settings.map_floatPars["outermost_distance"]*Sqrt(2)-t_vec3.X() < t_vec3.Y()) continue;
+        if(t_vec3.X()-settings.map_floatPars["innermost_distance"]*Sqrt(2) > t_vec3.Y()) continue;
+        
+        TVector3 extp(x,y,z);
         ext_points.push_back(extp);
-      }     
+      }
     }
-// std::cout<<"num of eext_points="<<ext_points.size()<<std::endl;
+    
     // Add track state to the track
     for(int ip=0; ip<ext_points.size(); ip++){
       TrackState t_state = ECAL_trk_state;
@@ -308,7 +307,7 @@ float TrackExtrapolatingAlg::GetRefAlpha0(const PandoraPlus::TrackState & trk_st
 // ...oooOO0OOooo......oooOO0OOooo......oooOO0OOooo...
 bool TrackExtrapolatingAlg::IsReturn(float rho, TVector2 & center){
   float farest = rho + center.Mod();
-  if (farest < settings.map_floatPars["outermost_distance"]) {return true;}
+  if (farest < settings.map_floatPars["outermost_distance"]/Cos(22.5/180.*Pi())+100) {return true;}
   else{return false;}
 }
 
