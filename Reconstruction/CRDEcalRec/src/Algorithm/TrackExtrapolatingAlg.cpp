@@ -23,39 +23,12 @@ StatusCode TrackExtrapolatingAlg::ReadSettings(Settings& m_settings){
     settings.map_intPars["Nlayers"] = 28;
   if(settings.map_floatPars.find("layer_width")==settings.map_floatPars.end())
     settings.map_floatPars["layer_width"] = 10;
-
-  if(settings.map_floatPars.find("normal_vec0x")==settings.map_floatPars.end()) 
-    settings.map_floatPars["normal_vec0x"] = 0;
-  if(settings.map_floatPars.find("normal_vec0y")==settings.map_floatPars.end()) 
-    settings.map_floatPars["normal_vec0y"] = 1;
-  if(settings.map_floatPars.find("normal_vec1x")==settings.map_floatPars.end()) 
-    settings.map_floatPars["normal_vec1x"] = -1;
-  if(settings.map_floatPars.find("normal_vec1y")==settings.map_floatPars.end()) 
-    settings.map_floatPars["normal_vec1y"] = 1;
-  if(settings.map_floatPars.find("normal_vec2x")==settings.map_floatPars.end()) 
-    settings.map_floatPars["normal_vec2x"] = -1;
-  if(settings.map_floatPars.find("normal_vec2y")==settings.map_floatPars.end()) 
-    settings.map_floatPars["normal_vec2y"] = 0;
-  if(settings.map_floatPars.find("normal_vec3x")==settings.map_floatPars.end()) 
-    settings.map_floatPars["normal_vec3x"] = -1;
-  if(settings.map_floatPars.find("normal_vec3y")==settings.map_floatPars.end())
-    settings.map_floatPars["normal_vec3y"] = -1;
-  if(settings.map_floatPars.find("normal_vec4x")==settings.map_floatPars.end()) 
-    settings.map_floatPars["normal_vec4x"] = 0;
-  if(settings.map_floatPars.find("normal_vec4y")==settings.map_floatPars.end()) 
-    settings.map_floatPars["normal_vec4y"] = -1;
-  if(settings.map_floatPars.find("normal_vec5x")==settings.map_floatPars.end()) 
-    settings.map_floatPars["normal_vec5x"] = 1;
-  if(settings.map_floatPars.find("normal_vec5y")==settings.map_floatPars.end()) 
-    settings.map_floatPars["normal_vec5y"] = -1;
-  if(settings.map_floatPars.find("normal_vec6x")==settings.map_floatPars.end()) 
-    settings.map_floatPars["normal_vec6x"] = 1;
-  if(settings.map_floatPars.find("normal_vec6y")==settings.map_floatPars.end()) 
-    settings.map_floatPars["normal_vec6y"] = 0;
-  if(settings.map_floatPars.find("normal_vec7x")==settings.map_floatPars.end()) 
-    settings.map_floatPars["normal_vec7x"] = 1;
-  if(settings.map_floatPars.find("normal_vec7y")==settings.map_floatPars.end()) 
-    settings.map_floatPars["normal_vec7y"] = 1;
+  if(settings.map_floatPars.find("ECAL_half_length")==settings.map_floatPars.end())
+    settings.map_floatPars["ECAL_half_length"] = 2450;
+  if(settings.map_intPars.find("Nmodule")==settings.map_intPars.end()) 
+    settings.map_intPars["Nmodule"] = 8;
+  if(settings.map_floatPars.find("B_field")==settings.map_floatPars.end())
+    settings.map_floatPars["B_field"] = 3.0;
 
   return StatusCode::SUCCESS;
 };
@@ -121,11 +94,9 @@ StatusCode TrackExtrapolatingAlg::ClearAlgorithm(){
 
 // ...oooOO0OOooo......oooOO0OOooo......oooOO0OOooo...
 StatusCode TrackExtrapolatingAlg::GetPlaneNormalVector(std::vector<TVector2> & normal_vectors){
-  for(int im=0; im<8; im++){    // hardcode: 8 module for ECAL
-    std::string str_x = "normal_vec" + std::to_string(im) + "x";
-    std::string str_y = "normal_vec" + std::to_string(im) + "y";
-    TVector2 t_vec(settings.map_floatPars[str_x],
-                   settings.map_floatPars[str_y]);
+  for(int im=0; im<settings.map_intPars["Nmodule"]; im++){    
+    TVector2 t_vec(0, 1);
+    t_vec = t_vec.Rotate(1.*im/settings.map_intPars["Nmodule"]*2*Pi());
     normal_vectors.push_back(t_vec);
   }
 
@@ -140,7 +111,8 @@ StatusCode TrackExtrapolatingAlg::GetLayerPoints(const std::vector<TVector2> & n
     std::vector<TVector2> t_points;
     for(int il=0; il<settings.map_intPars["Nlayers"]; il++){
       TVector2 t_p;
-      float dist = settings.map_floatPars["layer_width"]*il + settings.map_floatPars["innermost_distance"] + 5;
+      float dist = settings.map_floatPars["layer_width"]*il + settings.map_floatPars["innermost_distance"] + 
+                   settings.map_floatPars["layer_width"]/2;
       float xx = (normal_vectors[im].X()/normal_vectors[im].Mod()) * dist;
       float yy = (normal_vectors[im].Y()/normal_vectors[im].Mod()) * dist;
       t_p.SetX(xx); t_p.SetY(yy);
@@ -168,7 +140,7 @@ bool TrackExtrapolatingAlg::IsReachECAL(PandoraPlus::Track * track){
 std::cout<<"      the track has no track state at calorimeter"<<std::endl;
     return false;
   } 
-  if( Abs(Abs(t_vec.Z())-2450) < 1e-6 ){
+  if( Abs(Abs(t_vec.Z())-settings.map_floatPars["ECAL_half_length"]) < 1e-6 ){
 std::cout<<"      the track escape from endcap"<<std::endl;
     return false;
   } 
@@ -250,10 +222,10 @@ StatusCode TrackExtrapolatingAlg::ExtrapolateByLayer(const std::vector<TVector2>
         }
 
         TVector3 t_vec3(x,y,z);
-        float rotate_angle = (6-im)*Pi()/4; 
+        float rotate_angle = (6-im)*Pi()/4;
         t_vec3.RotateZ(rotate_angle);
 
-        if(Sqrt(x*x+y*y) > settings.map_floatPars["outermost_distance"]/Cos(22.5/180*Pi())+100) continue;
+        if(Sqrt(x*x+y*y) > settings.map_floatPars["outermost_distance"]/Cos(Pi()/settings.map_intPars["Nmodule"])+100) continue;
         if(Sqrt(x*x+y*y) < settings.map_floatPars["innermost_distance"]) continue;
         if(settings.map_floatPars["outermost_distance"]*Sqrt(2)-t_vec3.X() < t_vec3.Y()) continue;
         if(t_vec3.X()-settings.map_floatPars["innermost_distance"]*Sqrt(2) > t_vec3.Y()) continue;
@@ -276,8 +248,7 @@ StatusCode TrackExtrapolatingAlg::ExtrapolateByLayer(const std::vector<TVector2>
 
 // ...oooOO0OOooo......oooOO0OOooo......oooOO0OOooo...
 float TrackExtrapolatingAlg::GetRho(const PandoraPlus::TrackState & trk_state){
-  float B = 3.0;    // B should be written in settings
-  float rho = Abs(1000. / (0.3*B*trk_state.Kappa));
+  float rho = Abs(1000. / (0.3*settings.map_floatPars["B_field"]*trk_state.Kappa));
   return rho;
 }
 
@@ -307,7 +278,7 @@ float TrackExtrapolatingAlg::GetRefAlpha0(const PandoraPlus::TrackState & trk_st
 // ...oooOO0OOooo......oooOO0OOooo......oooOO0OOooo...
 bool TrackExtrapolatingAlg::IsReturn(float rho, TVector2 & center){
   float farest = rho + center.Mod();
-  if (farest < settings.map_floatPars["outermost_distance"]/Cos(22.5/180.*Pi())+100) {return true;}
+  if (farest < settings.map_floatPars["outermost_distance"]/Cos(Pi()/settings.map_intPars["Nmodule"])+100) {return true;}
   else{return false;}
 }
 
