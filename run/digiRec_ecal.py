@@ -1,4 +1,6 @@
 from Gaudi.Configuration import *
+Nskip = 0
+Nevt = 10
 
 ############## GeomSvc #################
 geometry_option = "CRD_o1_v01/CRD_o1_v01.xml"
@@ -21,10 +23,10 @@ geomsvc.compact = geometry_path
 from Configurables import k4DataSvc
 podioevent = k4DataSvc("EventDataSvc")
 podioevent.inputs = [
-#"CRD_SimMu_FullDet.root"
+"CRD_SimGamMu_FullDet.root"
 #"SimSamples/CRD_SimMu_FullDet_200evt.root"
 #"CRD_Sim2Gam_FullDet.root"
-"SimSamples/CRD_Sim2Gam_FullDet_200evt.root"
+#"SimSamples/CRD_Sim2Gam_FullDet_200evt.root"
 ]
 ##########################################
 
@@ -45,7 +47,7 @@ EcalDigi.ReadOutName = "EcalBarrelCollection"
 EcalDigi.SimCaloHitCollection = "EcalBarrelCollection"
 EcalDigi.CaloHitCollection = "ECALBarrel"
 EcalDigi.CaloAssociationCollection = "RecoCaloAssociation_ECALBarrel"
-#EcalDigi.SkipEvt = 23
+EcalDigi.SkipEvt = Nskip
 EcalDigi.Seed = 2079
 #Digitalization parameters
 EcalDigi.CalibrECAL = 1
@@ -54,7 +56,7 @@ EcalDigi.TimeResolution = 0.5        #unit: ns
 EcalDigi.EnergyThreshold = 0.0001   #0.1 MeV
 EcalDigi.ChargeThresholdFrac = 0.05
 EcalDigi.Debug=1
-EcalDigi.OutFileName = "testTree_2Gam.root"
+EcalDigi.OutFileName = "testTree.root"
 #########################################
 
 ##HCAL##
@@ -78,9 +80,9 @@ PandoraPlusPFAlg = PandoraPlusPFAlg("PandoraPlusPFAlg")
 PandoraPlusPFAlg.Seed = 1024
 PandoraPlusPFAlg.BField = 3.
 PandoraPlusPFAlg.Debug = 0
-#PandoraPlusPFAlg.SkipEvt = 23
+PandoraPlusPFAlg.SkipEvt = Nskip
 PandoraPlusPFAlg.WriteAna = 1
-PandoraPlusPFAlg.AnaFileName = "testRec_2Gam.root"
+PandoraPlusPFAlg.AnaFileName = "testRec.root"
 ##----Readin collections----
 PandoraPlusPFAlg.MCParticleCollection = "MCParticle"
 PandoraPlusPFAlg.TrackCollections = ["MarlinTrkTracks"]
@@ -93,22 +95,16 @@ PandoraPlusPFAlg.HCalReadOutNames = ["HcalBarrelCollection"]
 
 PandoraPlusPFAlg.AlgList = ["ExampleAlg", 
                             "GlobalClusteringAlg", 
-                            "LocalMaxFindingAlg",
-                            "HoughClusteringAlg", 
-                            "EnergySplittingAlg",
-                            "EnergyTimeMatchingAlg"]
+                            "LocalMaxFindingAlg"]
 PandoraPlusPFAlg.AlgParNames = [ ["Par1", "Par2"], 
                                  ["Par1"], 
-                                 ["Eth_localMax", "Eth_MaxWithNeigh"], 
-                                 ["th_Layers", "th_AxisE"],  #Can leave empty, but MUST have one block. 
-                                 [""], 
-                                 [""] ]
-PandoraPlusPFAlg.AlgParValues = [ [1., 3.14], 
-                                  [1.], 
-                                  [0.005, 0.],
-                                  [10, 1.],  #Same as ParNames.
-                                  [0.], 
-                                  [0.] ]
+                                 ["Eth_localMax", "Eth_MaxWithNeigh"] ]
+PandoraPlusPFAlg.AlgParTypes = [ ["double", "double"],
+                                 ["double"],
+                                 ["double", "double"] ]
+PandoraPlusPFAlg.AlgParValues = [ ["1.", "3.14"], 
+                                  ["1."], 
+                                  ["0.005", "0."] ]
 
 ########################################
 
@@ -125,10 +121,10 @@ out.outputCommands = ["keep *"]
 
 from Configurables import ApplicationMgr
 ApplicationMgr( 
-    TopAlg=[inp, EcalDigi,caloDigi, PandoraPlusPFAlg, out],
+    TopAlg=[inp, EcalDigi,caloDigi, PandoraPlusPFAlg ],
     #TopAlg=[inp, EcalDigi, PandoraPlusPFAlg],
     EvtSel="NONE",
-    EvtMax=100,
+    EvtMax=Nevt,
     ExtSvc=[podioevent, geomsvc],
     #OutputLevel=DEBUG
 )

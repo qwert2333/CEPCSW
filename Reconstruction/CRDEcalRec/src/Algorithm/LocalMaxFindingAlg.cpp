@@ -20,50 +20,23 @@ StatusCode LocalMaxFindingAlg::Initialize(){
 
 StatusCode LocalMaxFindingAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol){
 
-  std::vector<PandoraPlus::CaloBlock*> m_blocks = m_datacol.BlockCol;
-  std::vector<PandoraPlus::CaloTower*> m_TowerCol; m_TowerCol.clear();
+  std::vector<PandoraPlus::Calo2DCluster*> m_2dClusCol = m_datacol.Cluster2DCol;
 
-  int Nblocks = m_blocks.size();
-  for(int ib=0;ib<Nblocks;ib++){
-    GetLocalMax( m_blocks[ib] );
+cout<<"LocalMaxFinding: input 2DCluster size = "<<m_2dClusCol.size()<<endl;  
+  for(int ic=0; ic<m_2dClusCol.size(); ic++){
+    GetLocalMax( m_2dClusCol[ic] );
 
-    for(int is=0; is<m_blocks[ib]->getShowerXCol().size(); is++)
-      m_datacol.bk_BarShowerCol.push_back( const_cast<PandoraPlus::CaloBarShower *>(m_blocks[ib]->getShowerXCol()[is]) );
-    for(int is=0; is<m_blocks[ib]->getShowerYCol().size(); is++)
-      m_datacol.bk_BarShowerCol.push_back( const_cast<PandoraPlus::CaloBarShower *>(m_blocks[ib]->getShowerYCol()[is]) );
-
-
-    int b_module = m_blocks[ib]->getModule();
-    int b_stave  = m_blocks[ib]->getStave();
-    int b_part   = m_blocks[ib]->getPart();
-
-    PandoraPlus::CaloTower *m_tower = nullptr; 
-    for(int it=0; it<m_TowerCol.size(); it++){
-      if( m_TowerCol[it]->getModule() == b_module && 
-          m_TowerCol[it]->getStave()  == b_stave  &&
-          m_TowerCol[it]->getPart()   == b_part)  m_tower = m_TowerCol[it];
-    }
-
-    if(!m_tower){
-      m_tower = new PandoraPlus::CaloTower(); m_datacol.bk_TowerCol.push_back(m_tower);
-
-      m_tower->setTowerID( m_blocks.at(ib)->getModule(),
-                           m_blocks.at(ib)->getStave(),
-                           m_blocks.at(ib)->getPart() );
-      m_tower->addBlock( m_blocks[ib] );
-      m_TowerCol.push_back(m_tower);
-    }
-    else{
-      m_tower->addBlock( m_blocks[ib] );
-    }
-
+    for(int is=0; is<m_2dClusCol[ic]->getShowerUCol().size(); is++)
+      m_datacol.bk_BarShowerCol.push_back( const_cast<PandoraPlus::CaloBarShower *>(m_2dClusCol[ic]->getShowerUCol()[is]) );
+    for(int is=0; is<m_2dClusCol[ic]->getShowerVCol().size(); is++)
+      m_datacol.bk_BarShowerCol.push_back( const_cast<PandoraPlus::CaloBarShower *>(m_2dClusCol[ic]->getShowerVCol()[is]) );
   }
+
 //cout<<"  LocalMaxFinding: tower size = "<<m_TowerCol.size();
 //cout<<"  #Blocks in tower: ";
 //for(int i=0; i<m_TowerCol.size(); i++) cout<<m_TowerCol[i]->getBlocks().size()<<"  ";
 //cout<<endl;
 
-  m_datacol.TowerCol = m_TowerCol;
   return StatusCode::SUCCESS;
 }
 
@@ -72,53 +45,53 @@ StatusCode LocalMaxFindingAlg::ClearAlgorithm(){
   return StatusCode::SUCCESS;
 }
 
-StatusCode LocalMaxFindingAlg::GetLocalMax(PandoraPlus::CaloBlock* m_block){
-  if(m_block->getBarXCol().size()==0 && m_block->getBarYCol().size()==0) return StatusCode::SUCCESS;
+StatusCode LocalMaxFindingAlg::GetLocalMax(PandoraPlus::Calo2DCluster* m_2dClus){
+  if(m_2dClus->getBarUCol().size()==0 && m_2dClus->getBarVCol().size()==0) return StatusCode::SUCCESS;
 
-  std::vector<const PandoraPlus::CaloBar*> m_barXCol = m_block->getBarXCol();
-  std::vector<const PandoraPlus::CaloBar*> m_barYCol = m_block->getBarYCol();
+  std::vector<const PandoraPlus::CaloUnit*> m_barUCol = m_2dClus->getBarUCol();
+  std::vector<const PandoraPlus::CaloUnit*> m_barVCol = m_2dClus->getBarVCol();
 
-  std::vector<const PandoraPlus::CaloBar*> localMaxXCol; localMaxXCol.clear();
-  std::vector<const PandoraPlus::CaloBar*> localMaxYCol; localMaxYCol.clear();
-  GetLocalMaxBar( m_barXCol, localMaxXCol );
-  GetLocalMaxBar( m_barYCol, localMaxYCol );
+  std::vector<const PandoraPlus::CaloUnit*> localMaxUCol; localMaxUCol.clear();
+  std::vector<const PandoraPlus::CaloUnit*> localMaxVCol; localMaxVCol.clear();
+  GetLocalMaxBar( m_barUCol, localMaxUCol );
+  GetLocalMaxBar( m_barVCol, localMaxVCol );
 
-  std::vector<const PandoraPlus::CaloBarShower*> m_showerColX; m_showerColX.clear();
-  std::vector<const PandoraPlus::CaloBarShower*> m_showerColY; m_showerColY.clear();
-  for(int j=0; j<localMaxXCol.size(); j++){
+  std::vector<const PandoraPlus::CaloBarShower*> m_showerColU; m_showerColU.clear();
+  std::vector<const PandoraPlus::CaloBarShower*> m_showerColV; m_showerColV.clear();
+  for(int j=0; j<localMaxUCol.size(); j++){
     PandoraPlus::CaloBarShower* m_shower = new PandoraPlus::CaloBarShower();
-    m_shower->addBar( localMaxXCol[j] );
-    m_shower->setSeed( localMaxXCol[j] );
-    m_shower->setIDInfo( localMaxXCol[j]->getModule(),
-                        localMaxXCol[j]->getStave(),
-                        localMaxXCol[j]->getDlayer(),
-                        localMaxXCol[j]->getPart(),
-                        localMaxXCol[j]->getSlayer() );
-    m_showerColX.push_back(m_shower);
+    m_shower->addBar( localMaxUCol[j] );
+    m_shower->setSeed( localMaxUCol[j] );
+    m_shower->setIDInfo( localMaxUCol[j]->getModule(),
+                        localMaxUCol[j]->getStave(),
+                        localMaxUCol[j]->getDlayer(),
+                        localMaxUCol[j]->getPart(),
+                        localMaxUCol[j]->getSlayer() );
+    m_showerColU.push_back(m_shower);
   }
-  for(int j=0; j<localMaxYCol.size(); j++){
+  for(int j=0; j<localMaxVCol.size(); j++){
     PandoraPlus::CaloBarShower* m_shower = new PandoraPlus::CaloBarShower();
-    m_shower->addBar( localMaxYCol[j] );
-    m_shower->setSeed( localMaxYCol[j] );
-    m_shower->setIDInfo( localMaxYCol[j]->getModule(),
-                        localMaxYCol[j]->getStave(),
-                        localMaxYCol[j]->getDlayer(),
-                        localMaxYCol[j]->getPart(),
-                        localMaxYCol[j]->getSlayer() );
-    m_showerColY.push_back(m_shower);
+    m_shower->addBar( localMaxVCol[j] );
+    m_shower->setSeed( localMaxVCol[j] );
+    m_shower->setIDInfo( localMaxVCol[j]->getModule(),
+                        localMaxVCol[j]->getStave(),
+                        localMaxVCol[j]->getDlayer(),
+                        localMaxVCol[j]->getPart(),
+                        localMaxVCol[j]->getSlayer() );
+    m_showerColV.push_back(m_shower);
   }
 
-  m_block->setShowerXCol(m_showerColX);
-  m_block->setShowerYCol(m_showerColY);
+  m_2dClus->setShowerUCol(m_showerColU);
+  m_2dClus->setShowerVCol(m_showerColV);
 
   return StatusCode::SUCCESS;
 }
 
-StatusCode LocalMaxFindingAlg::GetLocalMaxBar( std::vector<const PandoraPlus::CaloBar*>& barCol, std::vector<const PandoraPlus::CaloBar*>& localMaxCol ){
-  std::sort( barCol.begin(), barCol.end(), compBar );
+StatusCode LocalMaxFindingAlg::GetLocalMaxBar( std::vector<const PandoraPlus::CaloUnit*>& barCol, std::vector<const PandoraPlus::CaloUnit*>& localMaxCol ){
+  //std::sort( barCol.begin(), barCol.end(), compBar );
 
   for(int ib=0; ib<barCol.size(); ib++){
-    std::vector<const PandoraPlus::CaloBar*> m_neighbors = getNeighbors( barCol[ib], barCol );
+    std::vector<const PandoraPlus::CaloUnit*> m_neighbors = getNeighbors( barCol[ib], barCol );
     if( m_neighbors.size()==0 && barCol[ib]->getEnergy()>settings.map_floatPars["Eth_localMax"] ) { localMaxCol.push_back( barCol[ib] ); continue; }
 
     bool isLocalMax=true;
@@ -137,10 +110,28 @@ StatusCode LocalMaxFindingAlg::GetLocalMaxBar( std::vector<const PandoraPlus::Ca
 }
 
 
-std::vector<const PandoraPlus::CaloBar*> LocalMaxFindingAlg::getNeighbors( const PandoraPlus::CaloBar* seed, std::vector<const PandoraPlus::CaloBar*>& barCol){
-  std::vector<const PandoraPlus::CaloBar*> m_neighbor;
+std::vector<const PandoraPlus::CaloUnit*> LocalMaxFindingAlg::getNeighbors( const PandoraPlus::CaloUnit* seed, std::vector<const PandoraPlus::CaloUnit*>& barCol){
+  std::vector<const PandoraPlus::CaloUnit*> m_neighbor; m_neighbor.clear();
   for(int i=0;i<barCol.size();i++){
-    if( seed->isNeighbor(barCol[i]) ) m_neighbor.push_back(barCol[i]);
+    bool fl_neighbor = false; 
+    if( seed->getModule()==barCol[i]->getModule() && 
+        seed->getPart()==barCol[i]->getPart() && 
+        seed->getStave()==barCol[i]->getStave() && 
+        seed->getDlayer()==barCol[i]->getDlayer() &&
+        seed->getSlayer()==barCol[i]->getSlayer() &&
+        abs( seed->getBar()-barCol[i]->getBar() )==1 ) fl_neighbor=true;
+    else if( seed->getModule()==barCol[i]->getModule() && 
+             seed->getStave()==barCol[i]->getStave() && 
+             ( ( seed->getPart()-barCol[i]->getPart()==1 && seed->isAtLowerEdgePhi() && barCol[i]->isAtUpperEdgePhi() ) ||
+               ( barCol[i]->getPart()-seed->getPart()==1 && seed->isAtUpperEdgePhi() && barCol[i]->isAtLowerEdgePhi() ) ) ) fl_neighbor=true;
+    else if( seed->getModule()==barCol[i]->getModule() && 
+             seed->getPart()==barCol[i]->getPart() &&
+             ( ( seed->getStave()-barCol[i]->getStave()==1 && seed->isAtLowerEdgeZ() && barCol[i]->isAtUpperEdgeZ() ) || 
+               ( barCol[i]->getStave()-seed->getStave()==1 && seed->isAtUpperEdgeZ() && barCol[i]->isAtLowerEdgeZ() ) ) ) fl_neighbor=true;
+
+
+    if(fl_neighbor) m_neighbor.push_back( barCol[i] );
+
   }
   if(m_neighbor.size()>2) std::cout<<"WARNING: more than 2 hits in neighborCol!!"<<std::endl;
 

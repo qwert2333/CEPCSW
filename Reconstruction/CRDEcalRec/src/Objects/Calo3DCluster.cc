@@ -35,6 +35,7 @@ void Calo3DCluster::Check()
 
 bool Calo3DCluster::isNeighbor(const PandoraPlus::Calo2DCluster* m_2dcluster) const
 {
+  //Inner module
 	for(int i=0; i<m_2dcluster->getModules().size(); i++)
 	{
 		for(int j=0; j<m_modules.size(); j++)
@@ -46,32 +47,15 @@ bool Calo3DCluster::isNeighbor(const PandoraPlus::Calo2DCluster* m_2dcluster) co
 		}
 	}
 	
-	std::vector<const PandoraPlus::CaloBar*> bars_2d = m_2dcluster->getBars();
-	std::vector<const PandoraPlus::CaloBar*> bars_3d;
-	bars_3d.clear();
-	for(int i=0; i<m_2dclusters.size(); i++)
-	{
-		for(int j=0; j<m_2dclusters.at(i)->getBars().size(); j++)
-		{
-			bars_3d.push_back(m_2dclusters.at(i)->getBars().at(j));
-		}
-	}
-
-	for(int i=0; i<bars_2d.size(); i++)
-	{
-		const PandoraPlus::CaloBar* bob = bars_2d.at(i);
-		
-		for(int j=0; j<bars_3d.size(); j++)
-		{
-			const PandoraPlus::CaloBar* alice = bars_3d.at(j);
-			// cout<<i<<j<<endl;
-			if(ifModuleAdjacent(bob,alice))
-			{
-				// cout<<"ifModuleAdjacent"<<endl;
-				return true;
-			}
-		}
-	}
+  //Over modules
+	std::vector<const PandoraPlus::CaloUnit*> bars_2d = m_2dcluster->getBars();
+  for(int ib2d=0; ib2d<bars_2d.size(); ib2d++){
+    for(int ic=0; ic<m_2dclusters.size(); ic++){
+      for(int ib3d=0; ib3d<m_2dclusters[ic]->getBars().size(); ib3d++){
+        if(bars_2d[ib2d]->isModuleAdjacent(m_2dclusters[ic]->getBars()[ib3d])) return true;
+      }
+    }
+  }
 
 	return false;
 }
@@ -87,63 +71,12 @@ void Calo3DCluster::addCluster(const Calo2DCluster* _2dcluster)
 	m_staves.insert(m_staves.end(),m_2dstaves.begin(),m_2dstaves.end());
 }
 
-bool Calo3DCluster::ifModuleAdjacent(const PandoraPlus::CaloBar* bar_2d, const PandoraPlus::CaloBar* bar_3d) const
-{
-	PandoraPlus::CaloBar bob; //just first layer
-	PandoraPlus::CaloBar alice; //second new
-	if(bar_2d->getModule()==m_module && bar_3d->getModule()==m_modulestart)
-	{
-		bob = *bar_2d;
-		alice = *bar_3d;
-		return ifAdjacent(bob, alice);	
-	}
-	else if(bar_2d->getModule()==m_modulestart && bar_3d->getModule()==m_module)
-	{
-		bob = *bar_3d;
-		alice = *bar_2d;
-		return ifAdjacent(bob, alice);
-	}
-	else if(bar_2d->getModule() == bar_3d->getModule())
-	{
-		return false;
-	}
-	else if((bar_2d->getModule() < bar_3d->getModule()) && (bar_2d->getModule() - bar_3d->getModule())==-1)
-	{
-		bob = *bar_2d;
-		alice = *bar_3d;
-		return ifAdjacent(bob, alice);
-	}
-	else if((bar_2d->getModule() > bar_3d->getModule()) && (bar_2d->getModule() - bar_3d->getModule())==1)
-	{
-		bob = *bar_3d;
-		alice = *bar_2d;
-		return ifAdjacent(bob, alice);
-	}	
-	else
-	{
-		return false;
-	}	
-}
 
 //
-bool Calo3DCluster::ifAdjacent(PandoraPlus::CaloBar &bob, PandoraPlus::CaloBar &alice) const
-{
-	if( (bob.getDlayer()==1 && bob.getSlayer()==0 && bob.getPart()==m_part && alice.getSlayer()==0 && alice.getPart()==1 && bob.getStave()==alice.getStave() && abs(bob.getBar()-alice.getBar())<=1 ) ||
-		(bob.getDlayer()==1 && bob.getSlayer()==0 && bob.getPart()==m_part && alice.getSlayer()==1 && alice.getPart()==1 && bob.getStave()==alice.getStave() && alice.getBar()==1) ||
-		(bob.getDlayer()==1 && bob.getSlayer()==0 && bob.getPart()==m_part && alice.getSlayer()==0 && alice.getPart()==1 && abs(bob.getStave()-alice.getStave())<=1 && ((bob.getBar()==1&&alice.getBar()==60)||(bob.getBar()==60&&alice.getBar()==1)))
-	) 
-	{
-		return true;
-	}
-	else
-	{
-		return false;
-	}
-}
 
-std::vector<const PandoraPlus::CaloBar*> Calo3DCluster::getBars() const
+std::vector<const PandoraPlus::CaloUnit*> Calo3DCluster::getBars() const
 {
-	std::vector<const PandoraPlus::CaloBar*> results;
+	std::vector<const PandoraPlus::CaloUnit*> results;
 	results.clear();
 	for(int i=0; i<m_2dclusters.size(); i++)
 	{

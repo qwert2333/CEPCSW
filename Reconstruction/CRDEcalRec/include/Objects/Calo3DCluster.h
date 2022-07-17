@@ -24,12 +24,10 @@ namespace PandoraPlus {
     std::vector<int> getStaves() const { return m_staves; }
 
     bool isNeighbor(const PandoraPlus::Calo2DCluster* m_2dcluster) const; 
-    bool ifModuleAdjacent(const PandoraPlus::CaloBar* bar_2d, const PandoraPlus::CaloBar* bar_3d) const; 
-    bool ifAdjacent(PandoraPlus::CaloBar &bob, PandoraPlus::CaloBar &alice) const; 
     void addCluster(const Calo2DCluster* _2dcluster);
     std::vector<const Calo2DCluster*> getCluster() const { return m_2dclusters; }
     
-    std::vector<const CaloBar*> getBars() const;
+    std::vector<const CaloUnit*> getBars() const;
     double getEnergy() const; 
 
   private:
@@ -40,14 +38,14 @@ namespace PandoraPlus {
     std::vector<const Calo2DCluster*> m_2dclusters;
     std::vector<const CaloTower*> m_towers;
 
-    static const int m_module = 7;
-    static const int m_modulestart = 0;
-    static const int m_part = 4;
-    static const int m_stave = 11;
-    static const int m_superlayer = 14;
-    static const int m_startnumber = 1;
-    static const int m_phibarnumber = 60;
-    static const int m_zbarnumber = 47;
+    //static const int m_module = 7;
+    //static const int m_modulestart = 0;
+    //static const int m_part = 4;
+    //static const int m_stave = 11;
+    //static const int m_superlayer = 14;
+    //static const int m_startnumber = 1;
+    //static const int m_phibarnumber = 60;
+    //static const int m_zbarnumber = 47;
   };
 
 };

@@ -1,7 +1,7 @@
 #ifndef CALOBAR_CLUSTER_C
 #define CALOBAR_CLUSTER_C
 
-#include "Objects/CaloBar.h"
+#include "Objects/CaloUnit.h"
 #include "Objects/CaloBarCluster.h"
 
 namespace PandoraPlus{
@@ -26,14 +26,14 @@ namespace PandoraPlus{
       if(!Seeds[i]) { Seeds.erase(Seeds.begin()+i); i--; }
   }
 
-  bool CaloBarCluster::isNeighbor(const PandoraPlus::CaloBar* iBar) const{
+  bool CaloBarCluster::isNeighbor(const PandoraPlus::CaloUnit* iBar) const{
     for(int i=0;i<Bars.size();i++){
       if(!inCluster(iBar) && (iBar->getBar()==Bars[i]->getBar()+1 || iBar->getBar()==Bars[i]->getBar()-1) ) return true;
     }
     return false;
   }
 
-  bool CaloBarCluster::inCluster(const PandoraPlus::CaloBar* iBar) const{
+  bool CaloBarCluster::inCluster(const PandoraPlus::CaloUnit* iBar) const{
     return (find(Bars.begin(), Bars.end(), iBar)!=Bars.end() );
   }
 

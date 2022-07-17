@@ -9,6 +9,12 @@
 using namespace std;
 using namespace dd4hep;
 
+int PandoraPlus::CaloUnit::Nmodule = 8;
+int PandoraPlus::CaloUnit::Npart = 4;
+int PandoraPlus::CaloUnit::Nstave = 11;
+int PandoraPlus::CaloUnit::Nlayer = 14;
+int PandoraPlus::CaloUnit::NbarPhi = 47;
+int PandoraPlus::CaloUnit::NbarZ = 60;
 
 DECLARE_COMPONENT( PandoraPlusPFAlg )
 
@@ -79,7 +85,6 @@ StatusCode PandoraPlusPFAlg::initialize()
   //Register Algorithms
   //--- Initialize algorithm maps ---
   m_algorithmManager.RegisterAlgorithmFactory("ExampleAlg",             new ExampleAlg::Factory);
-  m_algorithmManager.RegisterAlgorithmFactory("TrackExtrapolatingAlg",  new TrackExtrapolatingAlg::Factory);
   m_algorithmManager.RegisterAlgorithmFactory("GlobalClusteringAlg",    new GlobalClusteringAlg::Factory);
   m_algorithmManager.RegisterAlgorithmFactory("LocalMaxFindingAlg",     new LocalMaxFindingAlg::Factory);
   m_algorithmManager.RegisterAlgorithmFactory("HoughClusteringAlg",     new HoughClusteringAlg::Factory);
@@ -147,16 +152,16 @@ StatusCode PandoraPlusPFAlg::initialize()
     t_SimBar->Branch("simBar_slayer", &m_simBar_slayer);
    
     //Local maxima
-    t_Layers->Branch("NshowerX", &m_NshowerX);
-    t_Layers->Branch("NshowerY", &m_NshowerY);
-    t_Layers->Branch("barShowerX_x", &m_barShowerX_x);
-    t_Layers->Branch("barShowerX_y", &m_barShowerX_y);
-    t_Layers->Branch("barShowerX_z", &m_barShowerX_z);
-    t_Layers->Branch("barShowerX_E", &m_barShowerX_E);
-    t_Layers->Branch("barShowerY_x", &m_barShowerY_x);
-    t_Layers->Branch("barShowerY_y", &m_barShowerY_y);
-    t_Layers->Branch("barShowerY_z", &m_barShowerY_z);
-    t_Layers->Branch("barShowerY_E", &m_barShowerY_E);
+    t_Layers->Branch("NshowerU", &m_NshowerU);
+    t_Layers->Branch("NshowerV", &m_NshowerV);
+    t_Layers->Branch("barShowerU_x", &m_barShowerU_x);
+    t_Layers->Branch("barShowerU_y", &m_barShowerU_y);
+    t_Layers->Branch("barShowerU_z", &m_barShowerU_z);
+    t_Layers->Branch("barShowerU_E", &m_barShowerU_E);
+    t_Layers->Branch("barShowerV_x", &m_barShowerV_x);
+    t_Layers->Branch("barShowerV_y", &m_barShowerV_y);
+    t_Layers->Branch("barShowerV_z", &m_barShowerV_z);
+    t_Layers->Branch("barShowerV_E", &m_barShowerV_E);
 
     //Clusters
     t_Cluster->Branch("Nclus", &m_Nclus);
@@ -232,44 +237,6 @@ StatusCode PandoraPlusPFAlg::execute()
   cout<<"Run Algorithms"<<endl;
   m_algorithmManager.RunAlgorithm( m_DataCol );
 
-/*
-cout<<"Block Info: "<<endl;
-for(int ib=0; ib<m_DataCol.BlockCol.size(); ib++){
-  printf("  #%d Block: ID=(%d, %d, %d, %d). Bar shower size: X=%d, Y=%d \n", ib, m_DataCol.BlockCol[ib]->getModule(), m_DataCol.BlockCol[ib]->getStave(), m_DataCol.BlockCol[ib]->getPart(), m_DataCol.BlockCol[ib]->getDlayer(), m_DataCol.BlockCol[ib]->getShowerXCol().size(), m_DataCol.BlockCol[ib]->getShowerYCol().size() );
-
-  cout<<"  Print BarShowersX "<<endl;
-  for(int is=0 ;is<m_DataCol.BlockCol[ib]->getShowerXCol().size(); is++)
-  printf("    #%d showerX: cellID=(%d, %d, %d, %d) \n", is, m_DataCol.BlockCol[ib]->getShowerXCol()[is]->getModule(), m_DataCol.BlockCol[ib]->getShowerXCol()[is]->getStave(), m_DataCol.BlockCol[ib]->getShowerXCol()[is]->getPart(), m_DataCol.BlockCol[ib]->getShowerXCol()[is]->getDlayer() );
-
-  cout<<"  Print BarShowersY "<<endl;
-  for(int is=0 ;is<m_DataCol.BlockCol[ib]->getShowerYCol().size(); is++)
-  printf("    #%d showerX: cellID=(%d, %d, %d, %d) \n", is, m_DataCol.BlockCol[ib]->getShowerYCol()[is]->getModule(), m_DataCol.BlockCol[ib]->getShowerYCol()[is]->getStave(), m_DataCol.BlockCol[ib]->getShowerYCol()[is]->getPart(), m_DataCol.BlockCol[ib]->getShowerYCol()[is]->getDlayer() );
-}
-
-cout<<endl;
-cout<<endl;
-
-cout<<"Tower Info: size = "<<m_DataCol.TowerCol.size()<<endl;
-for(int it=0; it<m_DataCol.TowerCol.size(); it++){
-  printf("  #%d Tower: ID=(%d, %d, %d). Block size: %d \n", it, m_DataCol.TowerCol[it]->getModule(), m_DataCol.TowerCol[it]->getStave(), m_DataCol.TowerCol[it]->getPart(), m_DataCol.TowerCol[it]->getBlocks().size() );
-
-for(int ib=0; ib<m_DataCol.TowerCol[it]->getBlocks().size(); ib++){
-  printf("    #%d Block: ID=(%d, %d, %d, %d). Bar shower size: X=%d, Y=%d \n", ib, m_DataCol.TowerCol[it]->getBlocks()[ib]->getModule(), m_DataCol.TowerCol[it]->getBlocks()[ib]->getStave(), m_DataCol.TowerCol[it]->getBlocks()[ib]->getPart(), m_DataCol.TowerCol[it]->getBlocks()[ib]->getDlayer(), m_DataCol.TowerCol[it]->getBlocks()[ib]->getShowerXCol().size(), m_DataCol.TowerCol[it]->getBlocks()[ib]->getShowerYCol().size() );
-
-  cout<<"    Print BarShowersX "<<endl;
-  for(int is=0 ;is<m_DataCol.TowerCol[it]->getBlocks()[ib]->getShowerXCol().size(); is++)
-  printf("      #%d showerX: cellID=(%d, %d, %d, %d) \n", is, m_DataCol.TowerCol[it]->getBlocks()[ib]->getShowerXCol()[is]->getModule(), m_DataCol.TowerCol[it]->getBlocks()[ib]->getShowerXCol()[is]->getStave(), m_DataCol.TowerCol[it]->getBlocks()[ib]->getShowerXCol()[is]->getPart(), m_DataCol.TowerCol[it]->getBlocks()[ib]->getShowerXCol()[is]->getDlayer() );
-
-  cout<<"    Print BarShowersY "<<endl;
-  for(int is=0 ;is<m_DataCol.TowerCol[it]->getBlocks()[ib]->getShowerYCol().size(); is++)
-  printf("      #%d showerX: cellID=(%d, %d, %d, %d) \n", is, m_DataCol.TowerCol[it]->getBlocks()[ib]->getShowerYCol()[is]->getModule(), m_DataCol.TowerCol[it]->getBlocks()[ib]->getShowerYCol()[is]->getStave(), m_DataCol.TowerCol[it]->getBlocks()[ib]->getShowerYCol()[is]->getPart(), m_DataCol.TowerCol[it]->getBlocks()[ib]->getShowerYCol()[is]->getDlayer() );
-
-}
-}
-*/
-
-//for(int ic=0; ic<m_DataCol.ClusterCol.size(); ic++) m_DataCol.ClusterCol[ic]->Print();
-
 
   m_pOutputCreator->CreateRecCaloHits( m_DataCol, w_RecCaloCol );
   m_pOutputCreator->CreateCluster( m_DataCol, w_ClusterCollection );
@@ -279,59 +246,42 @@ for(int ib=0; ib<m_DataCol.TowerCol[it]->getBlocks().size(); ib++){
 
   //Save Raw bars information
   ClearBar();
-  std::vector<PandoraPlus::CaloBlock*> m_blockvec = m_DataCol.BlockCol;
-  for(int ibl=0;ibl<m_blockvec.size();ibl++){
-    PandoraPlus::CaloBlock tmp_barcol = *(m_blockvec[ibl]);
-    for(int ibar=0;ibar<tmp_barcol.getBarXCol().size();ibar++){
-      const PandoraPlus::CaloBar* p_hitbar = tmp_barcol.getBarXCol()[ibar];
-      m_simBar_x.push_back(p_hitbar->getPosition().x());
-      m_simBar_y.push_back(p_hitbar->getPosition().y());
-      m_simBar_z.push_back(p_hitbar->getPosition().z());
-      m_simBar_Q1.push_back(p_hitbar->getQ1());
-      m_simBar_Q2.push_back(p_hitbar->getQ2());
-      m_simBar_T1.push_back(p_hitbar->getT1());
-      m_simBar_T2.push_back(p_hitbar->getT2());
-      m_simBar_module.push_back(p_hitbar->getModule());
-      m_simBar_dlayer.push_back(p_hitbar->getDlayer());
-      m_simBar_part.push_back(p_hitbar->getPart());
-      m_simBar_stave.push_back(p_hitbar->getStave());
-      m_simBar_slayer.push_back(p_hitbar->getSlayer());
-    }
-    for(int ibar=0;ibar<tmp_barcol.getBarYCol().size();ibar++){
-      const PandoraPlus::CaloBar* p_hitbar = tmp_barcol.getBarYCol()[ibar];
-      m_simBar_x.push_back(p_hitbar->getPosition().x());
-      m_simBar_y.push_back(p_hitbar->getPosition().y());
-      m_simBar_z.push_back(p_hitbar->getPosition().z());
-      m_simBar_Q1.push_back(p_hitbar->getQ1());
-      m_simBar_Q2.push_back(p_hitbar->getQ2());
-      m_simBar_T1.push_back(p_hitbar->getT1());
-      m_simBar_T2.push_back(p_hitbar->getT2());
-      m_simBar_module.push_back(p_hitbar->getModule());
-      m_simBar_dlayer.push_back(p_hitbar->getDlayer());
-      m_simBar_part.push_back(p_hitbar->getPart());
-      m_simBar_stave.push_back(p_hitbar->getStave());
-      m_simBar_slayer.push_back(p_hitbar->getSlayer());
-    }
+  std::vector<PandoraPlus::CaloUnit*> m_barcol = m_DataCol.BarCol;
+  for(int ibar=0;ibar<m_barcol.size();ibar++){
+    const PandoraPlus::CaloUnit* p_hitbar = m_barcol[ibar];
+    m_simBar_x.push_back(p_hitbar->getPosition().x());
+    m_simBar_y.push_back(p_hitbar->getPosition().y());
+    m_simBar_z.push_back(p_hitbar->getPosition().z());
+    m_simBar_Q1.push_back(p_hitbar->getQ1());
+    m_simBar_Q2.push_back(p_hitbar->getQ2());
+    m_simBar_T1.push_back(p_hitbar->getT1());
+    m_simBar_T2.push_back(p_hitbar->getT2());
+    m_simBar_module.push_back(p_hitbar->getModule());
+    m_simBar_dlayer.push_back(p_hitbar->getDlayer());
+    m_simBar_part.push_back(p_hitbar->getPart());
+    m_simBar_stave.push_back(p_hitbar->getStave());
+    m_simBar_slayer.push_back(p_hitbar->getSlayer());
   }
   t_SimBar->Fill();
 
   //Save Layer info (local Max)
   ClearLayer();
+  std::vector<PandoraPlus::Calo2DCluster*> m_blockvec = m_DataCol.Cluster2DCol; 
   for(int ibl=0;ibl<m_blockvec.size();ibl++){
-    PandoraPlus::CaloBlock tmp_barcol = *(m_blockvec[ibl]);
-    m_NshowerX = tmp_barcol.getShowerXCol().size();
-    m_NshowerY = tmp_barcol.getShowerYCol().size();
-    for(int is=0; is<m_NshowerX; is++){
-      m_barShowerX_x.push_back( tmp_barcol.getShowerXCol()[is]->getPos().x() );
-      m_barShowerX_y.push_back( tmp_barcol.getShowerXCol()[is]->getPos().y() );
-      m_barShowerX_z.push_back( tmp_barcol.getShowerXCol()[is]->getPos().z() );
-      m_barShowerX_E.push_back( tmp_barcol.getShowerXCol()[is]->getE() );
+    PandoraPlus::Calo2DCluster tmp_barcol = *(m_blockvec[ibl]);
+    m_NshowerU = tmp_barcol.getShowerUCol().size();
+    m_NshowerV = tmp_barcol.getShowerVCol().size();
+    for(int is=0; is<m_NshowerU; is++){
+      m_barShowerU_x.push_back( tmp_barcol.getShowerUCol()[is]->getPos().x() );
+      m_barShowerU_y.push_back( tmp_barcol.getShowerUCol()[is]->getPos().y() );
+      m_barShowerU_z.push_back( tmp_barcol.getShowerUCol()[is]->getPos().z() );
+      m_barShowerU_E.push_back( tmp_barcol.getShowerUCol()[is]->getE() );
     }
-    for(int is=0; is<m_NshowerY; is++){
-      m_barShowerY_x.push_back( tmp_barcol.getShowerYCol()[is]->getPos().x() );
-      m_barShowerY_y.push_back( tmp_barcol.getShowerYCol()[is]->getPos().y() );
-      m_barShowerY_z.push_back( tmp_barcol.getShowerYCol()[is]->getPos().z() );
-      m_barShowerY_E.push_back( tmp_barcol.getShowerYCol()[is]->getE() );
+    for(int is=0; is<m_NshowerV; is++){
+      m_barShowerV_x.push_back( tmp_barcol.getShowerVCol()[is]->getPos().x() );
+      m_barShowerV_y.push_back( tmp_barcol.getShowerVCol()[is]->getPos().y() );
+      m_barShowerV_z.push_back( tmp_barcol.getShowerVCol()[is]->getPos().z() );
+      m_barShowerV_E.push_back( tmp_barcol.getShowerVCol()[is]->getE() );
     }
   }
   t_Layers->Fill();
@@ -355,7 +305,7 @@ for(int ib=0; ib<m_DataCol.TowerCol[it]->getBlocks().size(); ib++){
 	std::vector<PandoraPlus::Calo3DCluster*>  tmp_3dclusters = m_DataCol.Cluster3DCol;
 	std::vector<PandoraPlus::Calo2DCluster*>  tmp_2dclusters = m_DataCol.Cluster2DCol;
 	std::vector<PandoraPlus::Calo1DCluster*>  tmp_1dclusters = m_DataCol.Cluster1DCol;
-	std::vector<PandoraPlus::CaloBar*>  tmp_bars = m_DataCol.BarCol;
+	std::vector<PandoraPlus::CaloUnit*>  tmp_bars = m_DataCol.BarCol;
 	
 	m_3dcluster = tmp_3dclusters.size();
 	m_2dcluster = tmp_2dclusters.size();
@@ -365,10 +315,10 @@ for(int ib=0; ib<m_DataCol.TowerCol[it]->getBlocks().size(); ib++){
 	{
 		PandoraPlus::Calo3DCluster* tmp_3dcluster = tmp_3dclusters.at(i);
 		m_E_3dcluster.push_back(tmp_3dcluster->getEnergy()); //
-		std::vector<const PandoraPlus::CaloBar*> allthebars = tmp_3dcluster->getBars(); //
+		std::vector<const PandoraPlus::CaloUnit*> allthebars = tmp_3dcluster->getBars(); //
 		for(int n=0; n<allthebars.size(); n++)
 		{
-			const PandoraPlus::CaloBar* the_bar = allthebars.at(n); //need to be fixed
+			const PandoraPlus::CaloUnit* the_bar = allthebars.at(n); //need to be fixed
 			m_bar_tag.push_back(tmp_3dcluster->getEnergy());
 			m_bar_energy.push_back(the_bar->getEnergy());
 			m_bar_dlayer.push_back(the_bar->getDlayer());
@@ -394,7 +344,7 @@ for(int ib=0; ib<m_DataCol.TowerCol[it]->getBlocks().size(); ib++){
 	}
 	for(int m=0; m<tmp_bars.size(); m++)
 	{
-		PandoraPlus::CaloBar* tmp_bar = tmp_bars.at(m);
+		PandoraPlus::CaloUnit* tmp_bar = tmp_bars.at(m);
 		m_E_bar.push_back(tmp_bar->getEnergy());
 	}
 
@@ -436,12 +386,9 @@ StatusCode PandoraPlusPFAlg::finalize()
   t_Layers->Write();
   t_Cluster->Write();
   t_Clustering->Write();
-  m_wfile->Close();
-  delete m_wfile, t_SimBar, t_Layers, t_Cluster, t_Clustering;
-
   t_Track->Write();
   m_wfile->Close();
-  delete m_wfile, t_SimBar, t_Layers, t_Cluster, t_Track;
+  delete m_wfile, t_SimBar, t_Layers, t_Cluster, t_Track, t_Clustering;
 
 
   delete m_pMCParticleCreator;
@@ -480,16 +427,16 @@ void PandoraPlusPFAlg::ClearBar(){
 }
 
 void PandoraPlusPFAlg::ClearLayer(){
-  m_NshowerX=-99;
-  m_NshowerY=-99;
-  m_barShowerX_x.clear();
-  m_barShowerX_y.clear();
-  m_barShowerX_z.clear();
-  m_barShowerX_E.clear();
-  m_barShowerY_x.clear();
-  m_barShowerY_y.clear();
-  m_barShowerY_z.clear();
-  m_barShowerY_E.clear();
+  m_NshowerU=-99;
+  m_NshowerV=-99;
+  m_barShowerU_x.clear();
+  m_barShowerU_y.clear();
+  m_barShowerU_z.clear();
+  m_barShowerU_E.clear();
+  m_barShowerV_x.clear();
+  m_barShowerV_y.clear();
+  m_barShowerV_z.clear();
+  m_barShowerV_E.clear();
 }
 
 void PandoraPlusPFAlg::ClearCluster(){
@@ -524,6 +471,7 @@ void PandoraPlusPFAlg::ClearClustering(){
   m_bar_part.clear();
   m_bar_stave.clear();
   m_bar_bar.clear();
+}
 
 void PandoraPlusPFAlg::ClearTrack(){
   m_Ntrk=-99;

@@ -22,14 +22,14 @@ namespace PandoraPlus {
       if(!Bars[i]) { Bars.erase(Bars.begin()+i); i--; }
   }
 
-/*    bool CaloBarShower::isNeighbor(PandoraPlus::CaloBar iBar){
+/*    bool CaloBarShower::isNeighbor(PandoraPlus::CaloUnit iBar){
       for(int i=0;i<Bars.size();i++){
         if(!inShower(iBar) && (iBar.getBar()==Bars[i].getBar()+1 || iBar.getBar()==Bars[i].getBar()-1) ) return true;
       }
       return false;
     }
 
-    bool CaloBarShower::inShower(PandoraPlus::CaloBar iBar){
+    bool CaloBarShower::inShower(PandoraPlus::CaloUnit iBar){
       for(int i=0;i<Bars.size();i++){
         if(iBar.getcellID() == Bars[i].getcellID() ) return true;
       }

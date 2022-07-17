@@ -44,8 +44,8 @@ for(int ib=0; ib<p_towerCol->at(it)->getBlocks().size(); ib++ ){
   printf("    Block #%d: Layer = %d, bar size (%d, %d), shower size (%d, %d) \n", ib, p_block->getDlayer(),
               p_block->getBarXCol().size(), p_block->getBarYCol().size(), p_block->getShowerXCol().size(), p_block->getShowerYCol().size());
 
-  std::vector<const CaloBar *> barXCol = p_block->getBarXCol();
-  std::vector<const CaloBar *> barYCol = p_block->getBarYCol();
+  std::vector<const CaloUnit *> barXCol = p_block->getBarXCol();
+  std::vector<const CaloUnit *> barYCol = p_block->getBarYCol();
   std::vector<const CaloBarShower*> barShowerXCol = p_block->getShowerXCol();
   std::vector<const CaloBarShower*> barShowerYCol = p_block->getShowerYCol();
 
@@ -542,12 +542,12 @@ StatusCode EnergyTimeMatchingAlg::GetMatchedShowersL1( const PandoraPlus::CaloBa
     double wi_E = EshY[is]/totE_shY;
     PandoraPlus::CaloBarShower* m_splitshower1 = new PandoraPlus::CaloBarShower();
 
-    PandoraPlus::CaloBar* m_wiseed = shower1->getSeed()->Clone();
+    PandoraPlus::CaloUnit* m_wiseed = shower1->getSeed()->Clone();
     m_wiseed->setQ( wi_E*m_wiseed->getQ1(), wi_E*m_wiseed->getQ2() );
 
-    std::vector<const PandoraPlus::CaloBar*> m_wibars;
+    std::vector<const PandoraPlus::CaloUnit*> m_wibars;
     for(int ib=0;ib<shower1->getBars().size();ib++){
-      PandoraPlus::CaloBar* m_wibar = shower1->getBars()[ib]->Clone();
+      PandoraPlus::CaloUnit* m_wibar = shower1->getBars()[ib]->Clone();
       m_wibar->setQ(wi_E*m_wibar->getQ1(), wi_E*m_wibar->getQ2());
       m_wibars.push_back(m_wibar);
     }

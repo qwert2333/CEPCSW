@@ -34,8 +34,8 @@ for(int ib=0; ib<p_towerCol->at(it)->getBlocks().size(); ib++ ){
   printf("    Block #%d: Layer = %d, bar size (%d, %d), shower size (%d, %d) \n", ib, p_block->getDlayer(),
               p_block->getBarXCol().size(), p_block->getBarYCol().size(), p_block->getShowerXCol().size(), p_block->getShowerYCol().size());
 
-  std::vector<const CaloBar *> barXCol = p_block->getBarXCol();
-  std::vector<const CaloBar *> barYCol = p_block->getBarYCol();
+  std::vector<const CaloUnit *> barXCol = p_block->getBarXCol();
+  std::vector<const CaloUnit *> barYCol = p_block->getBarYCol();
   std::vector<const CaloBarShower*> barShowerXCol = p_block->getShowerXCol();
   std::vector<const CaloBarShower*> barShowerYCol = p_block->getShowerYCol();
 
@@ -115,8 +115,8 @@ printf("  In Tower #%d: HoughCLX range: (%d, %d), HoughCLY range: (%d, %d) \n", 
 
       std::vector<PandoraPlus::CaloBarCluster*> m_barClusXCol; m_barClusXCol.clear();
       std::vector<PandoraPlus::CaloBarCluster*> m_barClusYCol; m_barClusYCol.clear();
-      std::vector<const PandoraPlus::CaloBar*> m_barColX = m_blocksInTower[ib]->getBarXCol();
-      std::vector<const PandoraPlus::CaloBar*> m_barColY = m_blocksInTower[ib]->getBarYCol();
+      std::vector<const PandoraPlus::CaloUnit*> m_barColX = m_blocksInTower[ib]->getBarXCol();
+      std::vector<const PandoraPlus::CaloUnit*> m_barColY = m_blocksInTower[ib]->getBarYCol();
 
       //Neighbor clustering
       int dlayer = m_blocksInTower[ib]->getDlayer();
@@ -237,8 +237,8 @@ cout<<"  EnergySplittingAlg: Update clusters energy"<<endl;
 cout<<"  Loop check blocks AFTERLONGICLUSTERING:"<<endl;
 for(int ib=0; ib<m_blocks.size(); ib++){
 int dlayer = m_blocks[ib]->getDlayer();
-std::vector<const CaloBar *> m_barColX = m_blocks[ib]->getBarXCol();
-std::vector<const CaloBar *> m_barColY = m_blocks[ib]->getBarYCol();
+std::vector<const CaloUnit *> m_barColX = m_blocks[ib]->getBarXCol();
+std::vector<const CaloUnit *> m_barColY = m_blocks[ib]->getBarYCol();
 std::vector<const CaloBarShower *> m_barShowerXCol = m_blocks[ib]->getShowerXCol();
 std::vector<const CaloBarShower *> m_barShowerYCol = m_blocks[ib]->getShowerYCol();
 
@@ -398,7 +398,7 @@ printf("    #%d shower: pos/E=(%.2f, %.2f, %.2f, %.3f), cellID=(%d, %d, %d, %d, 
 }
 
 
-StatusCode EnergySplittingAlg::Clustering( std::vector<const PandoraPlus::CaloBar*>& barCol, 
+StatusCode EnergySplittingAlg::Clustering( std::vector<const PandoraPlus::CaloUnit*>& barCol, 
                                            std::vector<PandoraPlus::CaloBarCluster*>& outClus,  
                                            std::vector<const PandoraPlus::LongiCluster*>& m_longiClusCol )
 {
@@ -424,10 +424,10 @@ StatusCode EnergySplittingAlg::Clustering( std::vector<const PandoraPlus::CaloBa
 //cout<<endl;
 
   //Save out CaloBars in longiClusCol as seed. 
-  std::vector<const PandoraPlus::CaloBar*> m_seedbars; m_seedbars.clear(); 
+  std::vector<const PandoraPlus::CaloUnit*> m_seedbars; m_seedbars.clear(); 
   for(int il=0; il<m_longiClusCol.size(); il++){
   for(int is=0; is<m_longiClusCol[il]->getBarShowers().size(); is++){
-    std::vector<const PandoraPlus::CaloBar*> m_bars = m_longiClusCol[il]->getBarShowers()[is]->getBars();
+    std::vector<const PandoraPlus::CaloUnit*> m_bars = m_longiClusCol[il]->getBarShowers()[is]->getBars();
     m_seedbars.insert(m_seedbars.end(), m_bars.begin(), m_bars.end());
   }}
 
@@ -436,7 +436,7 @@ StatusCode EnergySplittingAlg::Clustering( std::vector<const PandoraPlus::CaloBa
   //Find seed with LongiCluster
   for(int ic=0; ic<m_clusCol.size(); ic++){
   for(int ib=0; ib<m_clusCol[ic]->getBars().size(); ib++){
-      std::vector<const PandoraPlus::CaloBar*>::iterator iter = find(m_seedbars.begin(), m_seedbars.end(), m_clusCol[ic]->getBars()[ib]);
+      std::vector<const PandoraPlus::CaloUnit*>::iterator iter = find(m_seedbars.begin(), m_seedbars.end(), m_clusCol[ic]->getBars()[ib]);
       if(iter==m_seedbars.end()) continue; 
       m_clusCol[ic]->addSeed( *iter );
     
@@ -470,7 +470,7 @@ for(int j=0; j<m_clusCol.size(); j++){
 }
 
 
-StatusCode EnergySplittingAlg::Clustering( std::vector<const PandoraPlus::CaloBar*>& barCol,
+StatusCode EnergySplittingAlg::Clustering( std::vector<const PandoraPlus::CaloUnit*>& barCol,
                                            std::vector<PandoraPlus::CaloBarCluster*>& outClus){
   if(barCol.size()==0) return StatusCode::SUCCESS;
 
@@ -490,7 +490,7 @@ StatusCode EnergySplittingAlg::Clustering( std::vector<const PandoraPlus::CaloBa
 
   //Find seed in cluster
   for(int i=0;i<m_clusCol.size();i++){
-    std::vector<const PandoraPlus::CaloBar*> m_seedVec; m_seedVec.clear();
+    std::vector<const PandoraPlus::CaloUnit*> m_seedVec; m_seedVec.clear();
     findSeeds(m_clusCol[i], m_seedVec);
 
     m_clusCol[i]->setSeeds(m_seedVec);
@@ -596,12 +596,12 @@ StatusCode EnergySplittingAlg::ClusterSplitting( PandoraPlus::CaloBarCluster* m_
   for(int is=0;is<Nshower;is++) SeedPos[is] = m_cluster->getSeeds()[is]->getPosition();
   for(int is=0;is<Nshower;is++){
     PandoraPlus::CaloBarShower* shower = new PandoraPlus::CaloBarShower();
-    std::vector<const PandoraPlus::CaloBar*> Bars; Bars.clear();
+    std::vector<const PandoraPlus::CaloUnit*> Bars; Bars.clear();
     int iseed=-1;
     double _Emax = -99;
     
     for(int ib=0;ib<Nbars;ib++){
-      PandoraPlus::CaloBar* bar = m_cluster->getBars()[ib]->Clone();
+      PandoraPlus::CaloUnit* bar = m_cluster->getBars()[ib]->Clone();
 
       bar->setQ( bar->getQ1()*weight[ib][is], bar->getQ2()*weight[ib][is]  );
       if( bar->getEnergy()>_Emax ) { _Emax=bar->getEnergy(); iseed=ib; }
@@ -705,11 +705,11 @@ StatusCode EnergySplittingAlg::MergeToClosestCluster( const PandoraPlus::CaloBar
   return StatusCode::SUCCESS;
 }
 
-StatusCode EnergySplittingAlg::findSeeds( PandoraPlus::CaloBarCluster* m_cluster, std::vector<const PandoraPlus::CaloBar*>& seedCol){
+StatusCode EnergySplittingAlg::findSeeds( PandoraPlus::CaloBarCluster* m_cluster, std::vector<const PandoraPlus::CaloUnit*>& seedCol){
 
   for(int i=0;i<m_cluster->getBars().size();i++){
-    const PandoraPlus::CaloBar* ibar = m_cluster->getBars()[i];
-    std::vector<const PandoraPlus::CaloBar*> m_neighbor = getNeighbors(m_cluster, ibar);
+    const PandoraPlus::CaloUnit* ibar = m_cluster->getBars()[i];
+    std::vector<const PandoraPlus::CaloUnit*> m_neighbor = getNeighbors(m_cluster, ibar);
     if(m_neighbor.size()==0 && ibar->getEnergy()>settings.map_floatPars["Eth_SeedAbs"])
       seedCol.push_back(ibar); 
 
@@ -725,9 +725,9 @@ StatusCode EnergySplittingAlg::findSeeds( PandoraPlus::CaloBarCluster* m_cluster
   return StatusCode::SUCCESS;
 }
 
-std::vector<const PandoraPlus::CaloBar*>  EnergySplittingAlg::getNeighbors(PandoraPlus::CaloBarCluster* m_cluster, const PandoraPlus::CaloBar* seed){
+std::vector<const PandoraPlus::CaloUnit*>  EnergySplittingAlg::getNeighbors(PandoraPlus::CaloBarCluster* m_cluster, const PandoraPlus::CaloUnit* seed){
 
-  std::vector<const PandoraPlus::CaloBar*> m_neighbor;
+  std::vector<const PandoraPlus::CaloUnit*> m_neighbor;
   for(int i=0;i<m_cluster->getBars().size();i++)
     if( seed->isNeighbor(m_cluster->getBars()[i]) ) m_neighbor.push_back(m_cluster->getBars()[i]);
   
@@ -737,7 +737,7 @@ std::vector<const PandoraPlus::CaloBar*>  EnergySplittingAlg::getNeighbors(Pando
 }
 
 
-void EnergySplittingAlg::CalculateInitialEseed( const std::vector<const PandoraPlus::CaloBar*>& Seeds, const TVector3* pos, double* Eseed){
+void EnergySplittingAlg::CalculateInitialEseed( const std::vector<const PandoraPlus::CaloUnit*>& Seeds, const TVector3* pos, double* Eseed){
 //Calculate Eseed by solving a linear function:
 // [ f(11) .. f(1mu)  .. ]   [E_seed 1 ]   [E_bar 1]
 // [  ..   ..   ..    .. ] * [...      ] = [...    ]

@@ -3,6 +3,7 @@
 
 #include "PandoraPlusDataCol.h"
 #include "Tools/Algorithm.h"
+#include "Algorithm/TrackExtrapolatingAlg.h"
 #include "TVector3.h"
 
 namespace PandoraPlus{
@@ -12,7 +13,7 @@ namespace PandoraPlus{
 
     //initialize a CaloHitCreator
     TrackCreator( const Settings& m_settings );
-    ~TrackCreator() {};
+    ~TrackCreator() { delete m_TrkExtraAlg; };
    
     StatusCode CreateTracks( PandoraPlusDataCol& m_DataCol, 
                              std::vector<DataHandle<edm4hep::TrackCollection>*>& r_TrackCols ); 
@@ -22,7 +23,10 @@ namespace PandoraPlus{
 
   private: 
     const PandoraPlus::Settings  settings; 
-  
+    PandoraPlus::Algorithm*      m_TrkExtraAlg; 
+    PandoraPlus::Settings        m_TrkExtraSettings;  
+
+
   };
 };
 #endif

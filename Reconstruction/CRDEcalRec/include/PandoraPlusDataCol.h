@@ -4,7 +4,7 @@
 #include <algorithm>
 #include <map>
 
-#include "Objects/CaloBar.h"
+#include "Objects/CaloUnit.h"
 #include "Objects/Calo1DCluster.h"
 #include "Objects/Calo2DCluster.h"
 #include "Objects/Calo3DCluster.h"
@@ -62,10 +62,10 @@ public:
   std::map<std::string, std::vector<PandoraPlus::CaloCluster*>> map_CaloCluster;
 
 
-  std::vector<PandoraPlus::CaloBar*>     BarCol; 
-  std::vector<PandoraPlus::Calo1DCluster*>     Cluster1DCol; 
-  std::vector<PandoraPlus::Calo2DCluster*>     Cluster2DCol;  
-  std::vector<PandoraPlus::Calo3DCluster*>     Cluster3DCol;
+  std::vector<PandoraPlus::CaloUnit*>       BarCol; 
+  std::vector<PandoraPlus::Calo1DCluster*>  Cluster1DCol; 
+  std::vector<PandoraPlus::Calo2DCluster*>  Cluster2DCol;  
+  std::vector<PandoraPlus::Calo3DCluster*>  Cluster3DCol;
 
   std::vector<PandoraPlus::CaloBlock*>   BlockCol; 
   std::vector<PandoraPlus::CaloTower*>   TowerCol;
@@ -77,7 +77,7 @@ public:
   std::vector<PandoraPlus::Track*>          bk_TrackCol;
 
   std::vector<PandoraPlus::CaloHit*>        bk_HitCol;
-  std::vector<PandoraPlus::CaloBar*>        bk_BarCol;
+  std::vector<PandoraPlus::CaloUnit*>        bk_BarCol;
   std::vector<PandoraPlus::Calo1DCluster*>     bk_Cluster1DCol; 
   std::vector<PandoraPlus::Calo2DCluster*>     bk_Cluster2DCol;  
   std::vector<PandoraPlus::Calo3DCluster*>     bk_Cluster3DCol;

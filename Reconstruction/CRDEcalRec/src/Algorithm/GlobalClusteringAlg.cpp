@@ -6,14 +6,7 @@ using namespace PandoraPlus;
 
 StatusCode GlobalClusteringAlg::ReadSettings(PandoraPlus::Settings& m_settings){
   settings = m_settings;
-/*   if(settings.map_intPars.find("m_module")==settings.map_intPars.end()) settings.map_intPars["m_module"] = 7;
-  if(settings.map_intPars.find("m_modulestart")==settings.map_intPars.end()) settings.map_intPars["m_modulestart"] = 0;
-  if(settings.map_intPars.find("m_part")==settings.map_intPars.end()) settings.map_intPars["m_part"] = 4;
-  if(settings.map_intPars.find("m_stave")==settings.map_intPars.end()) settings.map_intPars["m_stave"] = 11;
-  if(settings.map_intPars.find("m_superlayer")==settings.map_intPars.end()) settings.map_intPars["m_superlayer"] = 14;
-  if(settings.map_intPars.find("m_startnumber")==settings.map_intPars.end()) settings.map_intPars["m_startnumber"] = 1;
-  if(settings.map_intPars.find("m_phibarnumber")==settings.map_intPars.end()) settings.map_intPars["m_phibarnumber"] = 60;
-  if(settings.map_intPars.find("m_zbarnumber")==settings.map_intPars.end()) settings.map_intPars["m_zbarnumber"] = 47; */
+
   return StatusCode::SUCCESS;
 };
 
@@ -23,10 +16,9 @@ StatusCode GlobalClusteringAlg::Initialize(){
 };
 
 StatusCode GlobalClusteringAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
-  // //Readin: m_DataCol.BarCol
-  // //Output: m_Datacol.BlockCol
 
-  std::vector<PandoraPlus::CaloBar*> m_bars = m_datacol.BarCol; 
+/*
+  std::vector<PandoraPlus::CaloUnit*> m_bars = m_datacol.BarCol; 
   std::vector<PandoraPlus::CaloBlock*> m_blocks; m_blocks.clear();
 
   for(int ibar=0; ibar<m_bars.size(); ibar++){
@@ -51,34 +43,30 @@ StatusCode GlobalClusteringAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
     }
   }
   m_datacol.BlockCol = m_blocks;
+*/
 
-//   std::vector<PandoraPlus::CaloBar*> m_bars = m_datacol.BarCol; 
+   std::vector<PandoraPlus::CaloUnit*> m_bars = m_datacol.BarCol; 
 	std::vector<PandoraPlus::Calo1DCluster*> m_1dclusters; m_1dclusters.clear();
 	std::vector<PandoraPlus::Calo2DCluster*> m_2dclusters; m_2dclusters.clear();
 	std::vector<PandoraPlus::Calo3DCluster*> m_3dclusters; m_3dclusters.clear();
 	
-	cout<<"check bar data: "<<m_bars.size()<<endl;
+cout<<"check bar data: "<<m_bars.size()<<endl;
 	Clustering(m_bars, m_1dclusters);
 	for(int i1d=0; i1d<m_1dclusters.size(); i1d++)
-	{
 		m_datacol.bk_Cluster1DCol.push_back(m_1dclusters.at(i1d));
-	}
 
-	cout<<"check 1d data: "<<m_1dclusters.size()<<endl;
+
+cout<<"check 1d data: "<<m_1dclusters.size()<<endl;
 	Clustering(m_1dclusters, m_2dclusters);
 	for(int i2d=0; i2d<m_2dclusters.size(); i2d++)
-	{
 		m_datacol.bk_Cluster2DCol.push_back(m_2dclusters.at(i2d));
-	}
 
-	cout<<"check 2d data: "<<m_2dclusters.size()<<endl;
+cout<<"check 2d data: "<<m_2dclusters.size()<<endl;
 	Clustering(m_2dclusters, m_3dclusters);
 	for(int i3d=0; i3d<m_3dclusters.size(); i3d++)
-	{
 		m_datacol.bk_Cluster3DCol.push_back(m_3dclusters.at(i3d));
-	}
 
-	cout<<"check 3d data: "<<m_3dclusters.size()<<endl;
+cout<<"check 3d data: "<<m_3dclusters.size()<<endl;
 
 	m_datacol.Cluster1DCol = m_1dclusters;
 	m_datacol.Cluster2DCol = m_2dclusters;
@@ -101,10 +89,9 @@ template<typename T1, typename T2> StatusCode GlobalClusteringAlg::Clustering(st
     T1* lowlevelcluster = m_input.at(i);
     for(int j=0; j<m_output.size(); j++)
     {
-        if(m_output.at(j)->isNeighbor(lowlevelcluster)) // //m_output.at(j).isNeighbor(lowlevelcluster)
-        {
-            record.push_back(m_output.at(j));
-        }
+      if(m_output.at(j)->isNeighbor(lowlevelcluster)) // //m_output.at(j).isNeighbor(lowlevelcluster)
+        record.push_back(m_output.at(j));
+
     }
     if(record.size()>0)
     {
@@ -143,13 +130,13 @@ template<typename T1, typename T2> StatusCode GlobalClusteringAlg::Clustering(st
 // 	for(int i=0; i<m_3dcluster.size(); i++)
 // 	{
 // 		PandoraPlus::Calo3DCluster* cluster3d = m_3dcluster.at(i);
-// 		std::vector<const PandoraPlus::CaloBar*> m_bar = cluster3d->getBars();
+// 		std::vector<const PandoraPlus::CaloUnit*> m_bar = cluster3d->getBars();
 // 		std::vector<PandoraPlus::Calo1DCluster*> m_1dcluster; m_1dcluster.clear();
 // 		std::vector<PandoraPlus::Calo2DCluster*> m_2dcluster; m_2dcluster.clear();
 // 		//
 // 		for(int j=0; j<m_bar.size(); j++)
 // 		{
-// 			const PandoraPlus::CaloBar* bar = m_bar.at(j);
+// 			const PandoraPlus::CaloUnit* bar = m_bar.at(j);
 
 // 			for(int k=0; k<m_1dcluster.size(); k++)
 // 			{

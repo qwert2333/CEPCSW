@@ -1,7 +1,7 @@
 #ifndef CALO_1DCLUSTER_C
 #define CALO_1DCLUSTER_C
 
-#include "Objects/CaloBar.h"
+#include "Objects/CaloUnit.h"
 #include "Objects/Calo1DCluster.h"
 
 namespace PandoraPlus{
@@ -32,79 +32,15 @@ namespace PandoraPlus{
       if(!Seeds[i]) { Seeds.erase(Seeds.begin()+i); i--; }
   }
 
-  bool Calo1DCluster::isNeighbor(const PandoraPlus::CaloBar* m_bar) const
+  bool Calo1DCluster::isNeighbor(const PandoraPlus::CaloUnit* m_bar) const
   {
-    std::vector<const PandoraPlus::CaloBar*> m_1dcluster = Bars;
-    for(int i1d = 0; i1d<m_1dcluster.size(); i1d++)
-    {
-      if(m_bar->getModule()==m_1dcluster[i1d]->getModule() && m_bar->getDlayer()==m_1dcluster[i1d]->getDlayer() && m_bar->getSlayer()==m_1dcluster[i1d]->getSlayer())
-      {
-        if(m_1dcluster[i1d]->getSlayer()==0)
-        {
-          if(m_1dcluster[i1d]->getBar()==1)
-          {
-            if(
-            (m_bar->getBar()==m_phibarnumber && m_bar->getStave()==(m_1dcluster[i1d]->getStave()-1) && abs(m_bar->getPart()-m_1dcluster[i1d]->getPart())<=1)||
-            ((m_bar->getBar()==1 || m_bar->getBar()==2)  && m_bar->getStave()==m_1dcluster[i1d]->getStave() && abs(m_bar->getPart()-m_1dcluster[i1d]->getPart())<=1)
-            )
-            {
-              return true;
-            }
-          }
-          else if(m_1dcluster[i1d]->getBar()==m_phibarnumber)
-          {
-            if(
-            (m_bar->getBar()==1 && m_bar->getStave()==(m_1dcluster[i1d]->getStave()+1) && abs(m_bar->getPart()-m_1dcluster[i1d]->getPart())<=1)||
-            ((m_bar->getBar()==m_phibarnumber || m_bar->getBar()==(m_phibarnumber-1))  && m_bar->getStave()==m_1dcluster[i1d]->getStave() && abs(m_bar->getPart()-m_1dcluster[i1d]->getPart())<=1)
-            )
-            {
-              return true;
-            }
-          }
-          else
-          {
-            if(abs(m_bar->getBar()-m_1dcluster[i1d]->getBar())<=1 && m_bar->getStave()==m_1dcluster[i1d]->getStave() && abs(m_bar->getPart()-m_1dcluster[i1d]->getPart())<=1)
-            {
-              return true;
-            }
-          }
-        }
-        else
-        {
-          if(m_1dcluster[i1d]->getBar()==1)
-          {
-            if(
-            (m_bar->getBar()==(m_zbarnumber-2*(m_bar->getDlayer()-1)) && m_bar->getPart()==(m_1dcluster[i1d]->getPart()-1) && abs(m_bar->getStave()-m_1dcluster[i1d]->getStave())<=1)||
-            ((m_bar->getBar()==1 || m_bar->getBar()==2)  && m_bar->getPart()==m_1dcluster[i1d]->getPart() && abs(m_bar->getStave()-m_1dcluster[i1d]->getStave())<=1)
-            )
-            {
-              return true;
-            }
-          }
-          else if(m_1dcluster[i1d]->getBar()==(m_zbarnumber-2*(m_bar->getDlayer()-1)))
-          {
-            if(
-            (m_bar->getBar()==1 && m_bar->getPart()==(m_1dcluster[i1d]->getPart()+1) && abs(m_bar->getStave()-m_1dcluster[i1d]->getStave())<=1)||
-            ((m_bar->getBar()==(m_zbarnumber-2*(m_bar->getDlayer()-1)) || m_bar->getBar()==((m_zbarnumber-2*(m_bar->getDlayer()-1))-1))  && m_bar->getPart()==m_1dcluster[i1d]->getPart() && abs(m_bar->getStave()-m_1dcluster[i1d]->getStave())<=1)
-            )
-            {
-              return true;
-            }
-          }
-          else
-          {
-            if(abs(m_bar->getBar()-m_1dcluster[i1d]->getBar())<=1 && m_bar->getPart()==m_1dcluster[i1d]->getPart() && abs(m_bar->getStave()-m_1dcluster[i1d]->getStave())<=1)
-            {
-              return true;
-            }
-          }
-        }
-      }		
-    }
+    for(int i1d = 0; i1d<Bars.size(); i1d++)
+      if(Bars[i1d]->isNeighbor(m_bar)) return true;
+
     return false;
   }
 
-  bool Calo1DCluster::inCluster(const PandoraPlus::CaloBar* iBar) const{
+  bool Calo1DCluster::inCluster(const PandoraPlus::CaloUnit* iBar) const{
     return (find(Bars.begin(), Bars.end(), iBar)!=Bars.end() );
   }
 
@@ -164,17 +100,17 @@ namespace PandoraPlus{
     return true;
   }
 
-  int Calo1DCluster::getLeftEdge(){
-    std::sort(Bars.begin(), Bars.end());
-    if(Bars.size()==0) return -99;
-    return Bars[0]->getBar();
-  }
+  //int Calo1DCluster::getLeftEdge(){
+  //  std::sort(Bars.begin(), Bars.end());
+  //  if(Bars.size()==0) return -99;
+  //  return Bars[0]->getBar();
+  //}
 
-  int Calo1DCluster::getRightEdge(){
-    std::sort(Bars.begin(), Bars.end());
-    if(Bars.size()==0) return -99;
-    return Bars[Bars.size()-1]->getBar();
-  }  
+  //int Calo1DCluster::getRightEdge(){
+  //  std::sort(Bars.begin(), Bars.end());
+  //  if(Bars.size()==0) return -99;
+  //  return Bars[Bars.size()-1]->getBar();
+  //}  
 
 
   void Calo1DCluster::PrintBars() const{
@@ -193,12 +129,12 @@ namespace PandoraPlus{
     }
   }
 
-  void Calo1DCluster::addCluster(const PandoraPlus::CaloBar* _bar ) 
+  void Calo1DCluster::addCluster(const PandoraPlus::CaloUnit* _bar ) 
   {
     Bars.push_back(_bar);
-    m_modules.push_back(_bar->getModule());
-    m_parts.push_back(_bar->getPart());
-    m_staves.push_back(_bar->getStave());
+    if( find( m_modules.begin(), m_modules.end(), _bar->getModule())==m_modules.end() ) m_modules.push_back(_bar->getModule());
+    if( find( m_parts.begin(), m_parts.end(), _bar->getModule())==m_parts.end() )       m_parts.push_back(_bar->getPart());
+    if( find( m_staves.begin(), m_staves.end(), _bar->getModule())==m_staves.end() )    m_staves.push_back(_bar->getStave());
   }
 };
 #endif

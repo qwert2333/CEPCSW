@@ -42,15 +42,15 @@ from Configurables import SLCIORdr
 from Configurables import HepMCRdr
 from Configurables import GenPrinter
 gun = GtGunTool("GtGunTool")
-gun.Particles = ["gamma", "gamma"]
+gun.Particles = ["gamma", "mu-"]
 #gun.Particles = ["nu_e"]
 gun.PositionXs = [0., 0.]
 gun.PositionYs = [0., 0.]
 gun.PositionZs = [0., 0.]
-gun.EnergyMins = [10.,10. ] # GeV
-gun.EnergyMaxs = [10.,10.] # GeV
-gun.ThetaMins  = [91.,89]    # deg
-gun.ThetaMaxs  = [91.,89]  # deg
+gun.EnergyMins = [10.,30. ] # GeV
+gun.EnergyMaxs = [10.,30.] # GeV
+gun.ThetaMins  = [90.,89]    # deg
+gun.ThetaMaxs  = [90.,89]  # deg
 gun.PhiMins    = [0., 0.]    # deg
 gun.PhiMaxs    = [0., 0.]  # deg
 # stdheprdr = StdHepRdr("StdHepRdr")
@@ -260,7 +260,7 @@ elif dedxoption == "BetheBlochEquationDedxSimTool":
 # output
 from Configurables import PodioOutput
 out = PodioOutput("outputalg")
-out.filename = "CRD_Sim2Gam_FullDet_200evt.root"
+out.filename = "CRD_SimGamMu_FullDet.root"
 out.outputCommands = ["keep *"]
 
 # ApplicationMgr
@@ -270,7 +270,7 @@ ApplicationMgr(
     TopAlg = [genalg, detsimalg, digiVXD, digiSIT, digiSET, digiFTD, spSET, digiDC, tracking, forward, subset, full, out],
     #TopAlg = [genalg, detsimalg, out],
     EvtSel = 'NONE',
-    EvtMax = 200,
+    EvtMax = 20,
     ExtSvc = [rndmengine, rndmgensvc, dsvc, evtseeder, geosvc, gearsvc, tracksystemsvc],
     #ExtSvc = [rndmengine, rndmgensvc, dsvc, geosvc],
     OutputLevel=INFO

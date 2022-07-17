@@ -1,6 +1,6 @@
 # Modules
 gaudi_add_library(CRDEcalRecLib
-                  SOURCES src/Objects/CaloBar.cc
+                  SOURCES src/Objects/CaloUnit.cc
                           src/Objects/Calo1DCluster.cc
                           src/Objects/Calo2DCluster.cc
                           src/Objects/Calo3DCluster.cc

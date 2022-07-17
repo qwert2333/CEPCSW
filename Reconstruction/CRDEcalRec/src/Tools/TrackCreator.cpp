@@ -55,6 +55,15 @@ namespace PandoraPlus{
     }}
     m_DataCol.TrackCol = m_trkCol;
 
+    //Track extrapolation
+    //  Write settings: geometry description
+    //  m_TrkExtraSettings.map_floatPar["Nlayers"] = 28;
+
+    m_TrkExtraAlg = new TrackExtrapolatingAlg();
+    m_TrkExtraAlg->ReadSettings(m_TrkExtraSettings);
+    m_TrkExtraAlg->Initialize();
+    m_TrkExtraAlg->RunAlgorithm( m_DataCol );
+    m_TrkExtraAlg->ClearAlgorithm();
 
     return StatusCode::SUCCESS;
   }

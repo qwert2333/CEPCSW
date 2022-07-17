@@ -61,14 +61,6 @@ StatusCode PandoraPlusDataCol::Clean(){
 
   Clear();
 
-  std::cout<<"Bar: "<<BarCol.capacity()<<endl;
-  std::cout<<"Cluster1D: "<<Cluster1DCol.capacity()<<endl;
-  std::cout<<"Cluster2D: "<<Cluster2DCol.capacity()<<endl;
-  std::cout<<"Cluster3D: "<<Cluster3DCol.capacity()<<endl;
-  std::cout<<"bk_Bar: "<<bk_BarCol.capacity()<<endl;
-  std::cout<<"bk_Cluster1D: "<<bk_Cluster1DCol.capacity()<<endl;
-  std::cout<<"bk_Cluster2D: "<<bk_Cluster2DCol.capacity()<<endl;
-  std::cout<<"bk_Cluster3D: "<<bk_Cluster3DCol.capacity()<<endl;
   return StatusCode::SUCCESS;
 }
 #endif

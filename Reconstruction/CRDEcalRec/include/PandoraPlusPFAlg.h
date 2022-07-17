@@ -139,9 +139,9 @@ protected:
   FloatVec m_simBar_x, m_simBar_y, m_simBar_z, m_simBar_T1, m_simBar_T2, m_simBar_Q1, m_simBar_Q2, m_simBar_dlayer, m_simBar_part, m_simBar_stave, m_simBar_slayer, m_simBar_module;
 
   TTree *t_Layers;
-  int m_NshowerX, m_NshowerY;
-  FloatVec m_barShowerX_x, m_barShowerX_y, m_barShowerX_z, m_barShowerX_E;
-  FloatVec m_barShowerY_x, m_barShowerY_y, m_barShowerY_z, m_barShowerY_E;
+  int m_NshowerU, m_NshowerV;
+  FloatVec m_barShowerU_x, m_barShowerU_y, m_barShowerU_z, m_barShowerU_E;
+  FloatVec m_barShowerV_x, m_barShowerV_y, m_barShowerV_z, m_barShowerV_E;
 
   TTree *t_Cluster;
   int m_Nclus;

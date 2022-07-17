@@ -51,14 +51,14 @@ namespace PandoraPlus{
     }
 
 
-    //Convert to local objects: CalorimeterHit to CaloBar (For ECALBarrel only)
+    //Convert to local objects: CalorimeterHit to CaloUnit (For ECALBarrel only)
     if(settings.map_stringPars.at("EcalType")=="BarEcal"){
-      std::vector<PandoraPlus::CaloBar*> m_barCol; m_barCol.clear(); 
+      std::vector<PandoraPlus::CaloUnit*> m_barCol; m_barCol.clear(); 
    
       auto CaloHits = m_DataCol.collectionMap_CaloHit["ECALBarrel"]; 
-      std::map<std::uint64_t, std::vector<PandoraPlus::CaloBar> > map_cellID_hits; map_cellID_hits.clear();
+      std::map<std::uint64_t, std::vector<PandoraPlus::CaloUnit> > map_cellID_hits; map_cellID_hits.clear();
       for(auto& hit : CaloHits){ 
-        PandoraPlus::CaloBar m_bar; 
+        PandoraPlus::CaloUnit m_bar; 
         m_bar.setcellID(hit.getCellID());
         m_bar.setPosition( TVector3(hit.getPosition().x, hit.getPosition().y, hit.getPosition().z) );
         m_bar.setQ(hit.getEnergy(), hit.getEnergy());
@@ -69,7 +69,7 @@ namespace PandoraPlus{
       for(auto& hit : map_cellID_hits){
         if(hit.second.size()!=2){ std::cout<<"WARNING: didn't find correct hit pairs! "<<std::endl; continue; }
    
-        PandoraPlus::CaloBar* m_bar = new PandoraPlus::CaloBar(); 
+        PandoraPlus::CaloUnit* m_bar = new PandoraPlus::CaloUnit(); 
    
         unsigned long long id = hit.first; 
         m_bar->setcellID( id );
