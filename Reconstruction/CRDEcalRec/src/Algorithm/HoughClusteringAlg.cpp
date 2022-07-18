@@ -24,6 +24,10 @@ StatusCode HoughClusteringAlg::ReadSettings(PandoraPlus::Settings& m_settings){
   if(settings.map_floatPars.find("th_dRho2")==settings.map_floatPars.end()) settings.map_floatPars["th_dRho2"] = 50;  
   if(settings.map_floatPars.find("th_overlapE1")==settings.map_floatPars.end()) settings.map_floatPars["th_overlapE1"] = 0.7;  
   if(settings.map_floatPars.find("th_overlapE2")==settings.map_floatPars.end()) settings.map_floatPars["th_overlapE2"] = 0.9;  
+
+  if(settings.map_stringPars.find("ReadinLocalMaxName")==settings.map_stringPars.end()) settings.map_stringPars["ReadinLocalMaxName"] = "AllLocalMax";
+  if(settings.map_stringPars.find("OutputLongiClusName")==settings.map_stringPars.end()) settings.map_stringPars["OutputLongiClusName"] = "EMLongiCluster"; 
+
   return StatusCode::SUCCESS;
 };
 
@@ -34,56 +38,50 @@ StatusCode HoughClusteringAlg::Initialize(){
 
 StatusCode HoughClusteringAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
 
-  std::vector<PandoraPlus::CaloTower*>* p_towers = &(m_datacol.TowerCol); 
-cout<<"Tower size: "<<p_towers->size()<<endl;
-  for(int it=0; it<p_towers->size(); it++){
-printf("  In tower #%d: block size = %d \n", it, p_towers->at(it)->getBlocks().size());
+  std::vector<PandoraPlus::Calo3DCluster*>* p_3DClusters = &(m_datacol.Cluster3DCol); 
+  if(!p_3DClusters){ std::cout<<"ERROR: No 3DCluster in present data collection! "<<std::endl; return StatusCode::FAILURE; }
+cout<<"3DCluster size: "<<p_3DClusters->size()<<endl;
 
-    std::vector<const PandoraPlus::CaloBarShower*> m_localMaxXCol; m_localMaxXCol.clear();
-    std::vector<const PandoraPlus::CaloBarShower*> m_localMaxYCol; m_localMaxYCol.clear();
-    for(int ib=0; ib<p_towers->at(it)->getBlocks().size(); ib++){
-      if(settings.map_floatPars["th_Layers"]>0 && p_towers->at(it)->getBlocks()[ib]->getDlayer()>settings.map_floatPars["th_Layers"]) continue;
-      std::vector<const PandoraPlus::CaloBarShower*> tmp_showerX = p_towers->at(it)->getBlocks()[ib]->getShowerXCol();
-      std::vector<const PandoraPlus::CaloBarShower*> tmp_showerY = p_towers->at(it)->getBlocks()[ib]->getShowerYCol();
+  for(int it=0; it<p_3DClusters->size(); it++){
+printf("  In 3DCluster #%d: block size = %d \n", it, p_3DClusters->at(it)->getCluster().size());
 
-      m_localMaxXCol.insert(m_localMaxXCol.end(), tmp_showerX.begin(), tmp_showerX.end() );
-      m_localMaxYCol.insert(m_localMaxYCol.end(), tmp_showerY.begin(), tmp_showerY.end() );
-    }
+    std::vector<const PandoraPlus::CaloBarShower*> m_localMaxUCol = p_3DClusters->at(it)->getLocalMaxUCol(settings.map_stringPars["ReadinLocalMaxName"]); 
+    std::vector<const PandoraPlus::CaloBarShower*> m_localMaxVCol = p_3DClusters->at(it)->getLocalMaxVCol(settings.map_stringPars["ReadinLocalMaxName"]);
 
-    if(m_localMaxXCol.size()==0 && m_localMaxYCol.size()==0) continue; 
-//cout<<"  Local maximum size: barX "<<m_localMaxXCol.size()<<"  barY "<<m_localMaxYCol.size()<<endl;
+    if(m_localMaxUCol.size()==0 && m_localMaxVCol.size()==0) continue; 
+//cout<<"  Local maximum size: barX "<<m_localMaxUCol.size()<<"  barY "<<m_localMaxVCol.size()<<endl;
 
-    std::vector<PandoraPlus::HoughObject> m_HoughObjectsX; m_HoughObjectsX.clear(); 
-    std::vector<PandoraPlus::HoughObject> m_HoughObjectsY; m_HoughObjectsY.clear(); 
-    for(int il=0; il<m_localMaxXCol.size(); il++){
+    std::vector<PandoraPlus::HoughObject> m_HoughObjectsU; m_HoughObjectsU.clear(); 
+    std::vector<PandoraPlus::HoughObject> m_HoughObjectsV; m_HoughObjectsV.clear(); 
+    for(int il=0; il<m_localMaxUCol.size(); il++){
       PandoraPlus::HoughObject m_obj; m_obj.Clear();
-      m_obj.SetLocalMax( m_localMaxXCol[il] );
-      m_HoughObjectsX.push_back(m_obj);
+      m_obj.SetLocalMax( m_localMaxUCol[il] );
+      m_HoughObjectsU.push_back(m_obj);
     }
-    for(int il=0; il<m_localMaxYCol.size(); il++){
+    for(int il=0; il<m_localMaxVCol.size(); il++){
       PandoraPlus::HoughObject m_obj; m_obj.Clear();
-      m_obj.SetLocalMax( m_localMaxYCol[il] );
-      m_HoughObjectsY.push_back(m_obj);
+      m_obj.SetLocalMax( m_localMaxVCol[il] );
+      m_HoughObjectsV.push_back(m_obj);
     }
 
 //cout<<"  HoughClusteringAlg: Conformal transformation"<<endl;
     //Conformal transformation  
-    ConformalTransformation(m_HoughObjectsX);
-    ConformalTransformation(m_HoughObjectsY);
+    ConformalTransformation(m_HoughObjectsU);
+    ConformalTransformation(m_HoughObjectsV);
 
 /*
 cout<<"    Local max (HoughObjectX): "<<endl;
-for(int i=0; i<m_HoughObjectsX.size(); i++) printf("(%.2f, %.2f, %.2f) \t", m_HoughObjectsX[i].getLocalMax()->getPos().x(), m_HoughObjectsX[i].getLocalMax()->getPos().y(), m_HoughObjectsX[i].getLocalMax()->getPos().z() );
+for(int i=0; i<m_HoughObjectsU.size(); i++) printf("(%.2f, %.2f, %.2f) \t", m_HoughObjectsU[i].getLocalMax()->getPos().x(), m_HoughObjectsU[i].getLocalMax()->getPos().y(), m_HoughObjectsU[i].getLocalMax()->getPos().z() );
 cout<<endl;
 cout<<"    Conformal Point (HoughObjectX): "<<endl;
-for(int i=0; i<m_HoughObjectsX.size(); i++) printf("(%.2f, %.2f) \t", m_HoughObjectsX[i].getConformPointUR().X(), m_HoughObjectsX[i].getConformPointUR().Y());
+for(int i=0; i<m_HoughObjectsU.size(); i++) printf("(%.2f, %.2f) \t", m_HoughObjectsU[i].getConformPointUR().X(), m_HoughObjectsU[i].getConformPointUR().Y());
 cout<<endl;
 
 cout<<"    Local max (HoughObjectY): "<<endl;
-for(int i=0; i<m_HoughObjectsY.size(); i++) printf("(%.2f, %.2f, %.2f) \t", m_HoughObjectsY[i].getLocalMax()->getPos().x(), m_HoughObjectsY[i].getLocalMax()->getPos().y(), m_HoughObjectsY[i].getLocalMax()->getPos().z() );
+for(int i=0; i<m_HoughObjectsV.size(); i++) printf("(%.2f, %.2f, %.2f) \t", m_HoughObjectsV[i].getLocalMax()->getPos().x(), m_HoughObjectsV[i].getLocalMax()->getPos().y(), m_HoughObjectsV[i].getLocalMax()->getPos().z() );
 cout<<endl;
 cout<<"    Conformal Point (HoughObjectY): "<<endl;
-for(int i=0; i<m_HoughObjectsY.size(); i++) printf("(%.2f, %.2f) \t", m_HoughObjectsY[i].getConformPointUR().X(), m_HoughObjectsY[i].getConformPointUR().Y());
+for(int i=0; i<m_HoughObjectsV.size(); i++) printf("(%.2f, %.2f) \t", m_HoughObjectsV[i].getConformPointUR().X(), m_HoughObjectsV[i].getConformPointUR().Y());
 cout<<endl;
 */
 
@@ -91,34 +89,34 @@ cout<<endl;
 //cout<<"  HoughClusteringAlg: Hough transformation"<<endl;
 
     //Hough transformation
-    HoughTransformation(m_HoughObjectsX);
-    HoughTransformation(m_HoughObjectsY);
+    HoughTransformation(m_HoughObjectsU);
+    HoughTransformation(m_HoughObjectsV);
 
 /*
 cout<<"  Check all Hough Objects: "<<endl;
 
 cout<<"  Transformed Hough lines X: "<<endl;
-for(int i=0; i<m_HoughObjectsX.size(); i++){
+for(int i=0; i<m_HoughObjectsU.size(); i++){
   cout<<"    HoughObj #"<<i<<": Origin localMax position ";
-  printf(" (%.3f, %.3f, %.3f) \n", m_HoughObjectsX[i].getLocalMax()->getPos().X(), m_HoughObjectsX[i].getLocalMax()->getPos().Z(), m_HoughObjectsX[i].getLocalMax()->getE());
-  printf("    Conformal Point: (%.3f, %.3f) \n", m_HoughObjectsX[i].getConformPointUR().X()-5, m_HoughObjectsX[i].getConformPointUR().Y()-5 );
-  cout<<"    LineUR pars: "<<m_HoughObjectsX[i].getHoughLineUR().GetParameter(0)<<"  "<<m_HoughObjectsX[i].getHoughLineUR().GetParameter(1)<<", range: ["<<m_HoughObjectsX[i].getHoughLineUR().GetMaximum()<<", "<<m_HoughObjectsX[i].getHoughLineUR().GetMinimum()<<"]"<<endl;
-  cout<<"    LineUL pars: "<<m_HoughObjectsX[i].getHoughLineUL().GetParameter(0)<<"  "<<m_HoughObjectsX[i].getHoughLineUL().GetParameter(1)<<", range: ["<<m_HoughObjectsX[i].getHoughLineUL().GetMaximum()<<", "<<m_HoughObjectsX[i].getHoughLineUL().GetMinimum()<<"]"<<endl;
-  cout<<"    LineDR pars: "<<m_HoughObjectsX[i].getHoughLineDR().GetParameter(0)<<"  "<<m_HoughObjectsX[i].getHoughLineDR().GetParameter(1)<<", range: ["<<m_HoughObjectsX[i].getHoughLineDR().GetMaximum()<<", "<<m_HoughObjectsX[i].getHoughLineDR().GetMinimum()<<"]"<<endl;
-  cout<<"    LineDL pars: "<<m_HoughObjectsX[i].getHoughLineDL().GetParameter(0)<<"  "<<m_HoughObjectsX[i].getHoughLineDL().GetParameter(1)<<", range: ["<<m_HoughObjectsX[i].getHoughLineDL().GetMaximum()<<", "<<m_HoughObjectsX[i].getHoughLineDL().GetMinimum()<<"]"<<endl;
+  printf(" (%.3f, %.3f, %.3f) \n", m_HoughObjectsU[i].getLocalMax()->getPos().X(), m_HoughObjectsU[i].getLocalMax()->getPos().Z(), m_HoughObjectsU[i].getLocalMax()->getE());
+  printf("    Conformal Point: (%.3f, %.3f) \n", m_HoughObjectsU[i].getConformPointUR().X()-5, m_HoughObjectsU[i].getConformPointUR().Y()-5 );
+  cout<<"    LineUR pars: "<<m_HoughObjectsU[i].getHoughLineUR().GetParameter(0)<<"  "<<m_HoughObjectsU[i].getHoughLineUR().GetParameter(1)<<", range: ["<<m_HoughObjectsU[i].getHoughLineUR().GetMaximum()<<", "<<m_HoughObjectsU[i].getHoughLineUR().GetMinimum()<<"]"<<endl;
+  cout<<"    LineUL pars: "<<m_HoughObjectsU[i].getHoughLineUL().GetParameter(0)<<"  "<<m_HoughObjectsU[i].getHoughLineUL().GetParameter(1)<<", range: ["<<m_HoughObjectsU[i].getHoughLineUL().GetMaximum()<<", "<<m_HoughObjectsU[i].getHoughLineUL().GetMinimum()<<"]"<<endl;
+  cout<<"    LineDR pars: "<<m_HoughObjectsU[i].getHoughLineDR().GetParameter(0)<<"  "<<m_HoughObjectsU[i].getHoughLineDR().GetParameter(1)<<", range: ["<<m_HoughObjectsU[i].getHoughLineDR().GetMaximum()<<", "<<m_HoughObjectsU[i].getHoughLineDR().GetMinimum()<<"]"<<endl;
+  cout<<"    LineDL pars: "<<m_HoughObjectsU[i].getHoughLineDL().GetParameter(0)<<"  "<<m_HoughObjectsU[i].getHoughLineDL().GetParameter(1)<<", range: ["<<m_HoughObjectsU[i].getHoughLineDL().GetMaximum()<<", "<<m_HoughObjectsU[i].getHoughLineDL().GetMinimum()<<"]"<<endl;
   cout<<endl;
 }
 
 
 cout<<"  Transformed Hough lines Y: "<<endl;
-for(int i=0; i<m_HoughObjectsY.size(); i++){
+for(int i=0; i<m_HoughObjectsV.size(); i++){
   cout<<"    HoughObj #"<<i<<": Origin localMax position ";
-  printf(" (%.3f, %.3f, %.3f) \n", m_HoughObjectsY[i].getLocalMax()->getPos().X(), m_HoughObjectsY[i].getLocalMax()->getPos().Z(), m_HoughObjectsY[i].getLocalMax()->getE());
-  printf("    Conformal Point: (%.3f, %.3f) \n", m_HoughObjectsY[i].getConformPointUR().X()-5, m_HoughObjectsY[i].getConformPointUR().Y()-5 );
-  cout<<"    LineUR pars: "<<m_HoughObjectsY[i].getHoughLineUR().GetParameter(0)<<"  "<<m_HoughObjectsY[i].getHoughLineUR().GetParameter(1)<<", range: ["<<m_HoughObjectsY[i].getHoughLineUR().GetMaximum()<<", "<<m_HoughObjectsY[i].getHoughLineUR().GetMinimum()<<"]"<<endl;
-  cout<<"    LineUL pars: "<<m_HoughObjectsY[i].getHoughLineUL().GetParameter(0)<<"  "<<m_HoughObjectsY[i].getHoughLineUL().GetParameter(1)<<", range: ["<<m_HoughObjectsY[i].getHoughLineUL().GetMaximum()<<", "<<m_HoughObjectsY[i].getHoughLineUL().GetMinimum()<<"]"<<endl;
-  cout<<"    LineDR pars: "<<m_HoughObjectsY[i].getHoughLineDR().GetParameter(0)<<"  "<<m_HoughObjectsY[i].getHoughLineDR().GetParameter(1)<<", range: ["<<m_HoughObjectsY[i].getHoughLineDR().GetMaximum()<<", "<<m_HoughObjectsY[i].getHoughLineDR().GetMinimum()<<"]"<<endl;
-  cout<<"    LineDL pars: "<<m_HoughObjectsY[i].getHoughLineDL().GetParameter(0)<<"  "<<m_HoughObjectsY[i].getHoughLineDL().GetParameter(1)<<", range: ["<<m_HoughObjectsY[i].getHoughLineDL().GetMaximum()<<", "<<m_HoughObjectsY[i].getHoughLineDL().GetMinimum()<<"]"<<endl;
+  printf(" (%.3f, %.3f, %.3f) \n", m_HoughObjectsV[i].getLocalMax()->getPos().X(), m_HoughObjectsV[i].getLocalMax()->getPos().Z(), m_HoughObjectsV[i].getLocalMax()->getE());
+  printf("    Conformal Point: (%.3f, %.3f) \n", m_HoughObjectsV[i].getConformPointUR().X()-5, m_HoughObjectsV[i].getConformPointUR().Y()-5 );
+  cout<<"    LineUR pars: "<<m_HoughObjectsV[i].getHoughLineUR().GetParameter(0)<<"  "<<m_HoughObjectsV[i].getHoughLineUR().GetParameter(1)<<", range: ["<<m_HoughObjectsV[i].getHoughLineUR().GetMaximum()<<", "<<m_HoughObjectsV[i].getHoughLineUR().GetMinimum()<<"]"<<endl;
+  cout<<"    LineUL pars: "<<m_HoughObjectsV[i].getHoughLineUL().GetParameter(0)<<"  "<<m_HoughObjectsV[i].getHoughLineUL().GetParameter(1)<<", range: ["<<m_HoughObjectsV[i].getHoughLineUL().GetMaximum()<<", "<<m_HoughObjectsV[i].getHoughLineUL().GetMinimum()<<"]"<<endl;
+  cout<<"    LineDR pars: "<<m_HoughObjectsV[i].getHoughLineDR().GetParameter(0)<<"  "<<m_HoughObjectsV[i].getHoughLineDR().GetParameter(1)<<", range: ["<<m_HoughObjectsV[i].getHoughLineDR().GetMaximum()<<", "<<m_HoughObjectsV[i].getHoughLineDR().GetMinimum()<<"]"<<endl;
+  cout<<"    LineDL pars: "<<m_HoughObjectsV[i].getHoughLineDL().GetParameter(0)<<"  "<<m_HoughObjectsV[i].getHoughLineDL().GetParameter(1)<<", range: ["<<m_HoughObjectsV[i].getHoughLineDL().GetMaximum()<<", "<<m_HoughObjectsV[i].getHoughLineDL().GetMinimum()<<"]"<<endl;
   cout<<endl;
 }
 */
@@ -126,17 +124,17 @@ for(int i=0; i<m_HoughObjectsY.size(); i++){
    
 cout<<"  HoughClusteringAlg: Fill bins to get the hills"<<endl;
     //Fill bins to get the hills
-    PandoraPlus::HoughSpace m_HoughSpaceX; 
-    PandoraPlus::HoughSpace m_HoughSpaceY; 
-    FillHoughSpace(m_HoughObjectsX, m_HoughSpaceX);
-    FillHoughSpace(m_HoughObjectsY, m_HoughSpaceY);
+    PandoraPlus::HoughSpace m_HoughSpaceU; 
+    PandoraPlus::HoughSpace m_HoughSpaceV; 
+    FillHoughSpace(m_HoughObjectsU, m_HoughSpaceU);
+    FillHoughSpace(m_HoughObjectsV, m_HoughSpaceV);
 
 /*
 cout<<"  Save Hough space map"<<endl;
 TCanvas *c1 = new TCanvas("c1", "c1", 700,500);
 c1->cd();
 TH2F *h2_mapXZ = new TH2F();
-*h2_mapXZ = m_HoughSpaceX.getSpaceMap();
+*h2_mapXZ = m_HoughSpaceU.getSpaceMap();
 cout<<" If space map is empty: "<<h2_mapXZ->Integral()<<endl;
 h2_mapXZ->Draw("colz");
 //c1->Draw();
@@ -146,16 +144,16 @@ delete c1, h2_mapXZ;
 
 //cout<<"  HoughClusteringAlg: Find hills"<<endl;
     //Find hills
-    FindingHills(m_HoughSpaceX);
-    FindingHills(m_HoughSpaceY);
+    FindingHills(m_HoughSpaceU);
+    FindingHills(m_HoughSpaceV);
 
 /*
 cout<<"  Print Hough hills in HoughSpaceY: "<<endl;
-cout<<"  Hill size: "<<m_HoughSpaceY.getHills().size()<<endl;
-for(int ih=0; ih<m_HoughSpaceY.getHills().size(); ih++){
-  int m_size = m_HoughSpaceY.getHills()[ih].getIndexAlpha().size(); 
-  std::vector<int> vec_alpha = m_HoughSpaceY.getHills()[ih].getIndexAlpha();
-  std::vector<int> vec_rho = m_HoughSpaceY.getHills()[ih].getIndexRho();
+cout<<"  Hill size: "<<m_HoughSpaceV.getHills().size()<<endl;
+for(int ih=0; ih<m_HoughSpaceV.getHills().size(); ih++){
+  int m_size = m_HoughSpaceV.getHills()[ih].getIndexAlpha().size(); 
+  std::vector<int> vec_alpha = m_HoughSpaceV.getHills()[ih].getIndexAlpha();
+  std::vector<int> vec_rho = m_HoughSpaceV.getHills()[ih].getIndexRho();
 
   printf("    In Hill #%d: cell size = %d, alpha range [%d, %d], rho range [%d, %d]. \n", 
           ih, m_size, *min_element(vec_alpha.begin(), vec_alpha.end()), *max_element(vec_alpha.begin(), vec_alpha.end()), 
@@ -166,48 +164,50 @@ for(int ih=0; ih<m_HoughSpaceY.getHills().size(); ih++){
 
 //cout<<"  HoughClusteringAlg: Create output HoughClusters. ";
     //Create output HoughClusters 
-    std::vector<const PandoraPlus::LongiCluster*> m_longiClusXCol; m_longiClusXCol.clear();
-    std::vector<const PandoraPlus::LongiCluster*> m_longiClusYCol; m_longiClusYCol.clear(); 
-    Transform2Clusters(m_HoughSpaceX, m_HoughObjectsX, m_longiClusXCol);
-    Transform2Clusters(m_HoughSpaceY, m_HoughObjectsY, m_longiClusYCol);
+    std::vector<const PandoraPlus::LongiCluster*> m_longiClusUCol; m_longiClusUCol.clear();
+    std::vector<const PandoraPlus::LongiCluster*> m_longiClusVCol; m_longiClusVCol.clear(); 
+    Transform2Clusters(m_HoughSpaceU, m_HoughObjectsU, m_longiClusUCol);
+    Transform2Clusters(m_HoughSpaceV, m_HoughObjectsV, m_longiClusVCol);
 
-    for(int ic=0; ic<m_longiClusXCol.size(); ic++) m_datacol.bk_LongiClusCol.push_back( const_cast<PandoraPlus::LongiCluster*>(m_longiClusXCol[ic]) );
-    for(int ic=0; ic<m_longiClusYCol.size(); ic++) m_datacol.bk_LongiClusCol.push_back( const_cast<PandoraPlus::LongiCluster*>(m_longiClusYCol[ic]) );
+    for(int ic=0; ic<m_longiClusUCol.size(); ic++) m_datacol.bk_LongiClusCol.push_back( const_cast<PandoraPlus::LongiCluster*>(m_longiClusUCol[ic]) );
+    for(int ic=0; ic<m_longiClusVCol.size(); ic++) m_datacol.bk_LongiClusCol.push_back( const_cast<PandoraPlus::LongiCluster*>(m_longiClusVCol[ic]) );
 
 
 
-cout<<"  HoughCluster size: "<<m_longiClusXCol.size()<<" / "<<m_longiClusYCol.size()<<endl;
+cout<<"  HoughCluster size: "<<m_longiClusUCol.size()<<" / "<<m_longiClusVCol.size()<<endl;
 /*
-cout<<"  Print LongiClusterX: size = "<<m_longiClusXCol.size()<<endl;
-for(int il=0; il<m_longiClusXCol.size(); il++){
-  printf("    Clus#%d: Hough Par = (%.3f, %.3f, %.3f), shower layers: \n", il, m_longiClusXCol[il]->getHoughAlpha(), m_longiClusXCol[il]->getHoughRho(), m_longiClusXCol[il]->getHoughIntercept());
-  for(int is=0; is<m_longiClusXCol[il]->getBarShowers().size(); is++) 
-    printf("      Dlayer = %d, Pos/E = (%.2f, %.2f, %.2f, %.3f) \n", m_longiClusXCol[il]->getBarShowers()[is]->getDlayer(), 
-                                                                     m_longiClusXCol[il]->getBarShowers()[is]->getPos().x(),
-                                                                     m_longiClusXCol[il]->getBarShowers()[is]->getPos().y(),
-                                                                     m_longiClusXCol[il]->getBarShowers()[is]->getPos().z(),
-                                                                     m_longiClusXCol[il]->getBarShowers()[is]->getE() );
+cout<<"  Print LongiClusterX: size = "<<m_longiClusUCol.size()<<endl;
+for(int il=0; il<m_longiClusUCol.size(); il++){
+  printf("    Clus#%d: Hough Par = (%.3f, %.3f, %.3f), shower layers: \n", il, m_longiClusUCol[il]->getHoughAlpha(), m_longiClusUCol[il]->getHoughRho(), m_longiClusUCol[il]->getHoughIntercept());
+  for(int is=0; is<m_longiClusUCol[il]->getBarShowers().size(); is++) 
+    printf("      Dlayer = %d, Pos/E = (%.2f, %.2f, %.2f, %.3f) \n", m_longiClusUCol[il]->getBarShowers()[is]->getDlayer(), 
+                                                                     m_longiClusUCol[il]->getBarShowers()[is]->getPos().x(),
+                                                                     m_longiClusUCol[il]->getBarShowers()[is]->getPos().y(),
+                                                                     m_longiClusUCol[il]->getBarShowers()[is]->getPos().z(),
+                                                                     m_longiClusUCol[il]->getBarShowers()[is]->getE() );
   cout<<endl;
 }
 
-cout<<"  Print LongiClusterY: size = "<<m_longiClusYCol.size()<<endl;
-for(int il=0; il<m_longiClusYCol.size(); il++){
-  printf("    Clus#%d: Hough Par = (%.3f, %.3f, %.3f), shower layers: \n", il, m_longiClusYCol[il]->getHoughAlpha(), m_longiClusYCol[il]->getHoughRho(), m_longiClusYCol[il]->getHoughIntercept());
-  for(int is=0; is<m_longiClusYCol[il]->getBarShowers().size(); is++)
-    printf("      Dlayer = %d, Pos/E = (%.2f, %.2f, %.2f, %.3f) \n", m_longiClusYCol[il]->getBarShowers()[is]->getDlayer(),
-                                                                     m_longiClusYCol[il]->getBarShowers()[is]->getPos().x(),
-                                                                     m_longiClusYCol[il]->getBarShowers()[is]->getPos().y(),
-                                                                     m_longiClusYCol[il]->getBarShowers()[is]->getPos().z(),
-                                                                     m_longiClusYCol[il]->getBarShowers()[is]->getE() );
+cout<<"  Print LongiClusterY: size = "<<m_longiClusVCol.size()<<endl;
+for(int il=0; il<m_longiClusVCol.size(); il++){
+  printf("    Clus#%d: Hough Par = (%.3f, %.3f, %.3f), shower layers: \n", il, m_longiClusVCol[il]->getHoughAlpha(), m_longiClusVCol[il]->getHoughRho(), m_longiClusVCol[il]->getHoughIntercept());
+  for(int is=0; is<m_longiClusVCol[il]->getBarShowers().size(); is++)
+    printf("      Dlayer = %d, Pos/E = (%.2f, %.2f, %.2f, %.3f) \n", m_longiClusVCol[il]->getBarShowers()[is]->getDlayer(),
+                                                                     m_longiClusVCol[il]->getBarShowers()[is]->getPos().x(),
+                                                                     m_longiClusVCol[il]->getBarShowers()[is]->getPos().y(),
+                                                                     m_longiClusVCol[il]->getBarShowers()[is]->getPos().z(),
+                                                                     m_longiClusVCol[il]->getBarShowers()[is]->getE() );
   cout<<endl;
 }
 */
-    p_towers->at(it)->setLongiClusters(m_longiClusXCol, m_longiClusYCol); 
+    p_3DClusters->at(it)->setLongiClusters( settings.map_stringPars["OutputLongiClusName"], m_longiClusUCol, 
+                                            settings.map_stringPars["OutputLongiClusName"], m_longiClusVCol); 
+
   }//End loop tower
 
-  //m_datacol.TowerCol = p_towers;
+  //m_datacol.TowerCol = p_3DClusters;
 //cout<<"End in HoughClusteringAlg"<<endl;
-  p_towers = nullptr;
+  p_3DClusters = nullptr;
   return StatusCode::SUCCESS;
 };
 

@@ -9,6 +9,7 @@ StatusCode LocalMaxFindingAlg::ReadSettings(PandoraPlus::Settings& m_settings){
 
   if(settings.map_floatPars.find("Eth_localMax")==settings.map_floatPars.end()) settings.map_floatPars["Eth_localMax"] = 0.005;
   if(settings.map_floatPars.find("Eth_MaxWithNeigh")==settings.map_floatPars.end()) settings.map_floatPars["Eth_MaxWithNeigh"] = 0.;
+  if(settings.map_stringPars.find("OutputLocalMaxName")==settings.map_stringPars.end()) settings.map_stringPars["OutputLocalMaxName"] = "AllLocalMax";
   return StatusCode::SUCCESS;
 }
 
@@ -32,10 +33,23 @@ cout<<"LocalMaxFinding: input 2DCluster size = "<<m_2dClusCol.size()<<endl;
       m_datacol.bk_BarShowerCol.push_back( const_cast<PandoraPlus::CaloBarShower *>(m_2dClusCol[ic]->getShowerVCol()[is]) );
   }
 
-//cout<<"  LocalMaxFinding: tower size = "<<m_TowerCol.size();
-//cout<<"  #Blocks in tower: ";
-//for(int i=0; i<m_TowerCol.size(); i++) cout<<m_TowerCol[i]->getBlocks().size()<<"  ";
-//cout<<endl;
+  std::vector<PandoraPlus::Calo3DCluster*>* p_3DClusters = &(m_datacol.Cluster3DCol);
+  if(!p_3DClusters) {std::cout<<"ERROR: No 3DCluster in present data collection! "<<std::endl; return StatusCode::FAILURE; }
+
+  for(int i3d=0; i3d<p_3DClusters->size(); i3d++){
+    std::vector<const PandoraPlus::CaloBarShower*> m_localMaxUCol; m_localMaxUCol.clear();
+    std::vector<const PandoraPlus::CaloBarShower*> m_localMaxVCol; m_localMaxVCol.clear();
+
+    for(int ib=0; ib<p_3DClusters->at(it)->getCluster().size(); ib++){
+      std::vector<const PandoraPlus::CaloBarShower*> tmp_showerU = p_3DClusters->at(it)->getCluster()[ib]->getShowerUCol();
+      std::vector<const PandoraPlus::CaloBarShower*> tmp_showerV = p_3DClusters->at(it)->getCluster()[ib]->getShowerVCol();
+
+      m_localMaxUCol.insert(m_localMaxUCol.end(), tmp_showerU.begin(), tmp_showerU.end() );
+      m_localMaxVCol.insert(m_localMaxVCol.end(), tmp_showerV.begin(), tmp_showerV.end() );
+    }
+    p_3DClusters->at(i3d)->setLocalMax(settings.map_stringPars["OutputLocalMaxName"], m_localMaxUCol, settings.map_stringPars["OutputLocalMaxName"], m_localMaxVCol);
+  }
+  p_3DClusters = nullptr;
 
   return StatusCode::SUCCESS;
 }
