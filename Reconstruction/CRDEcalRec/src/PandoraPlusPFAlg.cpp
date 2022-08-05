@@ -88,6 +88,7 @@ StatusCode PandoraPlusPFAlg::initialize()
   m_algorithmManager.RegisterAlgorithmFactory("GlobalClusteringAlg",    new GlobalClusteringAlg::Factory);
   m_algorithmManager.RegisterAlgorithmFactory("LocalMaxFindingAlg",     new LocalMaxFindingAlg::Factory);
   m_algorithmManager.RegisterAlgorithmFactory("HoughClusteringAlg",     new HoughClusteringAlg::Factory);
+  m_algorithmManager.RegisterAlgorithmFactory("ConeClustering2DAlg",    new ConeClustering2DAlg::Factory);
   m_algorithmManager.RegisterAlgorithmFactory("EnergySplittingAlg",     new EnergySplittingAlg::Factory);
   m_algorithmManager.RegisterAlgorithmFactory("EnergyTimeMatchingAlg",  new EnergyTimeMatchingAlg::Factory);
   m_algorithmManager.RegisterAlgorithmFactory("ConeClusteringAlg",      new ConeClusteringAlg::Factory);
@@ -237,6 +238,38 @@ StatusCode PandoraPlusPFAlg::execute()
   cout<<"Run Algorithms"<<endl;
   m_algorithmManager.RunAlgorithm( m_DataCol );
 
+/*
+std::vector<PandoraPlus::Calo3DCluster*> m_3dclusters = m_DataCol.Cluster3DCol;
+cout<<"Printout LongiClusters"<<endl;
+cout<<"3D cluster size: "<<m_3dclusters.size()<<endl;
+for(int i=0; i<m_3dclusters.size(); i++){
+std::map<std::string, std::vector<const PandoraPlus::LongiCluster*> > map_longiClusUCol = m_3dclusters[i]->getLongiClusterUMap();
+std::map<std::string, std::vector<const PandoraPlus::LongiCluster*> > map_longiClusVCol = m_3dclusters[i]->getLongiClusterVMap();
+
+cout<<"  In 3DCluster #"<<i<<": "<<endl;
+auto iter = map_longiClusUCol.begin(); 
+for(iter; iter!=map_longiClusUCol.end(); iter++){
+  cout<<"  LongiClusterU ["<<iter->first<<"] size = "<<iter->second.size()<<endl;
+  for(int il=0; il<iter->second.size(); il++){ 
+    const PandoraPlus::LongiCluster* tmp_clus = iter->second[il];
+    cout<<"    #"<<il<<endl;
+    for(int is=0; is<tmp_clus->getBarShowers().size(); is++) printf("    #%d: (%.3f, %.3f, %.3f) \n", is, tmp_clus->getBarShowers()[is]->getPos().x(), tmp_clus->getBarShowers()[is]->getPos().y(), tmp_clus->getBarShowers()[is]->getPos().z() );
+  }
+}
+
+iter = map_longiClusVCol.begin();
+for(iter; iter!=map_longiClusVCol.end(); iter++){
+  cout<<"  LongiClusterV ["<<iter->first<<"] size = "<<iter->second.size()<<endl;
+  for(int il=0; il<iter->second.size(); il++){
+    const PandoraPlus::LongiCluster* tmp_clus = iter->second[il];
+    cout<<"    #"<<il<<endl;
+    for(int is=0; is<tmp_clus->getBarShowers().size(); is++) printf("    #%d: (%.3f, %.3f, %.3f) \n", is, tmp_clus->getBarShowers()[is]->getPos().x(), tmp_clus->getBarShowers()[is]->getPos().y(), tmp_clus->getBarShowers()[is]->getPos().z() );
+  }
+}
+
+}
+*/
+
 
   m_pOutputCreator->CreateRecCaloHits( m_DataCol, w_RecCaloCol );
   m_pOutputCreator->CreateCluster( m_DataCol, w_ClusterCollection );
@@ -275,16 +308,44 @@ StatusCode PandoraPlusPFAlg::execute()
       m_barShowerU_x.push_back( tmp_barcol.getShowerUCol()[is]->getPos().x() );
       m_barShowerU_y.push_back( tmp_barcol.getShowerUCol()[is]->getPos().y() );
       m_barShowerU_z.push_back( tmp_barcol.getShowerUCol()[is]->getPos().z() );
-      m_barShowerU_E.push_back( tmp_barcol.getShowerUCol()[is]->getE() );
+      m_barShowerU_E.push_back( tmp_barcol.getShowerUCol()[is]->getEnergy() );
     }
     for(int is=0; is<m_NshowerV; is++){
       m_barShowerV_x.push_back( tmp_barcol.getShowerVCol()[is]->getPos().x() );
       m_barShowerV_y.push_back( tmp_barcol.getShowerVCol()[is]->getPos().y() );
       m_barShowerV_z.push_back( tmp_barcol.getShowerVCol()[is]->getPos().z() );
-      m_barShowerV_E.push_back( tmp_barcol.getShowerVCol()[is]->getE() );
+      m_barShowerV_E.push_back( tmp_barcol.getShowerVCol()[is]->getEnergy() );
     }
   }
   t_Layers->Fill();
+
+
+/*  ClearLayer();
+  //std::vector<PandoraPlus::Calo3DCluster*> m_3dclusters = m_DataCol.Cluster3DCol;
+  for(int i=0; i<m_3dclusters.size(); i++){
+    std::vector<const LongiCluster*> m_longiClusU = m_3dclusters[i]->getLongiClusterUCol("ConeLongiCluster");
+    for(int il=0; il<m_longiClusU.size(); il++){
+      for(int is=0; is<m_longiClusU[il]->getBarShowers().size(); is++){
+        m_barShowerU_x.push_back( m_longiClusU[il]->getBarShowers()[is]->getPos().x() );
+        m_barShowerU_y.push_back( m_longiClusU[il]->getBarShowers()[is]->getPos().y() );
+        m_barShowerU_z.push_back( m_longiClusU[il]->getBarShowers()[is]->getPos().z() );
+        m_barShowerU_E.push_back( m_longiClusU[il]->getBarShowers()[is]->getEnergy() );
+      }
+    }
+
+    std::vector<const LongiCluster*> m_longiClusV = m_3dclusters[i]->getLongiClusterVCol("ConeLongiCluster");
+    for(int il=0; il<m_longiClusV.size(); il++){
+      for(int is=0; is<m_longiClusV[il]->getBarShowers().size(); is++){
+        m_barShowerV_x.push_back( m_longiClusV[il]->getBarShowers()[is]->getPos().x() );
+        m_barShowerV_y.push_back( m_longiClusV[il]->getBarShowers()[is]->getPos().y() );
+        m_barShowerV_z.push_back( m_longiClusV[il]->getBarShowers()[is]->getPos().z() );
+        m_barShowerV_E.push_back( m_longiClusV[il]->getBarShowers()[is]->getEnergy() );
+      }
+    }
+  }
+  t_Layers->Fill();
+*/
+
 
   //Save Cluster info
   ClearCluster();

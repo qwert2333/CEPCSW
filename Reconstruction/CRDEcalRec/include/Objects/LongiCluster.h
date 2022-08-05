@@ -3,7 +3,7 @@
 #include <vector>
 #include <map>
 #include "Objects/CaloBarShower.h"
-//#include "Objects/TrackFitInEcal.h"
+#include "Tools/TrackFitInEcal.h"
 #include "TVector3.h"
 
 namespace PandoraPlus{
@@ -22,8 +22,8 @@ namespace PandoraPlus{
   }  
 
   TVector3 getPos() const; 
-  //TVector3 getAxis() { FitAxis(); return axis; }
-  double getE() const; 
+  TVector3 getAxis() { FitAxis(); return axis; }
+  double getEnergy() const; 
   int getSlayer() const; 
   std::vector<const PandoraPlus::CaloBarShower*> getBarShowers() const { return barShowerCol; }
   std::vector<const PandoraPlus::CaloBarShower*> getBarShowersInLayer(int _layer) const; 
@@ -40,7 +40,7 @@ namespace PandoraPlus{
   bool isSubset(const LongiCluster* clus) const; 
   double OverlapRatioE( const LongiCluster* clus ) const;
 
-  //void FitAxis(); 
+  void FitAxis(); 
   void addBarShower( const PandoraPlus::CaloBarShower* _shower ); 
   void SortBarShowersByLayer() { std::sort(barShowerCol.begin(), barShowerCol.end(), compLayer); }
   void setBarShowers( std::vector<const PandoraPlus::CaloBarShower*> _barshwoers ) { barShowerCol = _barshwoers; }
@@ -57,7 +57,7 @@ namespace PandoraPlus{
     double Hough_rho;
     double Hough_intercept;
     std::vector<const PandoraPlus::CaloBarShower*> barShowerCol;
-    //TrackFitInEcal* track = new TrackFitInEcal();
+    TrackFitInEcal* track = new TrackFitInEcal();
 
     static bool compLayer( const PandoraPlus::CaloBarShower* hit1, const PandoraPlus::CaloBarShower* hit2 ) 
       { return hit1->getDlayer() < hit2->getDlayer(); }

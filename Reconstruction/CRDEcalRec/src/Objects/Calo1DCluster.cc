@@ -100,17 +100,17 @@ namespace PandoraPlus{
     return true;
   }
 
-  //int Calo1DCluster::getLeftEdge(){
-  //  std::sort(Bars.begin(), Bars.end());
-  //  if(Bars.size()==0) return -99;
-  //  return Bars[0]->getBar();
-  //}
+  int Calo1DCluster::getLeftEdge(){
+    std::sort(Bars.begin(), Bars.end());
+    if(Bars.size()==0) return -99;
+    return Bars[0]->getBar();
+  }
 
-  //int Calo1DCluster::getRightEdge(){
-  //  std::sort(Bars.begin(), Bars.end());
-  //  if(Bars.size()==0) return -99;
-  //  return Bars[Bars.size()-1]->getBar();
-  //}  
+  int Calo1DCluster::getRightEdge(){
+    std::sort(Bars.begin(), Bars.end());
+    if(Bars.size()==0) return -99;
+    return Bars[Bars.size()-1]->getBar();
+  }  
 
 
   void Calo1DCluster::PrintBars() const{

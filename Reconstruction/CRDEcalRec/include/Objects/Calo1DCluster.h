@@ -37,8 +37,8 @@ namespace PandoraPlus{
 	  std::vector<const PandoraPlus::CaloUnit*> getCluster()  const { return Bars;  }
     std::vector<const PandoraPlus::CaloUnit*> getSeeds() const { return Seeds; }
     bool getGlobalRange( double& xmin,  double& ymin, double& zmin, double& xmax, double& ymax, double& zmax ) const;
-    //int  getLeftEdge();
-    //int  getRightEdge();
+    int  getLeftEdge();
+    int  getRightEdge();
 
     void PrintBars() const;
     void PrintSeeds() const;

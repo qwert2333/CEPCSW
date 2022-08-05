@@ -16,8 +16,12 @@ namespace PandoraPlus{
     void Clear() { position.SetXYZ(0.,0.,0.); Q1=-1; Q2=-1; T1=-99; T2=-99; }
 
     inline bool operator < (const CaloUnit &x) const {
-      return ((part<x.part) || (part==x.part && stave<x.stave) ||  (part==x.part && stave==x.stave && bar<x.bar));
+      if(x.cellID==cellID) return false; 
+
+      if(slayer==0) return ((part<x.part) || (part==x.part && stave<x.stave) ||  (part==x.part && stave==x.stave && bar<x.bar));
+      else return ((stave<x.stave) || (stave==x.stave && part<x.part) ||  (part==x.part && stave==x.stave && bar<x.bar));
     }
+
     inline bool operator == (const CaloUnit &x) const{
       return ( (cellID == x.cellID) && getEnergy()==x.getEnergy() );
     }

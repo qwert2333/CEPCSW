@@ -25,7 +25,8 @@ StatusCode HoughClusteringAlg::ReadSettings(PandoraPlus::Settings& m_settings){
   if(settings.map_floatPars.find("th_overlapE1")==settings.map_floatPars.end()) settings.map_floatPars["th_overlapE1"] = 0.7;  
   if(settings.map_floatPars.find("th_overlapE2")==settings.map_floatPars.end()) settings.map_floatPars["th_overlapE2"] = 0.9;  
 
-  if(settings.map_stringPars.find("ReadinLocalMaxName")==settings.map_stringPars.end()) settings.map_stringPars["ReadinLocalMaxName"] = "AllLocalMax";
+  if(settings.map_stringPars.find("ReadinLocalMaxName")==settings.map_stringPars.end())  settings.map_stringPars["ReadinLocalMaxName"] = "AllLocalMax";
+  if(settings.map_stringPars.find("LeftLocalMaxName")==settings.map_stringPars.end())    settings.map_stringPars["LeftLocalMaxName"] = "LeftLocalMax";
   if(settings.map_stringPars.find("OutputLongiClusName")==settings.map_stringPars.end()) settings.map_stringPars["OutputLongiClusName"] = "EMLongiCluster"; 
 
   return StatusCode::SUCCESS;
@@ -43,10 +44,19 @@ StatusCode HoughClusteringAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
 cout<<"3DCluster size: "<<p_3DClusters->size()<<endl;
 
   for(int it=0; it<p_3DClusters->size(); it++){
-printf("  In 3DCluster #%d: block size = %d \n", it, p_3DClusters->at(it)->getCluster().size());
+//printf("  In 3DCluster #%d: block size = %d \n", it, p_3DClusters->at(it)->getCluster().size());
 
-    std::vector<const PandoraPlus::CaloBarShower*> m_localMaxUCol = p_3DClusters->at(it)->getLocalMaxUCol(settings.map_stringPars["ReadinLocalMaxName"]); 
-    std::vector<const PandoraPlus::CaloBarShower*> m_localMaxVCol = p_3DClusters->at(it)->getLocalMaxVCol(settings.map_stringPars["ReadinLocalMaxName"]);
+    std::vector<const PandoraPlus::CaloBarShower*> m_localMaxUCol; m_localMaxUCol.clear();  
+    std::vector<const PandoraPlus::CaloBarShower*> m_localMaxVCol; m_localMaxVCol.clear();
+    std::vector<const PandoraPlus::CaloBarShower*> tmp_localMaxUCol = p_3DClusters->at(it)->getLocalMaxUCol(settings.map_stringPars["ReadinLocalMaxName"]); 
+    std::vector<const PandoraPlus::CaloBarShower*> tmp_localMaxVCol = p_3DClusters->at(it)->getLocalMaxVCol(settings.map_stringPars["ReadinLocalMaxName"]);
+
+    for(int il=0; il<tmp_localMaxUCol.size(); il++)
+      if(tmp_localMaxUCol[il]->getDlayer()<=settings.map_floatPars["th_Layers"]) m_localMaxUCol.push_back(tmp_localMaxUCol[il]);
+    for(int il=0; il<tmp_localMaxVCol.size(); il++)
+      if(tmp_localMaxVCol[il]->getDlayer()<=settings.map_floatPars["th_Layers"]) m_localMaxVCol.push_back(tmp_localMaxVCol[il]);
+    //tmp_localMaxUCol.clear(); tmp_localMaxVCol.clear(); 
+
 
     if(m_localMaxUCol.size()==0 && m_localMaxVCol.size()==0) continue; 
 //cout<<"  Local maximum size: barX "<<m_localMaxUCol.size()<<"  barY "<<m_localMaxVCol.size()<<endl;
@@ -98,7 +108,7 @@ cout<<"  Check all Hough Objects: "<<endl;
 cout<<"  Transformed Hough lines X: "<<endl;
 for(int i=0; i<m_HoughObjectsU.size(); i++){
   cout<<"    HoughObj #"<<i<<": Origin localMax position ";
-  printf(" (%.3f, %.3f, %.3f) \n", m_HoughObjectsU[i].getLocalMax()->getPos().X(), m_HoughObjectsU[i].getLocalMax()->getPos().Z(), m_HoughObjectsU[i].getLocalMax()->getE());
+  printf(" (%.3f, %.3f, %.3f) \n", m_HoughObjectsU[i].getLocalMax()->getPos().X(), m_HoughObjectsU[i].getLocalMax()->getPos().Z(), m_HoughObjectsU[i].getLocalMax()->getEnergy());
   printf("    Conformal Point: (%.3f, %.3f) \n", m_HoughObjectsU[i].getConformPointUR().X()-5, m_HoughObjectsU[i].getConformPointUR().Y()-5 );
   cout<<"    LineUR pars: "<<m_HoughObjectsU[i].getHoughLineUR().GetParameter(0)<<"  "<<m_HoughObjectsU[i].getHoughLineUR().GetParameter(1)<<", range: ["<<m_HoughObjectsU[i].getHoughLineUR().GetMaximum()<<", "<<m_HoughObjectsU[i].getHoughLineUR().GetMinimum()<<"]"<<endl;
   cout<<"    LineUL pars: "<<m_HoughObjectsU[i].getHoughLineUL().GetParameter(0)<<"  "<<m_HoughObjectsU[i].getHoughLineUL().GetParameter(1)<<", range: ["<<m_HoughObjectsU[i].getHoughLineUL().GetMaximum()<<", "<<m_HoughObjectsU[i].getHoughLineUL().GetMinimum()<<"]"<<endl;
@@ -111,7 +121,7 @@ for(int i=0; i<m_HoughObjectsU.size(); i++){
 cout<<"  Transformed Hough lines Y: "<<endl;
 for(int i=0; i<m_HoughObjectsV.size(); i++){
   cout<<"    HoughObj #"<<i<<": Origin localMax position ";
-  printf(" (%.3f, %.3f, %.3f) \n", m_HoughObjectsV[i].getLocalMax()->getPos().X(), m_HoughObjectsV[i].getLocalMax()->getPos().Z(), m_HoughObjectsV[i].getLocalMax()->getE());
+  printf(" (%.3f, %.3f, %.3f) \n", m_HoughObjectsV[i].getLocalMax()->getPos().X(), m_HoughObjectsV[i].getLocalMax()->getPos().Z(), m_HoughObjectsV[i].getLocalMax()->getEnergy());
   printf("    Conformal Point: (%.3f, %.3f) \n", m_HoughObjectsV[i].getConformPointUR().X()-5, m_HoughObjectsV[i].getConformPointUR().Y()-5 );
   cout<<"    LineUR pars: "<<m_HoughObjectsV[i].getHoughLineUR().GetParameter(0)<<"  "<<m_HoughObjectsV[i].getHoughLineUR().GetParameter(1)<<", range: ["<<m_HoughObjectsV[i].getHoughLineUR().GetMaximum()<<", "<<m_HoughObjectsV[i].getHoughLineUR().GetMinimum()<<"]"<<endl;
   cout<<"    LineUL pars: "<<m_HoughObjectsV[i].getHoughLineUL().GetParameter(0)<<"  "<<m_HoughObjectsV[i].getHoughLineUL().GetParameter(1)<<", range: ["<<m_HoughObjectsV[i].getHoughLineUL().GetMaximum()<<", "<<m_HoughObjectsV[i].getHoughLineUL().GetMinimum()<<"]"<<endl;
@@ -172,9 +182,73 @@ for(int ih=0; ih<m_HoughSpaceV.getHills().size(); ih++){
     for(int ic=0; ic<m_longiClusUCol.size(); ic++) m_datacol.bk_LongiClusCol.push_back( const_cast<PandoraPlus::LongiCluster*>(m_longiClusUCol[ic]) );
     for(int ic=0; ic<m_longiClusVCol.size(); ic++) m_datacol.bk_LongiClusCol.push_back( const_cast<PandoraPlus::LongiCluster*>(m_longiClusVCol[ic]) );
 
+    std::vector<const PandoraPlus::CaloBarShower*> left_localMaxUCol; left_localMaxUCol.clear(); 
+    std::vector<const PandoraPlus::CaloBarShower*> left_localMaxVCol; left_localMaxVCol.clear(); 
 
 
-cout<<"  HoughCluster size: "<<m_longiClusUCol.size()<<" / "<<m_longiClusVCol.size()<<endl;
+//cout<<"Total localMax U address: "<<endl;
+//for(int i=0; i<tmp_localMaxUCol.size(); i++) 
+//  printf("  #%d: (%.3f, %.3f, %.3f), %p \n", i, tmp_localMaxUCol[i]->getPos().x(), tmp_localMaxUCol[i]->getPos().y(), tmp_localMaxUCol[i]->getPos().z(), tmp_localMaxUCol[i]);
+//cout<<endl;
+
+    for(int is=0; is<tmp_localMaxUCol.size(); is++){
+      bool fl_incluster = false; 
+      for(int ic=0; ic<m_longiClusUCol.size(); ic++){
+        std::vector<const PandoraPlus::CaloBarShower*> p_showers = m_longiClusUCol[ic]->getBarShowers();
+        if( find(p_showers.begin(), p_showers.end(), tmp_localMaxUCol[is])!=p_showers.end() ) { fl_incluster = true; break; }
+      }
+      if(!fl_incluster && find(left_localMaxUCol.begin(), left_localMaxUCol.end(), tmp_localMaxUCol[is])==left_localMaxUCol.end() ) left_localMaxUCol.push_back(tmp_localMaxUCol[is]);
+    }
+    for(int is=0; is<tmp_localMaxVCol.size(); is++){
+      bool fl_incluster = false;
+      for(int ic=0; ic<m_longiClusVCol.size(); ic++){
+        std::vector<const PandoraPlus::CaloBarShower*> p_showers = m_longiClusVCol[ic]->getBarShowers();
+        if( find(p_showers.begin(), p_showers.end(), tmp_localMaxVCol[is])!=p_showers.end() ) { fl_incluster = true; break; }
+      }
+      if(!fl_incluster && find(left_localMaxVCol.begin(), left_localMaxVCol.end(), tmp_localMaxVCol[is])==left_localMaxVCol.end() ) left_localMaxVCol.push_back(tmp_localMaxVCol[is]);
+    }
+
+
+/*
+    for(int ic=0; ic<m_longiClusUCol.size(); ic++){
+      std::vector<const PandoraPlus::CaloBarShower*> p_showers = m_longiClusUCol[ic]->getBarShowers();
+cout<<"LocalMax in LongiCluster #"<<ic<<endl;
+for(int i=0; i<p_showers.size(); i++)
+  printf("  #%d: (%.3f, %.3f, %.3f), %p \n", i, p_showers[i]->getPos().x(), p_showers[i]->getPos().y(), p_showers[i]->getPos().z(), p_showers[i]);
+cout<<endl;
+      for(int is=0; is<tmp_localMaxUCol.size(); is++){
+printf("  Looping for localMax #%d: (%.3f, %.3f, %.3f), %p \n", is, tmp_localMaxUCol[is]->getPos().x(), tmp_localMaxUCol[is]->getPos().y(), tmp_localMaxUCol[is]->getPos().z(), tmp_localMaxUCol[is]);
+cout<<"  Current left collection size: "<<left_localMaxUCol.size()<<endl;
+
+        if( find(p_showers.begin(), p_showers.end(), tmp_localMaxUCol[is])==p_showers.end() && 
+            find(left_localMaxUCol.begin(), left_localMaxUCol.end(), tmp_localMaxUCol[is])==left_localMaxUCol.end() ){ 
+cout<<"    Not found in LongiCluster or current left collection"<<endl;
+          left_localMaxUCol.push_back(tmp_localMaxUCol[is]);
+        }
+      }
+    }
+
+    for(int ic=0; ic<m_longiClusVCol.size(); ic++){
+      std::vector<const PandoraPlus::CaloBarShower*> p_showers = m_longiClusVCol[ic]->getBarShowers();
+      for(int is=0; is<tmp_localMaxVCol.size(); is++)
+        if( find(p_showers.begin(), p_showers.end(), tmp_localMaxVCol[is])==p_showers.end() && 
+            find(left_localMaxVCol.begin(), left_localMaxVCol.end(), tmp_localMaxVCol[is])==left_localMaxVCol.end() ) left_localMaxVCol.push_back(tmp_localMaxVCol[is]);
+    }
+*/
+
+    p_3DClusters->at(it)->setLocalMax( settings.map_stringPars["LeftLocalMaxName"], left_localMaxUCol, 
+                                       settings.map_stringPars["LeftLocalMaxName"], left_localMaxVCol  );
+
+//cout<<"Left LocalMax U: "<<endl;
+//for(int i=0; i<left_localMaxUCol.size(); i++)
+//  printf("  #%d: (%.3f, %.3f, %.3f) \n ", i, left_localMaxUCol[i]->getPos().x(), left_localMaxUCol[i]->getPos().y(), left_localMaxUCol[i]->getPos().z());
+//cout<<"Left LocalMax V: "<<endl;
+//for(int i=0; i<left_localMaxVCol.size(); i++)
+//  printf("  #%d: (%.3f, %.3f, %.3f) \n ", i, left_localMaxVCol[i]->getPos().x(), left_localMaxVCol[i]->getPos().y(), left_localMaxVCol[i]->getPos().z());
+
+
+
+//cout<<"  HoughCluster size: "<<m_longiClusUCol.size()<<" / "<<m_longiClusVCol.size()<<endl;
 /*
 cout<<"  Print LongiClusterX: size = "<<m_longiClusUCol.size()<<endl;
 for(int il=0; il<m_longiClusUCol.size(); il++){
@@ -184,7 +258,7 @@ for(int il=0; il<m_longiClusUCol.size(); il++){
                                                                      m_longiClusUCol[il]->getBarShowers()[is]->getPos().x(),
                                                                      m_longiClusUCol[il]->getBarShowers()[is]->getPos().y(),
                                                                      m_longiClusUCol[il]->getBarShowers()[is]->getPos().z(),
-                                                                     m_longiClusUCol[il]->getBarShowers()[is]->getE() );
+                                                                     m_longiClusUCol[il]->getBarShowers()[is]->getEnergy() );
   cout<<endl;
 }
 
@@ -196,7 +270,7 @@ for(int il=0; il<m_longiClusVCol.size(); il++){
                                                                      m_longiClusVCol[il]->getBarShowers()[is]->getPos().x(),
                                                                      m_longiClusVCol[il]->getBarShowers()[is]->getPos().y(),
                                                                      m_longiClusVCol[il]->getBarShowers()[is]->getPos().z(),
-                                                                     m_longiClusVCol[il]->getBarShowers()[is]->getE() );
+                                                                     m_longiClusVCol[il]->getBarShowers()[is]->getEnergy() );
   cout<<endl;
 }
 */
@@ -522,7 +596,7 @@ StatusCode HoughClusteringAlg::Transform2Clusters( PandoraPlus::HoughSpace& m_Hs
 cout<<"  Print clusters: "<<endl;
 for(int ic=0; ic<tmp_clusCol.size(); ic++){
   printf("    Nhit %d, Energy %.2f, HoughPar (%.2f, %.2f).  ", 
-          tmp_clusCol[ic].getBarShowers().size(), tmp_clusCol[ic].getE(),
+          tmp_clusCol[ic].getBarShowers().size(), tmp_clusCol[ic].getEnergy(),
           tmp_clusCol[ic].getHoughAlpha(), tmp_clusCol[ic].getHoughRho() );
   for(int ihit=0; ihit<tmp_clusCol[ic].getBarShowers().size(); ihit++) cout<<tmp_clusCol[ic].getBarShowers()[ihit].getDlayer()<<"  ";
   cout<<endl;
@@ -532,7 +606,7 @@ cout<<endl;
 cout<<"  Print clusters: "<<endl;
 for(int ic=0; ic<m_clusCol.size(); ic++)
   printf("    Nhit %d, Energy %.2f, HoughPar (%.2f, %.2f) \n",
-          m_clusCol[ic].getBarShowers().size(), m_clusCol[ic].getE(), 
+          m_clusCol[ic].getBarShowers().size(), m_clusCol[ic].getEnergy(), 
           m_clusCol[ic].getHoughAlpha(), m_clusCol[ic].getHoughRho() );
 cout<<endl;
 */
@@ -592,7 +666,7 @@ StatusCode HoughClusteringAlg::CleanClusters( std::vector<PandoraPlus::LongiClus
 cout<<"  Print clusters: "<<endl;
 for(int ic=0; ic<m_longiClusCol.size(); ic++)
   printf("    Nhit %d, Energy %.2f, HoughPar (%.2f, %.2f) \n",
-          m_longiClusCol[ic]->getBarShowers().size(), m_longiClusCol[ic]->getE(), 
+          m_longiClusCol[ic]->getBarShowers().size(), m_longiClusCol[ic]->getEnergy(), 
           m_longiClusCol[ic]->getHoughAlpha(), m_longiClusCol[ic]->getHoughRho() );
 cout<<endl;
 */
@@ -618,16 +692,16 @@ cout<<"    After subset removal: "<<m_longiClusCol.size()<<endl;
 cout<<"  Print clusters: "<<endl;
 for(int ic=0; ic<m_longiClusCol.size(); ic++)
   printf("    Nhit %d, Energy %.2f, Layer range [%d, %d], intercept %.2f, energy %.2f \n",
-          m_longiClusCol[ic]->getBarShowers().size(), m_longiClusCol[ic]->getE(),
+          m_longiClusCol[ic]->getBarShowers().size(), m_longiClusCol[ic]->getEnergy(),
           m_longiClusCol[ic]->getBeginningDlayer(), m_longiClusCol[ic]->getEndDlayer(),
-          m_longiClusCol[ic]->getHoughIntercept(), m_longiClusCol[ic]->getE() );
+          m_longiClusCol[ic]->getHoughIntercept(), m_longiClusCol[ic]->getEnergy() );
 cout<<endl;
 */
 
 
   //Cut on energy and intercept
   for(int ic=0; ic<m_longiClusCol.size(); ic++){
-    if( fabs(m_longiClusCol[ic]->getHoughIntercept())>=settings.map_floatPars["th_intercept"] || m_longiClusCol[ic]->getE()<settings.map_floatPars["th_AxisE"]){
+    if( fabs(m_longiClusCol[ic]->getHoughIntercept())>=settings.map_floatPars["th_intercept"] || m_longiClusCol[ic]->getEnergy()<settings.map_floatPars["th_AxisE"]){
       delete m_longiClusCol[ic]; m_longiClusCol[ic]=NULL;
       m_longiClusCol.erase(m_longiClusCol.begin()+ic );
       ic--;
@@ -648,16 +722,16 @@ cout<<endl;
     double m_ratio1 = m_longiClusCol[ic]->OverlapRatioE(m_longiClusCol[jc]);
     double m_ratio2 = m_longiClusCol[jc]->OverlapRatioE(m_longiClusCol[ic]);
 
-//printf("      Tag branch: Clus #%d: (R, E) = (%.2f, %.2f). Clus #%d: (%.2f, %.2f). \n", ic, m_ratio1, m_longiClusCol[ic]->getE(), jc, m_ratio2, m_longiClusCol[jc]->getE() );
+//printf("      Tag branch: Clus #%d: (R, E) = (%.2f, %.2f). Clus #%d: (%.2f, %.2f). \n", ic, m_ratio1, m_longiClusCol[ic]->getEnergy(), jc, m_ratio2, m_longiClusCol[jc]->getEnergy() );
     
-    if(m_ratio1>settings.map_floatPars["th_overlapE1"] && m_longiClusCol[ic]->getE()<m_longiClusCol[jc]->getE()){
+    if(m_ratio1>settings.map_floatPars["th_overlapE1"] && m_longiClusCol[ic]->getEnergy()<m_longiClusCol[jc]->getEnergy()){
       delete m_longiClusCol[ic]; m_longiClusCol[ic] = NULL;
       m_longiClusCol.erase( m_longiClusCol.begin()+ic );
       ic--;
       break;
     }
 
-    if(m_ratio2>settings.map_floatPars["th_overlapE1"] && m_longiClusCol[jc]->getE()<m_longiClusCol[ic]->getE()){
+    if(m_ratio2>settings.map_floatPars["th_overlapE1"] && m_longiClusCol[jc]->getEnergy()<m_longiClusCol[ic]->getEnergy()){
       delete m_longiClusCol[jc]; m_longiClusCol[jc] = NULL;
       m_longiClusCol.erase( m_longiClusCol.begin()+jc );
       jc--;
@@ -679,16 +753,16 @@ cout<<endl;
     double m_ratio1 = m_longiClusCol[ic]->OverlapRatioE(m_longiClusCol[jc]);
     double m_ratio2 = m_longiClusCol[jc]->OverlapRatioE(m_longiClusCol[ic]);
 
-//printf("      Tag branch: Clus #%d: (R, E) = (%.2f, %.2f). Clus #%d: (%.2f, %.2f). \n", ic, m_ratio1, m_longiClusCol[ic]->getE(), jc, m_ratio2, m_longiClusCol[jc]->getE() );
+//printf("      Tag branch: Clus #%d: (R, E) = (%.2f, %.2f). Clus #%d: (%.2f, %.2f). \n", ic, m_ratio1, m_longiClusCol[ic]->getEnergy(), jc, m_ratio2, m_longiClusCol[jc]->getEnergy() );
 
-    if(m_ratio1>settings.map_floatPars["th_overlapE2"] && m_longiClusCol[ic]->getE()<m_longiClusCol[jc]->getE()){
+    if(m_ratio1>settings.map_floatPars["th_overlapE2"] && m_longiClusCol[ic]->getEnergy()<m_longiClusCol[jc]->getEnergy()){
       delete m_longiClusCol[ic]; m_longiClusCol[ic]=NULL;
       m_longiClusCol.erase( m_longiClusCol.begin()+ic );
       ic--;
       break;
     }
 
-    if(m_ratio2>settings.map_floatPars["th_overlapE2"] && m_longiClusCol[jc]->getE()<m_longiClusCol[ic]->getE()){
+    if(m_ratio2>settings.map_floatPars["th_overlapE2"] && m_longiClusCol[jc]->getEnergy()<m_longiClusCol[ic]->getEnergy()){
       delete m_longiClusCol[jc]; m_longiClusCol[jc]=NULL;
       m_longiClusCol.erase( m_longiClusCol.begin()+jc );
       jc--;
@@ -745,7 +819,7 @@ cout<<endl;
         for(int js=0; js<m_longiClusCol[jc].getBarShowers().size(); js++){
           if(m_longiClusCol[ic].getBarShowers()[is]==m_longiClusCol[jc].getBarShowers()[js]) m_sharedshs.push_back(m_longiClusCol[ic].getBarShowers()[is]);
         }}
-        if(m_longiClusCol[ic].getE()>m_longiClusCol[jc].getE()) m_longiClusCol[jc].RemoveShowers( m_sharedshs );  
+        if(m_longiClusCol[ic].getEnergy()>m_longiClusCol[jc].getEnergy()) m_longiClusCol[jc].RemoveShowers( m_sharedshs );  
         else m_longiClusCol[ic].RemoveShowers( m_sharedshs );
       }
     }
@@ -761,7 +835,7 @@ cout<<endl;
           if(m_longiClusCol[ic].getBarShowers()[is]==m_longiClusCol[jc].getBarShowers()[js]) m_sharedshs.push_back(m_longiClusCol[ic].getBarShowers()[is]);
         }}
 
-        if(m_longiClusCol[ic].getE()>m_longiClusCol[jc].getE()) m_longiClusCol[jc].RemoveShowers( m_sharedshs );
+        if(m_longiClusCol[ic].getEnergy()>m_longiClusCol[jc].getEnergy()) m_longiClusCol[jc].RemoveShowers( m_sharedshs );
         else m_longiClusCol[ic].RemoveShowers( m_sharedshs );
       }
 
@@ -789,7 +863,7 @@ cout<<endl;
 cout<<"  Print clusters: "<<endl;
 for(int ic=0; ic<m_longiClusCol.size(); ic++)
   printf("    Nhit %d, Energy %.2f, HoughPar (%.2f, %.2f, %.2f) \n",
-          m_longiClusCol[ic].getBarShowers().size(), m_longiClusCol[ic].getE(), 
+          m_longiClusCol[ic].getBarShowers().size(), m_longiClusCol[ic].getEnergy(), 
           m_longiClusCol[ic].getHoughAlpha(), m_longiClusCol[ic].getHoughRho(), m_longiClusCol[ic].getHoughIntercept() );
 cout<<endl;
 */

@@ -28,152 +28,29 @@ StatusCode EnergyTimeMatchingAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
   std::vector<PandoraPlus::TransShower*> m_transhowerCol; m_transhowerCol.clear(); 
   std::vector<PandoraPlus::CaloCluster*> m_clusterCol; m_clusterCol.clear();
 
-  //Basic unit: tower. 
-  std::vector<PandoraPlus::CaloTower*>* p_towerCol = &(m_datacol.TowerCol);
-  if(p_towerCol->size()==0){ std::cout<<"Warning: Empty input in EnergyTimeMatchingAlg! Please check previous algorithm!"<<std::endl; return StatusCode::SUCCESS; }
+  //Readin 3DClusters
+  std::vector<PandoraPlus::CaloTower*>* p_3DClusters = &(m_datacol.TowerCol);
+  if( !p_3DClusters || p_3DClusters->size()==0){ std::cout<<"Warning: Empty input in EnergyTimeMatchingAlg! Please check previous algorithm!"<<std::endl; return StatusCode::SUCCESS; }
 
-cout<<"Start EnergyTimeMatchingAlg. Tower size: "<<p_towerCol->size()<<endl;
 
-/*
-for(int it=0; it<p_towerCol->size(); it++){
-cout<<"  Check tower #"<<it<<endl;
-cout<<"  Block size: "<<p_towerCol->at(it)->getBlocks().size()<<endl;
-for(int ib=0; ib<p_towerCol->at(it)->getBlocks().size(); ib++ ){
+  for(int it=0; it<p_3DClusters->size(); it++){
 
-  const PandoraPlus::CaloBlock* p_block = p_towerCol->at(it)->getBlocks()[ib];
-  printf("    Block #%d: Layer = %d, bar size (%d, %d), shower size (%d, %d) \n", ib, p_block->getDlayer(),
-              p_block->getBarXCol().size(), p_block->getBarYCol().size(), p_block->getShowerXCol().size(), p_block->getShowerYCol().size());
+    //Preparation: Get 2D clusters and BarShowers in 2DCluster. 
+    //Depart tower-covering BarShowers to 2
 
-  std::vector<const CaloUnit *> barXCol = p_block->getBarXCol();
-  std::vector<const CaloUnit *> barYCol = p_block->getBarYCol();
-  std::vector<const CaloBarShower*> barShowerXCol = p_block->getShowerXCol();
-  std::vector<const CaloBarShower*> barShowerYCol = p_block->getShowerYCol();
+    //Classify towers: has ghost hit problem or not. 
+    //Loop in towers without ghost hit problem:
 
-cout<<"Print Bar X:"<<endl;
-for(int i=0; i<barXCol.size(); i++){
-cout<<"  Address: "<<barXCol[i];
-printf(", pos (%.2f, %.2f, %.2f, %.2f), ID (%d, %d, %d) \n", barXCol[i]->getPosition().x(), barXCol[i]->getPosition().y(), barXCol[i]->getPosition().z(), barXCol[i]->getEnergy(), 
-      barXCol[i]->getModule(), barXCol[i]->getStave(), barXCol[i]->getPart() );
-}
-cout<<endl;
-cout<<"Print Bar Y:"<<endl;
-for(int i=0; i<barYCol.size(); i++){
-cout<<"  Address: "<<barYCol[i];
-printf(",  pos (%.2f, %.2f, %.2f, %.2f), ID (%d, %d, %d) \n", barYCol[i]->getPosition().x(), barYCol[i]->getPosition().y(), barYCol[i]->getPosition().z(), barYCol[i]->getEnergy(),
-      barYCol[i]->getModule(), barYCol[i]->getStave(), barYCol[i]->getPart() );
-}
-cout<<endl;
 
-cout<<"Print shower X: "<<endl;
-for(int i=0; i<barShowerXCol.size(); i++){
-cout<<"  Address: "<<barShowerXCol[i];
-printf(", Nbar = %d, pos (%.2f, %.2f, %.2f, %.2f), ID (%d, %d, %d) \n", barShowerXCol[i]->getBars().size(), 
-      barShowerXCol[i]->getPos().x(), barShowerXCol[i]->getPos().y(), barShowerXCol[i]->getPos().z(), barShowerXCol[i]->getEnergy(), 
-      barShowerXCol[i]->getModule(), barShowerXCol[i]->getStave(), barShowerXCol[i]->getPart() );
-}
-cout<<endl;
-cout<<"Print shower Y: "<<endl;
-for(int i=0; i<barShowerYCol.size(); i++){
-cout<<"  Address: "<<barShowerYCol[i];
-printf(", Nbar = %d, pos (%.2f, %.2f, %.2f, %.2f), ID (%d, %d, %d) \n", barShowerYCol[i]->getBars().size(),
-      barShowerYCol[i]->getPos().x(), barShowerYCol[i]->getPos().y(), barShowerYCol[i]->getPos().z(), barShowerYCol[i]->getEnergy(), 
-      barShowerYCol[i]->getModule(), barShowerYCol[i]->getStave(), barShowerYCol[i]->getPart() );
-}
-cout<<endl;
+    //Loop in towers with ghost hit problem: 
 
-//  for(int i=0; i<barXCol.size(); i++)
-//    if(!barXCol[i]) { cout<<"WARNING: null ptr for barX "<<i<<endl; }
-//  for(int i=0; i<barYCol.size(); i++)
-//    if(!barYCol[i]) { cout<<"WARNING: null ptr for barY "<<i<<endl; }
-//  for(int i=0; i<barShowerXCol.size(); i++)
-//    if(!barShowerXCol[i]) { cout<<"WARNING: null ptr for showerX "<<i<<endl; }
-//  for(int i=0; i<barShowerYCol.size(); i++)
-//    if(!barShowerYCol[i]) { cout<<"WARNING: null ptr for showerY "<<i<<endl; }
-
-}
-}
-*/
-
-  for(int it=0; it<p_towerCol->size(); it++){
-
-    //Case1: Don't use shadow cluster or chi2 matching, Save all combinations for 3D clustering.
-    if(settings.map_floatPars["fl_UseChi2"]==0){
-cout<<"  EnergyTimeMatchingAlg: Tower #"<<it<<", Not use chi2 matching"<<endl;
-      std::vector<const PandoraPlus::CaloBlock*> m_blocks = p_towerCol->at(it)->getBlocks(); 
-      if(m_blocks.size()==0) continue; 
-
-      for(int ib=0;ib<m_blocks.size();ib++){
-        std::vector<const PandoraPlus::CaloBarShower*> showerXCol = m_blocks[ib]->getShowerXCol();
-        std::vector<const PandoraPlus::CaloBarShower*> showerYCol = m_blocks[ib]->getShowerYCol();
-   
-        std::vector<PandoraPlus::TransShower*> m_showerinlayer; m_showerinlayer.clear();
-
-        GetFullMatchedShowers( showerXCol, showerYCol, m_showerinlayer );
-        m_datacol.bk_TransShowerCol.insert( m_datacol.bk_TransShowerCol.end(), m_showerinlayer.begin(), m_showerinlayer.end() );
-        
-        m_transhowerCol.insert( m_transhowerCol.end(), m_showerinlayer.begin(), m_showerinlayer.end() );   
-      }
-    }
-    
-
-    //Case2: chi2 matching (combined chi2 in all layers)
-    else{
-cout<<"  EnergyTimeMatchingAlg: Tower #"<<it<<", Use chi2 matching"<<endl;
-      std::vector<const PandoraPlus::LongiCluster*> m_longiClXCol = p_towerCol->at(it)->getLongiClusterXCol();
-      std::vector<const PandoraPlus::LongiCluster*> m_longiClYCol = p_towerCol->at(it)->getLongiClusterYCol();
-
-cout<<"  EnergyTimeMatchingAlg: Longitudinal cluster size: X "<<m_longiClXCol.size()<<", Y: "<<m_longiClYCol.size()<<endl;
-
-      const int NclusX = m_longiClXCol.size(); 
-      const int NclusY = m_longiClYCol.size(); 
-      if(NclusX==0 || NclusY==0) continue; 
-
-      std::vector<PandoraPlus::CaloCluster*> tmp_clusters; tmp_clusters.clear(); 
-      
-      //Case 2.1: 1*1
-      if(NclusX==1 && NclusY==1){
-        PandoraPlus::CaloCluster* tmp_clus = new PandoraPlus::CaloCluster();
-        XYClusterMatchingL0(m_longiClXCol[0], m_longiClYCol[0], tmp_clus); 
-        tmp_clusters.push_back(tmp_clus);
-        //continue;
-      }
-      //Case 2.2: 1*N
-      else if(NclusX==1){ XYClusterMatchingL1(m_longiClXCol[0], m_longiClYCol, tmp_clusters); }
-      else if(NclusY==1){ XYClusterMatchingL1(m_longiClYCol[0], m_longiClXCol, tmp_clusters); }
-
-      //Case 2.3: N*N
-      else if( NclusX==NclusY ){ 
-        XYClusterMatchingL2(m_longiClXCol, m_longiClYCol, tmp_clusters);
-      }
-      //Case 2.4
-      else{ 
-        XYClusterMatchingL3(m_longiClXCol, m_longiClYCol, tmp_clusters);
-      }
-
-cout<<"  EnergyTimeMatchingAlg: After cluster matching. 3D cluster size: "<<tmp_clusters.size()<<endl;
-
-      for(int ic=0; ic<tmp_clusters.size(); ic++){ 
-        m_clusterCol.push_back( tmp_clusters[ic] );
-        std::vector<const PandoraPlus::TransShower*> m_showersinclus = tmp_clusters[ic]->getShowers(); 
-cout<<"  EnergyTimeMatchingAlg: In Cluster #"<<ic<<": shower size = "<<m_showersinclus.size()<<endl;
-        //m_transhowerCol.insert(m_transhowerCol.end(), m_showersinclus.begin(), m_showersinclus.end());
-        for(int is=0; is<m_showersinclus.size(); is++){ 
-          m_transhowerCol.push_back( const_cast<PandoraPlus::TransShower *>(m_showersinclus[is]) );
-          m_datacol.bk_TransShowerCol.push_back( const_cast<PandoraPlus::TransShower *>(m_showersinclus[is]) );
-        }
-
-        m_datacol.bk_ClusterCol.push_back( tmp_clusters[ic] );
-      }
-    }
-cout<<"  EnergyTimeMatchingAlg: present 2D shower size: "<<m_transhowerCol.size()<<", 3D cluster size: "<<m_clusterCol.size()<<endl;
 
   }
 
-  p_towerCol = nullptr; 
+  p_3DClusters = nullptr; 
   m_datacol.TransShowerCol = m_transhowerCol;
   if(settings.map_boolPars["fl_WriteCluster"]) m_datacol.map_CaloCluster["EcalCluster"] = m_clusterCol;
 
-cout<<"End EnergyTimeMatchingAlg"<<endl;
   return StatusCode::SUCCESS;
 }
 

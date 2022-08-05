@@ -22,17 +22,17 @@ namespace PandoraPlus{
 
   TVector3 LongiCluster::getPos() const{
     TVector3 pos(0, 0, 0);
-    double Etot = getE();
+    double Etot = getEnergy();
     for(int i=0; i<barShowerCol.size(); i++){
       TVector3 m_pos(barShowerCol[i]->getPos().x(), barShowerCol[i]->getPos().y(), barShowerCol[i]->getPos().z());
-      pos += m_pos * (barShowerCol[i]->getE()/Etot);
+      pos += m_pos * (barShowerCol[i]->getEnergy()/Etot);
     }
     return pos; 
   }
 
-  double LongiCluster::getE() const{
+  double LongiCluster::getEnergy() const{
     double totE = 0;
-    for(int i=0; i<barShowerCol.size(); i++) totE += barShowerCol[i]->getE();
+    for(int i=0; i<barShowerCol.size(); i++) totE += barShowerCol[i]->getEnergy();
     return totE;
   }
 
@@ -115,33 +115,33 @@ namespace PandoraPlus{
   double LongiCluster::OverlapRatioE( const LongiCluster* clus) const{
     double Eshare = 0.;
     for(int is=0; is<clus->getBarShowers().size(); is++)
-      if( find(barShowerCol.begin(), barShowerCol.end(), clus->getBarShowers()[is])!=barShowerCol.end() ) Eshare += clus->getBarShowers()[is]->getE(); 
+      if( find(barShowerCol.begin(), barShowerCol.end(), clus->getBarShowers()[is])!=barShowerCol.end() ) Eshare += clus->getBarShowers()[is]->getEnergy(); 
 
-    return Eshare / getE() ;
+    return Eshare / getEnergy() ;
   }
 
-  /*
+  
   void LongiCluster::FitAxis(){
     if(barShowerCol.size()==0){ axis.SetXYZ(0,0,0); return; }
     else if(barShowerCol.size()==1){ 
-      axis.SetXYZ(barShowerCol[0].getPos().x(), barShowerCol[0].getPos().y(), barShowerCol[0].getPos().z());
+      axis.SetXYZ(barShowerCol[0]->getPos().x(), barShowerCol[0]->getPos().y(), barShowerCol[0]->getPos().z());
       axis = axis.Unit(); 
       return;
     }
     else if(barShowerCol.size()==2){
-      TVector3 rpos = barShowerCol.back().getPos() - barShowerCol.front().getPos();
+      TVector3 rpos = barShowerCol.back()->getPos() - barShowerCol.front()->getPos();
       axis.SetXYZ( rpos.x(), rpos.y(), rpos.z() );
       axis = axis.Unit();
       return; 
     }
     else{
       track->clear(); 
-      double barAngle = (barShowerCol[0].getModule()+2)*TMath::Pi()/4.;
+      double barAngle = (barShowerCol[0]->getModule()+2)*TMath::Pi()/4.;
       double posErr = 10./sqrt(12);
       if(barAngle>=TMath::TwoPi()) barAngle = barAngle-TMath::TwoPi();
       track->setBarAngle(barAngle);
       for(int is=0; is<barShowerCol.size(); is++){
-        TVector3 b_pos = barShowerCol[is].getPos(); 
+        TVector3 b_pos = barShowerCol[is]->getPos(); 
         track->setGlobalPoint(0, b_pos.x(), posErr, b_pos.y(), posErr, b_pos.z(), posErr);
         track->setGlobalPoint(1, b_pos.x(), posErr, b_pos.y(), posErr, b_pos.z(), posErr);
       }
@@ -157,7 +157,7 @@ namespace PandoraPlus{
       axis.SetTheta(fitTheta);
     }
   }
-  */
+  
 
   void LongiCluster::addBarShower( const PandoraPlus::CaloBarShower* _shower ){
     int index = -1;

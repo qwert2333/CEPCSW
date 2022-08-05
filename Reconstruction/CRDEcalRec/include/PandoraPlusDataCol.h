@@ -77,10 +77,10 @@ public:
   std::vector<PandoraPlus::Track*>          bk_TrackCol;
 
   std::vector<PandoraPlus::CaloHit*>        bk_HitCol;
-  std::vector<PandoraPlus::CaloUnit*>        bk_BarCol;
-  std::vector<PandoraPlus::Calo1DCluster*>     bk_Cluster1DCol; 
-  std::vector<PandoraPlus::Calo2DCluster*>     bk_Cluster2DCol;  
-  std::vector<PandoraPlus::Calo3DCluster*>     bk_Cluster3DCol;
+  std::vector<PandoraPlus::CaloUnit*>       bk_BarCol;
+  std::vector<PandoraPlus::Calo1DCluster*>  bk_Cluster1DCol; 
+  std::vector<PandoraPlus::Calo2DCluster*>  bk_Cluster2DCol;  
+  std::vector<PandoraPlus::Calo3DCluster*>  bk_Cluster3DCol;
   std::vector<PandoraPlus::CaloBlock*>      bk_BlockCol;
   std::vector<PandoraPlus::CaloTower*>      bk_TowerCol;
   std::vector<PandoraPlus::CaloBarCluster*> bk_BarClusCol;

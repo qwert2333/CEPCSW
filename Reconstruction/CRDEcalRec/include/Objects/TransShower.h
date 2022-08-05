@@ -27,7 +27,7 @@ namespace PandoraPlus{
 
     TVector3 getPos() const;
     //double getHitsE() const; 
-    double getShowerE() const { return barShowerX->getE() + barShowerY->getE();}
+    double getShowerE() const { return barShowerX->getEnergy() + barShowerY->getEnergy();}
 
     int getModule() const { return module; }
     int getStave()  const { return stave;  }

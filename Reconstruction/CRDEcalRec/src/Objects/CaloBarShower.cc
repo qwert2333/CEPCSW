@@ -36,7 +36,7 @@ namespace PandoraPlus {
       return false;
     }
 */
-    double CaloBarShower::getE() const{
+    double CaloBarShower::getEnergy() const{
       double E=0;
       for(int i=0;i<Bars.size();i++) E+=Bars[i]->getEnergy();
       return E;
@@ -44,28 +44,28 @@ namespace PandoraPlus {
 
   TVector3 CaloBarShower::getPos() const{
     TVector3 pos(0,0,0);
-    double Etot=getE();
+    double Etot=getEnergy();
     for(int i=0;i<Bars.size();i++) pos += Bars[i]->getPosition() * (Bars[i]->getEnergy()/Etot);
     return pos;
   }
 
   double CaloBarShower::getT1() const{
     double T1=0;
-    double Etot = getE();
+    double Etot = getEnergy();
     for(int i=0;i<Bars.size();i++) T1 += (Bars[i]->getT1() * Bars[i]->getEnergy())/Etot;
     return T1;
   }
 
   double CaloBarShower::getT2() const{
     double T2=0;
-    double Etot = getE();
+    double Etot = getEnergy();
     for(int i=0;i<Bars.size();i++) T2 += (Bars[i]->getT2() * Bars[i]->getEnergy())/Etot;
     return T2;
   }
 
   double CaloBarShower::getWidth() const{
     TVector3 centPos = getPos(); 
-    double Etot = getE(); 
+    double Etot = getEnergy(); 
     double sigmax=0; 
     double sigmay=0; 
     double sigmaz=0; 

@@ -37,7 +37,7 @@ namespace PandoraPlus{
     return (find(Bars.begin(), Bars.end(), iBar)!=Bars.end() );
   }
 
-  double CaloBarCluster::getE() const{
+  double CaloBarCluster::getEnergy() const{
     double E=0;
     for(int i=0;i<Bars.size();i++) E+=Bars[i]->getEnergy();
     return E;
@@ -45,7 +45,7 @@ namespace PandoraPlus{
 
   TVector3 CaloBarCluster::getPos() const{
     TVector3 pos(0,0,0);
-    double Etot=getE();
+    double Etot=getEnergy();
     for(int i=0;i<Bars.size();i++) pos += Bars[i]->getPosition() * (Bars[i]->getEnergy()/Etot);
     return pos;
   }
@@ -53,7 +53,7 @@ namespace PandoraPlus{
   double CaloBarCluster::getScndMoment() const{
     if(Bars.size()<=1) return 0.;
     TVector3 pos = getPos();
-    double Etot = getE();
+    double Etot = getEnergy();
     double scndM = 0;
     for(int i=0;i<Bars.size();i++) scndM += (Bars[i]->getEnergy() * (pos-Bars[i]->getPosition()).Mag2()) / Etot;
     return scndM;

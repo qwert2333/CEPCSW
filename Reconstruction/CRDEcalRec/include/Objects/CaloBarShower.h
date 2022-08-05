@@ -24,7 +24,7 @@ namespace PandoraPlus {
     //bool inShower(PandoraPlus::CaloUnit* iBar); 
 
     TVector3 getPos() const;
-    double getE()  const;
+    double getEnergy()  const;
     double getT1() const;
     double getT2() const;
     double getWidth() const; 

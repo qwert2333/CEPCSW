@@ -25,7 +25,7 @@ namespace PandoraPlus{
     bool inCluster(const PandoraPlus::CaloUnit* iBar) const;
     void sortByPos() { std::sort(Bars.begin(), Bars.end()); }
 
-    double getE() const; 
+    double getEnergy() const; 
     TVector3 getPos() const;
     double getScndMoment() const;
     int getNseeds() const { return Seeds.size(); }

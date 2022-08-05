@@ -396,12 +396,12 @@ namespace PandoraPlus{
       printf(", pos/E (%.2f, %.2f, %.2f, %.3f) \n", showers[i]->getShowerX()->getPos().x(), 
                                                     showers[i]->getShowerX()->getPos().y(), 
                                                     showers[i]->getShowerX()->getPos().x(), 
-                                                    showers[i]->getShowerX()->getE() );
+                                                    showers[i]->getShowerX()->getEnergy() );
       cout<<"  BarShowerY address: "<<showers[i]->getShowerY();
       printf(", pos/E (%.2f, %.2f, %.2f, %.3f) \n", showers[i]->getShowerY()->getPos().x(),
                                                     showers[i]->getShowerY()->getPos().y(),
                                                     showers[i]->getShowerY()->getPos().x(),
-                                                    showers[i]->getShowerY()->getE() );
+                                                    showers[i]->getShowerY()->getEnergy() );
     }
 
     cout<<"---------End Print Cluster---------"<<endl;

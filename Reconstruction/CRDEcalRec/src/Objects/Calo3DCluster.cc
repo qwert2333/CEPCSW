@@ -9,7 +9,7 @@ namespace PandoraPlus{
   void Calo3DCluster::Clear() 
   {
 	  m_2dclusters.clear();
-	  m_towers.clear();
+	  //m_towers.clear();
 	  m_modules.clear();
 	  m_parts.clear();
 	  m_staves.clear();
@@ -18,7 +18,7 @@ namespace PandoraPlus{
   void Calo3DCluster::Clean()
   {
     for(int i=0; i<m_2dclusters.size(); i++) { delete m_2dclusters[i]; m_2dclusters[i]=NULL; }
-    for(int i=0; i<m_towers.size(); i++) { delete m_towers[i]; m_towers[i]=NULL; }
+    //for(int i=0; i<m_towers.size(); i++) { delete m_towers[i]; m_towers[i]=NULL; }
     std::vector<int>().swap(m_modules);
     std::vector<int>().swap(m_parts);
     std::vector<int>().swap(m_staves);
@@ -29,8 +29,8 @@ namespace PandoraPlus{
   {
     for(int i=0; i<m_2dclusters.size(); i++)
     if(!m_2dclusters[i]) { m_2dclusters.erase(m_2dclusters.begin()+i); i--; }
-    for(int i=0; i<m_towers.size(); i++)
-    if(!m_towers[i]) { m_towers.erase(m_towers.begin()+i); i--; }
+    //for(int i=0; i<m_towers.size(); i++)
+    //if(!m_towers[i]) { m_towers.erase(m_towers.begin()+i); i--; }
   }
 
   bool Calo3DCluster::isNeighbor(const PandoraPlus::Calo2DCluster* m_2dcluster) const
@@ -92,29 +92,28 @@ std::vector<const PandoraPlus::CaloUnit*> Calo3DCluster::getBars() const
     return result;
   }
 
-
-  std::vector<const LongiCluster*> Calo3DCluster::getLongiClusterUCol(std::string name) const {
-    std::vector<const LongiCluster*> emptyCol; emptyCol.clear()
-    if(map_longiClusUCol.find(name)==map_longiClusUCol.end()) return emptyCol;
-    else return map_longiClusUCol[name];
+  std::vector<const PandoraPlus::LongiCluster*> Calo3DCluster::getLongiClusterUCol(std::string name) const {
+    std::vector<const LongiCluster*> emptyCol; emptyCol.clear(); 
+    if(map_longiClusUCol.find(name)!=map_longiClusUCol.end()) emptyCol = map_longiClusUCol.at(name);
+    return emptyCol;
   }
 
-  std::vector<const LongiCluster*> Calo3DCluster::getLongiClusterVCol(std::string name) const {
-    std::vector<const LongiCluster*> emptyCol; emptyCol.clear()
-    if(map_longiClusVCol.find(name)==map_longiClusVCol.end()) return emptyCol;
-    else return map_longiClusVCol[name];
+  std::vector<const PandoraPlus::LongiCluster*> Calo3DCluster::getLongiClusterVCol(std::string name) const {
+    std::vector<const LongiCluster*> emptyCol; emptyCol.clear(); 
+    if(map_longiClusVCol.find(name)!=map_longiClusVCol.end()) emptyCol = map_longiClusVCol.at(name);
+    return emptyCol;
   }
 
-  std::vector<const CaloBarShower*> Calo3DCluster::getLocalMaxUCol(std::string name) const{
-    std::vector<const CaloBarShower*> emptyCol; emptyCol.clear()
-    if(map_localMaxU.find(name)==map_localMaxU.end()) return emptyCol;
-    else return map_localMaxU[name];
+  std::vector<const PandoraPlus::CaloBarShower*> Calo3DCluster::getLocalMaxUCol(std::string name) const{
+    std::vector<const CaloBarShower*> emptyCol; emptyCol.clear(); 
+    if(map_localMaxU.find(name)!=map_localMaxU.end()) emptyCol = map_localMaxU.at(name);
+    return emptyCol;
   }
 
-  std::vector<const CaloBarShower*> Calo3DCluster::getLocalMaxVCol(std::string name) const{
-    std::vector<const CaloBarShower*> emptyCol; emptyCol.clear()
-    if(map_localMaxV.find(name)==map_localMaxV.end()) return emptyCol;
-    else return map_localMaxV[name];
+  std::vector<const PandoraPlus::CaloBarShower*> Calo3DCluster::getLocalMaxVCol(std::string name) const{
+    std::vector<const CaloBarShower*> emptyCol; emptyCol.clear(); 
+    if(map_localMaxV.find(name)!=map_localMaxV.end()) emptyCol = map_localMaxV.at(name);
+    return emptyCol; 
   }
 
 
