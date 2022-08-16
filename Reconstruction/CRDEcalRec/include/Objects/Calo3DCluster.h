@@ -35,7 +35,7 @@ namespace PandoraPlus {
     std::map<std::string, std::vector<const PandoraPlus::LongiCluster*> > getLongiClusterUMap() const { return map_longiClusUCol; }
     std::map<std::string, std::vector<const PandoraPlus::LongiCluster*> > getLongiClusterVMap() const { return map_longiClusVCol; }
 
-    std::vector<const CaloTower*> getTowers() const {return m_towers}
+    std::vector<const CaloTower*> getTowers() const {return m_towers; }
     std::vector<const CaloUnit*> getBars() const;
     double getEnergy() const; 
   

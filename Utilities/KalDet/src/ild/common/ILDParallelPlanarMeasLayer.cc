@@ -181,6 +181,31 @@ Int_t ILDParallelPlanarMeasLayer::CalcXingPointWith(const TVTrack  &hel,
     s_ins = atan2(-sin_delta_phi,cos_delta_phi) / omega ;
     
     //SJA:FIXME: do we need to consider the mode here ...
+    // ---oooOOO000OOOooo------oooOOO000OOOooo------oooOOO000OOOooo---
+    // Replied by yyy: fix s_ins to consider mode
+    double t_phi = -s_ins * omega ;
+    if( mode == 1 ){
+      if ( (chg > 0) && (t_phi > 0) )
+        {
+          t_phi -= TMath::TwoPi();
+        }
+        else if ( (chg < 0) && (t_phi < 0) )
+        {
+          t_phi += TMath::TwoPi();
+        }
+    }
+    else if( mode == -1 ){
+      if ( (chg > 0) && (t_phi < 0) )
+        {
+          t_phi += TMath::TwoPi();
+        }
+        else if ( (chg < 0) && (t_phi > 0) )
+        {
+          t_phi -= TMath::TwoPi();
+        }
+    }
+    s_ins = -t_phi / omega ;
+    // ---oooOOO000OOOooo------oooOOO000OOOooo------oooOOO000OOOooo---
     
     //          streamlog_out(DEBUG0) << " : " << z_pca + s_ins * tanl << std::endl ;
     
