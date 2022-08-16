@@ -107,8 +107,10 @@ StatusCode GearSvc::initialize()
       if(sc==StatusCode::FAILURE) return sc;
     }
 
-    gear::CalorimeterParametersImpl* barrelParam = new gear::CalorimeterParametersImpl(1847.415655, 2350., 8, 0.);
-    gear::CalorimeterParametersImpl* endcapParam = new gear::CalorimeterParametersImpl(400., 2088.8, 2450., 2, 0.);
+    // gear::CalorimeterParametersImpl* barrelParam = new gear::CalorimeterParametersImpl(1847.415655, 2350., 8, 0.);
+    // gear::CalorimeterParametersImpl* endcapParam = new gear::CalorimeterParametersImpl(400., 2088.8, 2450., 2, 0.);
+    gear::CalorimeterParametersImpl* barrelParam = new gear::CalorimeterParametersImpl(1860., 3300., 8, 0.);
+    gear::CalorimeterParametersImpl* endcapParam = new gear::CalorimeterParametersImpl(350., 2140., 3050., 2, 0.);
     for(int i=0;i<29;i++){
       if(i<19){
 	barrelParam->layerLayout().positionLayer(0, 5.25, 1.016666667e+01, 1.016666667e+01, 2.1);
