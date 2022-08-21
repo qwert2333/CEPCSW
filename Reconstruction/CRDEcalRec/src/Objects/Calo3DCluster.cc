@@ -3,7 +3,7 @@
 
 #include "Objects/Calo3DCluster.h"
 #include <cmath>
-
+using namespace std;
 namespace PandoraPlus{
 
   void Calo3DCluster::Clear() 
@@ -37,12 +37,58 @@ namespace PandoraPlus{
   {
     //Inner module
     for(int i=0; i<m_2dcluster->getModules().size(); i++){
-      for(int j=0; j<m_modules.size(); j++)
-        if(m_2dcluster->getModules().at(i)==m_modules.at(j)&&m_2dcluster->getParts().at(i)==m_parts.at(j)&&m_2dcluster->getStaves().at(i)==m_staves.at(j))
+      for(int j=0; j<m_modules.size(); j++){
+        if(m_2dcluster->getModules().at(i)==m_modules.at(j) && m_2dcluster->getParts().at(i)==m_parts.at(j) && m_2dcluster->getStaves().at(i)==m_staves.at(j)){
           return true;
+      }}
 		}
-	
-	
+
+    //Inner module but in adjacent Dlayer
+    for(int i=0; i<m_2dclusters.size(); i++){
+      if(fabs(m_2dcluster->getDlayer()-m_2dclusters[i]->getDlayer())>1) continue; 
+
+      std::vector<const PandoraPlus::CaloUnit*> m_EdgeBarU_clus1; m_EdgeBarU_clus1.clear(); //Income 2DCluster
+      std::vector<const PandoraPlus::CaloUnit*> m_EdgeBarV_clus1; m_EdgeBarV_clus1.clear();
+      std::vector<const PandoraPlus::CaloUnit*> m_EdgeBarU_clus2; m_EdgeBarU_clus2.clear(); //2DCluster in present 3DCluster. 
+      std::vector<const PandoraPlus::CaloUnit*> m_EdgeBarV_clus2; m_EdgeBarV_clus2.clear();
+      
+      for(int ib=0; ib<m_2dcluster->getBarUCol().size(); ib++){
+        if(m_2dcluster->getBarUCol()[ib]->isAtLowerEdgeZ() || m_2dcluster->getBarUCol()[ib]->isAtUpperEdgeZ()) m_EdgeBarU_clus1.push_back(m_2dcluster->getBarUCol()[ib]);
+      }
+      for(int ib=0; ib<m_2dcluster->getBarVCol().size(); ib++){
+        if(m_2dcluster->getBarVCol()[ib]->isAtLowerEdgePhi() || m_2dcluster->getBarVCol()[ib]->isAtUpperEdgePhi()) m_EdgeBarV_clus1.push_back(m_2dcluster->getBarVCol()[ib]);
+      }
+      for(int ib=0; ib<m_2dclusters[i]->getBarUCol().size(); ib++){
+        if(m_2dclusters[i]->getBarUCol()[ib]->isAtLowerEdgeZ() || m_2dclusters[i]->getBarUCol()[ib]->isAtUpperEdgeZ()) m_EdgeBarU_clus2.push_back(m_2dclusters[i]->getBarUCol()[ib]);
+      }
+      for(int ib=0; ib<m_2dclusters[i]->getBarVCol().size(); ib++){
+        if(m_2dclusters[i]->getBarVCol()[ib]->isAtLowerEdgePhi() || m_2dclusters[i]->getBarVCol()[ib]->isAtUpperEdgePhi()) m_EdgeBarV_clus2.push_back(m_2dclusters[i]->getBarVCol()[ib]);
+      }
+
+
+      for(int ib1=0; ib1<m_EdgeBarU_clus1.size(); ib1++){
+        for(int ib2=0; ib2<m_2dclusters[i]->getBarVCol().size(); ib2++){
+          if( m_EdgeBarU_clus1[ib1]->getPart()==m_2dclusters[i]->getBarVCol()[ib2]->getPart() && abs(m_EdgeBarU_clus1[ib1]->getStave()-m_2dclusters[i]->getBarVCol()[ib2]->getStave())==1 ) 
+            return true; 
+      }}
+      for(int ib1=0; ib1<m_EdgeBarV_clus1.size(); ib1++){
+        for(int ib2=0; ib2<m_2dclusters[i]->getBarUCol().size(); ib2++){
+          if( m_EdgeBarV_clus1[ib1]->getStave()==m_2dclusters[i]->getBarUCol()[ib2]->getStave() && abs(m_EdgeBarV_clus1[ib1]->getPart()-m_2dclusters[i]->getBarUCol()[ib2]->getPart())==1 )
+            return true;
+      }}
+      for(int ib1=0; ib1<m_EdgeBarU_clus2.size(); ib1++){
+        for(int ib2=0; ib2<m_2dcluster->getBarVCol().size(); ib2++){
+          if( m_EdgeBarU_clus2[ib1]->getPart()==m_2dcluster->getBarVCol()[ib2]->getPart() && abs(m_EdgeBarU_clus2[ib1]->getStave()-m_2dcluster->getBarVCol()[ib2]->getStave())==1 )
+            return true;
+      }}
+      for(int ib1=0; ib1<m_EdgeBarV_clus2.size(); ib1++){
+        for(int ib2=0; ib2<m_2dcluster->getBarUCol().size(); ib2++){
+          if( m_EdgeBarV_clus2[ib1]->getStave()==m_2dcluster->getBarUCol()[ib2]->getStave() && abs(m_EdgeBarV_clus2[ib1]->getPart()-m_2dcluster->getBarUCol()[ib2]->getPart())==1 )
+            return true;
+      }}
+
+	  }
+
     //Over modules
     std::vector<const PandoraPlus::CaloUnit*> bars_2d = m_2dcluster->getBars();
     for(int ib2d=0; ib2d<bars_2d.size(); ib2d++){
@@ -58,17 +104,17 @@ namespace PandoraPlus{
 
   void Calo3DCluster::addCluster(const Calo2DCluster* _2dcluster)
   {
+
     m_2dclusters.push_back(_2dcluster);
     std::vector<int> m_2dmodules = _2dcluster->getModules();
     std::vector<int> m_2dparts = _2dcluster->getParts();
     std::vector<int> m_2dstaves = _2dcluster->getStaves();
+
     m_modules.insert(m_modules.end(),m_2dmodules.begin(),m_2dmodules.end());
     m_parts.insert(m_parts.end(),m_2dparts.begin(),m_2dparts.end());
     m_staves.insert(m_staves.end(),m_2dstaves.begin(),m_2dstaves.end());
   }
 
-
-//
 
 std::vector<const PandoraPlus::CaloUnit*> Calo3DCluster::getBars() const
 {

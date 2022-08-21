@@ -3,7 +3,7 @@
 
 #include "Objects/Calo2DCluster.h"
 #include <cmath>
-
+using namespace std;
 namespace PandoraPlus{
 
   void Calo2DCluster::Clear() {
@@ -51,23 +51,18 @@ namespace PandoraPlus{
     Clear();
   	}
 
-  bool Calo2DCluster::isNeighbor(const PandoraPlus::Calo1DCluster* m_1dcluster) const
-  {
-	assert(m_1dcluster->getBars().size() > 0 && getCluster().at(0)->getBars().size()>0 );
-	if(m_1dcluster->getDlayer() == getDlayer()  )
-	{
-		for(int i=0; i<m_1dcluster->getModules().size(); i++)
-		{
-			for(int j=0; j<m_modules.size(); j++)
-			{
-				if(m_1dcluster->getModules().at(i)==m_modules.at(j) && m_1dcluster->getParts().at(i)==m_parts.at(j) && m_1dcluster->getStaves().at(i)==m_staves.at(j))
-				{
-					return true;
-				}
-			}
-		}
-	}
-	return false;
+  bool Calo2DCluster::isNeighbor(const PandoraPlus::Calo1DCluster* m_1dcluster) const{
+    assert(m_1dcluster->getBars().size() > 0 && getCluster().at(0)->getBars().size()>0 );
+    if(m_1dcluster->getDlayer() == getDlayer()  ){
+      for(int i=0; i<m_1dcluster->getModules().size(); i++){
+		  for(int j=0; j<m_modules.size(); j++){
+        if(m_1dcluster->getModules().at(i)==m_modules.at(j) && m_1dcluster->getParts().at(i)==m_parts.at(j) && m_1dcluster->getStaves().at(i)==m_staves.at(j)){
+          return true;
+        }
+      }
+    }
+    }
+    return false;
   }
 
  

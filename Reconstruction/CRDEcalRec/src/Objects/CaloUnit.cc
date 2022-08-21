@@ -11,8 +11,8 @@ namespace PandoraPlus{
     if( system!=x->getSystem() || module!=x->getModule() || dlayer!=x->getDlayer() || slayer!=x->getSlayer() ) return false; 
 
     if( part==x->getPart() && stave==x->getStave() && fabs(bar - x->getBar())==1 ) return true;
-    if( slayer==1 && stave==x->getStave() && fabs(part-x->getPart())<=1   && fabs(bar - x->getBar())<=1 ) return true;
-    if( slayer==0 && part==x->getPart()   && fabs(stave-x->getStave())<=1 && fabs(bar - x->getBar())<=1 ) return true;
+    if( slayer==0 && stave==x->getStave() && fabs(part-x->getPart())<=1   && fabs(bar - x->getBar())<=1 ) return true;
+    if( slayer==1 && part==x->getPart()   && fabs(stave-x->getStave())<=1 && fabs(bar - x->getBar())<=1 ) return true;
 
     if( isAtLowerEdgeZ()   && x->isAtUpperEdgeZ()   && x->getStave()==stave-1 && (x->getPart()-part)<=1 ) return true;
     if( isAtUpperEdgeZ()   && x->isAtLowerEdgeZ()   && x->getStave()==stave+1 && (x->getPart()-part)<=1 ) return true;

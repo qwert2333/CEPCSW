@@ -3,7 +3,7 @@
 
 #include "Objects/CaloUnit.h"
 #include "Objects/Calo1DCluster.h"
-
+using namespace std; 
 namespace PandoraPlus{
 
   void Calo1DCluster::Clear(){
@@ -34,9 +34,13 @@ namespace PandoraPlus{
 
   bool Calo1DCluster::isNeighbor(const PandoraPlus::CaloUnit* m_bar) const
   {
-    for(int i1d = 0; i1d<Bars.size(); i1d++)
-      if(Bars[i1d]->isNeighbor(m_bar)) return true;
-
+//cout<<"Calo1DCluster::isNeighbor: ";
+//printf("Input bar ID (%d, %d, %d, %d, %d, %d) \n", m_bar->getModule(), m_bar->getStave(), m_bar->getPart(), m_bar->getDlayer(), m_bar->getSlayer(), m_bar->getBar());
+    for(int i1d = 0; i1d<Bars.size(); i1d++){
+//printf("  Compare with bar #%d: ID (%d, %d, %d, %d, %d, %d) ", i1d, Bars[i1d]->getModule(), Bars[i1d]->getStave(), Bars[i1d]->getPart(), Bars[i1d]->getDlayer(), Bars[i1d]->getSlayer(), Bars[i1d]->getBar());
+      if(Bars[i1d]->isNeighbor(m_bar)){ /*cout<<" isNeighbor! "<<endl;*/ return true;}
+//cout<<endl;
+    }
     return false;
   }
 
@@ -132,9 +136,12 @@ namespace PandoraPlus{
   void Calo1DCluster::addCluster(const PandoraPlus::CaloUnit* _bar ) 
   {
     Bars.push_back(_bar);
-    if( find( m_modules.begin(), m_modules.end(), _bar->getModule())==m_modules.end() ) m_modules.push_back(_bar->getModule());
-    if( find( m_parts.begin(), m_parts.end(), _bar->getModule())==m_parts.end() )       m_parts.push_back(_bar->getPart());
-    if( find( m_staves.begin(), m_staves.end(), _bar->getModule())==m_staves.end() )    m_staves.push_back(_bar->getStave());
+    m_modules.push_back(_bar->getModule());
+    m_parts.push_back(_bar->getPart());
+    m_staves.push_back(_bar->getStave());
+    //if( find( m_modules.begin(), m_modules.end(), _bar->getModule())==m_modules.end() ) m_modules.push_back(_bar->getModule());
+    //if( find( m_parts.begin(), m_parts.end(), _bar->getPart())==m_parts.end() )         m_parts.push_back(_bar->getPart());
+    //if( find( m_staves.begin(), m_staves.end(), _bar->getStave())==m_staves.end() )     m_staves.push_back(_bar->getStave());
   }
 };
 #endif
