@@ -111,21 +111,21 @@ cout<<endl;
     if(m_clusUCol.size()==0 || m_clusVCol.size()==0) continue;
 
 
-    int minLayerX = 99;
-    int minLayerY = 99;
-    int maxLayerX = -99;
-    int maxLayerY = -99;
+    int minLayerU = 99;
+    int minLayerV = 99;
+    int maxLayerU = -99;
+    int maxLayerV = -99;
     for(int ic=0; ic<m_clusUCol.size(); ic++){
-      if(minLayerX>m_clusUCol[ic]->getBeginningDlayer()) minLayerX = m_clusUCol[ic]->getBeginningDlayer();
-      if(maxLayerX<m_clusUCol[ic]->getEndDlayer()) maxLayerX = m_clusUCol[ic]->getEndDlayer();
+      if(minLayerU>m_clusUCol[ic]->getBeginningDlayer()) minLayerU = m_clusUCol[ic]->getBeginningDlayer();
+      if(maxLayerU<m_clusUCol[ic]->getEndDlayer()) maxLayerU = m_clusUCol[ic]->getEndDlayer();
     }
     for(int ic=0; ic<m_clusVCol.size(); ic++){
-      if(minLayerY>m_clusVCol[ic]->getBeginningDlayer()) minLayerY = m_clusVCol[ic]->getBeginningDlayer();
-      if(maxLayerY<m_clusVCol[ic]->getEndDlayer()) maxLayerY = m_clusVCol[ic]->getEndDlayer();
+      if(minLayerV>m_clusVCol[ic]->getBeginningDlayer()) minLayerV = m_clusVCol[ic]->getBeginningDlayer();
+      if(maxLayerV<m_clusVCol[ic]->getEndDlayer()) maxLayerV = m_clusVCol[ic]->getEndDlayer();
     }
 
 printf("  In Tower #%d: Block size = %d \n", it, m_2Dclus.size());
-printf("  In Tower #%d: HoughCLX range: (%d, %d), HoughCLY range: (%d, %d) \n", it, minLayerX, maxLayerX, minLayerY, maxLayerY);
+printf("  In Tower #%d: HoughCLX range: (%d, %d), HoughCLY range: (%d, %d) \n", it, minLayerU, maxLayerU, minLayerV, maxLayerV);
 
     //Make clusters and shwoers in blocks
     for(int ib=0; ib<m_2Dclus.size(); ib++ ){
@@ -139,10 +139,10 @@ printf("  In Tower #%d: HoughCLX range: (%d, %d), HoughCLY range: (%d, %d) \n", 
       int dlayer = m_2Dclus[ib]->getDlayer();
 
 
-      if( dlayer>maxLayerX || dlayer<minLayerX ) Clustering( m_barColU, m_barClusUCol );
+      if( dlayer>maxLayerU || dlayer<minLayerU ) Clustering( m_barColU, m_barClusUCol );
       else Clustering( m_barColU, m_barClusUCol, m_clusUCol );
 
-      if( dlayer>maxLayerY || dlayer<minLayerY ) Clustering( m_barColV, m_barClusVCol );
+      if( dlayer>maxLayerV || dlayer<minLayerV ) Clustering( m_barColV, m_barClusVCol );
       else Clustering( m_barColV, m_barClusVCol, m_clusVCol );
 
       m_datacol.bk_Cluster1DCol.insert( m_datacol.bk_Cluster1DCol.end(), m_barClusUCol.begin(), m_barClusUCol.end() );
@@ -333,7 +333,7 @@ StatusCode EnergySplittingAlg::LongiClusterLinking( std::vector<PandoraPlus::Cal
             m_showers[js]->getDlayer() ==m_shower->getDlayer() && 
             (m_showers[js]->getSeed()->getPosition()-m_shower->getPos()).Mag()<10 ) {m_selshower = m_showers[js]; fl_foundshower=true; break; }
       }
-      if(fl_foundshower && m_selshower!=NULL) m_newClus->addBarShower( m_selshower );
+      if(fl_foundshower && m_selshower!=NULL) m_newClus->addBarShower( m_selshower, 1);
 //else{ printf(" In Cluster #%d: shower #%d does not find the new shower. Layer = %d. \n ", ic, is, m_shower->getDlayer()); }
     }
 
@@ -694,7 +694,7 @@ StatusCode EnergySplittingAlg::MergeToClosestCluster( const PandoraPlus::CaloBar
 
 //printf("  minR = %.3f, in #cl %d \n", minR, index_cluster);
 
-  if(index_cluster>=0) m_clusters[index_cluster]->addBarShower( m_shower );
+  if(index_cluster>=0) m_clusters[index_cluster]->addBarShower( m_shower, 1 );
   //delete m_shower; m_shower = NULL;
 
   return StatusCode::SUCCESS;

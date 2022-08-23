@@ -159,12 +159,12 @@ namespace PandoraPlus{
   }
   
 
-  void LongiCluster::addBarShower( const PandoraPlus::CaloBarShower* _shower ){
+  void LongiCluster::addBarShower( const PandoraPlus::CaloBarShower* _shower, int option ){
     int index = -1;
     for(int i=0; i<barShowerCol.size(); i++)
       if(_shower->getDlayer()==barShowerCol[i]->getDlayer() ){ index=i; break; }
     
-    if(index<0){
+    if(index<0 || option==0){
       barShowerCol.push_back( _shower );
       //FitAxis();
     }

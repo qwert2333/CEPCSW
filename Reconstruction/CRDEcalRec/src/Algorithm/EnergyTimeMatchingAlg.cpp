@@ -656,6 +656,10 @@ StatusCode EnergyTimeMatchingAlg::GetMatchedShowersL3(  std::vector<const Pandor
 double** EnergyTimeMatchingAlg::GetClusterChi2Map( std::vector<std::vector<const PandoraPlus::CaloBarShower*>>& barShowerXCol, 
                                                    std::vector<std::vector<const PandoraPlus::CaloBarShower*>>& barShowerYCol )
 {
+
+//TODO for version 2.0.1: 
+//  add one function: if ShowerU[i] and ShowerV[j] both have cousin shower in another tower, set chi2[i][j] to a huge value. 
+
   const int NclusX = barShowerXCol.size(); 
   const int NclusY = barShowerYCol.size(); 
 

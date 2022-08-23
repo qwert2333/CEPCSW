@@ -40,13 +40,18 @@ namespace PandoraPlus {
     double getRhoLowEdge() const { return m_sapceMap.GetYaxis()->GetBinLowEdge(1); }
     double getRhoUpEdge() const { return m_sapceMap.GetYaxis()->GetBinUpEdge(m_sapceMap.GetYaxis()->GetNbins()); }
 
-    void SetSpaceMap(TH2F& _map) { m_sapceMap=_map; }
-    void SetHoughHills(  std::vector<PandoraPlus::HoughSpace::HoughHill> _hillCol ) { m_hills=_hillCol; }
+    void setSpaceMap(TH2F& _map) { m_sapceMap=_map; }
+    void setIPBand(TF1& _o, TF1& _i) { IPHoughLine_outer=_o; IPHoughLine_inner=_i; }
+    void setHoughHills(  std::vector<PandoraPlus::HoughSpace::HoughHill> _hillCol ) { m_hills=_hillCol; }
+
+    bool isFromIP(PandoraPlus::HoughSpace::HoughHill& _hill) const;
+
 
   private: 
     TH2F m_sapceMap; 
 		std::vector<PandoraPlus::HoughSpace::HoughHill> m_hills; 
-
+    TF1 IPHoughLine_outer;
+    TF1 IPHoughLine_inner;
 
 };
 

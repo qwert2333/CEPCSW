@@ -41,7 +41,8 @@ namespace PandoraPlus{
   double OverlapRatioE( const LongiCluster* clus ) const;
 
   void FitAxis(); 
-  void addBarShower( const PandoraPlus::CaloBarShower* _shower ); 
+  void addBarShower( const PandoraPlus::CaloBarShower* _shower, int option ); //option=0: do not merge the BarShowers in the same layer. 
+                                                                              //option=1: merge the BarShowers in the same layer.  
   void SortBarShowersByLayer() { std::sort(barShowerCol.begin(), barShowerCol.end(), compLayer); }
   void setBarShowers( std::vector<const PandoraPlus::CaloBarShower*> _barshwoers ) { barShowerCol = _barshwoers; }
   void setHoughPars(double _a, double _r) { Hough_alpha=_a; Hough_rho=_r; }
@@ -58,6 +59,10 @@ namespace PandoraPlus{
     double Hough_intercept;
     std::vector<const PandoraPlus::CaloBarShower*> barShowerCol;
     TrackFitInEcal* track = new TrackFitInEcal();
+
+    //const PandoraPlus::LongiCluster* ParentCluster; 
+    //std::vector<const PandoraPlus::LongiCluster*> ChildClusters; 
+
 
     static bool compLayer( const PandoraPlus::CaloBarShower* hit1, const PandoraPlus::CaloBarShower* hit2 ) 
       { return hit1->getDlayer() < hit2->getDlayer(); }

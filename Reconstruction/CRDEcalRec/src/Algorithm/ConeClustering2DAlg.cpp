@@ -95,7 +95,7 @@ StatusCode ConeClustering2DAlg::LongiConeLinking(  std::map<int, std::vector<con
   for(int i=0;i<ShowersinFirstLayer.size(); i++){
     if(iter->first < settings.map_floatPars["th_beginLayer"] || iter->first > settings.map_floatPars["th_stopLayer"] ) continue; 
     PandoraPlus::LongiCluster* m_clus = new  PandoraPlus::LongiCluster();
-    m_clus->addBarShower(ShowersinFirstLayer[i]);
+    m_clus->addBarShower(ShowersinFirstLayer[i], 1);
     ClusterCol.push_back(m_clus);
   }
   iter++;
@@ -112,7 +112,7 @@ StatusCode ConeClustering2DAlg::LongiConeLinking(  std::map<int, std::vector<con
 
         TVector3 relR = ShowersinLayer[is]->getPos() - shower_in_clus->getPos();
         if( relR.Angle(ClusterCol[ic]->getAxis())<settings.map_floatPars["th_ConeTheta"] && relR.Mag()<settings.map_floatPars["th_ConeR"] ){
-          ClusterCol[ic]->addBarShower(ShowersinLayer[is]);
+          ClusterCol[ic]->addBarShower(ShowersinLayer[is], 1);
           ShowersinLayer.erase(ShowersinLayer.begin()+is);
           is--;
           break;  
@@ -122,7 +122,7 @@ StatusCode ConeClustering2DAlg::LongiConeLinking(  std::map<int, std::vector<con
     if(ShowersinLayer.size()>0){
       for(int i=0;i<ShowersinLayer.size(); i++){
         PandoraPlus::LongiCluster* m_clus = new PandoraPlus::LongiCluster();
-        m_clus->addBarShower(ShowersinLayer[i]);
+        m_clus->addBarShower(ShowersinLayer[i], 1);
         ClusterCol.push_back(m_clus);
     }}//end new cluster
   }//end loop layers.

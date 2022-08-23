@@ -137,17 +137,23 @@ protected:
 
   TFile* m_wfile;
   TTree* t_SimBar;
-  FloatVec m_simBar_x, m_simBar_y, m_simBar_z, m_simBar_T1, m_simBar_T2, m_simBar_Q1, m_simBar_Q2, m_simBar_dlayer, m_simBar_part, m_simBar_stave, m_simBar_slayer, m_simBar_module;
+  FloatVec m_simBar_x, m_simBar_y, m_simBar_z, m_simBar_T1, m_simBar_T2, m_simBar_Q1, m_simBar_Q2; 
+  FloatVec m_simBar_dlayer, m_simBar_part, m_simBar_stave, m_simBar_slayer, m_simBar_module, m_simBar_bar;
 
   TTree *t_Layers;
   int m_NshowerU, m_NshowerV;
-  FloatVec m_barShowerU_x, m_barShowerU_y, m_barShowerU_z, m_barShowerU_E;
-  FloatVec m_barShowerV_x, m_barShowerV_y, m_barShowerV_z, m_barShowerV_E;
+  FloatVec m_barShowerU_x, m_barShowerU_y, m_barShowerU_z, m_barShowerU_E, m_barShowerU_part, m_barShowerU_stave;
+  FloatVec m_barShowerV_x, m_barShowerV_y, m_barShowerV_z, m_barShowerV_E, m_barShowerV_part, m_barShowerV_stave;
 
   TTree *t_Cluster;
   int m_Nclus;
   FloatVec m_Clus_x, m_Clus_y, m_Clus_z, m_Clus_E;
   IntVec m_Nhit;
+
+  TTree *t_LongiClusU; 
+  FloatVec m_showerU_x, m_showerU_y, m_showerU_z, m_showerU_E, m_showerU_stave, m_showerU_part;
+  TTree *t_LongiClusV; 
+  FloatVec m_showerV_x, m_showerV_y, m_showerV_z, m_showerV_E, m_showerV_stave, m_showerV_part;
 
 
   //check neighbor clustering

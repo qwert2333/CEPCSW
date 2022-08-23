@@ -23,8 +23,12 @@ geomsvc.compact = geometry_path
 from Configurables import k4DataSvc
 podioevent = k4DataSvc("EventDataSvc")
 podioevent.inputs = [
-#"SimSamples/Sim_Gam10GeV_central_EcalOnly.root"
-"SimSamples/Sim_Gam10GeV_Part23_Stave6_EcalOnly.root"
+"Sim_Gam10GeV_Part23_Stave6_EcalOnly.root"
+#"CRD_SimGamMu_FullDet.root"
+#"SimSamples/CRD_SimMu_FullDet_200evt.root"
+#"CRD_Sim2Gam_FullDet.root"
+#"SimSamples/CRD_Sim2Gam_FullDet_200evt.root"
+#"SimSamples/CRD_SimGamPi_FullDet.root"
 ]
 ##########################################
 
@@ -32,9 +36,7 @@ podioevent.inputs = [
 ########## Podio Input ###################
 from Configurables import PodioInput
 inp = PodioInput("InputReader")
-#inp.collections = ["EcalBarrelCollection", "EcalEndcapRingCollection", "EcalEndcapsCollection", "MCParticle"]
-#inp.collections = ["EcalBarrelCollection", "HcalBarrelCollection", "MCParticle", "MarlinTrkTracks"]
-inp.collections = ["EcalBarrelCollection", "MCParticle"]
+inp.collections = ["EcalBarrelCollection", "HcalBarrelCollection", "MCParticle", "MarlinTrkTracks"]
 ##########################################
 
 ########## Digitalization ################
@@ -84,38 +86,38 @@ PandoraPlusPFAlg.WriteAna = 1
 PandoraPlusPFAlg.AnaFileName = "testRec.root"
 ##----Readin collections----
 PandoraPlusPFAlg.MCParticleCollection = "MCParticle"
-PandoraPlusPFAlg.TrackCollections = [""]
+PandoraPlusPFAlg.TrackCollections = ["MarlinTrkTracks"]
 PandoraPlusPFAlg.ECalCaloHitCollections = ["ECALBarrel"]
 PandoraPlusPFAlg.ECalReadOutNames = ["EcalBarrelCollection"]
-PandoraPlusPFAlg.HCalCaloHitCollections = [""]
-PandoraPlusPFAlg.HCalReadOutNames = [""]
+PandoraPlusPFAlg.HCalCaloHitCollections = ["HCALBarrel"]
+PandoraPlusPFAlg.HCalReadOutNames = ["HcalBarrelCollection"]
 
 #----Algorithms----
 
 PandoraPlusPFAlg.AlgList = ["ExampleAlg", 
                             "GlobalClusteringAlg", 
-                            "LocalMaxFindingAlg",
-                            "HoughClusteringAlg" ]
-#                            "ConeClustering2DAlg", 
-#                            "EnergySplittingAlg"  ]
+                            "LocalMaxFindingAlg", 
+                            "HoughClusteringAlg", 
+                            "ConeClustering2DAlg", 
+                            "EnergySplittingAlg"  ]
 PandoraPlusPFAlg.AlgParNames = [ ["Par1", "Par2"], 
                                  ["Par1"], 
                                  ["Eth_localMax", "Eth_MaxWithNeigh"],
-                                 ["th_Layers"] ]
-#                                 ["th_beginLayer"],
-#                                 [""]  ]
+                                 ["th_Layers"],
+                                 ["th_beginLayer"],
+                                 [""]  ]
 PandoraPlusPFAlg.AlgParTypes = [ ["double", "double"],
                                  ["double"],
-                                 ["double", "double"],
-                                 ["double"] ]
-#                                 ["double"], 
-#                                 [""]  ]
+                                 ["double", "double"], 
+                                 ["double"],
+                                 ["double"], 
+                                 [""]  ]
 PandoraPlusPFAlg.AlgParValues = [ ["1.", "3.14"], 
                                   ["1."], 
                                   ["0.005", "0."],
-                                  ["10"] ]
-#                                  ["1"],
-#                                  [""]   ]
+                                  ["15"],
+                                  ["1"],
+                                  [""]   ]
 
 ########################################
 
@@ -132,8 +134,7 @@ out.outputCommands = ["keep *"]
 
 from Configurables import ApplicationMgr
 ApplicationMgr( 
-    #TopAlg=[inp, EcalDigi,caloDigi, PandoraPlusPFAlg ],
-    TopAlg=[inp, EcalDigi, PandoraPlusPFAlg],
+    TopAlg=[inp, EcalDigi,caloDigi, PandoraPlusPFAlg ],
     EvtSel="NONE",
     EvtMax=Nevt,
     ExtSvc=[podioevent, geomsvc],

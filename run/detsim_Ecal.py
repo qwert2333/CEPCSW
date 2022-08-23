@@ -63,8 +63,8 @@ gun.EnergyMins = [10.] # GeV
 gun.EnergyMaxs = [10.] # GeV
 gun.ThetaMins  = [90.]    # deg
 gun.ThetaMaxs  = [90.]  # deg
-gun.PhiMins    = [0.]    # deg
-gun.PhiMaxs    = [0.]  # deg
+gun.PhiMins    = [0. ]    # deg
+gun.PhiMaxs    = [0. ]  # deg
 gun.PositionXs = [0.] # mm
 gun.PositionYs = [0.] # mm
 gun.PositionZs = [0.] # mm
@@ -126,7 +126,7 @@ cal_sensdettool.CalNamesMergeDisable = ["CaloDetector"]
 ##############################################################################
 from Configurables import PodioOutput
 out = PodioOutput("outputalg")
-out.filename = "Sim_Ecal_noMerge.root"
+out.filename = "Sim_Gam10GeV_central_EcalOnly.root"
 out.outputCommands = ["keep *"]
 
 ##############################################################################
@@ -136,7 +136,7 @@ out.outputCommands = ["keep *"]
 from Configurables import ApplicationMgr
 ApplicationMgr( TopAlg = [genalg, detsimalg, out],
                 EvtSel = 'NONE',
-                EvtMax = 1,
+                EvtMax = 20,
                 ExtSvc = [rndmengine, dsvc, geosvc],
 					 #OutputLevel=DEBUG
 )

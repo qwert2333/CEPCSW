@@ -9,9 +9,10 @@ gaudi_add_library(CRDEcalRecLib
                           src/Objects/CaloBlock.cc
                           src/Objects/CaloTower.cc
                           src/Objects/TransShower.cc
-                          src/Objects/CaloCluster.cc .
+                          src/Objects/CaloCluster.cc 
                           src/Objects/Track.cc
                           src/Objects/LongiCluster.cc
+                          src/Objects/HoughSpace.cc
                   LINK    k4FWCore::k4FWCore
                           GearSvc
                           DetInterface

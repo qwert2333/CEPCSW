@@ -1,7 +1,8 @@
 build.*
 build
 spack*
-./Generator/output/
-./Generator/options/
-./run/
-./build/
+Generator/output/
+Generator/options/
+run/*.root
+build/
+InstallArea

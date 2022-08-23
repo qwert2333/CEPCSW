@@ -41,6 +41,7 @@ namespace PandoraPlus {
     void setBars(std::vector<const PandoraPlus::CaloUnit*> _bars){ Bars = _bars; }
     void addBar(const PandoraPlus::CaloUnit* _bar) { Bars.push_back(_bar); }
     void setSeed(const PandoraPlus::CaloUnit* _seed ) { Seed = _seed; }
+    //std::vector<const PandoraPlus::CaloBarCluster*> departWithTower(); 
 
   private:
     int module;
@@ -51,6 +52,9 @@ namespace PandoraPlus {
 
     std::vector<const PandoraPlus::CaloUnit*> Bars;
     const PandoraPlus::CaloUnit* Seed;
+
+    //const PandoraPlus::CaloBarCluster* ParentCluster; 
+    //std::vector<const PandoraPlus::CaloBarCluster*> ChildClusters;
   };
 
 

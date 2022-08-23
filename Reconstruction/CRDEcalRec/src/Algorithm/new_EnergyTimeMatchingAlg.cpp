@@ -29,14 +29,23 @@ StatusCode EnergyTimeMatchingAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
   std::vector<PandoraPlus::CaloCluster*> m_clusterCol; m_clusterCol.clear();
 
   //Readin 3DClusters
-  std::vector<PandoraPlus::CaloTower*>* p_3DClusters = &(m_datacol.TowerCol);
+  std::vector<PandoraPlus::CaloTower*>* p_3DClusters = &(m_datacol.Cluster3DCol);
   if( !p_3DClusters || p_3DClusters->size()==0){ std::cout<<"Warning: Empty input in EnergyTimeMatchingAlg! Please check previous algorithm!"<<std::endl; return StatusCode::SUCCESS; }
 
 
+  //Depart tower-covering BarShowers to 2
+  for(int it=0; it<p_3DClusters->size(); it++){
+
+
+
+  }
+
+
+
+  //Matching
   for(int it=0; it<p_3DClusters->size(); it++){
 
     //Preparation: Get 2D clusters and BarShowers in 2DCluster. 
-    //Depart tower-covering BarShowers to 2
 
     //Classify towers: has ghost hit problem or not. 
     //Loop in towers without ghost hit problem:
