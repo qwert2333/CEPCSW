@@ -1,6 +1,6 @@
 #ifndef CALOHOUGHOBJECT_H
 #define CALOHOUGHOBJECT_H
-#include "Objects/CaloBarShower.h"
+#include "Objects/Calo1DCluster.h"
 #include "TVector2.h"
 #include "TF1.h"
 namespace PandoraPlus {
@@ -18,7 +18,7 @@ namespace PandoraPlus {
     //  return  originLocalMax == x.originLocalMax;
     //}
 
-		std::vector<const PandoraPlus::CaloBarShower*> getLocalMax() const { return originLocalMax; }
+		std::vector<const PandoraPlus::Calo1DCluster*> getLocalMax() const { return originLocalMax; }
 		TVector2 getConformPointUR() const { return ConformalPoint+TVector2(cellSize/2., cellSize/2.);   }
 		TVector2 getConformPointUL() const { return ConformalPoint+TVector2(-cellSize/2., cellSize/2.);  }
 		TVector2 getConformPointDR() const { return ConformalPoint+TVector2(cellSize/2., -cellSize/2.);  }
@@ -29,7 +29,7 @@ namespace PandoraPlus {
     TF1 getHoughLineDL() const { return HoughLine_dl; }
 
     void setCellSize(double _cell) { cellSize=_cell; }
-    void addLocalMax( const PandoraPlus::CaloBarShower* _localmax ) { originLocalMax.push_back(_localmax); }
+    void addLocalMax( const PandoraPlus::Calo1DCluster* _localmax ) { originLocalMax.push_back(_localmax); }
     void setConformalPoint(TVector2& _vec) { ConformalPoint=_vec;}
 		void setHoughLine(TF1& _func_ur, TF1& _func_ul, TF1& _func_dr, TF1& _func_dl) 
          { HoughLine_ur=_func_ur; HoughLine_ul=_func_ul; HoughLine_dr=_func_dr; HoughLine_dl=_func_dl; }
@@ -38,7 +38,7 @@ namespace PandoraPlus {
   private: 
 	  int Slayer;
     double cellSize; //crystal cell size, unit: mm. 
-    std::vector<const PandoraPlus::CaloBarShower*> originLocalMax;  //Local max
+    std::vector<const PandoraPlus::Calo1DCluster*> originLocalMax;  //Local max
 		TVector2 ConformalPoint; //Center position. 
 		TF1 HoughLine_ur;
 		TF1 HoughLine_ul;

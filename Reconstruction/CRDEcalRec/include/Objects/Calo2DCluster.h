@@ -3,7 +3,6 @@
 
 #include "Objects/CaloUnit.h"
 #include "Objects/Calo1DCluster.h"
-#include "Objects/CaloBarShower.h"
 
 namespace PandoraPlus {
 
@@ -24,19 +23,24 @@ namespace PandoraPlus {
     bool isNeighbor(const PandoraPlus::Calo1DCluster* m_1dcluster) const; 
 
     int getDlayer() const { if(barUCol.size()>0) return barUCol[0]->getDlayer(); else if(barVCol.size()>0) return barVCol[0]->getDlayer(); else return -99; }
-    std::vector<int> getModules() const { return m_modules; }
-    std::vector<int> getParts() const { return m_parts; }
-    std::vector<int> getStaves() const { return m_staves; }
+    std::vector< std::vector<int> > getTowerID() const { return towerID; }
+    //std::vector<int> getModules() const { return m_modules; }
+    //std::vector<int> getParts() const { return m_parts; }
+    //std::vector<int> getStaves() const { return m_staves; }
 
     std::vector<const CaloUnit *> getBarUCol() const { return barUCol; }
     std::vector<const CaloUnit *> getBarVCol() const { return barVCol; }
-    std::vector<const CaloBarShower*> getShowerUCol() const {return barShowerUCol;}
-    std::vector<const CaloBarShower*> getShowerVCol() const {return barShowerVCol;}
+    std::vector<const Calo1DCluster*> getShowerUCol() const {return barShowerUCol;}
+    std::vector<const Calo1DCluster*> getShowerVCol() const {return barShowerVCol;}
 
     void addBar(const CaloUnit* _bar) { if(_bar->getSlayer()==0) barUCol.push_back(_bar); if(_bar->getSlayer()==1) barVCol.push_back(_bar); }
-    void setShowerUCol(std::vector<const CaloBarShower*> _sh) { barShowerUCol=_sh; }
-    void setShowerVCol(std::vector<const CaloBarShower*> _sh) { barShowerVCol=_sh; }
-    void addCluster(const Calo1DCluster* _1dcluster);
+    void setBarUCol( std::vector<const CaloUnit*> _bars ) { barUCol=_bars; }
+    void setBarVCol( std::vector<const CaloUnit*> _bars ) { barVCol=_bars; }
+    void setShowerUCol(std::vector<const Calo1DCluster*> _sh) { barShowerUCol=_sh; }
+    void setShowerVCol(std::vector<const Calo1DCluster*> _sh) { barShowerVCol=_sh; }
+    void addUnit(const Calo1DCluster* _1dcluster);
+    void addTowerID(int _m, int _p, int _s) { std::vector<int> id(3); id[0] = _m; id[1] = _p; id[2] = _s; towerID.push_back(id); }
+    void addTowerID(std::vector<int> id) { towerID.push_back(id); }
     std::vector<const Calo1DCluster*> getClusterU() const { return barClusterUCol; }
     std::vector<const Calo1DCluster*> getClusterV() const { return barClusterVCol; }
     std::vector<const Calo1DCluster*> getCluster() const; 
@@ -46,16 +50,17 @@ namespace PandoraPlus {
 
 	
   private:
-    std::vector<int> m_modules;
-    std::vector<int> m_parts;
-    std::vector<int> m_staves;    
+    std::vector< std::vector<int> > towerID; //[module, part, stave]
+    //std::vector<int> m_modules;
+    //std::vector<int> m_parts;
+    //std::vector<int> m_staves;    
 
-    std::vector<const CaloUnit *> barUCol;  //slayer == 0.
-    std::vector<const CaloUnit *> barVCol;  //slayer == 1.
-    std::vector<const CaloBarShower *> barShowerUCol; 
-    std::vector<const CaloBarShower *> barShowerVCol; 
-    std::vector<const Calo1DCluster*>  barClusterUCol;
-    std::vector<const Calo1DCluster*>  barClusterVCol;
+    std::vector<const CaloUnit*> barUCol;  //slayer == 0.
+    std::vector<const CaloUnit*> barVCol;  //slayer == 1.
+    std::vector<const Calo1DCluster*> barShowerUCol; 
+    std::vector<const Calo1DCluster*> barShowerVCol; 
+    std::vector<const Calo1DCluster*> barClusterUCol;
+    std::vector<const Calo1DCluster*> barClusterVCol;
 
     //static const int m_module = 7;
     //static const int m_modulestart = 0;

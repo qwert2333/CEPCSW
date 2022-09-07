@@ -11,17 +11,18 @@ namespace PandoraPlus{
     Seeds.clear();
     Energy=0.;
     pos.SetXYZ(0.,0.,0.);
-    m_modules.clear();
-    m_parts.clear();
-    m_staves.clear();
+    towerID.clear();
+    //m_modules.clear();
+    //m_parts.clear();
+    //m_staves.clear();
   }
 
   void Calo1DCluster::Clean() {
     for(int i=0; i<Bars.size(); i++) { delete Bars[i]; Bars[i]=NULL; }
     for(int i=0; i<Seeds.size(); i++) { delete Seeds[i]; Seeds[i]=NULL; }
-    std::vector<int>().swap(m_modules);
-    std::vector<int>().swap(m_parts);
-    std::vector<int>().swap(m_staves);
+    //std::vector<int>().swap(m_modules);
+    //std::vector<int>().swap(m_parts);
+    //std::vector<int>().swap(m_staves);
     Clear();
   }
 
@@ -34,12 +35,8 @@ namespace PandoraPlus{
 
   bool Calo1DCluster::isNeighbor(const PandoraPlus::CaloUnit* m_bar) const
   {
-//cout<<"Calo1DCluster::isNeighbor: ";
-//printf("Input bar ID (%d, %d, %d, %d, %d, %d) \n", m_bar->getModule(), m_bar->getStave(), m_bar->getPart(), m_bar->getDlayer(), m_bar->getSlayer(), m_bar->getBar());
     for(int i1d = 0; i1d<Bars.size(); i1d++){
-//printf("  Compare with bar #%d: ID (%d, %d, %d, %d, %d, %d) ", i1d, Bars[i1d]->getModule(), Bars[i1d]->getStave(), Bars[i1d]->getPart(), Bars[i1d]->getDlayer(), Bars[i1d]->getSlayer(), Bars[i1d]->getBar());
       if(Bars[i1d]->isNeighbor(m_bar)){ /*cout<<" isNeighbor! "<<endl;*/ return true;}
-//cout<<endl;
     }
     return false;
   }
@@ -59,6 +56,40 @@ namespace PandoraPlus{
     double Etot=getEnergy();
     for(int i=0;i<Bars.size();i++) pos += Bars[i]->getPosition() * (Bars[i]->getEnergy()/Etot);
     return pos;
+  }
+
+  double Calo1DCluster::getT1() const{
+    double T1=0;
+    double Etot = getEnergy();
+    for(int i=0;i<Bars.size();i++) T1 += (Bars[i]->getT1() * Bars[i]->getEnergy())/Etot;
+    return T1;
+  }
+
+  double Calo1DCluster::getT2() const{
+    double T2=0;
+    double Etot = getEnergy();
+    for(int i=0;i<Bars.size();i++) T2 += (Bars[i]->getT2() * Bars[i]->getEnergy())/Etot;
+    return T2;
+  }
+
+  double Calo1DCluster::getWidth() const{
+    TVector3 centPos = getPos();
+    double Etot = getEnergy();
+    double sigmax=0;
+    double sigmay=0;
+    double sigmaz=0;
+    for(int i=0; i<Bars.size(); i++){
+      double wi = Bars[i]->getEnergy()/Etot;
+      sigmax += wi*(Bars[i]->getPosition().x()-centPos.x())*(Bars[i]->getPosition().x()-centPos.x());
+      sigmay += wi*(Bars[i]->getPosition().y()-centPos.y())*(Bars[i]->getPosition().y()-centPos.y());
+      sigmaz += wi*(Bars[i]->getPosition().z()-centPos.z())*(Bars[i]->getPosition().z()-centPos.z());
+    }
+
+    if(sigmaz!=0) return sigmaz;  //sLayer=1, bars along z-axis.
+    else if(sigmax==0 && sigmaz==0) return sigmay; //Module 2, 6
+    else if(sigmay==0 && sigmaz==0) return sigmax; //Module 0, 4
+    else if(sigmax!=0 && sigmay!=0 && sigmaz==0) return sqrt(sigmax*sigmax+sigmay*sigmay); //Module 1, 3, 5, 7;
+    else return 0.;
   }
 
   double Calo1DCluster::getScndMoment() const{
@@ -107,14 +138,20 @@ namespace PandoraPlus{
   int Calo1DCluster::getLeftEdge(){
     std::sort(Bars.begin(), Bars.end());
     if(Bars.size()==0) return -99;
-    return Bars[0]->getBar();
+    int edge = -99;
+    if( Bars[0]->getSlayer()==0 ) edge = Bars[0]->getBar() + Bars[0]->getStave()*PandoraPlus::CaloUnit::NbarZ; 
+    if( Bars[0]->getSlayer()==1 ) edge = Bars[0]->getBar() + Bars[0]->getPart()*(CaloUnit::NbarPhi-Bars[0]->getDlayer()+1);
+    return edge;
   }
 
   int Calo1DCluster::getRightEdge(){
     std::sort(Bars.begin(), Bars.end());
     if(Bars.size()==0) return -99;
-    return Bars[Bars.size()-1]->getBar();
-  }  
+    int edge = -99;
+    if( Bars[Bars.size()-1]->getSlayer()==0 ) edge = Bars[Bars.size()-1]->getBar() + Bars[Bars.size()-1]->getStave()*CaloUnit::NbarZ;
+    if( Bars[Bars.size()-1]->getSlayer()==1 ) edge = Bars[Bars.size()-1]->getBar() + Bars[Bars.size()-1]->getPart()*(CaloUnit::NbarPhi-Bars[Bars.size()-1]->getDlayer()+1);
+    return edge;
+  }
 
 
   void Calo1DCluster::PrintBars() const{
@@ -133,15 +170,42 @@ namespace PandoraPlus{
     }
   }
 
-  void Calo1DCluster::addCluster(const PandoraPlus::CaloUnit* _bar ) 
+  void Calo1DCluster::addUnit(const PandoraPlus::CaloUnit* _bar ) 
   {
     Bars.push_back(_bar);
-    m_modules.push_back(_bar->getModule());
-    m_parts.push_back(_bar->getPart());
-    m_staves.push_back(_bar->getStave());
+    std::vector<int> id(3);
+    id[0] = _bar->getModule();
+    id[1] = _bar->getPart();
+    id[2] = _bar->getStave();
+    if(find(towerID.begin(), towerID.end(), id)==towerID.end()) towerID.push_back(id);
+
+    //m_modules.push_back(_bar->getModule());
+    //m_parts.push_back(_bar->getPart());
+    //m_staves.push_back(_bar->getStave());
     //if( find( m_modules.begin(), m_modules.end(), _bar->getModule())==m_modules.end() ) m_modules.push_back(_bar->getModule());
     //if( find( m_parts.begin(), m_parts.end(), _bar->getPart())==m_parts.end() )         m_parts.push_back(_bar->getPart());
     //if( find( m_staves.begin(), m_staves.end(), _bar->getStave())==m_staves.end() )     m_staves.push_back(_bar->getStave());
   }
+
+
+  void Calo1DCluster::setIDInfo() {
+    for(int i=0; i<Bars.size(); i++){
+      std::vector<int> id(3);
+      id[0] = Bars[i]->getModule();
+      id[1] = Bars[i]->getPart();
+      id[2] = Bars[i]->getStave();
+      if(find(towerID.begin(), towerID.end(), id)==towerID.end()) towerID.push_back(id);  
+    }
+  }
+
+  void Calo1DCluster::setSeed(){
+    double maxE = -1; 
+    int index = -1; 
+    for(int i=0; i<Bars.size(); ++i){
+      if(Bars[i]->getEnergy()>maxE) { maxE = Bars[i]->getEnergy(); index = i; }
+    }
+    if(Seeds.size()==0 && index>=0) Seeds.push_back( Bars[index] );
+  }
+
 };
 #endif

@@ -13,7 +13,7 @@ StatusCode PandoraPlusDataCol::Clear(){
 
   TrackCol.clear();
   BarCol.clear();
-  BlockCol.clear();
+  //BlockCol.clear();
   TowerCol.clear(); 
   Cluster1DCol.clear();
   Cluster2DCol.clear(); 
@@ -29,17 +29,17 @@ StatusCode PandoraPlusDataCol::Clean(){
   for(int i=0; i<bk_BarCol.size(); i++)
     if(!bk_BarCol[i]) { delete bk_BarCol[i]; bk_BarCol[i]=NULL; }
 
-  for(int i=0; i<bk_BlockCol.size(); i++)
-    if(!bk_BlockCol[i]) { bk_BlockCol[i]->Clean(); delete bk_BlockCol[i]; bk_BlockCol[i]=NULL; }
+  //for(int i=0; i<bk_BlockCol.size(); i++)
+  //  if(!bk_BlockCol[i]) { bk_BlockCol[i]->Clean(); delete bk_BlockCol[i]; bk_BlockCol[i]=NULL; }
 
   for(int i=0; i<bk_TowerCol.size(); i++)
     if(!bk_TowerCol[i]) { bk_TowerCol[i]->Clean(); delete bk_TowerCol[i]; bk_TowerCol[i]=NULL; }
 
-  for(int i=0; i<bk_BarClusCol.size(); i++)
-    if(!bk_BarClusCol[i]) { bk_BarClusCol[i]->Clean(); delete bk_BarClusCol[i]; bk_BarClusCol[i]=NULL; }
+  //for(int i=0; i<bk_BarClusCol.size(); i++)
+  //  if(!bk_BarClusCol[i]) { bk_BarClusCol[i]->Clean(); delete bk_BarClusCol[i]; bk_BarClusCol[i]=NULL; }
 
-  for(int i=0; i<bk_BarShowerCol.size(); i++)
-    if(!bk_BarShowerCol[i]) { bk_BarShowerCol[i]->Clean(); delete bk_BarShowerCol[i]; bk_BarShowerCol[i]=NULL; }
+  //for(int i=0; i<bk_BarShowerCol.size(); i++)
+  //  if(!bk_BarShowerCol[i]) { bk_BarShowerCol[i]->Clean(); delete bk_BarShowerCol[i]; bk_BarShowerCol[i]=NULL; }
 
   for(int i=0; i<bk_TransShowerCol.size(); i++)
     if(!bk_TransShowerCol[i]) { bk_TransShowerCol[i]->Clean(); delete bk_TransShowerCol[i]; bk_TransShowerCol[i]=NULL; }

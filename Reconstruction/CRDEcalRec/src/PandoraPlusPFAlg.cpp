@@ -88,11 +88,11 @@ StatusCode PandoraPlusPFAlg::initialize()
   m_algorithmManager.RegisterAlgorithmFactory("GlobalClusteringAlg",    new GlobalClusteringAlg::Factory);
   m_algorithmManager.RegisterAlgorithmFactory("LocalMaxFindingAlg",     new LocalMaxFindingAlg::Factory);
   m_algorithmManager.RegisterAlgorithmFactory("HoughClusteringAlg",     new HoughClusteringAlg::Factory);
-  m_algorithmManager.RegisterAlgorithmFactory("ConeClustering2DAlg",    new ConeClustering2DAlg::Factory);
+  //m_algorithmManager.RegisterAlgorithmFactory("ConeClustering2DAlg",    new ConeClustering2DAlg::Factory);
   m_algorithmManager.RegisterAlgorithmFactory("EnergySplittingAlg",     new EnergySplittingAlg::Factory);
   m_algorithmManager.RegisterAlgorithmFactory("EnergyTimeMatchingAlg",  new EnergyTimeMatchingAlg::Factory);
-  m_algorithmManager.RegisterAlgorithmFactory("ConeClusteringAlg",      new ConeClusteringAlg::Factory);
-  m_algorithmManager.RegisterAlgorithmFactory("ConeClusteringAlgHCAL",  new ConeClusteringAlg::Factory);
+  //m_algorithmManager.RegisterAlgorithmFactory("ConeClusteringAlg",      new ConeClusteringAlg::Factory);
+  //m_algorithmManager.RegisterAlgorithmFactory("ConeClusteringAlgHCAL",  new ConeClusteringAlg::Factory);
 
 
   //--- Create algorithm from readin settings ---
@@ -137,9 +137,9 @@ StatusCode PandoraPlusPFAlg::initialize()
 
     t_LongiClusU = new TTree("LoniClusU", "LoniClusU");
     t_LongiClusV = new TTree("LoniClusV", "LoniClusV");
-    //t_Cluster = new TTree("RecClusters", "RecClusters");
-    //t_Clustering = new TTree("Clustering", "Clustering");
-    //t_Track = new TTree("RecTracks", "RecTracks");
+    t_Cluster = new TTree("RecClusters", "RecClusters");
+    t_Clustering = new TTree("Clustering", "Clustering");
+    t_Track = new TTree("RecTracks", "RecTracks");
 
     //Bar
     t_SimBar->Branch("simBar_x", &m_simBar_x);
@@ -186,7 +186,7 @@ StatusCode PandoraPlusPFAlg::initialize()
     t_LongiClusV->Branch("showerV_stave", &m_showerV_stave);
     t_LongiClusV->Branch("showerV_part", &m_showerV_part);
 
-/*
+
     //Clusters
     t_Cluster->Branch("Nclus", &m_Nclus);
     t_Cluster->Branch("Clus_x", &m_Clus_x);
@@ -231,7 +231,7 @@ StatusCode PandoraPlusPFAlg::initialize()
     t_Track->Branch("m_trkstate_refy", &m_trkstate_refy);
     t_Track->Branch("m_trkstate_refz", &m_trkstate_refz);
     t_Track->Branch("m_trkstate_location", &m_trkstate_location);
-*/
+
 
   }
 
@@ -294,8 +294,8 @@ StatusCode PandoraPlusPFAlg::execute()
   std::vector<PandoraPlus::Calo3DCluster*> m_3dclusters = m_DataCol.Cluster3DCol;
 cout<<"3D cluster size in DataCol: "<<m_3dclusters.size()<<endl; 
   for(int ic=0;ic<m_3dclusters.size();ic++){
-    std::vector<const CaloBarShower*> tmp_showerU = m_3dclusters[ic]->getLocalMaxUCol("AllLocalMax");
-    std::vector<const CaloBarShower*> tmp_showerV = m_3dclusters[ic]->getLocalMaxVCol("AllLocalMax");
+    std::vector<const Calo1DCluster*> tmp_showerU = m_3dclusters[ic]->getLocalMaxUCol("AllLocalMax");
+    std::vector<const Calo1DCluster*> tmp_showerV = m_3dclusters[ic]->getLocalMaxVCol("AllLocalMax");
     m_NshowerU = tmp_showerU.size(); 
     m_NshowerV = tmp_showerV.size(); 
 cout<<"  In Cluster #"<<ic<<": N showerU = "<<m_NshowerU<<", N showerV = "<<m_NshowerV<<endl;
@@ -304,16 +304,16 @@ cout<<"  In Cluster #"<<ic<<": N showerU = "<<m_NshowerU<<", N showerV = "<<m_Ns
       m_barShowerU_y.push_back( tmp_showerU[is]->getPos().y() );
       m_barShowerU_z.push_back( tmp_showerU[is]->getPos().z() );
       m_barShowerU_E.push_back( tmp_showerU[is]->getEnergy() );
-      m_barShowerU_stave.push_back( tmp_showerU[is]->getStave() );
-      m_barShowerU_part.push_back( tmp_showerU[is]->getPart() );
+      //m_barShowerU_stave.push_back( tmp_showerU[is]->getStave() );
+      //m_barShowerU_part.push_back( tmp_showerU[is]->getPart() );
     }
     for(int is=0; is<m_NshowerV; is++){
       m_barShowerV_x.push_back( tmp_showerV[is]->getPos().x() );
       m_barShowerV_y.push_back( tmp_showerV[is]->getPos().y() );
       m_barShowerV_z.push_back( tmp_showerV[is]->getPos().z() );
       m_barShowerV_E.push_back( tmp_showerV[is]->getEnergy() );
-      m_barShowerV_stave.push_back( tmp_showerV[is]->getStave() );
-      m_barShowerV_part.push_back( tmp_showerV[is]->getPart() );
+      //m_barShowerV_stave.push_back( tmp_showerV[is]->getStave() );
+      //m_barShowerV_part.push_back( tmp_showerV[is]->getPart() );
     }
   }
   t_Layers->Fill();
@@ -337,8 +337,8 @@ cout<<"  In Cluster #"<<i<<": N cluster U = "<<vec_LongiU.size()<<", N cluster V
         m_showerU_y.push_back( vec_LongiU[il]->getBarShowers()[is]->getPos().y() );
         m_showerU_z.push_back( vec_LongiU[il]->getBarShowers()[is]->getPos().z() );
         m_showerU_E.push_back( vec_LongiU[il]->getBarShowers()[is]->getEnergy()  );
-        m_showerU_stave.push_back( vec_LongiU[il]->getBarShowers()[is]->getStave() );
-        m_showerU_part.push_back( vec_LongiU[il]->getBarShowers()[is]->getPart() );
+        //m_showerU_stave.push_back( vec_LongiU[il]->getBarShowers()[is]->getStave() );
+        //m_showerU_part.push_back( vec_LongiU[il]->getBarShowers()[is]->getPart() );
       }
       t_LongiClusU->Fill();
     }
@@ -354,8 +354,8 @@ cout<<"  In Cluster #"<<i<<": N cluster U = "<<vec_LongiU.size()<<", N cluster V
         m_showerV_y.push_back( vec_LongiV[il]->getBarShowers()[is]->getPos().y() );
         m_showerV_z.push_back( vec_LongiV[il]->getBarShowers()[is]->getPos().z() );
         m_showerV_E.push_back( vec_LongiV[il]->getBarShowers()[is]->getEnergy()  );
-        m_showerV_stave.push_back( vec_LongiV[il]->getBarShowers()[is]->getStave() );
-        m_showerV_part.push_back( vec_LongiV[il]->getBarShowers()[is]->getPart() );
+        //m_showerV_stave.push_back( vec_LongiV[il]->getBarShowers()[is]->getStave() );
+        //m_showerV_part.push_back( vec_LongiV[il]->getBarShowers()[is]->getPart() );
       }
       t_LongiClusV->Fill();
     }
@@ -385,7 +385,7 @@ cout<<"  In Cluster #"<<i<<": N cluster U = "<<vec_LongiU.size()<<", N cluster V
     }
   }
   t_Layers->Fill();
-
+*/
 
   //Save Cluster info
   ClearCluster();
@@ -448,9 +448,8 @@ cout<<"  In Cluster #"<<i<<": N cluster U = "<<vec_LongiU.size()<<", N cluster V
 		PandoraPlus::CaloUnit* tmp_bar = tmp_bars.at(m);
 		m_E_bar.push_back(tmp_bar->getEnergy());
 	}
-
 	t_Clustering->Fill();
-
+/*
   // Save Track info
   ClearTrack();
   std::vector<PandoraPlus::Track*> m_trkCol = m_DataCol.TrackCol;
@@ -487,8 +486,8 @@ StatusCode PandoraPlusPFAlg::finalize()
   t_Layers->Write();
   t_LongiClusU->Write(); 
   t_LongiClusV->Write();
-  //t_Cluster->Write();
-  //t_Clustering->Write();
+  t_Cluster->Write();
+  t_Clustering->Write();
   //t_Track->Write();
   m_wfile->Close();
   delete m_wfile, t_SimBar, t_Layers, t_Cluster, t_Track, t_Clustering;

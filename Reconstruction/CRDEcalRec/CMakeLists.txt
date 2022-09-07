@@ -4,9 +4,6 @@ gaudi_add_library(CRDEcalRecLib
                           src/Objects/Calo1DCluster.cc
                           src/Objects/Calo2DCluster.cc
                           src/Objects/Calo3DCluster.cc
-                          src/Objects/CaloBarShower.cc
-                          src/Objects/CaloBarCluster.cc
-                          src/Objects/CaloBlock.cc
                           src/Objects/CaloTower.cc
                           src/Objects/TransShower.cc
                           src/Objects/CaloCluster.cc 
@@ -40,10 +37,8 @@ gaudi_add_module(CRDEcalRec
                          src/Algorithm/GlobalClusteringAlg.cpp
                          src/Algorithm/LocalMaxFindingAlg.cpp
                          src/Algorithm/HoughClusteringAlg.cpp
-                         src/Algorithm/ConeClustering2DAlg.cpp
                          src/Algorithm/EnergySplittingAlg.cpp
                          src/Algorithm/EnergyTimeMatchingAlg.cpp
-                         src/Algorithm/ConeClusteringAlg.cpp
                  LINK    CRDEcalRecLib
 )
 target_include_directories(CRDEcalRec PUBLIC

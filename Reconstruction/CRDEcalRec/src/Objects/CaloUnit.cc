@@ -43,11 +43,13 @@ namespace PandoraPlus{
   }
 
   bool CaloUnit::isModuleAdjacent( const CaloUnit* x ) const{
-    if(module==x->getModule() || (fabs(module-x->getModule())>1 && fabs(module-x->getModule())!=Nmodule-1 ) ) return false; 
+
+    if(module==x->getModule()) return false;
+    if( fabs(module-x->getModule())>1 && abs(module-x->getModule())!=Nmodule-1 ) return false; 
 
     int dlayer_lo, slayer_lo, part_lo, stave_lo, bar_lo;
     int dlayer_hi, slayer_hi, part_hi, stave_hi, bar_hi;
-    if( module > x->getModule() ) {
+    if( module - x->getModule()==1 || x->getModule()-module==Nmodule-1 ) {
       dlayer_lo=x->getDlayer(); slayer_lo=x->getSlayer(); part_lo=x->getPart(); stave_lo=x->getStave(); bar_lo=x->getBar(); 
       dlayer_hi=dlayer; slayer_hi=slayer; part_hi=part; stave_hi=stave; bar_hi=bar; 
     }
@@ -55,6 +57,7 @@ namespace PandoraPlus{
       dlayer_lo=dlayer; slayer_lo=slayer; part_lo=part; stave_lo=stave; bar_lo=bar;
       dlayer_hi=x->getDlayer(); slayer_hi=x->getSlayer(); part_hi=x->getPart(); stave_hi=x->getStave(); bar_hi=x->getBar();
     }
+
 
     if( dlayer_lo!=1 || slayer_lo!=0 || part_lo!=Npart || part_hi!=1 ) return false;
     if( slayer_hi==0 ){

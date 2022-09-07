@@ -13,7 +13,7 @@ namespace PandoraPlus{
   void CaloCluster::Clear(){
     showers.clear();
     tracks.clear();
-    daughter_clusters.clear();
+    //daughter_clusters.clear();
     hits.clear();
     showerMax=0; chi2=0; alpha=0; beta=0; ExpEn=0; axis.SetXYZ(0,0,0); type=-1;
   }
@@ -21,7 +21,7 @@ namespace PandoraPlus{
   void CaloCluster::Clean(){
     for(int i=0; i<showers.size(); i++) { delete showers[i]; showers[i] = NULL; }
     for(int i=0; i<tracks.size(); i++)  { delete tracks[i];  tracks[i] = NULL; }
-    for(int i=0; i<daughter_clusters.size(); i++) { delete daughter_clusters[i]; daughter_clusters[i] = NULL; }
+    //for(int i=0; i<daughter_clusters.size(); i++) { delete daughter_clusters[i]; daughter_clusters[i] = NULL; }
     for(int i=0; i<hits.size(); i++) { delete hits[i]; hits[i] = NULL; }
     Clear();
   }
@@ -31,8 +31,8 @@ namespace PandoraPlus{
       if(!showers[i]) { showers.erase(showers.begin()+i); i--; }
     for(int i=0; i<tracks.size(); i++)
       if(!tracks[i]) { tracks.erase(tracks.begin()+i); i--; }
-    for(int i=0; i<daughter_clusters.size(); i++)
-      if(!daughter_clusters[i]) { daughter_clusters.erase(daughter_clusters.begin()+i); i--; }
+    //for(int i=0; i<daughter_clusters.size(); i++)
+    //  if(!daughter_clusters[i]) { daughter_clusters.erase(daughter_clusters.begin()+i); i--; }
     for(int i=0; i<hits.size(); i++)
       if(!hits[i]) { hits.erase(hits.begin()+i); i--; }
   }
@@ -284,8 +284,8 @@ namespace PandoraPlus{
       if(barAngle>=TMath::TwoPi()) barAngle = barAngle-TMath::TwoPi();
       trackFitter.setBarAngle(barAngle);
       for(int is=0;is<showers.size();is++){
-        TVector3 pos_barsX = showers[is]->getShowerX()->getPos(); //U
-        TVector3 pos_barsY = showers[is]->getShowerY()->getPos(); //Z
+        TVector3 pos_barsX = showers[is]->getShowerU()->getPos(); //U
+        TVector3 pos_barsY = showers[is]->getShowerV()->getPos(); //Z
 //printf("\t DEBUG: input pointX (%.3f, %.3f, %.3f) \n", barsX.getPos().x(), barsX.getPos().y(), barsX.getPos().z());
 //printf("\t DEBUG: input pointY (%.3f, %.3f, %.3f) \n", barsY.getPos().x(), barsY.getPos().y(), barsY.getPos().z());
         trackFitter.setGlobalPoint(1, pos_barsX.x(), posErr, pos_barsX.y(), posErr, pos_barsX.z(), posErr);
@@ -392,16 +392,16 @@ namespace PandoraPlus{
     for(int i=0; i<showers.size(); i++){
       cout<<"  Shower #"<<i<<": Address "<<showers[i]<<", Layer = "<<showers[i]->getDlayer(); 
       printf(", pos/E (%.2f, %.2f, %.2f, %.3f) \n", showers[i]->getPos().x(), showers[i]->getPos().y(), showers[i]->getPos().z(), showers[i]->getShowerE() );
-      cout<<"  BarShowerX address: "<<showers[i]->getShowerX(); 
-      printf(", pos/E (%.2f, %.2f, %.2f, %.3f) \n", showers[i]->getShowerX()->getPos().x(), 
-                                                    showers[i]->getShowerX()->getPos().y(), 
-                                                    showers[i]->getShowerX()->getPos().x(), 
-                                                    showers[i]->getShowerX()->getEnergy() );
-      cout<<"  BarShowerY address: "<<showers[i]->getShowerY();
-      printf(", pos/E (%.2f, %.2f, %.2f, %.3f) \n", showers[i]->getShowerY()->getPos().x(),
-                                                    showers[i]->getShowerY()->getPos().y(),
-                                                    showers[i]->getShowerY()->getPos().x(),
-                                                    showers[i]->getShowerY()->getEnergy() );
+      cout<<"  BarShowerX address: "<<showers[i]->getShowerU(); 
+      printf(", pos/E (%.2f, %.2f, %.2f, %.3f) \n", showers[i]->getShowerU()->getPos().x(), 
+                                                    showers[i]->getShowerU()->getPos().y(), 
+                                                    showers[i]->getShowerU()->getPos().x(), 
+                                                    showers[i]->getShowerU()->getEnergy() );
+      cout<<"  BarShowerY address: "<<showers[i]->getShowerV();
+      printf(", pos/E (%.2f, %.2f, %.2f, %.3f) \n", showers[i]->getShowerV()->getPos().x(),
+                                                    showers[i]->getShowerV()->getPos().y(),
+                                                    showers[i]->getShowerV()->getPos().x(),
+                                                    showers[i]->getShowerV()->getEnergy() );
     }
 
     cout<<"---------End Print Cluster---------"<<endl;

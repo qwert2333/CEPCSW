@@ -31,11 +31,17 @@ namespace PandoraPlus{
 
     double getEnergy() const; 
     TVector3 getPos() const;
+    double getT1() const;
+    double getT2() const;
+    double getWidth() const;
     double getScndMoment() const;
+
     int getNseeds() const { return Seeds.size(); }
     std::vector<const PandoraPlus::CaloUnit*> getBars()  const { return Bars;  }
 	  std::vector<const PandoraPlus::CaloUnit*> getCluster()  const { return Bars;  }
     std::vector<const PandoraPlus::CaloUnit*> getSeeds() const { return Seeds; }
+    std::vector< const PandoraPlus::Calo1DCluster* > getCousinClusters() const { return CousinClusters; }
+    std::vector< const PandoraPlus::Calo1DCluster* > getChildClusters() const { return ChildClusters; }
     bool getGlobalRange( double& xmin,  double& ymin, double& zmin, double& xmax, double& ymax, double& zmax ) const;
     int  getLeftEdge();
     int  getRightEdge();
@@ -43,26 +49,35 @@ namespace PandoraPlus{
     void PrintBars() const;
     void PrintSeeds() const;
 	
-	  void addCluster(const PandoraPlus::CaloUnit* _bar );
-    //void addBar(const PandoraPlus::CaloUnit* _bar ) { Bars.push_back(_bar); }
+	  void addUnit(const PandoraPlus::CaloUnit* _bar );
     void addSeed(const PandoraPlus::CaloUnit* _seed ) { Seeds.push_back(_seed); }
     void setBars( std::vector<const PandoraPlus::CaloUnit*> _bars ) { Bars = _bars; }
     void setSeeds( std::vector<const PandoraPlus::CaloUnit*> _seeds) { Seeds = _seeds; }
+    void addCousinCluster( const PandoraPlus::Calo1DCluster* clus ) { CousinClusters.push_back(clus); }
+    void addChildCluster( const PandoraPlus::Calo1DCluster* clus ) { ChildClusters.push_back(clus); }
+    void setSeed();  //Set the most energitic unit as seed. 
+    void setIDInfo(); 
 
     int getDlayer() const { if(Bars.size()>0) return Bars[0]->getDlayer(); return -99;  }
     int getSlayer() const { if(Bars.size()>0) return Bars[0]->getSlayer(); return -99;  }
-    std::vector<int> getModules() const { return m_modules; }
-    std::vector<int> getParts() const { return m_parts; }
-    std::vector<int> getStaves() const { return m_staves; }
+    std::vector< std::vector<int> > getTowerID() const { return towerID; }
+    //std::vector<int> getModules() const { return m_modules; }
+    //std::vector<int> getParts() const { return m_parts; }
+    //std::vector<int> getStaves() const { return m_staves; }
     
   private: 
     std::vector<const PandoraPlus::CaloUnit*> Bars;
     std::vector<const PandoraPlus::CaloUnit*> Seeds;
     double Energy;
     TVector3 pos;
-    std::vector<int> m_modules;
-    std::vector<int> m_parts;
-    std::vector<int> m_staves;
+
+    std::vector< std::vector<int> > towerID; //[module, part, stave]
+    //std::vector<int> m_modules;
+    //std::vector<int> m_parts;
+    //std::vector<int> m_staves;
+
+    std::vector< const PandoraPlus::Calo1DCluster* > CousinClusters;
+    std::vector< const PandoraPlus::Calo1DCluster* > ChildClusters;
 
     //static const int m_module = 7;
     //static const int m_modulestart = 0;

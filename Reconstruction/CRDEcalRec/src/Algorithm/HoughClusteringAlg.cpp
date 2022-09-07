@@ -51,10 +51,10 @@ cout<<"3DCluster size: "<<p_3DClusters->size()<<endl;
   for(int it=0; it<p_3DClusters->size(); it++){
 printf("  In 3DCluster #%d: block size = %d \n", it, p_3DClusters->at(it)->getCluster().size());
 
-    std::vector<const PandoraPlus::CaloBarShower*> m_localMaxUCol; m_localMaxUCol.clear();  
-    std::vector<const PandoraPlus::CaloBarShower*> m_localMaxVCol; m_localMaxVCol.clear();
-    std::vector<const PandoraPlus::CaloBarShower*> tmp_localMaxUCol = p_3DClusters->at(it)->getLocalMaxUCol(settings.map_stringPars["ReadinLocalMaxName"]); 
-    std::vector<const PandoraPlus::CaloBarShower*> tmp_localMaxVCol = p_3DClusters->at(it)->getLocalMaxVCol(settings.map_stringPars["ReadinLocalMaxName"]);
+    std::vector<const PandoraPlus::Calo1DCluster*> m_localMaxUCol; m_localMaxUCol.clear();  
+    std::vector<const PandoraPlus::Calo1DCluster*> m_localMaxVCol; m_localMaxVCol.clear();
+    std::vector<const PandoraPlus::Calo1DCluster*> tmp_localMaxUCol = p_3DClusters->at(it)->getLocalMaxUCol(settings.map_stringPars["ReadinLocalMaxName"]); 
+    std::vector<const PandoraPlus::Calo1DCluster*> tmp_localMaxVCol = p_3DClusters->at(it)->getLocalMaxVCol(settings.map_stringPars["ReadinLocalMaxName"]);
 
     for(int il=0; il<tmp_localMaxUCol.size(); il++)
       if(tmp_localMaxUCol[il]->getDlayer()<=settings.map_floatPars["th_Layers"]) m_localMaxUCol.push_back(tmp_localMaxUCol[il]);
@@ -186,8 +186,8 @@ for(int ih=0; ih<m_HoughSpaceU.getHills().size(); ih++){
     for(int ic=0; ic<m_longiClusUCol.size(); ic++) m_datacol.bk_LongiClusCol.push_back( const_cast<PandoraPlus::LongiCluster*>(m_longiClusUCol[ic]) );
     for(int ic=0; ic<m_longiClusVCol.size(); ic++) m_datacol.bk_LongiClusCol.push_back( const_cast<PandoraPlus::LongiCluster*>(m_longiClusVCol[ic]) );
 
-    std::vector<const PandoraPlus::CaloBarShower*> left_localMaxUCol; left_localMaxUCol.clear(); 
-    std::vector<const PandoraPlus::CaloBarShower*> left_localMaxVCol; left_localMaxVCol.clear(); 
+    std::vector<const PandoraPlus::Calo1DCluster*> left_localMaxUCol; left_localMaxUCol.clear(); 
+    std::vector<const PandoraPlus::Calo1DCluster*> left_localMaxVCol; left_localMaxVCol.clear(); 
 
 
 //cout<<"Total localMax U address: "<<endl;
@@ -198,7 +198,7 @@ for(int ih=0; ih<m_HoughSpaceU.getHills().size(); ih++){
     for(int is=0; is<tmp_localMaxUCol.size(); is++){
       bool fl_incluster = false; 
       for(int ic=0; ic<m_longiClusUCol.size(); ic++){
-        std::vector<const PandoraPlus::CaloBarShower*> p_showers = m_longiClusUCol[ic]->getBarShowers();
+        std::vector<const PandoraPlus::Calo1DCluster*> p_showers = m_longiClusUCol[ic]->getBarShowers();
         if( find(p_showers.begin(), p_showers.end(), tmp_localMaxUCol[is])!=p_showers.end() ) { fl_incluster = true; break; }
       }
       if(!fl_incluster && find(left_localMaxUCol.begin(), left_localMaxUCol.end(), tmp_localMaxUCol[is])==left_localMaxUCol.end() ) left_localMaxUCol.push_back(tmp_localMaxUCol[is]);
@@ -206,7 +206,7 @@ for(int ih=0; ih<m_HoughSpaceU.getHills().size(); ih++){
     for(int is=0; is<tmp_localMaxVCol.size(); is++){
       bool fl_incluster = false;
       for(int ic=0; ic<m_longiClusVCol.size(); ic++){
-        std::vector<const PandoraPlus::CaloBarShower*> p_showers = m_longiClusVCol[ic]->getBarShowers();
+        std::vector<const PandoraPlus::Calo1DCluster*> p_showers = m_longiClusVCol[ic]->getBarShowers();
         if( find(p_showers.begin(), p_showers.end(), tmp_localMaxVCol[is])!=p_showers.end() ) { fl_incluster = true; break; }
       }
       if(!fl_incluster && find(left_localMaxVCol.begin(), left_localMaxVCol.end(), tmp_localMaxVCol[is])==left_localMaxVCol.end() ) left_localMaxVCol.push_back(tmp_localMaxVCol[is]);
@@ -215,7 +215,7 @@ for(int ih=0; ih<m_HoughSpaceU.getHills().size(); ih++){
 
 /*
     for(int ic=0; ic<m_longiClusUCol.size(); ic++){
-      std::vector<const PandoraPlus::CaloBarShower*> p_showers = m_longiClusUCol[ic]->getBarShowers();
+      std::vector<const PandoraPlus::Calo1DCluster*> p_showers = m_longiClusUCol[ic]->getBarShowers();
 cout<<"LocalMax in LongiCluster #"<<ic<<endl;
 for(int i=0; i<p_showers.size(); i++)
   printf("  #%d: (%.3f, %.3f, %.3f), %p \n", i, p_showers[i]->getPos().x(), p_showers[i]->getPos().y(), p_showers[i]->getPos().z(), p_showers[i]);
@@ -233,7 +233,7 @@ cout<<"    Not found in LongiCluster or current left collection"<<endl;
     }
 
     for(int ic=0; ic<m_longiClusVCol.size(); ic++){
-      std::vector<const PandoraPlus::CaloBarShower*> p_showers = m_longiClusVCol[ic]->getBarShowers();
+      std::vector<const PandoraPlus::Calo1DCluster*> p_showers = m_longiClusVCol[ic]->getBarShowers();
       for(int is=0; is<tmp_localMaxVCol.size(); is++)
         if( find(p_showers.begin(), p_showers.end(), tmp_localMaxVCol[is])==p_showers.end() && 
             find(left_localMaxVCol.begin(), left_localMaxVCol.end(), tmp_localMaxVCol[is])==left_localMaxVCol.end() ) left_localMaxVCol.push_back(tmp_localMaxVCol[is]);
@@ -302,13 +302,13 @@ StatusCode HoughClusteringAlg::ConformalTransformation(std::vector<PandoraPlus::
 
   for(int io=0; io<m_Hobjects.size(); io++){
     if(m_Hobjects[io].getLocalMax().size()==0) continue;
-    PandoraPlus::CaloBarShower m_localMax = *(m_Hobjects[io].getLocalMax()[0]);
+    PandoraPlus::Calo1DCluster m_localMax = *(m_Hobjects[io].getLocalMax()[0]);
 
 //cout<<"  Object #"<<io<<": local max position: ";
 //printf("(%.2f, %.2f, %.2f) \n", m_localMax.getPos().x(), m_localMax.getPos().y(), m_localMax.getPos().z());
 
     int slayer = m_localMax.getSlayer();
-    int module = m_localMax.getModule();
+    int module = m_localMax.getTowerID()[0][0];
     bool f_isXclus = (slayer==0 ? true : false);
     double rotAngle = -module*PI/4.;
 //cout<<"  Objcet #"<<io<<": slayer="<<slayer<<", module="<<module<<", isX="<<f_isXclus<<", rotAngle="<<rotAngle<<endl;
@@ -541,11 +541,17 @@ int HoughClusteringAlg::ExpandingPeak(TH2 &houghMap, int index_a, int index_b, P
   for(int fl1=-1; fl1<=1; fl1++){
   for(int fl2=-1; fl2<=1; fl2++){
     if(fl1!=0 || fl2!=0){
-      if( Abs(houghMap.GetBinContent(index_a+fl1+1, index_b+fl2+1)) > Abs( houghMap.GetBinContent(index_a+1, index_b+1))) return 1;
+      if( Abs(houghMap.GetBinContent(index_a+fl1+1, index_b+fl2+1)) > Abs( houghMap.GetBinContent(index_a+1, index_b+1))){
+        houghMap.SetBinContent(index_a+1, index_b+1, -1.*houghMap.GetBinContent(index_a+1, index_b+1) );
+        return 1;
+      }
       if(houghMap.GetBinContent(index_a+fl1+1, index_b+fl2+1) == Abs(houghMap.GetBinContent(index_a+1, index_b+1)) ){
         hill.AddCell(index_a+fl1, index_b+fl2, houghMap.GetBinContent(index_a+fl1+1, index_b+fl2+1) );
         count += ExpandingPeak(houghMap, index_a+fl1, index_b+fl2, hill );
-        if(count>0) return 1;
+        if(count>0){ 
+          houghMap.SetBinContent(index_a+1, index_b+1, -1.*houghMap.GetBinContent(index_a+1, index_b+1) );
+          return 1;
+        }
       }
     }
   }}

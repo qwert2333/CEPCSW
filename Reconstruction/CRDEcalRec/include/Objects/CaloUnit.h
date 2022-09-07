@@ -55,6 +55,13 @@ namespace PandoraPlus{
     void setT(double _t1, double _t2) { T1=_t1; T2=_t2; }
     CaloUnit* Clone() const;
 
+    static int Nmodule;
+    static int Npart;
+    static int Nstave;
+    static int Nlayer;
+    static int NbarPhi;
+    static int NbarZ;
+
   private:
 		unsigned long long cellID;
 		int system;
@@ -71,12 +78,12 @@ namespace PandoraPlus{
 		double T2;    // T in right readout;
 
 
-    static int Nmodule;
-    static int Npart;
-    static int Nstave;
-    static int Nlayer;
-    static int NbarPhi;
-    static int NbarZ;
+    //static int Nmodule;
+    //static int Npart;
+    //static int Nstave;
+    //static int Nlayer;
+    //static int NbarPhi;
+    //static int NbarZ;
 
   };
   

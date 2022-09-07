@@ -6,3 +6,4 @@ Generator/options/
 run/*.root
 build/
 InstallArea
+*.swp

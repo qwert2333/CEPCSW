@@ -77,7 +77,7 @@ namespace PandoraPlus{
   private: 
     std::vector<const PandoraPlus::CaloHit*> hits;
     std::vector<const PandoraPlus::Track*> tracks;
-    std::vector<const PandoraPlus::CaloCluster*> daughter_clusters;
+    //std::vector<const PandoraPlus::CaloCluster*> daughter_clusters;
     std::vector<const PandoraPlus::TransShower*> showers; //Specific for Bar Ecal.
     TVector3 axis;
     double showerMax;

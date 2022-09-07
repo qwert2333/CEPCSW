@@ -29,15 +29,17 @@ public:
 
   StatusCode LongiClusterLinking( std::vector<PandoraPlus::Calo2DCluster*>& m_blocks, std::vector<const PandoraPlus::LongiCluster*>& m_oldClusCol, std::vector<const PandoraPlus::LongiCluster*>& m_outClusCol );
 
+  StatusCode Split3DClusterToTowers( PandoraPlus::Calo3DCluster* m_3dcluster ); 
+
   StatusCode Clustering( std::vector<const PandoraPlus::CaloUnit*>& barCol, std::vector<PandoraPlus::Calo1DCluster*>& outClus, std::vector<const PandoraPlus::LongiCluster*>& m_longiClusCol );
 
   StatusCode Clustering( std::vector<const PandoraPlus::CaloUnit*>& barCol, std::vector<PandoraPlus::Calo1DCluster*>& outClus );
 
-  StatusCode ClusterSplitting( PandoraPlus::Calo1DCluster* m_cluster, std::vector<const PandoraPlus::CaloBarShower*>& outshCol );
+  StatusCode ClusterSplitting( PandoraPlus::Calo1DCluster* m_cluster, std::vector<const PandoraPlus::Calo1DCluster*>& outshCol );
 
   StatusCode MergeToClosestCluster( PandoraPlus::Calo1DCluster* iclus, std::vector<PandoraPlus::Calo1DCluster*>& clusvec );
 
-  StatusCode MergeToClosestCluster( const PandoraPlus::CaloBarShower* m_shower, std::vector<PandoraPlus::LongiCluster*>& m_clusters );
+  StatusCode MergeToClosestCluster( const PandoraPlus::Calo1DCluster* m_shower, std::vector<PandoraPlus::LongiCluster*>& m_clusters );
 
   StatusCode findSeeds( PandoraPlus::Calo1DCluster* m_cluster, std::vector<const PandoraPlus::CaloUnit*>& seedCol );
 
@@ -52,7 +54,7 @@ private:
 
   //static bool compBar( const PandoraPlus::CaloUnit* bar1, const PandoraPlus::CaloUnit* bar2 )
   //  { return bar1->getBar() < bar2->getBar(); }
-  static bool compLayer( const PandoraPlus::CaloBarShower* sh1, const PandoraPlus::CaloBarShower* sh2 )
+  static bool compLayer( const PandoraPlus::Calo1DCluster* sh1, const PandoraPlus::Calo1DCluster* sh2 )
     { return sh1->getDlayer() < sh2->getDlayer(); }
 
 };

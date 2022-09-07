@@ -51,6 +51,7 @@ StatusCode CRDEcalDigiAlg::initialize()
 	t_SimCont->Branch("step_x", &m_step_x);
 	t_SimCont->Branch("step_y", &m_step_y);
 	t_SimCont->Branch("step_z", &m_step_z);
+	t_SimCont->Branch("step_t", &m_step_t);			// yyy: time of each step
 	t_SimCont->Branch("stepBar_x", &m_stepBar_x);
 	t_SimCont->Branch("stepBar_y", &m_stepBar_y);
 	t_SimCont->Branch("stepBar_z", &m_stepBar_z);
@@ -121,13 +122,11 @@ StatusCode CRDEcalDigiAlg::execute()
 	MergeHits(*SimHitCol, m_simhitCol);
 	if(_Debug>=1) std::cout<<"Finish Hit Merge, with Nhit: "<<m_simhitCol.size()<<std::endl;
 
-
 	//Loop in SimHit, digitalize SimHit to DigiBar
 	for(int i=0;i<m_simhitCol.size();i++){
 
 		auto SimHit = m_simhitCol.at(i);
 		if(SimHit.getEnergy()<_Eth) continue;
-
 
 		unsigned long long id = SimHit.getCellID();
 		CaloBar hitbar;
@@ -147,7 +146,6 @@ StatusCode CRDEcalDigiAlg::execute()
 		//hitbar.T1 = 99999; hitbar.T2 = 99999;
 		//if(_Debug>=2) std::cout<<"SimHit contribution size: "<<SimHit.contributions_size()<<std::endl;
 
-
 		std::vector<HitStep> DigiLvec; DigiLvec.clear();
 		std::vector<HitStep> DigiRvec; DigiRvec.clear();
 		double totQ1 = 0;
@@ -163,10 +161,12 @@ StatusCode CRDEcalDigiAlg::execute()
 
 			TVector3 steppos(conb.getStepPosition().x, conb.getStepPosition().y, conb.getStepPosition().z);
 			TVector3 rpos = steppos-hitbar.getPosition();
+			float step_time = conb.getTime();		// yyy: step time
 
 			m_step_x.push_back(steppos.x());
 			m_step_y.push_back(steppos.y());
 			m_step_z.push_back(steppos.z());
+			m_step_t.push_back(step_time);			// yyy: push back step time
 			m_step_E.push_back(en);
 			m_stepBar_x.push_back(hitbar.getPosition().x());
 			m_stepBar_y.push_back(hitbar.getPosition().y());
@@ -204,14 +204,16 @@ StatusCode CRDEcalDigiAlg::execute()
 
 			double Ti_left = -1; int looptime=0;
 			while(Ti_left<0){ 
-				Ti_left = Tinit + rndm.Gaus(nMat*(Lbar/2 + sign*sqrt(rpos.Mag2()))/C, Tres); 
+				// Ti_left = Tinit + rndm.Gaus(nMat*(Lbar/2 + sign*sqrt(rpos.Mag2()))/C, Tres); 
+				Ti_left = Tinit + rndm.Gaus(nMat*(Lbar/2 + sign*sqrt(rpos.Mag2()))/C, Tres) + step_time;  // yyy: add step time 
 				looptime++;
 				if(looptime>500){ std::cout<<"ERROR: Step "<<iCont<<" can not get a positive left-side time!"<<std::endl; break;}
 			}
 			if(looptime>500) continue;		
 			double Ti_right = -1; looptime=0;
 			while(Ti_right<0){ 
-				Ti_right = Tinit + rndm.Gaus(nMat*(Lbar/2 - sign*sqrt(rpos.Mag2()))/C, Tres); 
+				// Ti_right = Tinit + rndm.Gaus(nMat*(Lbar/2 - sign*sqrt(rpos.Mag2()))/C, Tres); 
+				Ti_right = Tinit + rndm.Gaus(nMat*(Lbar/2 - sign*sqrt(rpos.Mag2()))/C, Tres) + step_time;  // yyy: add step time 
 				looptime++;
             if(looptime>500){ std::cout<<"ERROR: Step "<<iCont<<" can not get a positive right-side time!"<<std::endl; break;}
 			}
@@ -342,6 +344,13 @@ StatusCode CRDEcalDigiAlg::MergeHits( const edm4hep::SimCalorimeterHitCollection
 		edm4hep::MutableCaloHitContribution conb;
 		conb.setEnergy(m_step.getEnergy());
 		conb.setStepPosition(m_step.getPosition());
+	//---oooOOO000OOOooo---
+	if(m_step.contributions_size()==1)
+		conb.setTime(m_step.getContributions(0).getTime());
+	else{
+		cout<<"yyy: MergeHits(), m_step.contributions_size()!=1"<<endl;
+	}
+	//---oooOOO000OOOooo---
 		edm4hep::MutableSimCalorimeterHit m_hit = find(m_mergedhit, cellid);
 		if(m_hit.getCellID()==0){
 			//m_hit = new edm4hep::SimCalorimeterHit();
@@ -419,6 +428,7 @@ void CRDEcalDigiAlg::Clear(){
 	m_step_x.clear();
 	m_step_y.clear();
 	m_step_z.clear();
+	m_step_t.clear();   // yyy: clear
 	m_step_E.clear();
 	m_stepBar_x.clear();
 	m_stepBar_y.clear();

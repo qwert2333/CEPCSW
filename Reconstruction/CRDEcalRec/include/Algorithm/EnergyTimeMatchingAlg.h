@@ -33,14 +33,14 @@ public:
   StatusCode XYClusterMatchingL3( std::vector<const PandoraPlus::LongiCluster*>& m_longiClXCol, std::vector<const PandoraPlus::LongiCluster*>& m_longiClYCol, std::vector<PandoraPlus::CaloCluster*>& m_clusters );
 
 
-  StatusCode GetFullMatchedShowers( std::vector<const PandoraPlus::CaloBarShower*>& barShowerXCol, std::vector<const PandoraPlus::CaloBarShower*>& barShowerYCol, std::vector<PandoraPlus::TransShower*>& outshCol );
-  StatusCode GetMatchedShowersL0(const PandoraPlus::CaloBarShower* barShowerX, const PandoraPlus::CaloBarShower* barShowerY, PandoraPlus::TransShower* outsh); //1*1
-  StatusCode GetMatchedShowersL1(const PandoraPlus::CaloBarShower* shower1, std::vector<const PandoraPlus::CaloBarShower*>& showerNCol, std::vector<PandoraPlus::TransShower*>& outshCol ); //1*N
-  StatusCode GetMatchedShowersL2(std::vector<const PandoraPlus::CaloBarShower*>& barShowerXCol, std::vector<const PandoraPlus::CaloBarShower*>& barShowerYCol, std::vector<PandoraPlus::TransShower*>& outshCol ); 
+  StatusCode GetFullMatchedShowers( std::vector<const PandoraPlus::Calo1DCluster*>& barShowerXCol, std::vector<const PandoraPlus::Calo1DCluster*>& barShowerYCol, std::vector<PandoraPlus::TransShower*>& outshCol );
+  StatusCode GetMatchedShowersL0(const PandoraPlus::Calo1DCluster* barShowerX, const PandoraPlus::Calo1DCluster* barShowerY, PandoraPlus::TransShower* outsh); //1*1
+  StatusCode GetMatchedShowersL1(const PandoraPlus::Calo1DCluster* shower1, std::vector<const PandoraPlus::Calo1DCluster*>& showerNCol, std::vector<PandoraPlus::TransShower*>& outshCol ); //1*N
+  StatusCode GetMatchedShowersL2(std::vector<const PandoraPlus::Calo1DCluster*>& barShowerXCol, std::vector<const PandoraPlus::Calo1DCluster*>& barShowerYCol, std::vector<PandoraPlus::TransShower*>& outshCol ); 
 
-  StatusCode GetMatchedShowersL3(std::vector<const PandoraPlus::CaloBarShower*>& barShowerXCol, std::vector<const PandoraPlus::CaloBarShower*>& barShowerYCol, std::vector<PandoraPlus::TransShower*>& outshCol );
+  StatusCode GetMatchedShowersL3(std::vector<const PandoraPlus::Calo1DCluster*>& barShowerXCol, std::vector<const PandoraPlus::Calo1DCluster*>& barShowerYCol, std::vector<PandoraPlus::TransShower*>& outshCol );
 
-  double** GetClusterChi2Map(std::vector<std::vector<const PandoraPlus::CaloBarShower*>>& barShowerXCol, std::vector<std::vector<const PandoraPlus::CaloBarShower*>>& barShowerYCol);
+  double** GetClusterChi2Map(std::vector<std::vector<const PandoraPlus::Calo1DCluster*>>& barShowerXCol, std::vector<std::vector<const PandoraPlus::Calo1DCluster*>>& barShowerYCol);
 
 private: 
 

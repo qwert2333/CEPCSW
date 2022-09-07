@@ -37,8 +37,8 @@ namespace PandoraPlus{
   }
 
 
-  std::vector<const PandoraPlus::CaloBarShower*> LongiCluster::getBarShowersInLayer(int _layer) const{
-    std::vector<const PandoraPlus::CaloBarShower*> outShowers; outShowers.clear(); 
+  std::vector<const PandoraPlus::Calo1DCluster*> LongiCluster::getBarShowersInLayer(int _layer) const{
+    std::vector<const PandoraPlus::Calo1DCluster*> outShowers; outShowers.clear(); 
     for(int i=0; i<barShowerCol.size(); i++)
       if(barShowerCol[i]->getDlayer()==_layer) outShowers.push_back(barShowerCol[i]);
     return outShowers; 
@@ -136,7 +136,7 @@ namespace PandoraPlus{
     }
     else{
       track->clear(); 
-      double barAngle = (barShowerCol[0]->getModule()+2)*TMath::Pi()/4.;
+      double barAngle = (barShowerCol[0]->getTowerID()[0][0]+2)*TMath::Pi()/4.;
       double posErr = 10./sqrt(12);
       if(barAngle>=TMath::TwoPi()) barAngle = barAngle-TMath::TwoPi();
       track->setBarAngle(barAngle);
@@ -159,7 +159,7 @@ namespace PandoraPlus{
   }
   
 
-  void LongiCluster::addBarShower( const PandoraPlus::CaloBarShower* _shower, int option ){
+  void LongiCluster::addBarShower( const PandoraPlus::Calo1DCluster* _shower, int option ){
     int index = -1;
     for(int i=0; i<barShowerCol.size(); i++)
       if(_shower->getDlayer()==barShowerCol[i]->getDlayer() ){ index=i; break; }
@@ -169,11 +169,10 @@ namespace PandoraPlus{
       //FitAxis();
     }
     else{
-      PandoraPlus::CaloBarShower* newshower = new PandoraPlus::CaloBarShower();
+      PandoraPlus::Calo1DCluster* newshower = new PandoraPlus::Calo1DCluster();
       newshower->setBars( barShowerCol[index]->getBars() );
-      newshower->setSeed( barShowerCol[index]->getSeed() );
-      for(int i=0; i<_shower->getBars().size(); i++) newshower->addBar( _shower->getBars()[i] );
-      newshower->setIDInfo();
+      newshower->setSeeds( barShowerCol[index]->getSeeds() );
+      for(int i=0; i<_shower->getBars().size(); i++) newshower->addUnit( _shower->getBars()[i] );
 
       barShowerCol.erase( barShowerCol.begin()+index );  //WARNING: potential memory leakage! 
       barShowerCol.push_back( newshower );
@@ -188,7 +187,7 @@ namespace PandoraPlus{
     //FitAxis();
   }
 
-  void LongiCluster::RemoveShowers( std::vector<const PandoraPlus::CaloBarShower*>& _showers ){
+  void LongiCluster::RemoveShowers( std::vector<const PandoraPlus::Calo1DCluster*>& _showers ){
     for(int is=0; is<_showers.size(); is++){
       auto iter = std::remove(barShowerCol.begin(), barShowerCol.end(), _showers[is]);
       barShowerCol.erase( iter, barShowerCol.end() );

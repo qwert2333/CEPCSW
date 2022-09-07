@@ -7,9 +7,10 @@ using namespace std;
 namespace PandoraPlus{
 
   void Calo2DCluster::Clear() {
-	m_modules.clear(); 
-    m_parts.clear(); 
-    m_staves.clear();
+    towerID.clear();
+    //m_modules.clear(); 
+    //m_parts.clear(); 
+    //m_staves.clear();
     barUCol.clear();
     barVCol.clear();
     barShowerUCol.clear(); 
@@ -45,48 +46,49 @@ namespace PandoraPlus{
     for(int i=0; i<barVCol.size(); i++) { delete barVCol[i]; barVCol[i]=NULL; }
     for(int i=0; i<barShowerUCol.size(); i++) { delete barShowerUCol[i]; barShowerUCol[i]=NULL; }
     for(int i=0; i<barShowerVCol.size(); i++) { delete barShowerVCol[i]; barShowerVCol[i]=NULL; }
-	std::vector<int>().swap(m_modules);
-    std::vector<int>().swap(m_parts);
-    std::vector<int>().swap(m_staves);
+    //std::vector<int>().swap(m_modules);
+    //std::vector<int>().swap(m_parts);
+    //std::vector<int>().swap(m_staves);
     Clear();
   	}
 
   bool Calo2DCluster::isNeighbor(const PandoraPlus::Calo1DCluster* m_1dcluster) const{
     assert(m_1dcluster->getBars().size() > 0 && getCluster().at(0)->getBars().size()>0 );
-    if(m_1dcluster->getDlayer() == getDlayer()  ){
-      for(int i=0; i<m_1dcluster->getModules().size(); i++){
-		  for(int j=0; j<m_modules.size(); j++){
-        if(m_1dcluster->getModules().at(i)==m_modules.at(j) && m_1dcluster->getParts().at(i)==m_parts.at(j) && m_1dcluster->getStaves().at(i)==m_staves.at(j)){
-          return true;
-        }
-      }
-    }
-    }
+    if(m_1dcluster->getDlayer() != getDlayer()  ) return false; 
+
+    for(int i=0; i<m_1dcluster->getTowerID().size(); i++){
+		for(int j=0; j<towerID.size(); j++){
+      if( m_1dcluster->getTowerID()[i]==towerID[j] ) return true;
+    }}
+    
     return false;
   }
 
  
-  void Calo2DCluster::addCluster(const Calo1DCluster* _1dcluster)
+  void Calo2DCluster::addUnit(const Calo1DCluster* _1dcluster)
   {
     if(_1dcluster->getSlayer()==0) barClusterVCol.push_back(_1dcluster); 
     if(_1dcluster->getSlayer()==1) barClusterUCol.push_back(_1dcluster);
     for(int ib=0; ib<_1dcluster->getBars().size(); ib++) addBar(_1dcluster->getBars()[ib]);
 
-    std::vector<int> m_1dmodules = _1dcluster->getModules();
-    std::vector<int> m_1dparts = _1dcluster->getParts();
-    std::vector<int> m_1dstaves = _1dcluster->getStaves();
-    m_modules.insert(m_modules.end(),m_1dmodules.begin(),m_1dmodules.end());
-    m_parts.insert(m_parts.end(),m_1dparts.begin(),m_1dparts.end());
-    m_staves.insert(m_staves.end(),m_1dstaves.begin(),m_1dstaves.end());
+    std::vector< std::vector<int> > id = _1dcluster->getTowerID();
+    for(int ii=0; ii<id.size(); ii++) 
+      if( find(towerID.begin(), towerID.end(), id[ii])==towerID.end() ) towerID.push_back(id[ii]);
+
+    //std::vector<int> m_1dmodules = _1dcluster->getModules();
+    //std::vector<int> m_1dparts = _1dcluster->getParts();
+    //std::vector<int> m_1dstaves = _1dcluster->getStaves();
+    //m_modules.insert(m_modules.end(),m_1dmodules.begin(),m_1dmodules.end());
+    //m_parts.insert(m_parts.end(),m_1dparts.begin(),m_1dparts.end());
+    //m_staves.insert(m_staves.end(),m_1dstaves.begin(),m_1dstaves.end());
   }
 
-  std::vector<const Calo1DCluster*> Calo2DCluster::getCluster() const
-  { 
-	std::vector<const Calo1DCluster*> m_1dclusters; 
-	m_1dclusters.clear();
-	m_1dclusters.insert(m_1dclusters.end(),barClusterUCol.begin(),barClusterUCol.end());
-	m_1dclusters.insert(m_1dclusters.end(),barClusterVCol.begin(),barClusterVCol.end());
-	return  m_1dclusters;
+  std::vector<const Calo1DCluster*> Calo2DCluster::getCluster() const{ 
+    std::vector<const Calo1DCluster*> m_1dclusters; 
+    m_1dclusters.clear();
+    m_1dclusters.insert(m_1dclusters.end(),barClusterUCol.begin(),barClusterUCol.end());
+    m_1dclusters.insert(m_1dclusters.end(),barClusterVCol.begin(),barClusterVCol.end());
+    return  m_1dclusters;
   }
 	
   std::vector<const CaloUnit*> Calo2DCluster::getBars() const
@@ -107,19 +109,20 @@ namespace PandoraPlus{
 	return results;
   }
 	
-  double Calo2DCluster::getEnergy() const 
-  {
-	double result = 0;
-	std::vector<const Calo1DCluster*> m_1dclusters; 
-	m_1dclusters.clear();
-	m_1dclusters.insert(m_1dclusters.end(),barClusterUCol.begin(),barClusterUCol.end());
-	m_1dclusters.insert(m_1dclusters.end(),barClusterVCol.begin(),barClusterVCol.end());
-	for(int m=0; m<m_1dclusters.size(); m++)
-	{
-		result = result + m_1dclusters.at(m)->getEnergy();
-	}
-	return result;
+  double Calo2DCluster::getEnergy() const {
+    double sumE = 0;
+
+    if(barClusterUCol.size()==0 || barClusterVCol.size()==0){
+      for(int m=0; m<barShowerUCol.size(); m++) sumE += barShowerUCol[m]->getEnergy();
+      for(int m=0; m<barShowerVCol.size(); m++) sumE += barShowerVCol[m]->getEnergy();
+    }
+    else{
+      for(int m=0; m<barClusterUCol.size(); m++) sumE += barClusterUCol[m]->getEnergy();
+      for(int m=0; m<barClusterVCol.size(); m++) sumE += barClusterVCol[m]->getEnergy();
+    }
+    return sumE;
   }
+
 
 };
 #endif

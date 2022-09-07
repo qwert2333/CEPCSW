@@ -68,6 +68,7 @@ protected:
 	TTree* t_SimCont;
 	TTree* t_SimBar;
 	
+  FloatVec m_step_t;  // yyy: time of each step
 	FloatVec m_step_x, m_step_y, m_step_z, m_step_E, m_step_T1, m_step_T2, m_stepBar_x, m_stepBar_y, m_stepBar_z;
 	FloatVec m_simBar_x, m_simBar_y, m_simBar_z, m_simBar_T1, m_simBar_T2, m_simBar_Q1, m_simBar_Q2, m_simBar_dlayer, m_simBar_part, m_simBar_stave, m_simBar_slayer, m_simBar_module;
   std::vector<unsigned long long> m_simBar_cellID;
