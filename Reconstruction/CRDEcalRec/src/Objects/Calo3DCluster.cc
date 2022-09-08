@@ -35,6 +35,7 @@ namespace PandoraPlus{
 
   bool Calo3DCluster::isNeighbor(const PandoraPlus::Calo2DCluster* m_2dcluster) const
   {
+
     //Inner module
     for(int i=0; i<m_2dcluster->getTowerID().size(); i++){
     for(int j=0; j<towerID.size(); j++){
@@ -50,6 +51,16 @@ namespace PandoraPlus{
 
     //Inner module but in adjacent Dlayer
     for(int i=0; i<m_2dclusters.size(); i++){
+      //If not in the same module:
+      bool inSameModule = false; 
+      std::vector<int> ID_module; ID_module.clear();
+      for(int it=0; it<towerID.size(); it++) ID_module.push_back(towerID[it][0]); 
+      for(int it=0; it<m_2dcluster->getTowerID().size(); it++){
+        if( find(ID_module.begin(), ID_module.end(), m_2dcluster->getTowerID()[it][0])!=ID_module.end() ) { inSameModule=true; break; }
+      }
+      if(!inSameModule) continue;
+
+      //If not the adjacent Dlayer: 
       if(fabs(m_2dcluster->getDlayer()-m_2dclusters[i]->getDlayer())>1) continue; 
 
       std::vector<const PandoraPlus::CaloUnit*> m_EdgeBarU_clus1; m_EdgeBarU_clus1.clear(); //Income 2DCluster
