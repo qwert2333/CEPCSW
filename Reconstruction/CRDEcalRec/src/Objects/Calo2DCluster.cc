@@ -112,7 +112,7 @@ namespace PandoraPlus{
   double Calo2DCluster::getEnergy() const {
     double sumE = 0;
 
-    if(barClusterUCol.size()==0 || barClusterVCol.size()==0){
+    if(barClusterUCol.size()==0 && barClusterVCol.size()==0){
       for(int m=0; m<barShowerUCol.size(); m++) sumE += barShowerUCol[m]->getEnergy();
       for(int m=0; m<barShowerVCol.size(); m++) sumE += barShowerVCol[m]->getEnergy();
     }
