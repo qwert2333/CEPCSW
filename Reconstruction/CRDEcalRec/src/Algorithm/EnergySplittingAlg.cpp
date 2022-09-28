@@ -149,7 +149,7 @@ for(int a=0; a<m_showers[as]->getBars().size(); a++)
     }//End loop 2DCluster (Layer)
 
 
-
+/*
 cout<<"  After Clustering and cluster splitting in each layer: check BarShowers in Layers:"<<endl;
 for(int a=0; a<m_2DclusCol.size(); a++){
   printf("    In 2DClus #%d: Layer %d, tower size: %d, tower ID ", a, m_2DclusCol[a]->getDlayer(), m_2DclusCol[a]->getTowerID().size() );
@@ -169,7 +169,7 @@ for(int a=0; a<m_2DclusCol.size(); a++){
   for(int ic=0; ic<m_2DclusCol[a]->getShowerVCol().size(); ic++) cout<<m_2DclusCol[a]->getShowerVCol()[ic]->getEnergy()<<"  ";
   cout<<endl;
 }
-
+*/
     //Longitudinal linking: update clusters' energy.
 
     std::vector<const LongiCluster*> m_newLongiClusUCol; m_newLongiClusUCol.clear();
@@ -260,7 +260,7 @@ for(int a=0; a<m_newLongiClusVCol.size(); a++){
 
     //Split 3DCluster to towers for later matching. 
     Split3DClusterToTowers( p_3DClusters->at(it) );  
-
+/*
 cout<<"  After Cluster splitting: tower size "<<p_3DClusters->at(it)->getTowers().size()<<endl;
 for(int itw=0; itw<p_3DClusters->at(it)->getTowers().size(); itw++){
 const Calo3DCluster* p_tower = p_3DClusters->at(it)->getTowers()[itw];
@@ -301,7 +301,7 @@ for(int il=0; il<p_tower->getLongiClusterVCol("ESLongiCluster").size(); il++){
   }
 }
 }
-
+*/
 
 
   }

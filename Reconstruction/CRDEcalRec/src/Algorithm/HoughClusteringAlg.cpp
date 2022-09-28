@@ -604,8 +604,8 @@ cout<<endl;
   double rho_width = m_Hspace.getRhoBinWidth();
 
 
-std::vector<const PandoraPlus::LongiCluster*> tmp_clusCol; tmp_clusCol.clear(); 
-cout<<"  Transform2Clusters: input hill size: "<<m_hills.size()<<endl;
+//std::vector<const PandoraPlus::LongiCluster*> tmp_clusCol; tmp_clusCol.clear(); 
+//cout<<"  Transform2Clusters: input hill size: "<<m_hills.size()<<endl;
 
   for(int ih=0; ih<m_hills.size(); ih++){
     PandoraPlus::LongiCluster* m_clus = new PandoraPlus::LongiCluster();
@@ -645,7 +645,7 @@ cout<<"  Transform2Clusters: input hill size: "<<m_hills.size()<<endl;
           m_clus->setHoughPars(ave_alpha, ave_rho );
           }
     }}
-tmp_clusCol.push_back(m_clus);
+//tmp_clusCol.push_back(m_clus);
 
     //if(m_clus.getBarShowers().size()<settings.th_peak) continue;
     //if(settings.fl_continuetrk && !m_clus.isContinue()) continue;
@@ -660,9 +660,9 @@ tmp_clusCol.push_back(m_clus);
 
   }
 
-cout<<"  Transform2Cluster: track removal cutflow: "<<endl;
-cout<<"    Initial: "<<tmp_clusCol.size()<<endl;
-cout<<"    After >= 3 hits "<<m_clusCol.size()<<endl;
+//cout<<"  Transform2Cluster: track removal cutflow: "<<endl;
+//cout<<"    Initial: "<<tmp_clusCol.size()<<endl;
+//cout<<"    After >= 3 hits "<<m_clusCol.size()<<endl;
 /*
 cout<<"  Print clusters: "<<endl;
 for(int ic=0; ic<tmp_clusCol.size(); ic++){
@@ -673,14 +673,14 @@ for(int ic=0; ic<tmp_clusCol.size(); ic++){
   cout<<endl;
 }
 cout<<endl;
-*/
+
 cout<<"  Print clusters: "<<endl;
 for(int ic=0; ic<m_clusCol.size(); ic++)
   printf("    Nhit %d, Energy %.2f, HoughPar (%.2f, %.2f) \n",
           m_clusCol[ic]->getBarShowers().size(), m_clusCol[ic]->getEnergy(), 
           m_clusCol[ic]->getHoughAlpha(), m_clusCol[ic]->getHoughRho() );
 cout<<endl;
-
+*/
 
   CleanClusters(m_clusCol);
 
@@ -732,7 +732,7 @@ StatusCode HoughClusteringAlg::CleanClusters( std::vector<PandoraPlus::LongiClus
 
   }
 
-
+/*
 cout<<"    After isolated hits removal: "<<m_longiClusCol.size()<<endl;
 for(int il=0; il<m_longiClusCol.size(); il++){
   printf("    Clus#%d: Hough Par = (%.3f, %.3f, %.3f), shower layers: \n", il, m_longiClusCol[il]->getHoughAlpha(), m_longiClusCol[il]->getHoughRho(), m_longiClusCol[il]->getHoughIntercept());
@@ -745,7 +745,7 @@ for(int il=0; il<m_longiClusCol.size(); il++){
                                                                      m_longiClusCol[il]->getBarShowers()[is] );
   cout<<endl;
 }
-
+*/
 
   //Remove the repeated tracks
   for(int ic=0; ic<m_longiClusCol.size(); ic++){
@@ -763,7 +763,7 @@ for(int il=0; il<m_longiClusCol.size(); il++){
     }
   }}
 
-
+/*
 cout<<"    After subset removal: "<<m_longiClusCol.size()<<endl;
 for(int il=0; il<m_longiClusCol.size(); il++){
   printf("    Clus#%d: Hough Par = (%.3f, %.3f, %.3f), E = %.3f, shower layers: \n", il, m_longiClusCol[il]->getHoughAlpha(), m_longiClusCol[il]->getHoughRho(), m_longiClusCol[il]->getHoughIntercept(), m_longiClusCol[il]->getEnergy());
@@ -775,7 +775,7 @@ for(int il=0; il<m_longiClusCol.size(); il++){
                                                                      m_longiClusCol[il]->getBarShowers()[is]->getEnergy() );
   cout<<endl;
 }
-
+*/
 
   //Cut on energy and intercept
   for(int ic=0; ic<m_longiClusCol.size(); ic++){
@@ -785,7 +785,7 @@ for(int il=0; il<m_longiClusCol.size(); il++){
       ic--;
     }
   }
-cout<<"    After energy and intercetp cut: "<<m_longiClusCol.size()<<endl;
+//cout<<"    After energy and intercetp cut: "<<m_longiClusCol.size()<<endl;
 
 
   //Overlap with other clusters: Iter 1. 
@@ -816,7 +816,7 @@ cout<<"    After energy and intercetp cut: "<<m_longiClusCol.size()<<endl;
     }
 
   }}
-cout<<"    After 1st iter tagging: "<<m_longiClusCol.size()<<endl;
+//cout<<"    After 1st iter tagging: "<<m_longiClusCol.size()<<endl;
 
 
   //Overlap with other clusters: Iter 2. 
@@ -847,7 +847,7 @@ cout<<"    After 1st iter tagging: "<<m_longiClusCol.size()<<endl;
     }
 
   }}
-cout<<"    After 2nd iter tagging: "<<m_longiClusCol.size()<<endl;
+//cout<<"    After 2nd iter tagging: "<<m_longiClusCol.size()<<endl;
 
 /*
 cout<<"  Print clusters: "<<endl;

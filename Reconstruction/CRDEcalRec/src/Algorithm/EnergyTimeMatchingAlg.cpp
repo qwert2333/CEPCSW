@@ -76,6 +76,7 @@ cout<<"  Input pattern: "<<NclusX<<" / "<<NclusY<<endl;
       else{ 
         XYClusterMatchingL3(m_longiClUCol, m_longiClVCol, tmp_clusters);
       }
+cout<<"  EnergyTimeMatchingAlg: After cluster matching. 3D cluster size: "<<tmp_clusters.size()<<endl;
 
       //Clean empty CaloClusters
       for(int ic=0; ic<tmp_clusters.size(); ic++){
@@ -238,7 +239,7 @@ StatusCode EnergyTimeMatchingAlg::XYClusterMatchingL1( const PandoraPlus::LongiC
                                                        std::vector<const PandoraPlus::LongiCluster*>& m_longiClN, 
                                                        std::vector<PandoraPlus::CaloCluster*>& m_clusters )
 {
-/*
+
 cout<<"  Input LongiCluster: "<<endl;
 for(int ic=0; ic<m_longiClN.size(); ic++){
 for(int is=0; is<m_longiClN[ic]->getBarShowers().size(); is++){
@@ -257,7 +258,7 @@ printf("    (%.3f, %.3f, %.3f, %.3f) \t", m_longiCl1->getBarShowers()[is]->getPo
                                           m_longiCl1->getBarShowers()[is]->getEnergy() );
 }
 cout<<endl;
-*/
+
 
   m_clusters.clear(); 
   m_clusters.resize(m_longiClN.size());
@@ -291,7 +292,7 @@ cout<<endl;
     std::vector<const PandoraPlus::Calo1DCluster*> m_showerXcol = map_showersXinlayer[layerindex[il]];
     std::vector<const PandoraPlus::Calo1DCluster*> m_showerYcol = map_showersYinlayer[layerindex[il]];
 
-//cout<<"    XYClusterMatchingL1: In Layer #"<<layerindex[il]<<": (X, Y) = ("<<m_showerXcol.size()<<", "<<m_showerYcol.size()<<") "<<endl;
+cout<<"    XYClusterMatchingL1: In Layer #"<<layerindex[il]<<": (X, Y) = ("<<m_showerXcol.size()<<", "<<m_showerYcol.size()<<") "<<endl;
 
     std::vector<PandoraPlus::TransShower*> m_showerinlayer; m_showerinlayer.clear();
 
@@ -316,7 +317,7 @@ cout<<endl;
 
 
   for(int il=0; il<layerindex.size(); il++){
-//cout<<"    In Layer #"<<layerindex[il]<<":  TransShower size = "<<map_2Dshowersinlayer[layerindex[il]].size()<<endl;
+cout<<"    In Layer #"<<layerindex[il]<<":  TransShower size = "<<map_2Dshowersinlayer[layerindex[il]].size()<<endl;
 
   for(int is=0; is<map_2Dshowersinlayer[layerindex[il]].size(); is++){
 
@@ -334,7 +335,7 @@ cout<<endl;
     for(int jc=0; jc<m_longiClN[ic]->getBarShowers().size() && !fl_foundsh; jc++){
       if(m_barshower==m_longiClN[ic]->getBarShowers()[jc]) {index_longiclus=ic; fl_foundsh=true; break; }
     }}
-//cout<<"      Found LongiShower: "<<index_longiclus<<endl;
+cout<<"      Found LongiShower: "<<index_longiclus<<endl;
 
     if(index_longiclus<0){ std::cout<<"WARNING: did not find properate longitudinal cluster! "<<std::endl; continue; }
 
@@ -347,8 +348,9 @@ cout<<endl;
   }}
 
   for(int ic=0; ic<m_clusters.size(); ic++){
-    if(slayer==0) m_clusters[ic]->setLongiClusters(m_longiCl1, m_longiClN[ic] );
-    else m_clusters[ic]->setLongiClusters(m_longiClN[ic], m_longiCl1 );
+    if(!m_clusters[ic]) continue;
+    if(slayer==0) m_clusters[ic]->setLongiClusters( m_longiCl1, m_longiClN[ic] );
+    else          m_clusters[ic]->setLongiClusters( m_longiClN[ic], m_longiCl1 );
   }
 
   return StatusCode::SUCCESS;
