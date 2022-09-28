@@ -1,6 +1,6 @@
 from Gaudi.Configuration import *
 Nskip = 0
-Nevt = 1
+Nevt = 5
 
 ############## GeomSvc #################
 geometry_option = "CRD_o1_v01/CRD_o1_v01.xml"
@@ -23,11 +23,11 @@ geomsvc.compact = geometry_path
 from Configurables import k4DataSvc
 podioevent = k4DataSvc("EventDataSvc")
 podioevent.inputs = [
-"Sim_Gam10GeV_Part23_Stave6_EcalOnly.root"
-#"CRD_SimGamMu_FullDet.root"
+#"SimSamples/CRD_SimMu_Module0_7_FullDet.root"
+#"Sim_Gam10GeV_Part23_Stave6_EcalOnly.root"
 #"SimSamples/CRD_SimMu_FullDet_200evt.root"
 #"CRD_Sim2Gam_FullDet.root"
-#"SimSamples/CRD_Sim2Gam_FullDet_200evt.root"
+"SimSamples/CRD_Sim2Gam_FullDet_200evt.root"
 #"SimSamples/CRD_SimGamPi_FullDet.root"
 ]
 ##########################################
@@ -57,7 +57,7 @@ EcalDigi.TimeResolution = 0.5        #unit: ns
 EcalDigi.EnergyThreshold = 0.0001   #0.1 MeV
 EcalDigi.ChargeThresholdFrac = 0.05
 EcalDigi.Debug=1
-EcalDigi.OutFileName = "testTree.root"
+EcalDigi.OutFileName = "testTree_mu.root"
 #########################################
 
 ##HCAL##
@@ -83,7 +83,7 @@ PandoraPlusPFAlg.BField = 3.
 PandoraPlusPFAlg.Debug = 0
 PandoraPlusPFAlg.SkipEvt = Nskip
 PandoraPlusPFAlg.WriteAna = 1
-PandoraPlusPFAlg.AnaFileName = "testRec.root"
+PandoraPlusPFAlg.AnaFileName = "testRec_mu_CoverModule.root"
 ##----Readin collections----
 PandoraPlusPFAlg.MCParticleCollection = "MCParticle"
 PandoraPlusPFAlg.TrackCollections = ["MarlinTrkTracks"]
@@ -96,19 +96,19 @@ PandoraPlusPFAlg.HCalReadOutNames = ["HcalBarrelCollection"]
 
 PandoraPlusPFAlg.AlgList = ["ExampleAlg", 
                             "GlobalClusteringAlg", 
-                            "LocalMaxFindingAlg", 
+                            "LocalMaxFindingAlg",
                             "HoughClusteringAlg", 
                             "ConeClustering2DAlg", 
                             "EnergySplittingAlg"  ]
 PandoraPlusPFAlg.AlgParNames = [ ["Par1", "Par2"], 
                                  ["Par1"], 
-                                 ["Eth_localMax", "Eth_MaxWithNeigh"],
+                                 ["Eth_localMax", "Eth_MaxWithNeigh"], 
                                  ["th_Layers"],
                                  ["th_beginLayer"],
                                  [""]  ]
 PandoraPlusPFAlg.AlgParTypes = [ ["double", "double"],
                                  ["double"],
-                                 ["double", "double"], 
+                                 ["double", "double"],
                                  ["double"],
                                  ["double"], 
                                  [""]  ]

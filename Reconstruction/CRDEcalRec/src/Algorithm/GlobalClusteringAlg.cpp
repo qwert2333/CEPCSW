@@ -26,21 +26,23 @@ cout<<"  Clustering bars to 1DClusters: "<<endl;
   Clustering(m_bars, m_1dclusters);
 cout<<"  1DCluster size: "<<m_1dclusters.size()<<".  Clustering 1DClusters to 2DClusters: "<<endl;
   Clustering(m_1dclusters, m_2dclusters);
-cout<<"  2DCluster size: "<<m_2dclusters.size()<<".  Clustering 1DClusters to 2DClusters: "<<endl;
+cout<<"  2DCluster size: "<<m_2dclusters.size()<<".  Clustering 2DClusters to 3DClusters: "<<endl;
   Clustering(m_2dclusters, m_3dclusters);
 cout<<"  3DCluster size: "<<m_3dclusters.size()<<endl;
+
+
 
 /*
 cout<<endl;
 cout<<"  Check 3DClusters"<<endl;
 for(int i3d=0; i3d<m_3dclusters.size(); i3d++){
-  printf("    3DClus #%d: energy %.2f, 2DClus size %d, tower size %d, towerID: ", i3d, m_3dclusters[i3d]->getEnergy(), m_3dclusters[i3d]->getCluster().size(), m_3dclusters[i3d]->getTowerID().size() );
+  printf("    3DClus #%d: energy %.5f, 2DClus size %d, tower size %d, towerID: ", i3d, m_3dclusters[i3d]->getEnergy(), m_3dclusters[i3d]->getCluster().size(), m_3dclusters[i3d]->getTowerID().size() );
   for(int it=0; it<m_3dclusters[i3d]->getTowerID().size(); it++) printf("[%d, %d, %d], ", m_3dclusters[i3d]->getTowerID()[it][0],  m_3dclusters[i3d]->getTowerID()[it][1], m_3dclusters[i3d]->getTowerID()[it][2] );
   cout<<endl;
   cout<<"    Check 2DClus in this 3D: "<<endl;
   for(int i2d=0; i2d<m_3dclusters[i3d]->getCluster().size(); i2d++){
     const Calo2DCluster* p_clus = m_3dclusters[i3d]->getCluster()[i2d];
-    printf("      2DClus #%d: Layer %d, energy %.2f, 1DClus size (%d, %d), tower size %d, towerID: ", i2d, p_clus->getDlayer(), p_clus->getEnergy(), p_clus->getClusterU().size(), p_clus->getClusterV().size(), p_clus->getTowerID().size() );
+    printf("      2DClus #%d: Layer %d, energy %.5f, 1DClus size (%d, %d), tower size %d, towerID: ", i2d, p_clus->getDlayer(), p_clus->getEnergy(), p_clus->getClusterU().size(), p_clus->getClusterV().size(), p_clus->getTowerID().size() );
     for(int it=0; it<p_clus->getTowerID().size(); it++) printf("[%d, %d, %d],", p_clus->getTowerID()[it][0], p_clus->getTowerID()[it][1], p_clus->getTowerID()[it][2]);
     cout<<endl;
     p_clus = nullptr;
@@ -49,6 +51,8 @@ cout<<endl;
 }
 cout<<endl;
 */
+
+
   for(int i1d=0; i1d<m_1dclusters.size(); i1d++) m_datacol.bk_Cluster1DCol.push_back(m_1dclusters.at(i1d));
   for(int i2d=0; i2d<m_2dclusters.size(); i2d++) m_datacol.bk_Cluster2DCol.push_back(m_2dclusters.at(i2d));
   for(int i3d=0; i3d<m_3dclusters.size(); i3d++) m_datacol.bk_Cluster3DCol.push_back(m_3dclusters.at(i3d));

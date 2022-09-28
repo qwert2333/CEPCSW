@@ -41,20 +41,24 @@ from Configurables import StdHepRdr
 from Configurables import SLCIORdr
 from Configurables import HepMCRdr
 from Configurables import GenPrinter
+'''
 gun = GtGunTool("GtGunTool")
-gun.Particles = ["gamma", "mu-"]
+gun.Particles = ["mu-"]
 #gun.Particles = ["nu_e"]
-gun.PositionXs = [0., 0.]
-gun.PositionYs = [0., 0.]
-gun.PositionZs = [0., 0.]
-gun.EnergyMins = [10.,30. ] # GeV
-gun.EnergyMaxs = [10.,30.] # GeV
-gun.ThetaMins  = [90.,89]    # deg
-gun.ThetaMaxs  = [90.,89]  # deg
-gun.PhiMins    = [0., 0.]    # deg
-gun.PhiMaxs    = [0., 0.]  # deg
-# stdheprdr = StdHepRdr("StdHepRdr")
-# stdheprdr.Input = "/cefs/data/stdhep/CEPC250/2fermions/E250.Pbhabha.e0.p0.whizard195/bhabha.e0.p0.00001.stdhep"
+gun.PositionXs = [0. ]
+gun.PositionYs = [0. ]
+gun.PositionZs = [0. ]
+gun.EnergyMins = [20 ] # GeV
+gun.EnergyMaxs = [20 ] # GeV
+gun.ThetaMins  = [90 ]    # deg
+gun.ThetaMaxs  = [90,]  # deg
+gun.PhiMins    = [68.7 ]    # deg
+gun.PhiMaxs    = [68.7 ]  # deg
+'''
+
+stdheprdr = StdHepRdr("StdHepRdr")
+stdheprdr.Input = "/cefs/data/stdhep/CEPC240/higgs/exclusive/E240.Pnnh_aa_wo_ISR.e0.p0.whizard195/nnh_aa_wo_ISR.e0.p0.00001.stdhep"
+
 # lciordr = SLCIORdr("SLCIORdr")
 # lciordr.Input = "/cefs/data/stdhep/lcio250/signal/Higgs/E250.Pbbh.whizard195/E250.Pbbh_X.e0.p0.whizard195/Pbbh_X.e0.p0.00001.slcio"
 # hepmcrdr = HepMCRdr("HepMCRdr")
@@ -63,9 +67,9 @@ gun.PhiMaxs    = [0., 0.]  # deg
 genprinter = GenPrinter("GenPrinter")
 
 genalg = GenAlgo("GenAlgo")
-genalg.GenTools = ["GtGunTool"]
-#genalg.GenTools = ["StdHepRdr"]
-# genalg.GenTools = ["StdHepRdr", "GenPrinter"]
+#genalg.GenTools = ["GtGunTool"]
+genalg.GenTools = ["StdHepRdr"]
+#genalg.GenTools = ["StdHepRdr", "GenPrinter"]
 # genalg.GenTools = ["SLCIORdr", "GenPrinter"]
 # genalg.GenTools = ["HepMCRdr", "GenPrinter"]
 
@@ -260,7 +264,7 @@ elif dedxoption == "BetheBlochEquationDedxSimTool":
 # output
 from Configurables import PodioOutput
 out = PodioOutput("outputalg")
-out.filename = "CRD_SimGamMu_FullDet.root"
+out.filename = "CRD_E240_nnHaa_FullDet.root"
 out.outputCommands = ["keep *"]
 
 # ApplicationMgr
@@ -270,7 +274,7 @@ ApplicationMgr(
     TopAlg = [genalg, detsimalg, digiVXD, digiSIT, digiSET, digiFTD, spSET, digiDC, tracking, forward, subset, full, out],
     #TopAlg = [genalg, detsimalg, out],
     EvtSel = 'NONE',
-    EvtMax = 20,
+    EvtMax = 10,
     ExtSvc = [rndmengine, rndmgensvc, dsvc, evtseeder, geosvc, gearsvc, tracksystemsvc],
     #ExtSvc = [rndmengine, rndmgensvc, dsvc, geosvc],
     OutputLevel=INFO

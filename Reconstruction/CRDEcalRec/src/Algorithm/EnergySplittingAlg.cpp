@@ -7,7 +7,8 @@ StatusCode EnergySplittingAlg::ReadSettings(Settings& m_settings){
   settings = m_settings;
 
   if(settings.map_floatPars.find("th_split")==settings.map_floatPars.end()) settings.map_floatPars["th_split"] = -1;
-  if(settings.map_floatPars.find("Eth_SeedAbs")==settings.map_floatPars.end()) settings.map_floatPars["Eth_SeedAbs"] = 0.005;
+  if(settings.map_floatPars.find("Eth_Seed")==settings.map_floatPars.end()) settings.map_floatPars["Eth_Seed"] = 0.005;
+  if(settings.map_floatPars.find("Eth_ShowerAbs")==settings.map_floatPars.end()) settings.map_floatPars["Eth_Shower"] = 0.005;
   if(settings.map_stringPars.find("OutputLongiClusName")==settings.map_stringPars.end()) settings.map_stringPars["OutputLongiClusName"] = "ESLongiCluster";
 
   return StatusCode::SUCCESS;
@@ -62,6 +63,7 @@ StatusCode EnergySplittingAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
       if(minLayerV>m_LongiClusVCol[ic]->getBeginningDlayer()) minLayerV = m_LongiClusVCol[ic]->getBeginningDlayer();
       if(maxLayerV<m_LongiClusVCol[ic]->getEndDlayer()) maxLayerV = m_LongiClusVCol[ic]->getEndDlayer();
     }
+printf("  Layer range from LongiClusters: [%d, %d] / [%d, %d] \n", minLayerU, maxLayerU, minLayerV, maxLayerV);
 
 
     //Make clusters and shwoers in each layer:
@@ -130,14 +132,14 @@ for(int a=0; a<m_showers[as]->getBars().size(); a++)
 */
         m_barShowerVCol.insert( m_barShowerVCol.end(), m_showers.begin(), m_showers.end() );
       }
-/*
-printf("  After splitting in Layer %d: shower energy U:", dlayer);
-for(int a=0; a<m_barShowerUCol.size(); a++) cout<<m_barShowerUCol[a]->getEnergy()<<", ";
-cout<<". V: ";
-for(int a=0; a<m_barShowerVCol.size(); a++) cout<<m_barShowerVCol[a]->getEnergy()<<", ";
-cout<<endl;
-cout<<endl;
-*/
+
+//printf("  After splitting in Layer %d: shower energy U:", dlayer);
+//for(int a=0; a<m_barShowerUCol.size(); a++) cout<<m_barShowerUCol[a]->getEnergy()<<", ";
+//cout<<". V: ";
+//for(int a=0; a<m_barShowerVCol.size(); a++) cout<<m_barShowerVCol[a]->getEnergy()<<", ";
+//cout<<endl;
+//cout<<endl;
+
       m_2DclusCol[ib]->setShowerUCol( m_barShowerUCol );
       m_2DclusCol[ib]->setShowerVCol( m_barShowerVCol );     
 
@@ -146,21 +148,28 @@ cout<<endl;
 
     }//End loop 2DCluster (Layer)
 
-//cout<<"  Print energys for 2DClusters: "<<endl;
-//for(int ic=0; ic<m_2DclusCol.size(); ic++) printf("Layer %d: E = %.3f (%.3f) \n ",m_2DclusCol[ic]->getDlayer(), m_2DclusCol[ic]->getEnergy(), m_2DclusCol[ic]->getEnergy1() );
-//cout<<endl;
 
 
-/*
 cout<<"  After Clustering and cluster splitting in each layer: check BarShowers in Layers:"<<endl;
 for(int a=0; a<m_2DclusCol.size(); a++){
   printf("    In 2DClus #%d: Layer %d, tower size: %d, tower ID ", a, m_2DclusCol[a]->getDlayer(), m_2DclusCol[a]->getTowerID().size() );
   for(int id=0; id<m_2DclusCol[a]->getTowerID().size(); id++) 
     printf("[%d, %d, %d], ", m_2DclusCol[a]->getTowerID()[id][0], m_2DclusCol[a]->getTowerID()[id][1], m_2DclusCol[a]->getTowerID()[id][2]);
   cout<<endl;
-  printf("    BarShowerSize (%d, %d) \n", m_2DclusCol[a]->getShowerUCol().size(), m_2DclusCol[a]->getShowerVCol().size());
+  cout<<"    Cluster U energy: ";
+  for(int ic=0; ic<m_2DclusCol[a]->getClusterU().size(); ic++) cout<<m_2DclusCol[a]->getClusterU()[ic]->getEnergy()<<"  ";
+  cout<<endl;
+  cout<<"    Shower U energy:  ";
+  for(int ic=0; ic<m_2DclusCol[a]->getShowerUCol().size(); ic++) cout<<m_2DclusCol[a]->getShowerUCol()[ic]->getEnergy()<<"  ";
+  cout<<endl;
+  cout<<"    Cluster V energy: ";
+  for(int ic=0; ic<m_2DclusCol[a]->getClusterV().size(); ic++) cout<<m_2DclusCol[a]->getClusterV()[ic]->getEnergy()<<"  ";
+  cout<<endl;
+  cout<<"    Shower V energy:  ";
+  for(int ic=0; ic<m_2DclusCol[a]->getShowerVCol().size(); ic++) cout<<m_2DclusCol[a]->getShowerVCol()[ic]->getEnergy()<<"  ";
+  cout<<endl;
 }
-*/
+
     //Longitudinal linking: update clusters' energy.
 
     std::vector<const LongiCluster*> m_newLongiClusUCol; m_newLongiClusUCol.clear();
@@ -251,7 +260,7 @@ for(int a=0; a<m_newLongiClusVCol.size(); a++){
 
     //Split 3DCluster to towers for later matching. 
     Split3DClusterToTowers( p_3DClusters->at(it) );  
-/*
+
 cout<<"  After Cluster splitting: tower size "<<p_3DClusters->at(it)->getTowers().size()<<endl;
 for(int itw=0; itw<p_3DClusters->at(it)->getTowers().size(); itw++){
 const Calo3DCluster* p_tower = p_3DClusters->at(it)->getTowers()[itw];
@@ -292,7 +301,7 @@ for(int il=0; il<p_tower->getLongiClusterVCol("ESLongiCluster").size(); il++){
   }
 }
 }
-*/
+
 
 
   }
@@ -424,14 +433,19 @@ for(int ic=0; ic<m_3dcluster->getCluster().size(); ic++){
                               m_3dcluster->getCluster()[ic]->getShowerVCol()[is] );
   cout<<endl;
 }
+*/
 
 cout<<"Split3DClusterToTowers: Get LongiCluster U: "<<m_LongiClusterUCol.size()<<", V: "<<m_LongiClusterVCol.size()<<endl;
 for(int il=0; il<m_LongiClusterUCol.size(); il++){
   printf("  Check LongiClusterU #%d: shower size %d \n", il, m_LongiClusterUCol[il]->getBarShowers().size());
   cout<<"    BarShower: "<<endl;
   for(int is=0; is<m_LongiClusterUCol[il]->getBarShowers().size(); is++)
-    printf(" [%d, %d, %p], \n", m_LongiClusterUCol[il]->getBarShowers()[is]->getDlayer(),
+    printf(" [%d, %d (%d, %d, %d, %d), %p], \n", m_LongiClusterUCol[il]->getBarShowers()[is]->getDlayer(),
                               m_LongiClusterUCol[il]->getBarShowers()[is]->getTowerID().size(),
+                              m_LongiClusterUCol[il]->getBarShowers()[is]->getTowerID()[0][0],
+                              m_LongiClusterUCol[il]->getBarShowers()[is]->getTowerID()[0][1],
+                              m_LongiClusterUCol[il]->getBarShowers()[is]->getTowerID()[0][2],
+                              m_LongiClusterUCol[il]->getBarShowers()[is]->getDlayer(),
                               m_LongiClusterUCol[il]->getBarShowers()[is] );
   cout<<endl;
 }
@@ -440,12 +454,16 @@ for(int il=0; il<m_LongiClusterVCol.size(); il++){
   printf("  Check LongiClusterV #%d: shower size %d \n ", il, m_LongiClusterVCol[il]->getBarShowers().size());
   cout<<"    BarShower: "<<endl;
   for(int is=0; is<m_LongiClusterVCol[il]->getBarShowers().size(); is++)
-    printf(" [%d, %d, %p], \n", m_LongiClusterVCol[il]->getBarShowers()[is]->getDlayer(),
+    printf(" [%d, %d (%d, %d, %d, %d), %p], \n", m_LongiClusterVCol[il]->getBarShowers()[is]->getDlayer(),
                               m_LongiClusterVCol[il]->getBarShowers()[is]->getTowerID().size(),
+                              m_LongiClusterVCol[il]->getBarShowers()[is]->getTowerID()[0][0],
+                              m_LongiClusterVCol[il]->getBarShowers()[is]->getTowerID()[0][1],
+                              m_LongiClusterVCol[il]->getBarShowers()[is]->getTowerID()[0][2],
+                              m_LongiClusterVCol[il]->getBarShowers()[is]->getDlayer(),
                               m_LongiClusterVCol[il]->getBarShowers()[is] );
   cout<<endl;
 }
-*/
+
 
 
   std::map<std::vector<int>, std::vector<const PandoraPlus::Calo2DCluster*> > map_2DCluster;
@@ -623,8 +641,7 @@ for(auto iter:barShowerVMap) {
 
   }
 
-//cout<<"  Start Split LongiClusterU"<<endl;
-
+cout<<"  Start Split LongiClusterU"<<endl;
   //Split LongiClusterU
   for(int il=0; il<m_LongiClusterUCol.size(); il++){
     if(m_LongiClusterUCol[il]->getBarShowers().size()==0) {std::cout<<"WARNING: Have an empty LongiCluster! Skip it! "<<std::endl; continue;}
@@ -632,13 +649,19 @@ for(auto iter:barShowerVMap) {
 //printf("    LCluster #%d: shower size %d. ", il, m_LongiClusterUCol[il]->getBarShowers().size());
 
     bool fl_coverTower = false; 
-    int nTowerMax = -99;
+    std::vector< std::vector<int> > tmp_towerIDCol; tmp_towerIDCol.clear();
     for(int ib=0; ib<m_LongiClusterUCol[il]->getBarShowers().size(); ib++){
-      int m_ntower = m_LongiClusterUCol[il]->getBarShowers()[ib]->getTowerID().size();
+      std::vector< std::vector<int> > tmp_id = m_LongiClusterUCol[il]->getBarShowers()[ib]->getTowerID();
+      int m_ntower = tmp_id.size();
       if( m_ntower>1 )  fl_coverTower=true; 
-      if(m_ntower>nTowerMax) nTowerMax=m_ntower; 
+      tmp_towerIDCol.insert( tmp_towerIDCol.end(), tmp_id.begin(), tmp_id.end() );
     }
-//cout<<" Cover tower: "<<fl_coverTower<<", tower size "<<nTowerMax<<endl;
+    std::sort( tmp_towerIDCol.begin(), tmp_towerIDCol.end() );
+    auto iter_id = std::unique( tmp_towerIDCol.begin(), tmp_towerIDCol.end() );
+    tmp_towerIDCol.erase( iter_id, tmp_towerIDCol.end() );
+    if(tmp_towerIDCol.size()>1) fl_coverTower=true;
+
+cout<<" Cover tower: "<<fl_coverTower<<", tower size "<<tmp_towerIDCol.size()<<endl;
 
     //LongiCluster does not cover tower: 
     if(!fl_coverTower){
@@ -680,31 +703,42 @@ for(auto iter:barShowerVMap) {
 
       p_shower = nullptr;
     }
+
+    //Connect cousins
     if(tmp_LongiClusMaps.size()>1){
-      std::map<std::vector<int>, PandoraPlus::LongiCluster* >::iterator iter; iter = tmp_LongiClusMaps.begin();
-      int count = 0;
-      for(iter; iter!=tmp_LongiClusMaps.end() && count<tmp_LongiClusMaps.size()-1; iter++, count++){
-        std::map<std::vector<int>, PandoraPlus::LongiCluster* >::iterator iter1 = iter; ++iter1; 
-        for(iter1; iter1!=tmp_LongiClusMaps.end(); iter1++) iter->second->addCousinCluster(iter1->second);
+      std::map<std::vector<int>, PandoraPlus::LongiCluster* >::iterator iter = tmp_LongiClusMaps.begin();
+      for(iter; iter!=tmp_LongiClusMaps.end(); iter++){
+        std::map<std::vector<int>, PandoraPlus::LongiCluster* >::iterator iter1 = tmp_LongiClusMaps.begin();
+        for(iter1; iter1!=tmp_LongiClusMaps.end(); iter1++)
+          if(iter!=iter1) iter->second->addCousinCluster(iter1->second);
       }
     }
+
 
     for(auto &iter : tmp_LongiClusMaps) map_LongiClusterU[iter.first].push_back(iter.second);
   }
 
 
-//cout<<"  Start Split LongiClusterV"<<endl;
+cout<<"  Start Split LongiClusterV"<<endl;
   //Split LongiClusterV
   for(int il=0; il<m_LongiClusterVCol.size(); il++){
     if(m_LongiClusterVCol[il]->getBarShowers().size()==0) {std::cout<<"WARNING: Have an empty LongiCluster! Skip it! "<<std::endl; continue;}
 
+    //Check if the LongiCluster covers towers. 
     bool fl_coverTower = false;
-    int nTowerMax = -99;
+    std::vector< std::vector<int> > tmp_towerIDCol; tmp_towerIDCol.clear();
     for(int ib=0; ib<m_LongiClusterVCol[il]->getBarShowers().size(); ib++){
-      int m_ntower = m_LongiClusterVCol[il]->getBarShowers()[ib]->getTowerID().size();
+      std::vector< std::vector<int> > tmp_id = m_LongiClusterVCol[il]->getBarShowers()[ib]->getTowerID();
+      int m_ntower = tmp_id.size();
       if( m_ntower>1 )  fl_coverTower=true;
-      if(m_ntower>nTowerMax) nTowerMax=m_ntower;
+      tmp_towerIDCol.insert( tmp_towerIDCol.end(), tmp_id.begin(), tmp_id.end() );
     }
+    std::sort( tmp_towerIDCol.begin(), tmp_towerIDCol.end() );
+    auto iter_id = std::unique( tmp_towerIDCol.begin(), tmp_towerIDCol.end() );
+    tmp_towerIDCol.erase( iter_id, tmp_towerIDCol.end() );
+    if(tmp_towerIDCol.size()>1) fl_coverTower=true;
+
+cout<<" Cover tower: "<<fl_coverTower<<", tower size "<<tmp_towerIDCol.size()<<endl;
 
     //LongiCluster does not cover tower:
     if(!fl_coverTower){
@@ -714,19 +748,6 @@ for(auto iter:barShowerVMap) {
     }
 
     //LongiCluster covers towers:
-    /*
-    std::map<std::vector<int>, PandoraPlus::LongiCluster* > tmp_LongiClusMaps; tmp_LongiClusMaps.clear();
-    for(int ib=0; ib<m_LongiClusterVCol[il]->getBarShowers().size(); ib++){
-      std::vector< std::vector<int> > b_towerID = m_LongiClusterVCol[il]->getBarShowers()[ib]->getTowerID();
-
-      if(tmp_LongiClusMaps.find(b_towerID)==tmp_LongiClusMaps.end()){
-        PandoraPlus::LongiCluster* tmp_clus = new PandoraPlus::LongiCluster();
-        tmp_clus->addBarShower( m_LongiClusterVCol[il]->getBarShowers()[ib], 0);
-        tmp_LongiClusMaps[b_towerID] = tmp_clus;
-      }
-      else tmp_LongiClusMaps[b_towerID]->addBarShower( m_LongiClusterVCol[il]->getBarShowers()[ib], 0);
-    }
-    */
     std::map<std::vector<int>, PandoraPlus::LongiCluster* > tmp_LongiClusMaps; tmp_LongiClusMaps.clear();
     for(int ib=0; ib<m_LongiClusterVCol[il]->getBarShowers().size(); ib++){
       const PandoraPlus::Calo1DCluster* p_shower = m_LongiClusterVCol[il]->getBarShowers()[ib];
@@ -759,11 +780,11 @@ for(auto iter:barShowerVMap) {
     }
 
     if(tmp_LongiClusMaps.size()>1){
-      std::map<std::vector<int>, PandoraPlus::LongiCluster* >::iterator iter; iter = tmp_LongiClusMaps.begin();
-      int count = 0;
-      for(iter; iter!=tmp_LongiClusMaps.end() && count<tmp_LongiClusMaps.size()-1; iter++, count++){
-        std::map<std::vector<int>, PandoraPlus::LongiCluster* >::iterator iter1 = iter; ++iter1;
-        for(iter1; iter1!=tmp_LongiClusMaps.end(); iter1++) iter->second->addCousinCluster(iter1->second);
+      std::map<std::vector<int>, PandoraPlus::LongiCluster* >::iterator iter = tmp_LongiClusMaps.begin();
+      for(iter; iter!=tmp_LongiClusMaps.end(); iter++){
+        std::map<std::vector<int>, PandoraPlus::LongiCluster* >::iterator iter1 = tmp_LongiClusMaps.begin();
+        for(iter1; iter1!=tmp_LongiClusMaps.end(); iter1++) 
+          if(iter!=iter1) iter->second->addCousinCluster(iter1->second);
       }
     }
 
@@ -845,19 +866,33 @@ StatusCode EnergySplittingAlg::Clustering( std::vector<const PandoraPlus::CaloUn
     
   }}
 
-//cout<<"Clustering: After seed finding. Cluster size: "<<m_clusCol.size()<<endl;
-//cout<<"  Bar size in cluster: ";
-//for(int j=0; j<m_clusCol.size(); j++) cout<<m_clusCol[j]->getBars().size()<<'\t';
-//cout<<endl;
-//cout<<"  Seed size in cluster: ";
-//for(int j=0; j<m_clusCol.size(); j++) cout<<m_clusCol[j]->getSeeds().size()<<'\t';
-//cout<<endl;
-//cout<<"    Seed position: "<<endl;
-//for(int j=0; j<m_clusCol.size(); j++){
-//  for(int a=0; a<m_clusCol[j]->getSeeds().size(); a++) printf("    (%.3f, %.3f, %.3f ), ", m_clusCol[j]->getSeeds()[a]->getPosition().x(),  m_clusCol[j]->getSeeds()[a]->getPosition().y(),  m_clusCol[j]->getSeeds()[a]->getPosition().z() );
-//  cout<<endl;
-//}
+/*
+  //Cross-check 0-seed clusters: if E > Eth then find seed with localMax. 
+  for(int i=0;i<m_clusCol.size();i++){
+    if(m_clusCol[i]->getSeeds().size()>0) continue;
+    if(m_clusCol[i]->getEnergy()<settings.map_floatPars["Eth_Shower"]) continue; 
+    std::vector<const PandoraPlus::CaloUnit*> m_seedVec; m_seedVec.clear();
+    findSeeds(m_clusCol[i], m_seedVec);
 
+    m_clusCol[i]->setSeeds(m_seedVec);
+    m_clusCol[i]->getScndMoment();
+  }
+*/
+
+/*
+cout<<"Clustering: After seed finding. Cluster size: "<<m_clusCol.size()<<endl;
+cout<<"  Bar size in cluster: ";
+for(int j=0; j<m_clusCol.size(); j++) cout<<m_clusCol[j]->getBars().size()<<'\t';
+cout<<endl;
+cout<<"  Seed size in cluster: ";
+for(int j=0; j<m_clusCol.size(); j++) cout<<m_clusCol[j]->getSeeds().size()<<'\t';
+cout<<endl;
+cout<<"    Seed position: "<<endl;
+for(int j=0; j<m_clusCol.size(); j++){
+  for(int a=0; a<m_clusCol[j]->getSeeds().size(); a++) printf("    (%.3f, %.3f, %.3f ), ", m_clusCol[j]->getSeeds()[a]->getPosition().x(),  m_clusCol[j]->getSeeds()[a]->getPosition().y(),  m_clusCol[j]->getSeeds()[a]->getPosition().z() );
+  cout<<endl;
+}
+*/
 
   //Merge clusters without seed
   for(int ic=0; ic<m_clusCol.size(); ic++){
@@ -1135,7 +1170,7 @@ StatusCode EnergySplittingAlg::findSeeds( PandoraPlus::Calo1DCluster* m_cluster,
   for(int i=0;i<m_cluster->getBars().size();i++){
     const PandoraPlus::CaloUnit* ibar = m_cluster->getBars()[i];
     std::vector<const PandoraPlus::CaloUnit*> m_neighbor = getNeighbors(m_cluster, ibar);
-    if(m_neighbor.size()==0 && ibar->getEnergy()>settings.map_floatPars["Eth_SeedAbs"])
+    if(m_neighbor.size()==0 && ibar->getEnergy()>settings.map_floatPars["Eth_Seed"])
       seedCol.push_back(ibar); 
 
     else {
@@ -1143,7 +1178,7 @@ StatusCode EnergySplittingAlg::findSeeds( PandoraPlus::Calo1DCluster* m_cluster,
       for(int j=0;j<m_neighbor.size();j++){
         if(m_neighbor[j]->getEnergy()>ibar->getEnergy()) isLocalMax=false;
       }
-      if(ibar->getEnergy()>settings.map_floatPars["Eth_SeedAbs"] && isLocalMax) seedCol.push_back(ibar);
+      if(ibar->getEnergy()>settings.map_floatPars["Eth_Seed"] && isLocalMax) seedCol.push_back(ibar);
     }
   }
 

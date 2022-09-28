@@ -146,9 +146,16 @@ protected:
   FloatVec m_barShowerV_x, m_barShowerV_y, m_barShowerV_z, m_barShowerV_E, m_barShowerV_part, m_barShowerV_stave;
 
   TTree *t_Cluster;
-  int m_Nclus;
+  int m_Nclus, m_Nmc;
   FloatVec m_Clus_x, m_Clus_y, m_Clus_z, m_Clus_E;
-  IntVec m_Nhit;
+  IntVec m_mcPdgid, m_mcStatus, m_Nhit;
+  FloatVec m_mcPx, m_mcPy, m_mcPz, m_mcEn;
+
+  TTree *t_Shower;
+  int m_Nshowers;
+  float m_Eclus; 
+  FloatVec m_shower2D_x, m_shower2D_y, m_shower2D_z, m_shower2D_E;
+  IntVec m_shower2D_Module, m_shower2D_Stave, m_shower2D_Part, m_shower2D_Dlayer;
 
   TTree *t_LongiClusU; 
   FloatVec m_showerU_x, m_showerU_y, m_showerU_z, m_showerU_E, m_showerU_stave, m_showerU_part;
@@ -171,6 +178,7 @@ protected:
 
   void ClearBar();
   void ClearLayer();
+  void ClearShower();
   void ClearCluster();
   void ClearClustering();
   void ClearTrack();

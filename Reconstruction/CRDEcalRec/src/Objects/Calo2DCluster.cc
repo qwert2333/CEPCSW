@@ -67,8 +67,8 @@ namespace PandoraPlus{
  
   void Calo2DCluster::addUnit(const Calo1DCluster* _1dcluster)
   {
-    if(_1dcluster->getSlayer()==0) barClusterVCol.push_back(_1dcluster); 
-    if(_1dcluster->getSlayer()==1) barClusterUCol.push_back(_1dcluster);
+    if(_1dcluster->getSlayer()==0) barClusterUCol.push_back(_1dcluster);
+    if(_1dcluster->getSlayer()==1) barClusterVCol.push_back(_1dcluster); 
     for(int ib=0; ib<_1dcluster->getBars().size(); ib++) addBar(_1dcluster->getBars()[ib]);
 
     std::vector< std::vector<int> > id = _1dcluster->getTowerID();
@@ -112,13 +112,14 @@ namespace PandoraPlus{
   double Calo2DCluster::getEnergy() const {
     double sumE = 0;
 
-    if(barClusterUCol.size()==0 && barClusterVCol.size()==0){
-      for(int m=0; m<barShowerUCol.size(); m++) sumE += barShowerUCol[m]->getEnergy();
-      for(int m=0; m<barShowerVCol.size(); m++) sumE += barShowerVCol[m]->getEnergy();
-    }
-    else{
+    //Priority order: barShower -> barCluster. 
+    if(barShowerUCol.size()==0 && barShowerVCol.size()==0){
       for(int m=0; m<barClusterUCol.size(); m++) sumE += barClusterUCol[m]->getEnergy();
       for(int m=0; m<barClusterVCol.size(); m++) sumE += barClusterVCol[m]->getEnergy();
+    }
+    else{
+      for(int m=0; m<barShowerUCol.size(); m++) sumE += barShowerUCol[m]->getEnergy();
+      for(int m=0; m<barShowerVCol.size(); m++) sumE += barShowerVCol[m]->getEnergy();
     }
     return sumE;
   }

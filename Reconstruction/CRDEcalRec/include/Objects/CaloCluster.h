@@ -5,6 +5,7 @@
 //#include "edm4hep/CalorimeterHit.h"
 //#include "edm4hep/CalorimeterHitCollection.h"
 //#include "edm4hep/SimCalorimeterHitCollection.h"
+#include "Objects/LongiCluster.h"
 #include "Objects/TransShower.h"
 #include "Objects/CaloHit.h"
 #include "Objects/Track.h"
@@ -49,6 +50,8 @@ namespace PandoraPlus{
 
     std::vector<const PandoraPlus::TransShower*> getShowers() const { return showers; }
     std::vector<const PandoraPlus::CaloHit*> getCaloHits() const { return hits; }
+    const PandoraPlus::LongiCluster* getLongiClusterU() const {return longiClusU; }
+    const PandoraPlus::LongiCluster* getLongiClusterV() const {return longiClusV; }
     double getFitAlpha() const { return alpha; }
     double getFitBeta() const { return beta; }
     double getFitExpEn() const {return ExpEn; }
@@ -71,6 +74,7 @@ namespace PandoraPlus{
 
     void setShowers( std::vector<const PandoraPlus::TransShower*>& _svec ) { showers = _svec;}
     void setCaloHits( std::vector<const PandoraPlus::CaloHit*> _hits ) { hits = _hits; }
+    void setLongiClusters( const PandoraPlus::LongiCluster* _clU, const PandoraPlus::LongiCluster* _clV) { longiClusU=_clU; longiClusV=_clV; }
     void setType( int _t ) { type = _t; }
     void Print() const; 
 
@@ -79,6 +83,8 @@ namespace PandoraPlus{
     std::vector<const PandoraPlus::Track*> tracks;
     //std::vector<const PandoraPlus::CaloCluster*> daughter_clusters;
     std::vector<const PandoraPlus::TransShower*> showers; //Specific for Bar Ecal.
+    const PandoraPlus::LongiCluster* longiClusU;
+    const PandoraPlus::LongiCluster* longiClusV;
     TVector3 axis;
     double showerMax;
     double chi2;

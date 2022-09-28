@@ -62,7 +62,6 @@ namespace PandoraPlus{
     std::vector<const PandoraPlus::Calo1DCluster*> barShowerCol;
     TrackFitInEcal* track = new TrackFitInEcal();
 
-    //const PandoraPlus::LongiCluster* ParentCluster; 
     std::vector<const PandoraPlus::LongiCluster*> CousinClusters; 
 
 
