@@ -12,7 +12,7 @@ namespace PandoraPlus{
   StatusCode OutputCreator::CreateRecCaloHits( PandoraPlusDataCol& m_DataCol, DataHandle<edm4hep::CalorimeterHitCollection>& m_outRecHitsHandler ){
     edm4hep::CalorimeterHitCollection* m_calohitCol = m_outRecHitsHandler.createAndPut();
 
-    std::vector<PandoraPlus::CaloCluster*> p_clusCol = m_DataCol.map_CaloCluster["EcalCluster"];
+    std::vector<PandoraPlus::Calo3DCluster*> p_clusCol = m_DataCol.map_CaloCluster["EcalCluster"];
     for(int ic=0; ic<p_clusCol.size(); ic++){
       std::vector<const PandoraPlus::CaloHit*> p_hits = p_clusCol[ic]->getCaloHits();
       for(int ih=0; ih<p_hits.size(); ih++){
@@ -28,7 +28,7 @@ namespace PandoraPlus{
   StatusCode OutputCreator::CreateCluster( PandoraPlusDataCol& m_DataCol, DataHandle<edm4hep::ClusterCollection>& m_outClusterColHandler ){
     edm4hep::ClusterCollection* m_clusCol = m_outClusterColHandler.createAndPut();
 
-    std::vector<PandoraPlus::CaloCluster*> p_clusCol = m_DataCol.map_CaloCluster["EcalCluster"]; 
+    std::vector<PandoraPlus::Calo3DCluster*> p_clusCol = m_DataCol.map_CaloCluster["EcalCluster"]; 
     for(int ic=0; ic<p_clusCol.size(); ic++){
       auto _clus = m_clusCol->create();
 
@@ -41,7 +41,7 @@ namespace PandoraPlus{
         //_hit.setType();
         _clus.addToHits(_hit);
       }
-      _clus.setEnergy( p_clusCol[ic]->getShowerE() );
+      _clus.setEnergy( p_clusCol[ic]->getEnergy() );
       edm4hep::Vector3f pos( p_clusCol[ic]->getShowerCenter().x(), p_clusCol[ic]->getShowerCenter().y(), p_clusCol[ic]->getShowerCenter().z() );
       _clus.setPosition( pos );
     }

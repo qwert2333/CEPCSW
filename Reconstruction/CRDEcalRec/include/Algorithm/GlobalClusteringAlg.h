@@ -24,7 +24,6 @@ public:
   StatusCode ClearAlgorithm();
 
   template<typename T1, typename T2> StatusCode Clustering(std::vector<T1*>& m_input, std::vector<T2*>& m_output);
-  StatusCode Towering(std::vector<PandoraPlus::Calo3DCluster*>& m_3dcluster,std::vector<PandoraPlus::CaloTower*>& m_tower);
   
   //geometry construction
 /*   int m_module = settings.map_intPars["m_module"];

@@ -4,19 +4,20 @@
 #include <algorithm>
 #include <map>
 
+#include "Objects/CaloHit.h"
 #include "Objects/CaloUnit.h"
 #include "Objects/Calo1DCluster.h"
 #include "Objects/Calo2DCluster.h"
 #include "Objects/Calo3DCluster.h"
 //#include "Objects/CaloBlock.h"
-#include "Objects/CaloTower.h"
+//#include "Objects/CaloTower.h"
 //#include "Objects/CaloBarShower.h"
 //#include "Objects/CaloBarCluster.h"
 #include "Objects/HoughObject.h"
 #include "Objects/HoughSpace.h"
 #include "Objects/LongiCluster.h"
-#include "Objects/TransShower.h"
-#include "Objects/CaloCluster.h"
+//#include "Objects/TransShower.h"
+//#include "Objects/CaloCluster.h"
 //#include "Objects/PFObject.h"
 #include "Objects/Track.h"
 
@@ -59,18 +60,14 @@ public:
   //General objects for all PFA
   std::vector<PandoraPlus::Track*>       TrackCol;
   std::map<std::string, std::vector<PandoraPlus::CaloHit*>> map_CaloHit;
-  std::map<std::string, std::vector<PandoraPlus::CaloCluster*>> map_CaloCluster;
+  std::map<std::string, std::vector<PandoraPlus::Calo2DCluster*>> map_ShowerInLayer;
+  std::map<std::string, std::vector<PandoraPlus::Calo3DCluster*>> map_CaloCluster;
 
 
   std::vector<PandoraPlus::CaloUnit*>       BarCol; 
   std::vector<PandoraPlus::Calo1DCluster*>  Cluster1DCol; 
   std::vector<PandoraPlus::Calo2DCluster*>  Cluster2DCol;  
   std::vector<PandoraPlus::Calo3DCluster*>  Cluster3DCol;
-
-  //std::vector<PandoraPlus::CaloBlock*>   BlockCol; 
-  std::vector<PandoraPlus::CaloTower*>   TowerCol;
-  std::vector<PandoraPlus::TransShower*> TransShowerCol;
-  std::vector<PandoraPlus::CaloCluster*> ClusterCol;
 
 
   //Backup collections, for memory clean. TODO: replace with object managers. 
@@ -81,13 +78,7 @@ public:
   std::vector<PandoraPlus::Calo1DCluster*>  bk_Cluster1DCol; 
   std::vector<PandoraPlus::Calo2DCluster*>  bk_Cluster2DCol;  
   std::vector<PandoraPlus::Calo3DCluster*>  bk_Cluster3DCol;
-  //std::vector<PandoraPlus::CaloBlock*>      bk_BlockCol;
-  std::vector<PandoraPlus::CaloTower*>      bk_TowerCol;
-  //std::vector<PandoraPlus::CaloBarCluster*> bk_BarClusCol;
-  //std::vector<PandoraPlus::CaloBarShower*>  bk_BarShowerCol;
-  std::vector<PandoraPlus::TransShower*>    bk_TransShowerCol;
   std::vector<PandoraPlus::LongiCluster*>   bk_LongiClusCol;
-  std::vector<PandoraPlus::CaloCluster*>    bk_ClusterCol;
 
 
 };

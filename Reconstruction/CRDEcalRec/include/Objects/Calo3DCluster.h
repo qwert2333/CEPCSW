@@ -24,13 +24,9 @@ namespace PandoraPlus {
     }
 
     std::vector< std::vector<int> > getTowerID() const { return towerID; }
-    //std::vector<int> getModules() const { return m_modules; }
-    //std::vector<int> getParts() const { return m_parts; }
-    //std::vector<int> getStaves() const { return m_staves; }
-
     bool isNeighbor(const PandoraPlus::Calo2DCluster* m_2dcluster) const; 
+    std::vector<const PandoraPlus::CaloHit*> getCaloHits() const { return hits; }
     std::vector<const Calo2DCluster*> getCluster() const { return m_2dclusters; }
-
     std::vector<const Calo1DCluster*> getLocalMaxUCol(std::string name) const;
     std::vector<const Calo1DCluster*> getLocalMaxVCol(std::string name) const;
     std::vector<const LongiCluster*> getLongiClusterUCol(std::string name) const;
@@ -40,8 +36,13 @@ namespace PandoraPlus {
 
     std::vector<const Calo3DCluster*> getTowers() const {return m_towers; }
     std::vector<const CaloUnit*> getBars() const;
+    double getHitsE() const;
     double getEnergy() const; 
- 
+    //double getShowerE() const { return getEnergy(); }
+    TVector3 getHitCenter() const;
+    TVector3 getShowerCenter() const; 
+
+    void setCaloHits( std::vector<const PandoraPlus::CaloHit*> _hits ) { hits = _hits; }
     void setTowers(std::vector<const Calo3DCluster*> _t) { m_towers = _t; }
     void setLongiClusters( std::string name1, std::vector<const LongiCluster*>& _clU, 
                            std::string name2, std::vector<const LongiCluster*>& _clV )
@@ -55,11 +56,13 @@ namespace PandoraPlus {
     void addTowerID( std::vector<int> id ) { towerID.push_back(id); }
 
     void addUnit(const Calo2DCluster* _2dcluster);
+    void addHit(const PandoraPlus::CaloHit* _hit) { hits.push_back(_hit); };
     void addTower( const Calo3DCluster* _tower ) { m_towers.push_back(_tower); }
     void addLongiClusterU( std::string name, const LongiCluster* _clU ) { map_longiClusUCol[name].push_back(_clU); }
     void addLongiClusterV( std::string name, const LongiCluster* _clV ) { map_longiClusVCol[name].push_back(_clV); }
     void addLocalMaxU( std::string name, const Calo1DCluster* _shU ) { map_localMaxU[name].push_back(_shU); }
     void addLocalMaxV( std::string name, const Calo1DCluster* _shV ) { map_localMaxV[name].push_back(_shV); }
+    void mergeCluster( const PandoraPlus::Calo3DCluster* _clus );
 
   private:
     std::vector< std::vector<int> > towerID; //[module, part, stave]
@@ -67,6 +70,7 @@ namespace PandoraPlus {
     //std::vector<int> m_parts;
     //std::vector<int> m_staves;  
 
+    std::vector<const PandoraPlus::CaloHit*> hits; 
     std::vector<const PandoraPlus::Calo2DCluster*> m_2dclusters;
 
     std::map<std::string, std::vector<const PandoraPlus::Calo1DCluster*> > map_localMaxU;

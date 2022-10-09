@@ -132,6 +132,11 @@ namespace PandoraPlus{
     //m_staves.insert(m_staves.end(),m_2dstaves.begin(),m_2dstaves.end());
   }
 
+  void Calo3DCluster::mergeCluster( const PandoraPlus::Calo3DCluster* _clus ){
+    for(int i=0; i<_clus->getCluster().size(); i++)
+      addUnit( _clus->getCluster()[i] );
+  }
+
 
   std::vector<const PandoraPlus::CaloUnit*> Calo3DCluster::getBars() const{
     std::vector<const PandoraPlus::CaloUnit*> results; results.clear();
@@ -143,6 +148,12 @@ namespace PandoraPlus{
     return results;
   }
 
+  double Calo3DCluster::getHitsE() const{
+    double en=0;
+    for(int i=0;i<hits.size(); i++) en+=hits[i]->getEnergy();
+    return en;
+  }
+
   double Calo3DCluster::getEnergy() const{
     double result = 0;
     for(int m=0; m<m_2dclusters.size(); m++)
@@ -150,6 +161,24 @@ namespace PandoraPlus{
 	
     return result;
   }
+
+  TVector3 Calo3DCluster::getHitCenter() const{
+    TVector3 vec(0,0,0);
+    double totE = getHitsE();
+    for(int i=0;i<hits.size(); i++){
+       TVector3 v_cent = hits[i]->getPosition();
+       vec += v_cent * (hits[i]->getEnergy()/totE);
+    }
+    return vec;
+  }
+
+  TVector3 Calo3DCluster::getShowerCenter() const{
+    TVector3 spos(0,0,0);
+    double totE = getEnergy();
+    for(int i=0;i<m_2dclusters.size(); i++) spos += m_2dclusters[i]->getPos()*(m_2dclusters[i]->getEnergy()/totE);
+    return spos;
+  }
+
 
   std::vector<const PandoraPlus::LongiCluster*> Calo3DCluster::getLongiClusterUCol(std::string name) const {
     std::vector<const LongiCluster*> emptyCol; emptyCol.clear(); 

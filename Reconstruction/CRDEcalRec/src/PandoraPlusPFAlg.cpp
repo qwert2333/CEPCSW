@@ -416,14 +416,14 @@ StatusCode PandoraPlusPFAlg::execute()
 
   //Save Cluster and MCP info
   ClearCluster();
-  std::vector<PandoraPlus::CaloCluster*> m_clusvec = m_DataCol.map_CaloCluster["EcalCluster"];
+  std::vector<PandoraPlus::Calo3DCluster*> m_clusvec = m_DataCol.map_CaloCluster["EcalCluster"];
   m_Nclus = m_clusvec.size();
   for(int ic=0; ic<m_clusvec.size(); ic++){
     m_Clus_x.push_back( m_clusvec[ic]->getShowerCenter().x() );
     m_Clus_y.push_back( m_clusvec[ic]->getShowerCenter().y() );
     m_Clus_z.push_back( m_clusvec[ic]->getShowerCenter().z() );
-    m_Clus_E.push_back( m_clusvec[ic]->getShowerE() );
-    m_Nhit.push_back( m_clusvec[ic]->getShowers().size() );
+    m_Clus_E.push_back( m_clusvec[ic]->getEnergy() );
+    m_Nhit.push_back( m_clusvec[ic]->getCluster().size() );
   }
 
   std::vector<edm4hep::MCParticle> m_MCPCol = m_DataCol.collectionMap_MC[name_MCParticleCol.value()];  
@@ -438,30 +438,31 @@ StatusCode PandoraPlusPFAlg::execute()
   }
   t_Cluster->Fill();
 
+/*
   //Showers in cluster: 
   //ClearShower();
   for(int ic=0; ic<m_clusvec.size(); ic++){
     ClearShower();
-    PandoraPlus::CaloCluster* p_cluster = m_clusvec[ic];
+    PandoraPlus::Calo3DCluster* p_cluster = m_clusvec[ic];
 
-    m_Nshowers = p_cluster->getShowers().size();
+    m_Nshowers = p_cluster->getCluster().size();
     m_Eclus = p_cluster->getShowerE();
     for(int is=0; is<m_Nshowers; is++){
-      m_shower2D_x.push_back( p_cluster->getShowers()[is]->getPos().x() );
-      m_shower2D_y.push_back( p_cluster->getShowers()[is]->getPos().y() );
-      m_shower2D_z.push_back( p_cluster->getShowers()[is]->getPos().z() );
-      m_shower2D_E.push_back( p_cluster->getShowers()[is]->getShowerE() );
-      m_shower2D_Module.push_back( p_cluster->getShowers()[is]->getModule() );
-      m_shower2D_Part.push_back( p_cluster->getShowers()[is]->getPart() );
-      m_shower2D_Stave.push_back( p_cluster->getShowers()[is]->getStave() );
-      m_shower2D_Dlayer.push_back( p_cluster->getShowers()[is]->getDlayer() );
+      m_shower2D_x.push_back( p_cluster->getCluster()[is]->getPos().x() );
+      m_shower2D_y.push_back( p_cluster->getCluster()[is]->getPos().y() );
+      m_shower2D_z.push_back( p_cluster->getCluster()[is]->getPos().z() );
+      m_shower2D_E.push_back( p_cluster->getCluster()[is]->getShowerE() );
+      m_shower2D_Module.push_back( p_cluster->getCluster()[is]->getModule() );
+      m_shower2D_Part.push_back( p_cluster->getCluster()[is]->getPart() );
+      m_shower2D_Stave.push_back( p_cluster->getCluster()[is]->getStave() );
+      m_shower2D_Dlayer.push_back( p_cluster->getCluster()[is]->getDlayer() );
     }
 
     p_cluster = nullptr;
     t_Shower->Fill();
   }
   //t_Shower->Fill();
-
+*/
 	//neighbor clustering
 	ClearClustering();
 	std::vector<PandoraPlus::Calo3DCluster*>  tmp_3dclusters = m_DataCol.Cluster3DCol;

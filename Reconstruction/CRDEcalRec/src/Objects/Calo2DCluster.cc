@@ -125,5 +125,32 @@ namespace PandoraPlus{
   }
 
 
+  TVector3 Calo2DCluster::getPos() const{
+    TVector3 m_pos(0, 0, 0); 
+    if(towerID.size()==0) return m_pos; 
+
+    float rotAngle = towerID[0][0]*TMath::Pi()/4.;
+    TVector3 m_vecX(0., 0., 0.);  
+    TVector3 m_vecY(0., 0., 0.);
+    if(barShowerUCol.size()==0 && barShowerVCol.size()==0){
+      for(int m=0; m<barClusterUCol.size(); m++) m_vecX += barClusterUCol[m]->getPos();
+      m_vecX *= (1./barClusterUCol.size());
+      for(int m=0; m<barClusterVCol.size(); m++) m_vecY += barClusterVCol[m]->getPos();
+      m_vecY *= (1./barClusterVCol.size());
+    }
+    else{
+      for(int m=0; m<barShowerUCol.size(); m++) m_vecX += barShowerUCol[m]->getPos();
+      m_vecX *= (1./barShowerUCol.size());
+      for(int m=0; m<barShowerVCol.size(); m++) m_vecY += barShowerVCol[m]->getPos();
+      m_vecY *= (1./barShowerVCol.size());
+    }
+    m_vecX.RotateZ(rotAngle);
+    m_vecY.RotateZ(rotAngle);
+    m_pos.SetXYZ( m_vecY.x(), (m_vecX.y()+m_vecY.y())/2 , m_vecX.z() );
+    m_pos.RotateZ(-rotAngle);
+    return m_pos;
+  }
+
+
 };
 #endif

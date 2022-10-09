@@ -1,6 +1,6 @@
 from Gaudi.Configuration import *
 Nskip = 0
-Nevt = 200
+Nevt = 100
 
 ############## GeomSvc #################
 geometry_option = "CRD_o1_v01/CRD_o1_v01.xml"
@@ -23,15 +23,7 @@ geomsvc.compact = geometry_path
 from Configurables import k4DataSvc
 podioevent = k4DataSvc("EventDataSvc")
 podioevent.inputs = [
-"SimSamples/Sim_Gam10GeV_module0_7_EcalOnly.root"
-#"SimSamples/Sim_Mu20GeV_Module6_7_EcalOnly.root"
-#"SimSamples/Sim_Gam10GeV_central_EcalOnly.root"
-#"SimSamples/Sim_GamGamGhost_central_EcalOnly.root"
-#"SimSamples/Sim_GamGam_15deg_Central_EcalOnly.root"
-#"SimSamples/Sim_GamGam_15deg_Stave6_7_EcalOnly.root"
-#"SimSamples/Sim_pi0_10pm5GeV_central_EcalOnly.root"
-#"SimSamples/Sim_Pi0_10GEV_central_EcalOnly_3.root",
-#"/cefs/higgs/guofy/CEPCSW_v203/run/HyySim/bashes/CRD_E240_nnHaa_EcalOnly_1.root"
+"/cefs/higgs/guofy/CEPCSW_v203/run/SimSamples/Sim_GamGamGhost_central_EcalOnly.root"
 ]
 ##########################################
 
@@ -62,7 +54,7 @@ EcalDigi.TimeResolution = 0.5        #unit: ns
 EcalDigi.EnergyThreshold = 0.0001   #0.1 MeV
 EcalDigi.ChargeThresholdFrac = 0.05
 EcalDigi.Debug=1
-EcalDigi.OutFileName = "testTree_Gam_module0_7.root"
+EcalDigi.OutFileName = "testTree_GamGamGhost_central.root"
 #########################################
 
 ##HCAL##
@@ -88,7 +80,7 @@ PandoraPlusPFAlg.BField = 3.
 PandoraPlusPFAlg.Debug = 0
 PandoraPlusPFAlg.SkipEvt = Nskip
 PandoraPlusPFAlg.WriteAna = 1
-PandoraPlusPFAlg.AnaFileName = "testRec_Gam_module0_7.root"
+PandoraPlusPFAlg.AnaFileName = "testRec_GamGamGhost_central.root"
 ##----Readin collections----
 PandoraPlusPFAlg.MCParticleCollection = "MCParticleG4"
 PandoraPlusPFAlg.TrackCollections = [""]
