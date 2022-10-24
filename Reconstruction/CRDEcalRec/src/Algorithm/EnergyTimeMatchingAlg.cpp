@@ -31,11 +31,13 @@ StatusCode EnergyTimeMatchingAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
 
   //Readin: 3DClusters
   std::vector<PandoraPlus::Calo3DCluster*>* p_3DClusters = &(m_datacol.Cluster3DCol);
+cout<<"  Read in 3DCluster: size = "<<p_3DClusters->size()<<endl;
 
   //Loop for 3DClusters
   for(int i3d=0; i3d<p_3DClusters->size(); i3d++){
     //Basic unit: tower. 
     std::vector<const Calo3DCluster*> p_towerCol = p_3DClusters->at(i3d)->getTowers();
+cout<<"    In 3DCluster #"<<i3d<<": tower size "<<p_towerCol.size()<<endl;
 
     //Loop for towers:  
     for(int it=0; it<p_towerCol.size(); it++){
@@ -45,6 +47,8 @@ StatusCode EnergyTimeMatchingAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
 
       const int NclusX = m_longiClUCol.size(); 
       const int NclusY = m_longiClVCol.size(); 
+printf("      Tower #%d: LongiCluster size [%d, %d] \n", it, NclusX, NclusY);
+
       if(NclusX==0 || NclusY==0) continue;    
       std::vector<PandoraPlus::Calo3DCluster*> tmp_clusters; tmp_clusters.clear(); 
       
@@ -66,7 +70,7 @@ StatusCode EnergyTimeMatchingAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
       else{ 
         XYClusterMatchingL3(m_longiClUCol, m_longiClVCol, tmp_clusters);
       }
-
+cout<<"      After matching: form "<<tmp_clusters.size()<<" Clusters"<<endl;
 
       //Clean empty Calo3DClusters
       for(int ic=0; ic<tmp_clusters.size(); ic++){
@@ -75,7 +79,7 @@ StatusCode EnergyTimeMatchingAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
           tmp_clusters.erase(tmp_clusters.begin()+ic);
           ic--;
       }}
-
+cout<<"      After cleaning: "<<tmp_clusters.size()<<" Cluster left."<<endl;
 
       //Save Calo3DClusters and Calo2DClusters into dataCol backupCol.
       for(int ic=0; ic<tmp_clusters.size(); ic++){
@@ -90,12 +94,14 @@ StatusCode EnergyTimeMatchingAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
 
     }//End loop towers
 
-
+cout<<"    In 3DCluster #"<<i3d<<": cluster size "<<m_clusterCol.size()<<", Start merge clusters"<<endl;
+cout<<"    Merge type1: from 1DShower aspect"<<endl;
     //Merge reconstructed cluster
     //  Type1: from 1DShower aspect
     for(int ic=0; ic<m_clusterCol.size() && m_clusterCol.size()>1; ic++){
       for(int jc=ic+1; jc<m_clusterCol.size(); jc++){
-
+printf("      Check in cluster %d vs. %d: ", ic, jc );
+ 
         int NlinkedU = 0; 
         int NlinkedV = 0;
 
@@ -103,15 +109,18 @@ StatusCode EnergyTimeMatchingAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
         std::vector<const Calo1DCluster*> m_1DshowerUCol; m_1DshowerUCol.clear();
         std::vector<const Calo1DCluster*> m_1DshowerVCol; m_1DshowerVCol.clear();
         for(int is=0; is<m_clusterCol[jc]->getCluster().size(); is++){
-          for(int js=0; js<m_clusterCol[jc]->getCluster()[js]->getClusterU().size(); js++)
-            m_1DshowerUCol.push_back( m_clusterCol[jc]->getCluster()[js]->getClusterU()[js] );
-          for(int js=0; js<m_clusterCol[jc]->getCluster()[js]->getClusterV().size(); js++)
-            m_1DshowerVCol.push_back( m_clusterCol[jc]->getCluster()[js]->getClusterV()[js] );
+          for(int js=0; js<m_clusterCol[jc]->getCluster()[is]->getClusterU().size(); js++)
+            m_1DshowerUCol.push_back( m_clusterCol[jc]->getCluster()[is]->getClusterU()[js] );
+          for(int js=0; js<m_clusterCol[jc]->getCluster()[is]->getClusterV().size(); js++)
+            m_1DshowerVCol.push_back( m_clusterCol[jc]->getCluster()[is]->getClusterV()[js] );
         }
+
+printf("      1DShower size in Cl #%d: [%d, %d] \n", jc, m_1DshowerUCol.size(), m_1DshowerVCol.size());
 
         //Loop in Cluster[ic], count the linked showers
         for(int is=0; is<m_clusterCol[ic]->getCluster().size(); is++){
           const Calo2DCluster* p_shower = m_clusterCol[ic]->getCluster()[is];
+printf("      Check cluster %d's 2DCluster %d: barShower size [%d, %d], barCluster size [%d, %d] \n", ic, is, p_shower->getShowerUCol().size(), p_shower->getShowerVCol().size(), p_shower->getClusterU().size(), p_shower->getClusterV().size() );
 
           for(int icc=0; icc<p_shower->getClusterU()[0]->getCousinClusters().size(); icc++)
             if( find(m_1DshowerUCol.begin(), m_1DshowerUCol.end(), p_shower->getClusterU()[0]->getCousinClusters()[icc])!=m_1DshowerUCol.end() ){ NlinkedU++; break; }
@@ -122,14 +131,18 @@ StatusCode EnergyTimeMatchingAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
           p_shower = nullptr;
         }
 
+cout<<"      Linked shower: "<<NlinkedU<<", "<<NlinkedV<<endl;
         if(NlinkedU/(float)m_clusterCol[ic]->getCluster().size()>0.7 || NlinkedV/(float)m_clusterCol[ic]->getCluster().size()>0.7){
           m_clusterCol[ic]->mergeCluster( m_clusterCol[jc] );
           m_clusterCol.erase(m_clusterCol.begin()+jc);
           jc--;
           if(jc<ic) jc=ic;
         }
-    }}
+cout<<"      After merge: cluster size "<<m_clusterCol.size()<<endl;
 
+    }}
+cout<<"    After merge: cluster size "<<m_clusterCol.size()<<endl;
+cout<<"    Merge type2: from longiCluster aspect"<<endl;
     //  Type2: from longiCluster aspect
     for(int ic=0; ic<m_clusterCol.size() && m_clusterCol.size()>1; ic++){
       if( m_clusterCol[ic]->getLongiClusterUCol("LinkedLongiCluster")[0]->getCousinClusters().size()==0 && 
@@ -148,7 +161,7 @@ StatusCode EnergyTimeMatchingAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
           if(jc<ic) jc=ic;
         }        
     }}
-
+cout<<"    After merge: cluster size "<<m_clusterCol.size()<<endl;
 
   }//End loop 3DCluster. 
 

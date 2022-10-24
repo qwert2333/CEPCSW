@@ -5,6 +5,7 @@
 #include "Objects/LongiCluster.h"
 #include "Objects/Track.h"
 //#include "Objects/CaloTower.h"
+#include "Tools/TrackFitInEcal.h"
 
 namespace PandoraPlus {
 
@@ -64,31 +65,27 @@ namespace PandoraPlus {
     void addLocalMaxV( std::string name, const Calo1DCluster* _shV ) { map_localMaxV[name].push_back(_shV); }
     void mergeCluster( const PandoraPlus::Calo3DCluster* _clus );
 
-  private:
-    std::vector< std::vector<int> > towerID; //[module, part, stave]
-    //std::vector<int> m_modules;
-    //std::vector<int> m_parts;
-    //std::vector<int> m_staves;  
+    //void FitProfile();
+    void FitAxis();
+    void FitAxisHit();
 
+  private:
     std::vector<const PandoraPlus::CaloHit*> hits; 
     std::vector<const PandoraPlus::Calo2DCluster*> m_2dclusters;
-
+    std::vector<const Calo3DCluster*> m_towers;
     std::map<std::string, std::vector<const PandoraPlus::Calo1DCluster*> > map_localMaxU;
     std::map<std::string, std::vector<const PandoraPlus::Calo1DCluster*> > map_localMaxV;
-
     std::map<std::string, std::vector<const PandoraPlus::LongiCluster*> > map_longiClusUCol;
     std::map<std::string, std::vector<const PandoraPlus::LongiCluster*> > map_longiClusVCol;
 
-    std::vector<const Calo3DCluster*> m_towers;
+    std::vector< std::vector<int> > towerID; //[module, part, stave]
+    TVector3 axis;
+    double chi2;
+    double alpha;
+    double beta;
+    int    type;  //0: MIP shower.  1: EM shower.  2: hadronic shower
+    TrackFitInEcal trackFitter;
 
-    //static const int m_module = 7;
-    //static const int m_modulestart = 0;
-    //static const int m_part = 4;
-    //static const int m_stave = 11;
-    //static const int m_superlayer = 14;
-    //static const int m_startnumber = 1;
-    //static const int m_phibarnumber = 60;
-    //static const int m_zbarnumber = 47;
   };
 
 };

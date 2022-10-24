@@ -291,15 +291,15 @@ namespace PandoraPlus{
         trackFitter.setGlobalPoint(1, pos_barsX.x(), posErr, pos_barsX.y(), posErr, pos_barsX.z(), posErr);
         trackFitter.setGlobalPoint(0, pos_barsY.x(), posErr, pos_barsY.y(), posErr, pos_barsY.z(), posErr);
       }
-    trackFitter.fitTrack();
-    double fitPhi =   trackFitter.getTrkPar(2);
-    double fitTheta = trackFitter.getTrkPar(3);
+      trackFitter.fitTrack();
+      double fitPhi =   trackFitter.getTrkPar(2);
+      double fitTheta = trackFitter.getTrkPar(3);
 //printf("\t DEBUG: fitted phi and theta: %.3f \t %.3f \n", fitPhi, fitTheta);
 
-    axis.SetMag(1.);
-    axis.SetPhi(fitPhi);
-    axis.SetTheta(fitTheta);
-  } 
+      axis.SetMag(1.);
+      axis.SetPhi(fitPhi);
+      axis.SetTheta(fitTheta);
+    } 
   }
 
   void CaloCluster::FitAxisHit(){

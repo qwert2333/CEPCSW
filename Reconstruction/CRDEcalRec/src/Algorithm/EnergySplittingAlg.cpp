@@ -114,22 +114,6 @@ printf("  Layer range from LongiClusters: [%d, %d] / [%d, %d] \n", minLayerU, ma
         std::vector<const PandoraPlus::Calo1DCluster*> m_showers; m_showers.clear();
         ClusterSplitting( m_barClusVCol[ic], m_showers );
         if(m_showers.size()==0) continue;
-/*
-for(int as=0; as<m_showers.size(); as++){
-cout<<"  Print shower #"<<as<<endl;
-printf("    Shower Nbars = %d, pos/E (%.2f, %.2f, %.2f, %.3f) \n", m_showers[as]->getBars().size(),
-                                                                   m_showers[as]->getPos().x(), m_showers[as]->getPos().y(), m_showers[as]->getPos().z(), m_showers[as]->getEnergy() );
-cout<<"    Bars: "<<endl;
-for(int a=0; a<m_showers[as]->getBars().size(); a++)
-  printf("      Bar pos/E (%.2f, %.2f, %.2f, %.3f), ID [%d, %d, %d] \n",  m_showers[as]->getBars()[a]->getPosition().x(),
-                                                         m_showers[as]->getBars()[a]->getPosition().y(),
-                                                         m_showers[as]->getBars()[a]->getPosition().z(),
-                                                         m_showers[as]->getBars()[a]->getEnergy(),
-                                                         m_showers[as]->getBars()[a]->getModule(),
-                                                         m_showers[as]->getBars()[a]->getPart(),
-                                                         m_showers[as]->getBars()[a]->getStave() );
-}
-*/
         m_barShowerVCol.insert( m_barShowerVCol.end(), m_showers.begin(), m_showers.end() );
       }
 

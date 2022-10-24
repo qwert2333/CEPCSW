@@ -33,6 +33,7 @@ namespace PandoraPlus{
     //if(!m_towers[i]) { m_towers.erase(m_towers.begin()+i); i--; }
   }
 
+  //TODO: This function is sooooooo time consumeing now!!
   bool Calo3DCluster::isNeighbor(const PandoraPlus::Calo2DCluster* m_2dcluster) const
   {
 
@@ -123,14 +124,8 @@ namespace PandoraPlus{
     std::vector< std::vector<int> > id = _2dcluster->getTowerID();
     for(int ii=0; ii<id.size(); ii++)
       if( find(towerID.begin(), towerID.end(), id[ii])==towerID.end() ) towerID.push_back(id[ii]);
-
-    //std::vector<int> m_2dmodules = _2dcluster->getModules();
-    //std::vector<int> m_2dparts = _2dcluster->getParts();
-    //std::vector<int> m_2dstaves = _2dcluster->getStaves();
-    //m_modules.insert(m_modules.end(),m_2dmodules.begin(),m_2dmodules.end());
-    //m_parts.insert(m_parts.end(),m_2dparts.begin(),m_2dparts.end());
-    //m_staves.insert(m_staves.end(),m_2dstaves.begin(),m_2dstaves.end());
   }
+
 
   void Calo3DCluster::mergeCluster( const PandoraPlus::Calo3DCluster* _clus ){
     for(int i=0; i<_clus->getCluster().size(); i++)
@@ -203,6 +198,59 @@ namespace PandoraPlus{
     if(map_localMaxV.find(name)!=map_localMaxV.end()) emptyCol = map_localMaxV.at(name);
     return emptyCol; 
   }
+
+
+  void Calo3DCluster::FitAxis(){
+    if(m_2dclusters.size()==0) axis.SetXYZ(0,0,0);
+
+    else if(m_2dclusters.size()==1){
+      axis = m_2dclusters[0]->getPos();
+      axis *= 1./axis.Mag();
+    }
+
+    else if( m_2dclusters.size()==2 ){
+      TVector3 pos1 = m_2dclusters[0]->getPos();
+      TVector3 pos2 = m_2dclusters[1]->getPos();
+
+      axis = ( pos1.Mag()>pos2.Mag() ? pos1-pos2 : pos2-pos1 );
+      axis *= 1./axis.Mag();
+    }
+
+    else{
+      trackFitter.clear();
+      //track->setImpactParameter(0., 0.); //fix dr=0, dz=0.
+
+      double barAngle = (towerID[0][0]+2)*TMath::Pi()/4.;
+      double posErr = 10./sqrt(12);
+      if(barAngle>=TMath::TwoPi()) barAngle = barAngle-TMath::TwoPi();
+      trackFitter.setBarAngle(barAngle);
+      for(int is=0;is<m_2dclusters.size();is++){
+        TVector3 pos_barsX = m_2dclusters[is]->getShowerUCol()[0]->getPos(); //U
+        TVector3 pos_barsY = m_2dclusters[is]->getShowerVCol()[0]->getPos(); //Z
+//printf("\t DEBUG: input pointX (%.3f, %.3f, %.3f) \n", barsX.getPos().x(), barsX.getPos().y(), barsX.getPos().z());
+//printf("\t DEBUG: input pointY (%.3f, %.3f, %.3f) \n", barsY.getPos().x(), barsY.getPos().y(), barsY.getPos().z());
+        trackFitter.setGlobalPoint(1, pos_barsX.x(), posErr, pos_barsX.y(), posErr, pos_barsX.z(), posErr);
+        trackFitter.setGlobalPoint(0, pos_barsY.x(), posErr, pos_barsY.y(), posErr, pos_barsY.z(), posErr);
+      }
+      trackFitter.fitTrack();
+      double fitPhi =   trackFitter.getTrkPar(2);
+      double fitTheta = trackFitter.getTrkPar(3);
+//printf("\t DEBUG: fitted phi and theta: %.3f \t %.3f \n", fitPhi, fitTheta);
+
+      axis.SetMag(1.);
+      axis.SetPhi(fitPhi);
+      axis.SetTheta(fitTheta);
+    }
+
+  }
+
+  void Calo3DCluster::FitAxisHit(){
+
+
+  }
+
+  //void Calo3DCluster::FitProfile(){
+  //}
 
 
 };

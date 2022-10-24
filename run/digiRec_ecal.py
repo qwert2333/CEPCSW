@@ -1,6 +1,6 @@
 from Gaudi.Configuration import *
 Nskip = 0
-Nevt = 100
+Nevt = 10
 
 ############## GeomSvc #################
 geometry_option = "CRD_o1_v01/CRD_o1_v01.xml"
@@ -23,7 +23,10 @@ geomsvc.compact = geometry_path
 from Configurables import k4DataSvc
 podioevent = k4DataSvc("EventDataSvc")
 podioevent.inputs = [
-"/cefs/higgs/guofy/CEPCSW_v203/run/SimSamples/Sim_GamGamGhost_central_EcalOnly.root"
+"/cefs/higgs/guofy/CEPCSW_v203/run/HyySim/bashes/CRD_E240_nnHaa_EcalOnly_1.root"
+#"/cefs/higgs/zyang/cepcsoft/CEPCSW/yang/physics/simdir/sim_nnh_bb.root"
+#"/cefs/higgs/guofy/CEPCSW_v203/run/SimSamples/Sim_GamGamGhost_central_EcalOnly.root"
+#"/cefs/higgs/guofy/CEPCSW_v203/run/SimSamples/Sim_Gam10GeV_module0_7_EcalOnly.root"
 ]
 ##########################################
 
@@ -54,7 +57,7 @@ EcalDigi.TimeResolution = 0.5        #unit: ns
 EcalDigi.EnergyThreshold = 0.0001   #0.1 MeV
 EcalDigi.ChargeThresholdFrac = 0.05
 EcalDigi.Debug=1
-EcalDigi.OutFileName = "testTree_GamGamGhost_central.root"
+EcalDigi.OutFileName = "testTree_nnHaa.root"
 #########################################
 
 ##HCAL##
@@ -80,7 +83,7 @@ PandoraPlusPFAlg.BField = 3.
 PandoraPlusPFAlg.Debug = 0
 PandoraPlusPFAlg.SkipEvt = Nskip
 PandoraPlusPFAlg.WriteAna = 1
-PandoraPlusPFAlg.AnaFileName = "testRec_GamGamGhost_central.root"
+PandoraPlusPFAlg.AnaFileName = "testRec_nnHaa.root"
 ##----Readin collections----
 PandoraPlusPFAlg.MCParticleCollection = "MCParticleG4"
 PandoraPlusPFAlg.TrackCollections = [""]
@@ -94,20 +97,20 @@ PandoraPlusPFAlg.HCalReadOutNames = [""]
 '''
 PandoraPlusPFAlg.AlgList = ["ExampleAlg",
                             "GlobalClusteringAlg",
-                            "LocalMaxFindingAlg", 
-                            "HoughClusteringAlg" ]
+                            "LocalMaxFindingAlg" ]
+#                            "HoughClusteringAlg" ]
 PandoraPlusPFAlg.AlgParNames = [ ["Par1", "Par2"],
                                  ["Par1"],
-                                 ["Eth_localMax", "Eth_MaxWithNeigh"],
-                                 ["th_AxisE"] ]
+                                 ["Eth_localMax", "Eth_MaxWithNeigh"] ]
+#                                 ["th_AxisE"] ]
 PandoraPlusPFAlg.AlgParTypes = [ ["double", "double"],
                                  ["double"],
-                                 ["double", "double"],
-                                 ["double"] ]
+                                 ["double", "double"] ]
+#                                 ["double"] ]
 PandoraPlusPFAlg.AlgParValues = [ ["1.", "3.14"],
                                   ["1."],
-                                  ["0.005", "0."],
-                                  ["0.5"] ]
+                                  ["0.005", "0."] ]
+#                                  ["0.5"] ]
 
 '''
 PandoraPlusPFAlg.AlgList = ["ExampleAlg", 
