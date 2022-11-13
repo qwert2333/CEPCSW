@@ -8,20 +8,15 @@ namespace PandoraPlus{
 
   void Calo3DCluster::Clear() 
   {
+    hits.clear();
 	  m_2dclusters.clear();
 	  m_towers.clear();
     towerID.clear(); 
-	  //m_modules.clear();
-	  //m_parts.clear();
-	  //m_staves.clear();
   }
 
   void Calo3DCluster::Clean(){
     for(int i=0; i<m_2dclusters.size(); i++) { delete m_2dclusters[i]; m_2dclusters[i]=NULL; }
-    //for(int i=0; i<m_towers.size(); i++) { delete m_towers[i]; m_towers[i]=NULL; }
-    //std::vector<int>().swap(m_modules);
-    //std::vector<int>().swap(m_parts);
-    //std::vector<int>().swap(m_staves);
+    for(int i=0; i<hits.size(); i++) { delete hits[i]; hits[i]=NULL; }
     Clear();
   }
 
@@ -29,8 +24,6 @@ namespace PandoraPlus{
   {
     for(int i=0; i<m_2dclusters.size(); i++)
     if(!m_2dclusters[i]) { m_2dclusters.erase(m_2dclusters.begin()+i); i--; }
-    //for(int i=0; i<m_towers.size(); i++)
-    //if(!m_towers[i]) { m_towers.erase(m_towers.begin()+i); i--; }
   }
 
   //TODO: This function is sooooooo time consumeing now!!
@@ -245,8 +238,24 @@ namespace PandoraPlus{
   }
 
   void Calo3DCluster::FitAxisHit(){
+    if(hits.size()==0) axis.SetXYZ(0,0,0);
 
+    else if(hits.size()==1){
+      axis = hits[0]->getPosition();
+      axis *= 1./axis.Mag();
+    }
 
+    else if( hits.size()==2 ){
+      TVector3 pos1 = hits[0]->getPosition();
+      TVector3 pos2 = hits[1]->getPosition();
+
+      axis = ( pos1.Mag()>pos2.Mag() ? pos1-pos2 : pos2-pos1 );
+      axis *= 1./axis.Mag();
+    }
+
+    else{
+      axis = getHitCenter();
+    }
   }
 
   //void Calo3DCluster::FitProfile(){

@@ -57,7 +57,8 @@ namespace PandoraPlus{
 
     //Track extrapolation
     //  Write settings: geometry description
-    //  m_TrkExtraSettings.map_floatPar["Nlayers"] = 28;
+    m_TrkExtraSettings.map_floatPars["outermost_distance"] = 3610;
+    m_TrkExtraSettings.map_floatPars["Nlayers"] = 175;
 
     m_TrkExtraAlg = new TrackExtrapolatingAlg();
     m_TrkExtraAlg->ReadSettings(m_TrkExtraSettings);

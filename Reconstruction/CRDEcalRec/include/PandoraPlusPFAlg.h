@@ -19,10 +19,10 @@
 #include "Algorithm/GlobalClusteringAlg.h"
 #include "Algorithm/LocalMaxFindingAlg.h"
 #include "Algorithm/HoughClusteringAlg.h"
-//#include "Algorithm/ConeClustering2DAlg.h"
+#include "Algorithm/ConeClustering2DAlg.h"
 #include "Algorithm/EnergySplittingAlg.h"
 #include "Algorithm/EnergyTimeMatchingAlg.h"
-//#include "Algorithm/ConeClusteringAlg.h"
+#include "Algorithm/ConeClusteringAlg.h"
 #include "Algorithm/TrackExtrapolatingAlg.h"
 
 #include "TVector3.h"
@@ -136,38 +136,9 @@ protected:
   typedef std::vector<int>   IntVec;
 
   TFile* m_wfile;
-  TTree* t_SimBar;
-  FloatVec m_simBar_x, m_simBar_y, m_simBar_z, m_simBar_T1, m_simBar_T2, m_simBar_Q1, m_simBar_Q2; 
-  FloatVec m_simBar_dlayer, m_simBar_part, m_simBar_stave, m_simBar_slayer, m_simBar_module, m_simBar_bar;
-
-  TTree *t_Layers;
-  int m_NshowerU, m_NshowerV;
-  FloatVec m_barShowerU_x, m_barShowerU_y, m_barShowerU_z, m_barShowerU_E, m_barShowerU_part, m_barShowerU_stave;
-  FloatVec m_barShowerV_x, m_barShowerV_y, m_barShowerV_z, m_barShowerV_E, m_barShowerV_part, m_barShowerV_stave;
-
-  TTree *t_Cluster;
-  int m_Nclus, m_Nmc;
-  FloatVec m_Clus_x, m_Clus_y, m_Clus_z, m_Clus_E;
-  IntVec m_mcPdgid, m_mcStatus, m_Nhit;
-  FloatVec m_mcPx, m_mcPy, m_mcPz, m_mcEn;
-
-  TTree *t_Shower;
-  int m_Nshowers;
-  float m_Eclus; 
-  FloatVec m_shower2D_x, m_shower2D_y, m_shower2D_z, m_shower2D_E;
-  IntVec m_shower2D_Module, m_shower2D_Stave, m_shower2D_Part, m_shower2D_Dlayer;
-
-  TTree *t_LongiClusU; 
-  FloatVec m_showerU_x, m_showerU_y, m_showerU_z, m_showerU_E, m_showerU_stave, m_showerU_part;
-  TTree *t_LongiClusV; 
-  FloatVec m_showerV_x, m_showerV_y, m_showerV_z, m_showerV_E, m_showerV_stave, m_showerV_part;
-
-
-  //check neighbor clustering
-  TTree* t_Clustering;
-  int m_3dcluster, m_2dcluster, m_1dcluster, m_barcluster, m_bar; //efficiency
-  FloatVec m_E_3dcluster, m_E_2dcluster, m_E_1dcluster, m_E_barcluster, m_E_bar; //resolution
-  FloatVec m_bar_tag, m_bar_energy, m_bar_dlayer, m_bar_slayer, m_bar_x, m_bar_y, m_bar_z, m_bar_module, m_bar_part, m_bar_stave, m_bar_bar; //distribution check
+  TTree* t_digiHit;
+  FloatVec m_digiHit_x, m_digiHit_y, m_digiHit_z, m_digiHit_E;
+  FloatVec m_digiHit_layer;
 
   TTree * t_Track;
   int m_Ntrk; 
@@ -175,13 +146,15 @@ protected:
   FloatVec m_trkstate_refx, m_trkstate_refy, m_trkstate_refz; 
   IntVec m_trkstate_location; 
 
+  TTree *t_Cluster;
+  int m_Nclus;
+  FloatVec m_Clus_x, m_Clus_y, m_Clus_z, m_Clus_E;
+  IntVec m_Clus_Nhit;
 
-  void ClearBar();
-  void ClearLayer();
-  void ClearShower();
-  void ClearCluster();
-  void ClearClustering();
+
+  void ClearHit();
   void ClearTrack();
+  void ClearCluster();
 
 };
 #endif

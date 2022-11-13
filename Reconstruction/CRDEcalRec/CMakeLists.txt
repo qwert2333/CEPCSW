@@ -39,6 +39,8 @@ gaudi_add_module(CRDEcalRec
                          src/Algorithm/HoughClusteringAlg.cpp
                          src/Algorithm/EnergySplittingAlg.cpp
                          src/Algorithm/EnergyTimeMatchingAlg.cpp
+                         src/Algorithm/ConeClusteringAlg.cpp
+                         src/Algorithm/ConeClustering2DAlg.cpp
                  LINK    CRDEcalRecLib
 )
 target_include_directories(CRDEcalRec PUBLIC

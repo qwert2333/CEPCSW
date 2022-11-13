@@ -44,6 +44,7 @@ CRDEcalDigiAlg::CRDEcalDigiAlg(const std::string& name, ISvcLocator* svcLoc)
 StatusCode CRDEcalDigiAlg::initialize()
 {
 
+
 	std::string s_outfile = _filename;
 	m_wfile = new TFile(s_outfile.c_str(), "recreate");
 	t_SimCont = new TTree("SimStep", "SimStep");

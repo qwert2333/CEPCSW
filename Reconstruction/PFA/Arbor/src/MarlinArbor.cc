@@ -71,17 +71,17 @@ StatusCode MarlinArbor::initialize() {
 
       ISvcLocator* svcloc = serviceLocator();
       m_ArborToolLCIO=new ArborToolLCIO("arborTools",svcloc);
-         for(unsigned int i = 0; i < m_ecalReadoutNames.value().size(); i++){
-             m_col_readout_map[m_ecalColNames.value().at(i)] = m_ecalReadoutNames.value().at(i);
-         }
+//         for(unsigned int i = 0; i < m_ecalReadoutNames.value().size(); i++){
+//             m_col_readout_map[m_ecalColNames.value().at(i)] = m_ecalReadoutNames.value().at(i);
+//         }
          for(unsigned int i = 0; i < m_hcalReadoutNames.value().size(); i++){
              m_col_readout_map[m_hcalColNames.value().at(i)] = m_hcalReadoutNames.value().at(i);
          }
 
-     for (auto& ecal : m_ecalColNames) {
-	  _ecalCollections.push_back( new CaloType(ecal, Gaudi::DataHandle::Reader, this) );
-	  _calCollections.push_back( new CaloType(ecal, Gaudi::DataHandle::Reader, this) );
-     }
+//     for (auto& ecal : m_ecalColNames) {
+//	  _ecalCollections.push_back( new CaloType(ecal, Gaudi::DataHandle::Reader, this) );
+//	  _calCollections.push_back( new CaloType(ecal, Gaudi::DataHandle::Reader, this) );
+//     }
      for (auto& hcal : m_hcalColNames) {
 	  _hcalCollections.push_back( new CaloType(hcal, Gaudi::DataHandle::Reader, this) );
 	  _calCollections.push_back( new CaloType(hcal, Gaudi::DataHandle::Reader, this) );
@@ -138,12 +138,13 @@ StatusCode MarlinArbor::execute()
 	for(unsigned int i1 = 0; i1 < _calCollections.size(); i1++)
 	{
 
-		std::cout<<i1<<"th collection"<<m_col_readout_map[m_ecalColNames.value().at(i1)]<<std::endl;
+		std::cout<<i1<<"th collection"<<std::endl;
 		std::string tmp_readout;
 		
-	      if(i1<2)tmp_readout = m_col_readout_map[m_ecalColNames.value().at(i1)];
-	      else
-		      tmp_readout = m_col_readout_map[m_hcalColNames.value().at(i1-2)];
+//	      if(i1<2)tmp_readout = m_col_readout_map[m_ecalColNames.value().at(i1)];
+//	      else
+//		      tmp_readout = m_col_readout_map[m_hcalColNames.value().at(i1-2)];
+		      tmp_readout = m_col_readout_map[m_hcalColNames.value().at(i1)];
 
 	      std::cout<<tmp_readout<<std::endl;
               // get the DD4hep readout
@@ -163,6 +164,7 @@ StatusCode MarlinArbor::execute()
 			else if( i1 == _calCollections.size() - 2)	//HCAL Ring
 				KShift = 50;
 
+			cout<<"Get CaloHit Coll"<<endl;
 			auto CaloHitColl = _calCollections[i1]->get();
 		
 			//int NHitsCurrCol = CaloHitColl->getNumberOfElements();
@@ -188,10 +190,10 @@ StatusCode MarlinArbor::execute()
 		       }
 		
 
-			// cout<<i1<<"  Stat  "<<SubDId<<" ~~~ "<<inputABHit.size()<<endl; 
+			 cout<<i1<<"  Stat  "<<SubDId<<" ~~~ "<<inputABHit.size()<<endl; 
 
 	}
-	//cout<<"hit size"<<inputHits.size()<<endl;
+	cout<<"hit size"<<inputHits.size()<<endl;
 
 	Sequence = Arbor(inputABHit, _cepc_thresholds);   
 

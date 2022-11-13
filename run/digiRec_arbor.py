@@ -1,6 +1,6 @@
 from Gaudi.Configuration import *
 Nskip = 0
-Nevt = 10
+Nevt = 1
 
 ############## GeomSvc #################
 geometry_option = "CRD_o1_v01/CRD_o1_v01.xml"
@@ -23,10 +23,7 @@ geomsvc.compact = geometry_path
 from Configurables import k4DataSvc
 podioevent = k4DataSvc("EventDataSvc")
 podioevent.inputs = [
-"/cefs/higgs/guofy/CEPCSW_v203/run/HyySim/bashes/CRD_E240_nnHaa_EcalOnly_1.root"
-#"/cefs/higgs/zyang/cepcsoft/CEPCSW/yang/physics/simdir/sim_nnh_bb.root"
-#"/cefs/higgs/guofy/CEPCSW_v203/run/SimSamples/Sim_GamGamGhost_central_EcalOnly.root"
-#"/cefs/higgs/guofy/CEPCSW_v203/run/SimSamples/Sim_Gam10GeV_module0_7_EcalOnly.root"
+"CRDSim_Pi20GeV_FullDet.root"
 ]
 ##########################################
 
@@ -35,8 +32,8 @@ podioevent.inputs = [
 from Configurables import PodioInput
 inp = PodioInput("InputReader")
 #inp.collections = ["EcalBarrelCollection", "EcalEndcapRingCollection", "EcalEndcapsCollection", "MCParticle"]
-#inp.collections = ["EcalBarrelCollection", "HcalBarrelCollection", "MCParticle", "MarlinTrkTracks"]
-inp.collections = ["EcalBarrelCollection", "MCParticleG4"]
+inp.collections = ["EcalBarrelCollection", "HcalBarrelCollection", "MCParticleG4", "MarlinTrkTracks"]
+#inp.collections = ["EcalBarrelCollection", "MCParticleG4"]
 ##########################################
 
 ########## Digitalization ################
@@ -86,59 +83,66 @@ PandoraPlusPFAlg.WriteAna = 1
 PandoraPlusPFAlg.AnaFileName = "testRec_nnHaa.root"
 ##----Readin collections----
 PandoraPlusPFAlg.MCParticleCollection = "MCParticleG4"
-PandoraPlusPFAlg.TrackCollections = [""]
+PandoraPlusPFAlg.TrackCollections = ["MarlinTrkTracks"]
 PandoraPlusPFAlg.ECalCaloHitCollections = ["ECALBarrel"]
 PandoraPlusPFAlg.ECalReadOutNames = ["EcalBarrelCollection"]
-PandoraPlusPFAlg.HCalCaloHitCollections = [""]
-PandoraPlusPFAlg.HCalReadOutNames = [""]
+PandoraPlusPFAlg.HCalCaloHitCollections = ["HCALBarrel"]
+PandoraPlusPFAlg.HCalReadOutNames = ["HcalBarrelCollection"]
 
 #----Algorithms----
 
 '''
 PandoraPlusPFAlg.AlgList = ["ExampleAlg",
-                            "GlobalClusteringAlg",
-                            "LocalMaxFindingAlg" ]
-#                            "HoughClusteringAlg" ]
+                            "ConeClusteringAlgHCAL" ]
 PandoraPlusPFAlg.AlgParNames = [ ["Par1", "Par2"],
-                                 ["Par1"],
-                                 ["Eth_localMax", "Eth_MaxWithNeigh"] ]
-#                                 ["th_AxisE"] ]
+                                 ["ReadinHit", "OutputCluster"] ]
 PandoraPlusPFAlg.AlgParTypes = [ ["double", "double"],
-                                 ["double"],
-                                 ["double", "double"] ]
-#                                 ["double"] ]
+                                 ["string", "string"] ]
 PandoraPlusPFAlg.AlgParValues = [ ["1.", "3.14"],
-                                  ["1."],
-                                  ["0.005", "0."] ]
-#                                  ["0.5"] ]
+                                  ["HCALBarrel", "HCALCluster"] ]
 
 '''
 PandoraPlusPFAlg.AlgList = ["ExampleAlg", 
                             "GlobalClusteringAlg", 
                             "LocalMaxFindingAlg",
                             "HoughClusteringAlg",
+                            "ConeClustering2DAlg",
                             "EnergySplittingAlg",
-                            "EnergyTimeMatchingAlg"  ]
+                            "EnergyTimeMatchingAlg",
+                            "ConeClusteringAlgHCAL"  ]
 PandoraPlusPFAlg.AlgParNames = [ ["Par1", "Par2"], 
                                  ["Par1"], 
                                  ["Eth_localMax", "Eth_MaxWithNeigh"],
                                  ["th_Layers", "th_AxisE"] ,
+                                 [""],
                                  [""], 
-                                 [""]  ]
+                                 [""],
+                                 ["ReadinHit", "OutputCluster"] ]
 PandoraPlusPFAlg.AlgParTypes = [ ["double", "double"],
                                  ["double"],
                                  ["double", "double"],
                                  ["double", "double"],
                                  [""],
-                                 [""]  ]
+                                 [""],
+                                 [""], 
+                                 ["string", "string"]  ]
 PandoraPlusPFAlg.AlgParValues = [ ["1.", "3.14"], 
                                   ["1."], 
                                   ["0.005", "0."],
                                   ["10", "0.5"],
                                   [""],
-                                  [""]   ]
+                                  [""],
+                                  [""],
+                                  ["HCALBarrel", "HCALCluster"]   ]
 
 ########################################
+from Configurables import MarlinArbor
+ArborRec = MarlinArbor("MarlinArbor")
+ArborRec.ECALCollections = [""]
+ArborRec.HCALCollections = ["HCALBarrel"]
+ArborRec.ECALReadOutNames = [""]
+ArborRec.HCALReadOutNames = ["HcalBarrelCollection"]
+
 
 ##############################################################################
 # POD I/O
@@ -153,8 +157,8 @@ out.outputCommands = ["keep *"]
 
 from Configurables import ApplicationMgr
 ApplicationMgr( 
-    #TopAlg=[inp, EcalDigi,caloDigi, PandoraPlusPFAlg ],
-    TopAlg=[inp, EcalDigi, PandoraPlusPFAlg],
+    TopAlg=[inp, EcalDigi,caloDigi, ArborRec, out ],
+    #TopAlg=[inp, EcalDigi, PandoraPlusPFAlg],
     EvtSel="NONE",
     EvtMax=Nevt,
     ExtSvc=[podioevent, geomsvc],

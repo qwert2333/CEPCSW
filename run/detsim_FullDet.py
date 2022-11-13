@@ -41,9 +41,9 @@ from Configurables import StdHepRdr
 from Configurables import SLCIORdr
 from Configurables import HepMCRdr
 from Configurables import GenPrinter
-'''
+
 gun = GtGunTool("GtGunTool")
-gun.Particles = ["mu-"]
+gun.Particles = ["pi+"]
 #gun.Particles = ["nu_e"]
 gun.PositionXs = [0. ]
 gun.PositionYs = [0. ]
@@ -51,13 +51,13 @@ gun.PositionZs = [0. ]
 gun.EnergyMins = [20 ] # GeV
 gun.EnergyMaxs = [20 ] # GeV
 gun.ThetaMins  = [90 ]    # deg
-gun.ThetaMaxs  = [90,]  # deg
-gun.PhiMins    = [68.7 ]    # deg
-gun.PhiMaxs    = [68.7 ]  # deg
-'''
+gun.ThetaMaxs  = [90 ]  # deg
+gun.PhiMins    = [0. ]    # deg
+gun.PhiMaxs    = [0. ]  # deg
 
-stdheprdr = StdHepRdr("StdHepRdr")
-stdheprdr.Input = "/cefs/data/stdhep/CEPC240/higgs/exclusive/E240.Pnnh_aa_wo_ISR.e0.p0.whizard195/nnh_aa_wo_ISR.e0.p0.00001.stdhep"
+
+#stdheprdr = StdHepRdr("StdHepRdr")
+#stdheprdr.Input = "/cefs/data/stdhep/CEPC240/higgs/exclusive/E240.Pnnh_aa_wo_ISR.e0.p0.whizard195/nnh_aa_wo_ISR.e0.p0.00001.stdhep"
 
 # lciordr = SLCIORdr("SLCIORdr")
 # lciordr.Input = "/cefs/data/stdhep/lcio250/signal/Higgs/E250.Pbbh.whizard195/E250.Pbbh_X.e0.p0.whizard195/Pbbh_X.e0.p0.00001.slcio"
@@ -67,8 +67,8 @@ stdheprdr.Input = "/cefs/data/stdhep/CEPC240/higgs/exclusive/E240.Pnnh_aa_wo_ISR
 genprinter = GenPrinter("GenPrinter")
 
 genalg = GenAlgo("GenAlgo")
-#genalg.GenTools = ["GtGunTool"]
-genalg.GenTools = ["StdHepRdr"]
+genalg.GenTools = ["GtGunTool"]
+#genalg.GenTools = ["StdHepRdr"]
 #genalg.GenTools = ["StdHepRdr", "GenPrinter"]
 # genalg.GenTools = ["SLCIORdr", "GenPrinter"]
 # genalg.GenTools = ["HepMCRdr", "GenPrinter"]
@@ -264,7 +264,7 @@ elif dedxoption == "BetheBlochEquationDedxSimTool":
 # output
 from Configurables import PodioOutput
 out = PodioOutput("outputalg")
-out.filename = "CRD_E240_nnHaa_FullDet.root"
+out.filename = "CRDSim_Pi20GeV_FullDet.root"
 out.outputCommands = ["keep *"]
 
 # ApplicationMgr

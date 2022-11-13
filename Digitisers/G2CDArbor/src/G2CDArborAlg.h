@@ -57,7 +57,7 @@ protected:
      /* DataHandle<edm4hep::EventHeaderCollection> m_headerCol{"EventHeaderCol", Gaudi::DataHandle::Reader, this}; */
 
      // Input collections
-     DataHandle<edm4hep::MCParticleCollection> r_mcParticle{"MCParticle", Gaudi::DataHandle::Reader, this};
+     DataHandle<edm4hep::MCParticleCollection> r_mcParticle{"MCParticleG4", Gaudi::DataHandle::Reader, this};
 
      typedef DataHandle<edm4hep::SimCalorimeterHitCollection>  SimCaloType;
 

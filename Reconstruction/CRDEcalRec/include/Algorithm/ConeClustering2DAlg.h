@@ -25,7 +25,7 @@ public:
   StatusCode ClearAlgorithm();
 
   //Self defined algorithms
-  StatusCode LongiConeLinking( std::map<int, std::vector<const PandoraPlus::CaloBarShower*> >& orderedShower, std::vector<PandoraPlus::LongiCluster*>& ClusterCol);
+  StatusCode LongiConeLinking( std::map<int, std::vector<const PandoraPlus::Calo1DCluster*> >& orderedShower, std::vector<PandoraPlus::LongiCluster*>& ClusterCol);
 
 private: 
 

@@ -29,8 +29,8 @@ StatusCode ConeClustering2DAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
   std::vector<PandoraPlus::Calo3DCluster*>* p_3DClusters = &(m_datacol.Cluster3DCol);
 
   for(int ic=0; ic<p_3DClusters->size(); ic++){
-    std::vector<const PandoraPlus::CaloBarShower*> m_localMaxUCol = p_3DClusters->at(ic)->getLocalMaxUCol(settings.map_stringPars["ReadinLocalMaxName"]);
-    std::vector<const PandoraPlus::CaloBarShower*> m_localMaxVCol = p_3DClusters->at(ic)->getLocalMaxVCol(settings.map_stringPars["ReadinLocalMaxName"]);
+    std::vector<const PandoraPlus::Calo1DCluster*> m_localMaxUCol = p_3DClusters->at(ic)->getLocalMaxUCol(settings.map_stringPars["ReadinLocalMaxName"]);
+    std::vector<const PandoraPlus::Calo1DCluster*> m_localMaxVCol = p_3DClusters->at(ic)->getLocalMaxVCol(settings.map_stringPars["ReadinLocalMaxName"]);
 
     if(m_localMaxUCol.size()==0 && m_localMaxVCol.size()==0) continue;
 
@@ -43,8 +43,8 @@ StatusCode ConeClustering2DAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
 //  printf("  #%d: (%.3f, %.3f, %.3f) \n ", i, m_localMaxVCol[i]->getPos().x(), m_localMaxVCol[i]->getPos().y(), m_localMaxVCol[i]->getPos().z());
 
 
-    std::map<int, std::vector<const PandoraPlus::CaloBarShower*> > m_orderedShowerU; m_orderedShowerU.clear(); 
-    std::map<int, std::vector<const PandoraPlus::CaloBarShower*> > m_orderedShowerV; m_orderedShowerV.clear(); 
+    std::map<int, std::vector<const PandoraPlus::Calo1DCluster*> > m_orderedShowerU; m_orderedShowerU.clear(); 
+    std::map<int, std::vector<const PandoraPlus::Calo1DCluster*> > m_orderedShowerV; m_orderedShowerV.clear(); 
     for(int is=0; is<m_localMaxUCol.size(); is++)
       m_orderedShowerU[m_localMaxUCol[is]->getDlayer()].push_back(m_localMaxUCol[is]);
     for(int is=0; is<m_localMaxVCol.size(); is++)
@@ -56,7 +56,7 @@ StatusCode ConeClustering2DAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
 
     LongiConeLinking( m_orderedShowerU, m_longiClusUCol );
     LongiConeLinking( m_orderedShowerV, m_longiClusVCol );
-   
+
     //Convert LongiClusters to const object.
     std::vector<const PandoraPlus::LongiCluster*> const_longiClusUCol; const_longiClusUCol.clear();
     std::vector<const PandoraPlus::LongiCluster*> const_longiClusVCol; const_longiClusVCol.clear();
@@ -82,15 +82,15 @@ StatusCode ConeClustering2DAlg::ClearAlgorithm(){
 }
 
 
-StatusCode ConeClustering2DAlg::LongiConeLinking(  std::map<int, std::vector<const PandoraPlus::CaloBarShower*> >& orderedShower,
+StatusCode ConeClustering2DAlg::LongiConeLinking(  std::map<int, std::vector<const PandoraPlus::Calo1DCluster*> >& orderedShower,
                                                    std::vector<PandoraPlus::LongiCluster*>& ClusterCol)
 {
   if(orderedShower.size()==0) return StatusCode::SUCCESS;
 
-  std::map<int, std::vector<const PandoraPlus::CaloBarShower*>>::iterator iter = orderedShower.begin();
+  std::map<int, std::vector<const PandoraPlus::Calo1DCluster*>>::iterator iter = orderedShower.begin();
   //In first layer: initial clusters. All showers in the first layer are regarded as cluster seed.
   //cluster initial direction = R.
-  std::vector<const PandoraPlus::CaloBarShower*> ShowersinFirstLayer;  ShowersinFirstLayer.clear();
+  std::vector<const PandoraPlus::Calo1DCluster*> ShowersinFirstLayer;  ShowersinFirstLayer.clear();
   ShowersinFirstLayer = iter->second;
   for(int i=0;i<ShowersinFirstLayer.size(); i++){
     if(iter->first < settings.map_floatPars["th_beginLayer"] || iter->first > settings.map_floatPars["th_stopLayer"] ) continue; 
@@ -103,11 +103,11 @@ StatusCode ConeClustering2DAlg::LongiConeLinking(  std::map<int, std::vector<con
 
   for(iter; iter!=orderedShower.end(); iter++){
     if(iter->first < settings.map_floatPars["th_beginLayer"] || iter->first > settings.map_floatPars["th_stopLayer"] ) continue; 
-    std::vector<const PandoraPlus::CaloBarShower*> ShowersinLayer = iter->second;
+    std::vector<const PandoraPlus::Calo1DCluster*> ShowersinLayer = iter->second;
 
     for(int is=0; is<ShowersinLayer.size(); is++){
       for(int ic=0; ic<ClusterCol.size(); ic++ ){
-        const PandoraPlus::CaloBarShower* shower_in_clus = ClusterCol[ic]->getBarShowers().back();
+        const PandoraPlus::Calo1DCluster* shower_in_clus = ClusterCol[ic]->getBarShowers().back();
         if(!shower_in_clus) continue; 
 
         TVector3 relR = ShowersinLayer[is]->getPos() - shower_in_clus->getPos();

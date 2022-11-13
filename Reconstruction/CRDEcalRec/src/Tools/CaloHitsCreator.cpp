@@ -1,5 +1,5 @@
-#ifndef TRACK_CREATOR_C
-#define TRACK_CREATOR_C
+#ifndef CALOHIT_CREATOR_C
+#define CALOHIT_CREATOR_C
 
 #include "Tools/CaloHitsCreator.h"
 

@@ -5,5 +5,5 @@ Generator/output/
 Generator/options/
 run/*.root
 build/
-InstallArea
+InstallArea/
 *.swp

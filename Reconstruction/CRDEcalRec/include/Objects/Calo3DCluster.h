@@ -11,7 +11,7 @@ namespace PandoraPlus {
 
   class Calo3DCluster {
   public: 
-    Calo3DCluster() {};
+    Calo3DCluster() { track=nullptr; };
     ~Calo3DCluster() { Clear(); };
 
     void Clear();
@@ -26,6 +26,7 @@ namespace PandoraPlus {
 
     std::vector< std::vector<int> > getTowerID() const { return towerID; }
     bool isNeighbor(const PandoraPlus::Calo2DCluster* m_2dcluster) const; 
+    PandoraPlus::Track* getTrack() const { return track; }
     std::vector<const PandoraPlus::CaloHit*> getCaloHits() const { return hits; }
     std::vector<const Calo2DCluster*> getCluster() const { return m_2dclusters; }
     std::vector<const Calo1DCluster*> getLocalMaxUCol(std::string name) const;
@@ -42,6 +43,7 @@ namespace PandoraPlus {
     //double getShowerE() const { return getEnergy(); }
     TVector3 getHitCenter() const;
     TVector3 getShowerCenter() const; 
+    TVector3 getAxis() { return axis; }
 
     void setCaloHits( std::vector<const PandoraPlus::CaloHit*> _hits ) { hits = _hits; }
     void setTowers(std::vector<const Calo3DCluster*> _t) { m_towers = _t; }
@@ -56,6 +58,7 @@ namespace PandoraPlus {
     void addTowerID(int _m, int _p, int _s) { std::vector<int> id(3); id[0] = _m; id[1] = _p; id[2] = _s; towerID.push_back(id); }
     void addTowerID( std::vector<int> id ) { towerID.push_back(id); }
 
+    void addTrack(PandoraPlus::Track* _trk) { track=_trk; }
     void addUnit(const Calo2DCluster* _2dcluster);
     void addHit(const PandoraPlus::CaloHit* _hit) { hits.push_back(_hit); };
     void addTower( const Calo3DCluster* _tower ) { m_towers.push_back(_tower); }
@@ -70,6 +73,7 @@ namespace PandoraPlus {
     void FitAxisHit();
 
   private:
+    PandoraPlus::Track* track;
     std::vector<const PandoraPlus::CaloHit*> hits; 
     std::vector<const PandoraPlus::Calo2DCluster*> m_2dclusters;
     std::vector<const Calo3DCluster*> m_towers;
