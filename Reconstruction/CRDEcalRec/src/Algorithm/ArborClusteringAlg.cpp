@@ -62,7 +62,9 @@ StatusCode ArborClusteringAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
 
   //Convert hits to ArborNodes
 
+  //Convert existed clusters to ArborTree
 
+/*
   InitArborTree(m_orderedNodes, m_ArborTreeCol, m_isoNodes);
 
   std::vector<CRDEcalEDM::CRDArborTree> tmpTrees; tmpTrees.clear();
@@ -90,7 +92,7 @@ StatusCode ArborClusteringAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
 
 
   m_datacol.map_CaloCluster["ArborHCALCluster"] = 
-
+*/
   return StatusCode::SUCCESS;
 };
 
@@ -109,5 +111,31 @@ double ArborClusteringAlg::GetTrkCaloHitDistance(const PandoraPlus::Track* trk, 
 
   return dis; 
 };
+
+
+StatusCode ArborClusteringAlg::InitArborTree( std::map<int, std::vector<ArborNode*> >& m_orderedNodes,
+                                              std::vector<ArborTree>& m_treeCol,
+                                              std::vector<ArborNode*>& m_isoNodes ){
+
+  return StatusCode::SUCCESS;
+}
+
+StatusCode ArborClusteringAlg::MergeConnectedTrees( std::vector<ArborTree>& m_inTreeCol, std::vector<ArborTree>& m_outTreeCol ){
+
+  return StatusCode::SUCCESS;
+}
+
+StatusCode ArborClusteringAlg::CleanConnection( ArborTree& m_tree ){
+
+  return StatusCode::SUCCESS;
+}
+
+StatusCode ArborClusteringAlg::DepartArborTree( ArborTree& m_tree, std::vector<ArborTree>& m_departedTrees, std::vector<ArborNode*>& m_isoNodes ){
+
+  return StatusCode::SUCCESS;
+}
+
+StatusCode ArborClusteringAlg::MergeNeighborTree( std::vector<ArborTree>& m_inTreeCol, std::vector<ArborTree>& m_outTreeCol );
+
 
 #endif
