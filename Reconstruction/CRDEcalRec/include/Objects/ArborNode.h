@@ -17,7 +17,7 @@ namespace PandoraPlus{
     ~ArborNode() { Clear(); }
 
     inline bool operator == (const ArborNode &x) const{
-      return (pos==x.GetPosition() && En==x.GetEnergy() && Type==x.GetType()) ;
+      return (pos==x.getPosition() && En==x.getEnergy() && Type==x.getType()) ;
     }
    
     void Clear() {
@@ -28,7 +28,7 @@ namespace PandoraPlus{
     TVector3 getPosition() const { return pos; }
     TVector3 getRefDir(double wf, double wb) const; 
     double getEnergy() const { return En; }
-    int getLayer() const { return calohit.getLayer();  }
+    int getLayer() const { return calohit->getLayer();  }
     int getType() const { return Type; }
     PandoraPlus::CaloHit* getOriginCaloHit() const { return calohit; }
     std::vector<PandoraPlus::ArborNode*> getParentNodes() const { return parentNodes; }
@@ -36,7 +36,7 @@ namespace PandoraPlus{
 
     void setPosition(TVector3& _vecP) { pos=_vecP; }
     void setRefDir(TVector3& _vecRef) { Rref=_vecRef; }
-    void setOriginCaloHit( PandoraPlus::CaloHit& _hit ) { calohit=_hit; }
+    void setOriginCaloHit( PandoraPlus::CaloHit* _hit ) { calohit=_hit; }
     void setEnergy( double _en ) { En=_en; }
     void setType( int _type ) { Type=_type; }
 
@@ -59,8 +59,8 @@ namespace PandoraPlus{
               //5: star root node. 
     PandoraPlus::CaloHit* calohit;  
 
-    std::vector<const PandoraPlus::ArborNode*> parentNodes; 
-    std::vector<const PandoraPlus::ArborNode*> daughterNodes; 
+    std::vector<PandoraPlus::ArborNode*> parentNodes; 
+    std::vector<PandoraPlus::ArborNode*> daughterNodes; 
 
 
   };

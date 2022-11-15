@@ -15,6 +15,8 @@
 //#include "Objects/CaloBarCluster.h"
 #include "Objects/HoughObject.h"
 #include "Objects/HoughSpace.h"
+#include "Objects/ArborNode.h"
+#include "Objects/ArborTree.h"
 #include "Objects/LongiCluster.h"
 //#include "Objects/TransShower.h"
 //#include "Objects/CaloCluster.h"

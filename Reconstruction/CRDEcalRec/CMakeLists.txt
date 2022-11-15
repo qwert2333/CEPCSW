@@ -10,6 +10,8 @@ gaudi_add_library(CRDEcalRecLib
                           src/Objects/Track.cc
                           src/Objects/LongiCluster.cc
                           src/Objects/HoughSpace.cc
+                          src/Objects/ArborNode.cc
+                          src/Objects/ArborTree.cc
                   LINK    k4FWCore::k4FWCore
                           GearSvc
                           DetInterface
@@ -41,6 +43,7 @@ gaudi_add_module(CRDEcalRec
                          src/Algorithm/EnergyTimeMatchingAlg.cpp
                          src/Algorithm/ConeClusteringAlg.cpp
                          src/Algorithm/ConeClustering2DAlg.cpp
+                         src/Algorithm/ArborClusteringAlg.cpp
                  LINK    CRDEcalRecLib
 )
 target_include_directories(CRDEcalRec PUBLIC

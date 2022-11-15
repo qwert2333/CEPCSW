@@ -15,7 +15,7 @@ namespace PandoraPlus{
     ArborTree(std::vector<PandoraPlus::ArborNode*> _nodeCol) : Nodes(_nodeCol) {};
 
     inline bool operator == (const ArborTree &x) const{
-      return Nodes == x.GetNodes(); 
+      return Nodes == x.getNodes(); 
     }
     void Clear() { 
       for(int i=0; i<Nodes.size(); i++) delete Nodes[i];
@@ -23,9 +23,9 @@ namespace PandoraPlus{
       pBarycent.SetXYZ(0.,0.,0.); 
     } 
 
-    std::vector<PandoraPlus::ArborNode*> GetNodes() const { return Nodes; }
-    std::vector<PandoraPlus::ArborNode*> GetNodes(int Layer) const; 
-    PandoraPlus::ArborNode* GetRootNode() const; 
+    std::vector<PandoraPlus::ArborNode*> getNodes() const { return Nodes; }
+    std::vector<PandoraPlus::ArborNode*> getNodes(int Layer) const; 
+    PandoraPlus::ArborNode* getRootNode() const; 
     int getMinDlayer() const; 
     int getMaxDlayer() const;
     TVector3 getBarycenter(); 
@@ -41,7 +41,7 @@ namespace PandoraPlus{
     void nodeClassification(); 
 
     void printTree() const; 
-    Calo3DCluster* ConvertTreeToCluster() const; 
+    Calo3DCluster* convertTreeToCluster() const; 
 
   private: 
     std::vector<PandoraPlus::ArborNode*> Nodes; 

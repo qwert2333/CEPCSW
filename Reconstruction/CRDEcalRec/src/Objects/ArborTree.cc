@@ -4,8 +4,8 @@
 
 namespace PandoraPlus{
 
-  PandoraPlus::ArborNode* ArborTree::getRootNode() const{
-    std::vector<PandoraPlus::ArborNode*> _rootCol; _rootCol.clear(); 
+  ArborNode* ArborTree::getRootNode() const{
+    std::vector<ArborNode*> _rootCol; _rootCol.clear(); 
     for(int i=0; i<Nodes.size(); i++)
       if( Nodes[i]!=NULL && (Nodes[i]->getType()==4 || Nodes[i]->getType()==5) ) _rootCol.push_back(Nodes[i]);
 
@@ -57,19 +57,19 @@ namespace PandoraPlus{
   }
 
   void ArborTree::addNode( std::vector<PandoraPlus::ArborNode*> _nodes ) {
-    for(int i=0; i<_nodes.size(); i++) AddNode( _nodes[i] );
+    for(int i=0; i<_nodes.size(); i++) addNode( _nodes[i] );
   };
 
 
   void ArborTree::createWithRoot(PandoraPlus::ArborNode* _root) {
     Nodes.clear(); 
     Nodes.push_back( _root );
-    for(int i=0; i< _root->getDaughterNodes().size(); i++) this->CreateWithNode( _root->getDaughterNodes()[i], true );
+    for(int i=0; i< _root->getDaughterNodes().size(); i++) this->createWithNode( _root->getDaughterNodes()[i], true );
   };
 
   void ArborTree::createWithTopo( PandoraPlus::ArborNode* _node ){
     Nodes.clear();
-    this->CreateWithNode( _node, false);
+    this->createWithNode( _node, false);
   }
 
   void ArborTree::createWithNode( PandoraPlus::ArborNode* _node, bool f_t2b ){
@@ -78,10 +78,10 @@ namespace PandoraPlus{
 
     this->Nodes.push_back(_node);
     if(f_t2b) 
-      for(int i=0; i< _node->getDaughterNodes().size(); i++) this->CreateWithNode( _node->getDaughterNodes()[i], true );
+      for(int i=0; i< _node->getDaughterNodes().size(); i++) this->createWithNode( _node->getDaughterNodes()[i], true );
     else{
-      for(int i=0; i< _node->getDaughterNodes().size(); i++) this->CreateWithNode( _node->getDaughterNodes()[i], false );
-      for(int i=0; i< _node->getParentNodes().size(); i++) this->CreateWithNode( _node->getParentNodes()[i], false );
+      for(int i=0; i< _node->getDaughterNodes().size(); i++) this->createWithNode( _node->getDaughterNodes()[i], false );
+      for(int i=0; i< _node->getParentNodes().size(); i++) this->createWithNode( _node->getParentNodes()[i], false );
     }
   }
 
@@ -127,7 +127,7 @@ namespace PandoraPlus{
   };
 
   Calo3DCluster* ArborTree::convertTreeToCluster() const{
-    PandoraPlus::Calo3DCluster m_clus = new Calo3DCluster();
+    PandoraPlus::Calo3DCluster* m_clus = new Calo3DCluster();
     for(int in=0; in<Nodes.size(); in++){
       CaloHit* m_hit = Nodes[in]->getOriginCaloHit();
       m_clus->addHit( m_hit );

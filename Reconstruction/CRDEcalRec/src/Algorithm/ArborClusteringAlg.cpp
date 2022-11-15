@@ -22,7 +22,7 @@ StatusCode ArborClusteringAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
   std::vector<PandoraPlus::CaloHit*> m_ECalHitCol; m_ECalHitCol.clear();
   std::vector<PandoraPlus::CaloHit*> m_HCalHitCol; m_HCalHitCol.clear();
 
-    std::vector<PandoraPlus::Calo2DCluster*>* p_Tshowers = &(m_datacol.map_ShowerInLayer[settings.map_stringPars["ReadinHit"]]);
+  std::vector<PandoraPlus::Calo2DCluster*>* p_Tshowers = &(m_datacol.map_ShowerInLayer[settings.map_stringPars["ReadinHit"]]);
     //Convert transShower to hit
     for(int is=0; is<p_Tshowers->size(); is++){
       PandoraPlus::CaloHit* m_hit = new PandoraPlus::CaloHit();
@@ -39,7 +39,7 @@ StatusCode ArborClusteringAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
   m_HCalHitCol = m_datacol.map_CaloHit["HCALBarrel"];
 
 
-  std::vector<PandoraPlus::Track*>* p_trackCol = m_datacol.BarCol;
+  std::vector<PandoraPlus::Track*>* p_trackCol = &(m_datacol.TrackCol);
 
   std::vector<PandoraPlus::Calo3DCluster*> m_clusterCol; m_clusterCol.clear(); 
   //Track driven clustering: find all CaloHits nearby a tracks.
@@ -47,18 +47,18 @@ StatusCode ArborClusteringAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
 
     PandoraPlus::Calo3DCluster* m_clus = new PandoraPlus::Calo3DCluster();
     for(int ihit=0; ihit<m_HCalHitCol.size(); ihit++){
-      if(m_HCalHitCol[ihit].getLayer()>settings.map_intPars["TrkClusteringMaxLayer"]) continue; 
-      double TrkHitDistance = GetTrkCaloHitDistance( p_trackCol[itrk], m_HCalHitCol[ihit] );
+      if(m_HCalHitCol[ihit]->getLayer() > settings.map_intPars["TrkClusteringMaxLayer"]) continue; 
+      double TrkHitDistance = GetTrkCaloHitDistance( p_trackCol->at(itrk), m_HCalHitCol[ihit] );
       if(TrkHitDistance<settings.map_floatPars["TrkClusteringRThresh"])
         m_clus->addHit( m_HCalHitCol[ihit] );
     }
     if(m_clus->getCaloHits().size()!=0){ 
-      m_clus.addTrack(p_trackCol[itrk]);
+      m_clus->addTrack(p_trackCol->at(itrk));
       m_clusterCol.push_back(m_clus);
     }
     m_datacol.bk_Cluster3DCol.push_back(m_clus);
   }
-
+  p_trackCol = nullptr;
 
   //Convert hits to ArborNodes
 
@@ -105,7 +105,7 @@ double ArborClusteringAlg::GetTrkCaloHitDistance(const PandoraPlus::Track* trk, 
   double dis = 10e5;
   for(int i=0; i<trk->trackStates_size(); i++){
     TVector3 pos_state = trk->getTrackStates(i).referencePoint; 
-    double m_dis = (pos_state-hit->getPosition()).M();
+    double m_dis = (pos_state-hit->getPosition()).Mag();
     if(m_dis<dis) dis = m_dis;
   }
 
@@ -135,7 +135,10 @@ StatusCode ArborClusteringAlg::DepartArborTree( ArborTree& m_tree, std::vector<A
   return StatusCode::SUCCESS;
 }
 
-StatusCode ArborClusteringAlg::MergeNeighborTree( std::vector<ArborTree>& m_inTreeCol, std::vector<ArborTree>& m_outTreeCol );
+StatusCode ArborClusteringAlg::MergeNeighborTree( std::vector<ArborTree>& m_inTreeCol, std::vector<ArborTree>& m_outTreeCol ){
+
+  return StatusCode::SUCCESS;
+}
 
 
 #endif

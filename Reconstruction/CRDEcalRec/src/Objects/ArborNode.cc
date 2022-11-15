@@ -5,10 +5,10 @@
 
 namespace PandoraPlus{
 
-  ArborNode::ArborNode( PandoraPlus::CaloHit _calohit ){
+  ArborNode::ArborNode( PandoraPlus::CaloHit* _calohit ){
     calohit = _calohit; 
-    En = _calohit.getEnergy();
-    pos.SetXYZ( _calohit.getPosition().x(), _calohit.getPosition().y(), _calohit.getPosition().z() );
+    En = _calohit->getEnergy();
+    pos.SetXYZ( _calohit->getPosition().x(), _calohit->getPosition().y(), _calohit->getPosition().z() );
     Type = 0;
     parentNodes.clear(); 
     daughterNodes.clear(); 
