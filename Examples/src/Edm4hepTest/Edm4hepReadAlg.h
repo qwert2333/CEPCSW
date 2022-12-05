@@ -3,6 +3,9 @@
 
 #include "k4FWCore/DataHandle.h"
 #include "GaudiAlg/GaudiAlgorithm.h"
+#include "TFile.h"
+#include "TTree.h"
+#include "TVector3.h"
 
 namespace edm4hep {
     class EventHeaderCollection;
@@ -30,6 +33,15 @@ class Edm4hepReadAlg : public GaudiAlgorithm
                 Gaudi::DataHandle::Reader, this};
         DataHandle<edm4hep::CaloHitContributionCollection> m_caloContribCol{"SimCaloContributionCol", 
                 Gaudi::DataHandle::Reader, this};
+
+    TFile *m_wfile;
+    TTree *m_wtree;
+    int m_Nmc;
+    float m_deltaTheta_yy;
+    std::vector<int> m_mcPdgid, m_mcStatus;
+    std::vector<float> m_mcPx, m_mcPy, m_mcPz, m_mcEn;
+
+    void Clear();
 
 };
 
