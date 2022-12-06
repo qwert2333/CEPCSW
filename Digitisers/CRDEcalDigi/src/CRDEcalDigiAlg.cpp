@@ -373,8 +373,8 @@ StatusCode CRDEcalDigiAlg::MergeHits( const edm4hep::SimCalorimeterHitCollection
 
 double CRDEcalDigiAlg::GetBarLength(CaloBar& bar){
 	//TODO: reading bar length from geosvc. 
-	if(bar.getSlayer()==1) return 410.;
-	else return 470.-bar.getDlayer()*10.;
+	if(bar.getSlayer()==1) return 600.;
+	else return 480.-bar.getDlayer()*10.;
 }
 
 /*
