@@ -554,7 +554,7 @@ void BushConnect::TagCore()
 		}
 
 		//Diag for mimic
-		cout<<" Z R "<<TrkEndPoint.Z()<<" MM "<<TrkEndPoint.Perp()<< " ClosestCluIndex "<<ClosestCluIndex<<" ClosestDis "<<ClosestDis <<endl; 
+		cout<<"TagCore: Z R "<<TrkEndPoint.Z()<<" MM "<<TrkEndPoint.Perp()<< " ClosestCluIndex "<<ClosestCluIndex<<" ClosestDis "<<ClosestDis <<endl; 
 		//End Diag
 
 		if( ClosestDis < 15 + 15./TrackEn && ClosestCluIndex > -0.1 && (ClosestNC < 3 || abs(TrkP3.Theta() - 1.57) < 0.01 ) ) 
@@ -667,7 +667,6 @@ void BushConnect::TagCore()
 	}
 
 	int Track_Core_ID = -99;
-
 	edm4hep::ReconstructedParticleCollection* chargeparticleCol = m_chargeparticleCol.createAndPut();
 	edm4hep::ClusterCollection* chargedcoreclusterCol = m_chargedcoreclusterCol.createAndPut();
 	for(int j5 = 0; j5 < NTrk; j5++)
@@ -695,7 +694,6 @@ void BushConnect::TagCore()
 		chargeparticle.setType(Track_Core_ID);
 		ChCoreID[chargeparticle] = Track_Core_ID;
 	}
-
 
 }
 

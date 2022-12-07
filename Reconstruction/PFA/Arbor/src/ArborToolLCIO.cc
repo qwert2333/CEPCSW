@@ -190,7 +190,7 @@ void ArborToolLCIO::ClusterBuilding( DataHandle<edm4hep::ClusterCollection>& _cu
 }
 
 
-
+/*
 int ArborToolLCIO::NHScaleV2( std::vector<edm4hep::CalorimeterHit> clu0, int RatioX, int RatioY, int RatioZ )
 {
 
@@ -235,17 +235,19 @@ int ArborToolLCIO::NHScaleV2( std::vector<edm4hep::CalorimeterHit> clu0, int Rat
 
 	return ReScaledNH;
 }
+*/
 
 float ArborToolLCIO::FDV2( std::vector<edm4hep::CalorimeterHit> clu)
 {
 	float FractalDim = 0;
-	int NReSizeHit[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-	int Scale[10] = {2, 3, 4, 5, 6, 7, 8, 9, 10, 20};
+	float NReSizeHit[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+	float Scale[10] = {2, 3, 4, 5, 6, 7, 8, 9, 10, 20};
 	int OriNHit = clu.size();
 
 	for(int j = 0; j < 10; j++)
 	{
-		NReSizeHit[j] = NHScaleV2(clu, Scale[j], Scale[j], 1);
+		//NReSizeHit[j] = NHScaleV2(clu, Scale[j], Scale[j], 1);
+    NReSizeHit[j] = (float)OriNHit/sqrt(Scale[j]);
 		FractalDim += 0.1 * TMath::Log(float(OriNHit)/NReSizeHit[j])/TMath::Log(float(Scale[j]));
 	}
 
@@ -255,7 +257,7 @@ float ArborToolLCIO::FDV2( std::vector<edm4hep::CalorimeterHit> clu)
 	return FractalDim;
 }
 
-
+/*
 int ArborToolLCIO::NHScaleV3( edm4hep::Cluster clu0, int RatioX, int RatioY, int RatioZ )
 {
 
@@ -303,19 +305,22 @@ int ArborToolLCIO::NHScaleV3( edm4hep::Cluster clu0, int RatioX, int RatioY, int
 	return ReScaledNH;
 
 }
+*/
+
 
 float ArborToolLCIO::FDV3( edm4hep::Cluster clu ){
 
 	float FractalDim = -1;
-        int NReSizeHit[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-	int Scale[5] = {2, 3, 4, 5, 6};
+  float NReSizeHit[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+	float Scale[5] = {2, 3, 4, 5, 6};
 	int OriNHit = clu.hits_size();
 	if(OriNHit > 0)
 	{
 		FractalDim = 0.0;
 		for(int j = 0; j < 5; j++)
 		{
-			NReSizeHit[j] = NHScaleV3(clu, Scale[j], Scale[j], 1);
+			//NReSizeHit[j] = NHScaleV3(clu, Scale[j], Scale[j], 1);
+      NReSizeHit[j] = (float)OriNHit/sqrt(Scale[j]);
 			FractalDim += 0.2 * TMath::Log(float(OriNHit)/NReSizeHit[j])/TMath::Log(float(Scale[j]));
 		}
 	}
@@ -1153,7 +1158,6 @@ int ArborToolLCIO::ClusterFlag(edm4hep::Cluster a_tree, edm4hep::Track a_trk)
 		HH_0.clear();
 		Ecalf10hits.clear();
 
-
 		HelixClassD * currHelix = new HelixClassD();
 		currHelix->Initialize_Canonical(a_trk.getTrackStates(0).phi, a_trk.getTrackStates(0).D0, a_trk.getTrackStates(0).Z0, a_trk.getTrackStates(0).omega, a_trk.getTrackStates(0).tanLambda, BField);
 		float BushDist[3] = {0, 0, 0};
@@ -1213,7 +1217,8 @@ int ArborToolLCIO::ClusterFlag(edm4hep::Cluster a_tree, edm4hep::Track a_trk)
 			auto a_hit = a_tree.getHits(s1);
 			allhits.push_back(a_hit);
 			auto cellid= a_hit.getCellID();
-			int NLayer =  m_decoder->get(cellid, "layer");
+			//int NLayer =  m_decoder->get(cellid, "layer");
+      int NLayer = 2*(cellid%100);
 
 			HitPos = TVector3(a_hit.getPosition().x,a_hit.getPosition().y,a_hit.getPosition().z);
 
@@ -1326,7 +1331,6 @@ int ArborToolLCIO::ClusterFlag(edm4hep::Cluster a_tree, edm4hep::Track a_trk)
 		float totHitEn = 0;
 		float totHitEnDis = 0;
 		float HitEn;
-
 		for(int s2 = 0; s2 < currCluNHits; s2++)
 		{
 			auto a_hit2 = a_tree.getHits(s2);
@@ -1543,9 +1547,12 @@ int ArborToolLCIO::ActiveLayers(  std::vector<edm4hep::CalorimeterHit> clu )
 	for(int i = 0; i < NHits; i++)
 	{
 		auto hit = clu[i];
-		auto cellid= hit.getCellID();
-		tmpK = m_decoder->get(cellid, "layer")+1 ;
-		tmpS = m_decoder->get(cellid, "stave")+1 ;
+    int cellid = hit.getCellID();
+    tmpK = 2*(cellid%100)+1;
+    tmpS = cellid/100+1;
+		//auto cellid= hit.getCellID();
+		//tmpK = m_decoder->get(cellid, "layer")+1 ;
+		//tmpS = m_decoder->get(cellid, "stave")+1 ;
 		// cout<<"tmpK "<<tmpK<<endl; 
 		tmpID = tmpS * 50 + tmpK;
 
@@ -1638,7 +1645,6 @@ int ArborToolLCIO::ClusterFlag1st(edm4hep::Cluster a_tree)
 
 	std::vector<float> hitTheta;
 	hitTheta.clear();
-
 	for(unsigned int j1 = 0; j1 < a_tree.hits_size(); j1++)
 	{
 		auto a_hit = a_tree.getHits(j1);
@@ -1679,7 +1685,7 @@ int ArborToolLCIO::ClusterFlag1st(edm4hep::Cluster a_tree)
 		auto a_hit = a_tree.getHits(s1);
 		allhits.push_back(a_hit);
 		auto cellid = a_hit.getCellID();
-		int NLayer = m_decoder->get(cellid, "layer");
+		int NLayer = cellid%100; 
 		float tmpHitEn = a_hit.getEnergy();
 		HitPos = TVector3(a_hit.getPosition().x,a_hit.getPosition().y,a_hit.getPosition().z);
 
@@ -1879,7 +1885,9 @@ float ArborToolLCIO::EMClusterEE( edm4hep::Cluster inputCluster )
 	{
 		auto a_hit = inputCluster.getHits(s1);
 		auto cellid=a_hit.getCellID();
-		int NLayer = m_decoder->get(cellid, "layer");
+		//int NLayer = m_decoder->get(cellid, "layer");
+    int NLayer = 2*(cellid%100);
+
 		if(NLayer > 20){
 			if (NLayer%2 ==0){
 				ArNhite10 ++;

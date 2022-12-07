@@ -212,10 +212,10 @@ linkcoll LinkClean( std::vector<ArborHit> allhits, linkcoll alllinks )
 
 void BuildInitLink( std::vector<float>Thresholds )
 {
-	KDTreeLinkerAlgo<unsigned,3> kdtree;
-        typedef KDTreeNodeInfoT<unsigned,3> KDTreeNodeInfo;
+  KDTreeLinkerAlgo<unsigned,3> kdtree;
+  typedef KDTreeNodeInfoT<unsigned,3> KDTreeNodeInfo;
 	std::array<float,3> minpos{ {0.0f,0.0f,0.0f} }, maxpos{ {0.0f,0.0f,0.0f} };
-        std::vector<KDTreeNodeInfo> nodes, found;
+  std::vector<KDTreeNodeInfo> nodes, found;
 
 	for(int i0 = 0; i0 < NHits; ++i0 )
         {

@@ -11,7 +11,6 @@ gaudi_add_library(CRDEcalRecLib
                           src/Objects/LongiCluster.cc
                           src/Objects/HoughSpace.cc
                           src/Objects/ArborNode.cc
-                          src/Objects/ArborTree.cc
                   LINK    k4FWCore::k4FWCore
                           GearSvc
                           DetInterface

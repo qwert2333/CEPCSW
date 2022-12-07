@@ -62,30 +62,33 @@ MarlinArbor::MarlinArbor(const std::string& name, ISvcLocator* svcLoc)
 StatusCode MarlinArbor::initialize() {
 
 	
-	_cepc_thresholds.push_back(10);
-	_cepc_thresholds.push_back(90);
-	_cepc_thresholds.push_back(50);
-	_cepc_thresholds.push_back(7.5);
+  _cepc_thresholds.push_back(10);
+  _cepc_thresholds.push_back(90);
+  _cepc_thresholds.push_back(50);
+  _cepc_thresholds.push_back(7.5);
 
-     m_geosvc = service<IGeomSvc>("GeomSvc");
+  m_geosvc = service<IGeomSvc>("GeomSvc");
 
-      ISvcLocator* svcloc = serviceLocator();
-      m_ArborToolLCIO=new ArborToolLCIO("arborTools",svcloc);
-//         for(unsigned int i = 0; i < m_ecalReadoutNames.value().size(); i++){
-//             m_col_readout_map[m_ecalColNames.value().at(i)] = m_ecalReadoutNames.value().at(i);
-//         }
-         for(unsigned int i = 0; i < m_hcalReadoutNames.value().size(); i++){
-             m_col_readout_map[m_hcalColNames.value().at(i)] = m_hcalReadoutNames.value().at(i);
-         }
+  ISvcLocator* svcloc = serviceLocator();
+  m_ArborToolLCIO=new ArborToolLCIO("arborTools",svcloc);
 
-//     for (auto& ecal : m_ecalColNames) {
-//	  _ecalCollections.push_back( new CaloType(ecal, Gaudi::DataHandle::Reader, this) );
-//	  _calCollections.push_back( new CaloType(ecal, Gaudi::DataHandle::Reader, this) );
-//     }
-     for (auto& hcal : m_hcalColNames) {
+  for (auto& ecal : m_ecalColNames) {
+	  _ecalCollections.push_back( new CaloType(ecal, Gaudi::DataHandle::Reader, this) );
+	  _calCollections.push_back( new CaloType(ecal, Gaudi::DataHandle::Reader, this) );
+  }
+  for (auto& hcal : m_hcalColNames) {
 	  _hcalCollections.push_back( new CaloType(hcal, Gaudi::DataHandle::Reader, this) );
 	  _calCollections.push_back( new CaloType(hcal, Gaudi::DataHandle::Reader, this) );
-     }
+  }
+
+  //for(unsigned int i = 0; i < m_ecalReadoutNames.value().size(); i++){
+  //  m_col_readout_map[m_ecalColNames.value().at(i)] = m_ecalReadoutNames.value().at(i);
+  //}
+  for(unsigned int i = 0; i < m_hcalReadoutNames.value().size(); i++){
+    m_col_readout_map[m_hcalColNames.value().at(i)] = m_hcalReadoutNames.value().at(i);
+  }
+
+
 	return GaudiAlgorithm::initialize();
 }
 
@@ -135,22 +138,70 @@ StatusCode MarlinArbor::execute()
 	TVector3 TrkEndPointPos; 
 	std::vector<edm4hep::CalorimeterHit> IsoHits;
 
-	for(unsigned int i1 = 0; i1 < _calCollections.size(); i1++)
+  cout<<"Read ECAL hits"<<endl;
+  //ECAL hits
+  for(unsigned int i1=0; i1<_ecalCollections.size(); i1++){
+    KShift = 0;
+    SubDId = 1;
+
+    auto CaloHitColl = _ecalCollections[i1]->get();
+    for (auto a_hit: *CaloHitColl){
+      currHitPos =  TVector3(a_hit.getPosition().x, a_hit.getPosition().y, a_hit.getPosition().z);
+      Depth = DisSeedSurface(currHitPos);
+
+      int cellid = a_hit.getCellID();
+      StaveNum = cellid/100;
+      LayerNum = cellid%100;
+
+      inputECALHits.push_back(a_hit);
+      ArborHit a_abhit(currHitPos, LayerNum, 0, Depth, StaveNum, SubDId);
+      inputABHit.push_back(a_abhit);
+      inputHits.push_back(a_hit);
+    }
+
+		cout<<i1<<"  Stat  "<<SubDId<<" ~~~ "<<inputABHit.size()<<endl; 
+  }
+
+  cout<<"Read HCAL hits"<<endl;
+  //HCAL hits
+  for(unsigned int i1=0; i1<_hcalCollections.size(); i1++){
+    std::string tmp_readout = m_col_readout_map[m_hcalColNames.value().at(i1)];
+    m_decoder = m_geosvc->getDecoder(tmp_readout);
+    KShift = 50;
+    SubDId = 2;
+
+    auto CaloHitColl = _hcalCollections[i1]->get();
+    for (auto a_hit: *CaloHitColl){
+      currHitPos =  TVector3(a_hit.getPosition().x, a_hit.getPosition().y, a_hit.getPosition().z);
+      Depth = DisSeedSurface(currHitPos);
+
+      auto cellid = a_hit.getCellID();
+      LayerNum = m_decoder->get(cellid, "layer")+ KShift;
+      StaveNum = m_decoder->get(cellid, "stave");
+
+      inputHCALHits.push_back(a_hit);
+      ArborHit a_abhit(currHitPos, LayerNum, 0, Depth, StaveNum, SubDId);
+      inputABHit.push_back(a_abhit);
+      inputHits.push_back(a_hit);
+    }
+
+    cout<<i1<<"  Stat  "<<SubDId<<" ~~~ "<<inputABHit.size()<<endl; 
+  }
+
+/*	for(unsigned int i1 = 0; i1 < _calCollections.size(); i1++)
 	{
 
 		std::cout<<i1<<"th collection"<<std::endl;
 		std::string tmp_readout;
 		
-//	      if(i1<2)tmp_readout = m_col_readout_map[m_ecalColNames.value().at(i1)];
-//	      else
-//		      tmp_readout = m_col_readout_map[m_hcalColNames.value().at(i1-2)];
-		      tmp_readout = m_col_readout_map[m_hcalColNames.value().at(i1)];
+      // get the DD4hep readout
+	    if(i1<2) tmp_readout = m_col_readout_map[m_ecalColNames.value().at(i1)];
+	    else tmp_readout = m_col_readout_map[m_hcalColNames.value().at(i1-2)];
+      std::cout<<tmp_readout<<std::endl;
+      m_decoder = m_geosvc->getDecoder(tmp_readout);
 
-	      std::cout<<tmp_readout<<std::endl;
-              // get the DD4hep readout
-              m_decoder = m_geosvc->getDecoder(tmp_readout);
-			KShift = 0;
-			SubDId = -1; 
+      KShift = 0;
+      SubDId = -1; 
 
 			if( i1 < _EcalCalCollections.size() )
 				SubDId = 1; 
@@ -193,6 +244,9 @@ StatusCode MarlinArbor::execute()
 			 cout<<i1<<"  Stat  "<<SubDId<<" ~~~ "<<inputABHit.size()<<endl; 
 
 	}
+*/
+  
+
 	cout<<"hit size"<<inputHits.size()<<endl;
 
 	Sequence = Arbor(inputABHit, _cepc_thresholds);   

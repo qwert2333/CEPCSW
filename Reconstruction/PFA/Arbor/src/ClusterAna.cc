@@ -88,12 +88,12 @@ StatusCode ClusterAna::execute()
 
     std::vector<CaloHitColHandler*> hdl_EcalHitColl{
         &m_ecalbarrelhitcol,
-            &m_ecalendcaphitcol
+//            &m_ecalendcaphitcol
             };
     std::vector<CaloHitColHandler*> hdl_HcalHitColl{
         &m_hcalbarrelhitcol,
-            &m_hcalendcaphitcol,
-            &m_hcalotherhitcol
+//            &m_hcalendcaphitcol,
+//            &m_hcalotherhitcol
             };
 
     std::vector<std::string> EcalHitColl;

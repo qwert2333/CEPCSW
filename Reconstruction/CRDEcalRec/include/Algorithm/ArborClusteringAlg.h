@@ -25,11 +25,11 @@ public:
   //Self defined algorithms
   double GetTrkCaloHitDistance(const PandoraPlus::Track* trk, const PandoraPlus::CaloHit* hit); 
 
-  StatusCode InitArborTree( std::map<int, std::vector<ArborNode*> >& m_orderedNodes,
-                            std::vector<ArborTree>& m_treeCol,
-                            std::vector<ArborNode*>& m_isoNodes );
+  StatusCode InitArborTree( std::vector<ArborNode>* p_nodeCol,
+                            std::vector<ArborTree>* p_treeCol,
+                            std::vector<ArborNode>* p_isoNodes );
 
-  StatusCode MergeConnectedTrees( std::vector<ArborTree>& m_inTreeCol, std::vector<ArborTree>& m_outTreeCol );
+  //StatusCode MergeConnectedTrees( std::vector<ArborTree>& m_inTreeCol, std::vector<ArborTree>& m_outTreeCol );
 
   StatusCode CleanConnection( ArborTree& m_tree );
 

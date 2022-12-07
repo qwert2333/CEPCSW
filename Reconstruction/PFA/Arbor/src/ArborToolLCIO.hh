@@ -62,10 +62,10 @@ class ArborToolLCIO  : public GaudiAlgorithm
 	
 	float ClusterT0(edm4hep::Cluster a_Clu);
 
-	int NHScaleV2( std::vector<edm4hep::CalorimeterHit> clu0, int RatioX, int RatioY, int RatioZ );
+	//int NHScaleV2( std::vector<edm4hep::CalorimeterHit> clu0, int RatioX, int RatioY, int RatioZ );
 	float FDV2( std::vector<edm4hep::CalorimeterHit> clu);
 	
-	int NHScaleV3( edm4hep::Cluster clu0, int RatioX, int RatioY, int RatioZ );
+	//int NHScaleV3( edm4hep::Cluster clu0, int RatioX, int RatioY, int RatioZ );
 	
 	float FDV3( edm4hep::Cluster clu);
 	

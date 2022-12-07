@@ -47,10 +47,9 @@ StatusCode HoughClusteringAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
 
   std::vector<PandoraPlus::Calo3DCluster*>* p_3DClusters = &(m_datacol.Cluster3DCol); 
   if(!p_3DClusters){ std::cout<<"ERROR: No 3DCluster in present data collection! "<<std::endl; return StatusCode::FAILURE; }
-cout<<"3DCluster size: "<<p_3DClusters->size()<<endl;
 
   for(int it=0; it<p_3DClusters->size(); it++){
-printf("  In 3DCluster #%d: block size = %d \n", it, p_3DClusters->at(it)->getCluster().size());
+//printf("  In 3DCluster #%d: block size = %d \n", it, p_3DClusters->at(it)->getCluster().size());
 
     std::vector<const PandoraPlus::Calo1DCluster*> m_localMaxUCol; m_localMaxUCol.clear();  
     std::vector<const PandoraPlus::Calo1DCluster*> m_localMaxVCol; m_localMaxVCol.clear();
@@ -64,7 +63,7 @@ printf("  In 3DCluster #%d: block size = %d \n", it, p_3DClusters->at(it)->getCl
 
 
     if(m_localMaxUCol.size()==0 && m_localMaxVCol.size()==0) continue; 
-cout<<"  Local maximum size: barX "<<m_localMaxUCol.size()<<"  barY "<<m_localMaxVCol.size()<<endl;
+//cout<<"  Local maximum size: barX "<<m_localMaxUCol.size()<<"  barY "<<m_localMaxVCol.size()<<endl;
 
     std::vector<PandoraPlus::HoughObject> m_HoughObjectsU; m_HoughObjectsU.clear(); 
     std::vector<PandoraPlus::HoughObject> m_HoughObjectsV; m_HoughObjectsV.clear(); 
@@ -79,7 +78,7 @@ cout<<"  Local maximum size: barX "<<m_localMaxUCol.size()<<"  barY "<<m_localMa
       m_HoughObjectsV.push_back(m_obj);
     }
 
-cout<<"  HoughClusteringAlg: Conformal transformation"<<endl;
+//cout<<"  HoughClusteringAlg: Conformal transformation"<<endl;
     //Conformal transformation  
     ConformalTransformation(m_HoughObjectsU);
     ConformalTransformation(m_HoughObjectsV);
@@ -137,7 +136,7 @@ for(int i=0; i<m_HoughObjectsV.size(); i++){
 */
 
    
-cout<<"  HoughClusteringAlg: Fill bins to get the hills"<<endl;
+//cout<<"  HoughClusteringAlg: Fill bins to get the hills"<<endl;
     //Fill bins to get the hills
     PandoraPlus::HoughSpace m_HoughSpaceU; 
     PandoraPlus::HoughSpace m_HoughSpaceV; 
@@ -158,7 +157,7 @@ c1->SaveAs("/cefs/higgs/guofy/CEPCSW_v203/run/HoughMapXY.C");
 delete c1, h2_mapXY;
 */
 
-cout<<"  HoughClusteringAlg: Find hills"<<endl;
+//cout<<"  HoughClusteringAlg: Find hills"<<endl;
     //Find hills
     FindingHills(m_HoughSpaceU);
     FindingHills(m_HoughSpaceV);
@@ -177,7 +176,7 @@ for(int ih=0; ih<m_HoughSpaceU.getHills().size(); ih++){
 }
 */
 
-cout<<"  HoughClusteringAlg: Create output HoughClusters. "<<endl;
+//cout<<"  HoughClusteringAlg: Create output HoughClusters. "<<endl;
     //Create output HoughClusters 
     std::vector<const PandoraPlus::LongiCluster*> m_longiClusUCol; m_longiClusUCol.clear();
     std::vector<const PandoraPlus::LongiCluster*> m_longiClusVCol; m_longiClusVCol.clear(); 
@@ -285,7 +284,7 @@ for(int il=0; il<m_longiClusVCol.size(); il++){
   }//End loop 3D cluster
 
   //m_datacol.TowerCol = p_3DClusters;
-//cout<<"End in HoughClusteringAlg"<<endl;
+cout<<"End in HoughClusteringAlg"<<endl;
   p_3DClusters = nullptr;
   return StatusCode::SUCCESS;
 };
@@ -382,7 +381,6 @@ StatusCode HoughClusteringAlg::HoughTransformation(std::vector<PandoraPlus::Houg
   double centerX = (m_minX+m_maxX)/2.; 
 	double centerY = (m_minY+m_maxY)/2.; 
 
-cout<<"Origin point in conformal space: (X, Y) = ("<<centerX<<", "<<centerY<<")"<<endl;
 
   for(int iobj=0; iobj<m_Hobjects.size(); iobj++){
     //UR
@@ -820,8 +818,8 @@ for(int il=0; il<m_longiClusCol.size(); il++){
 
 
   //Overlap with other clusters: Iter 2. 
-  for(int ic=0; ic<m_longiClusCol.size()-1; ic++){
-  for(int jc=ic+1; jc<m_longiClusCol.size(); jc++){
+  for(int ic=0;  m_longiClusCol.size()>1 && ic<m_longiClusCol.size()-1; ic++){
+  for(int jc=ic+1;  m_longiClusCol.size()>1 && jc<m_longiClusCol.size(); jc++){
     if(ic>=m_longiClusCol.size()) ic--;
 
     if( fabs(m_longiClusCol[ic]->getHoughAlpha() - m_longiClusCol[jc]->getHoughAlpha()) > settings.map_floatPars["th_dAlpha2"] ||

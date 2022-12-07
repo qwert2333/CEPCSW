@@ -52,7 +52,8 @@ cout<<"LocalMaxFinding: input 2DCluster size = "<<m_2dClusCol.size()<<endl;
 //cout<<"LocalMaxV: "<<endl;
 //for(int i=0; i<m_localMaxVCol.size(); i++)
 //  printf("  #%d: (%.3f, %.3f, %.3f) \n ", i, m_localMaxVCol[i]->getPos().x(), m_localMaxVCol[i]->getPos().y(), m_localMaxVCol[i]->getPos().z());
-
+    m_datacol.bk_Cluster1DCol.insert(m_datacol.bk_Cluster1DCol.end(), m_localMaxUCol.begin(), m_localMaxUCol.end());
+    m_datacol.bk_Cluster1DCol.insert(m_datacol.bk_Cluster1DCol.end(), m_localMaxVCol.begin(), m_localMaxVCol.end());
   }
   p_3DClusters = nullptr;
 

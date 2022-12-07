@@ -6,6 +6,11 @@
 StatusCode ArborClusteringAlg::ReadSettings(Settings& m_settings){
   settings = m_settings;
 
+  //if(settings.map_stringPars.find("ReadinHit")==settings.map_stringPars.end()) settings.map_stringPars["ReadinHit"] = "";
+  if(settings.map_floatPars.find("Rth")==settings.map_floatPars.end()) settings.map_floatPars["Rth"] = 50;
+  if(settings.map_floatPars.find("TrkClusteringMaxLayer")==settings.map_floatPars.end()) settings.map_floatPars["TrkClusteringMaxLayer"] = 5;
+  if(settings.map_floatPars.find("TrkClusteringRThresh")==settings.map_floatPars.end()) settings.map_floatPars["TrkClusteringRThresh"] = 20.;
+
   //Initialize parameters
 
   return StatusCode::SUCCESS;
@@ -19,10 +24,10 @@ StatusCode ArborClusteringAlg::Initialize(){
 StatusCode ArborClusteringAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
 
   //Get readin info
-  std::vector<PandoraPlus::CaloHit*> m_ECalHitCol; m_ECalHitCol.clear();
-  std::vector<PandoraPlus::CaloHit*> m_HCalHitCol; m_HCalHitCol.clear();
+  std::vector<PandoraPlus::CaloHit*> m_EcalHitCol; m_EcalHitCol.clear();
+  std::vector<PandoraPlus::CaloHit*> m_HcalHitCol; m_HcalHitCol.clear();
 
-  std::vector<PandoraPlus::Calo2DCluster*>* p_Tshowers = &(m_datacol.map_ShowerInLayer[settings.map_stringPars["ReadinHit"]]);
+  std::vector<PandoraPlus::Calo2DCluster*>* p_Tshowers = &(m_datacol.map_ShowerInLayer["EcalShowerInLayer"]);
     //Convert transShower to hit
     for(int is=0; is<p_Tshowers->size(); is++){
       PandoraPlus::CaloHit* m_hit = new PandoraPlus::CaloHit();
@@ -31,26 +36,25 @@ StatusCode ArborClusteringAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
       m_hit->setLayer( p_Tshowers->at(is)->getDlayer() );
       m_hit->setType(1);
       //m_hit->setParentShower( p_Tshowers->at(is) );
-      m_ECalHitCol.push_back(m_hit);
+      m_EcalHitCol.push_back(m_hit);
       m_datacol.bk_HitCol.push_back(m_hit);
     }
     p_Tshowers = nullptr;
 
-  m_HCalHitCol = m_datacol.map_CaloHit["HCALBarrel"];
+  m_HcalHitCol = m_datacol.map_CaloHit["HCALBarrel"];
 
 
-  std::vector<PandoraPlus::Track*>* p_trackCol = &(m_datacol.TrackCol);
-
-  std::vector<PandoraPlus::Calo3DCluster*> m_clusterCol; m_clusterCol.clear(); 
   //Track driven clustering: find all CaloHits nearby a tracks.
+  std::vector<PandoraPlus::Calo3DCluster*> m_clusterCol; m_clusterCol.clear(); 
+  std::vector<PandoraPlus::Track*>* p_trackCol = &(m_datacol.TrackCol);
   for(int itrk=0; itrk<p_trackCol->size(); itrk++){
 
     PandoraPlus::Calo3DCluster* m_clus = new PandoraPlus::Calo3DCluster();
-    for(int ihit=0; ihit<m_HCalHitCol.size(); ihit++){
-      if(m_HCalHitCol[ihit]->getLayer() > settings.map_intPars["TrkClusteringMaxLayer"]) continue; 
-      double TrkHitDistance = GetTrkCaloHitDistance( p_trackCol->at(itrk), m_HCalHitCol[ihit] );
+    for(int ihit=0; ihit<m_HcalHitCol.size(); ihit++){
+      if(m_HcalHitCol[ihit]->getLayer() > settings.map_floatPars["TrkClusteringMaxLayer"]) continue; 
+      double TrkHitDistance = GetTrkCaloHitDistance( p_trackCol->at(itrk), m_HcalHitCol[ihit] );
       if(TrkHitDistance<settings.map_floatPars["TrkClusteringRThresh"])
-        m_clus->addHit( m_HCalHitCol[ihit] );
+        m_clus->addHit( m_HcalHitCol[ihit] );
     }
     if(m_clus->getCaloHits().size()!=0){ 
       m_clus->addTrack(p_trackCol->at(itrk));
@@ -59,40 +63,49 @@ StatusCode ArborClusteringAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
     m_datacol.bk_Cluster3DCol.push_back(m_clus);
   }
   p_trackCol = nullptr;
-
+  m_datacol.map_CaloCluster["TrackHCALCluster"] = m_clusterCol; 
+  
   //Convert hits to ArborNodes
+  std::vector<PandoraPlus::ArborNode> m_EcalNode; m_EcalNode.clear();
+  std::vector<PandoraPlus::ArborNode> m_HcalNode; m_HcalNode.clear();
+  for(int ih=0; ih<m_EcalHitCol.size(); ih++){
+    ArborNode m_node(m_EcalNode[ih]);
+    m_EcalNode.push_back(m_node);
+  }
+  for(int ih=0; ih<m_HcalHitCol.size(); ih++){
+    ArborNode m_node(m_HcalNode[ih]);
+    m_HcalNode.push_back(m_node);
+  }
 
   //Convert existed clusters to ArborTree
+  std::vector<ArborTree> m_ArborTreeCol; m_ArborTreeCol.clear();
+  for(int icl=0; icl<m_clusterCol.size(); icl++){
+    ArborTree m_tree; m_tree.clear();
+    std::vector<PandoraPlus::ArborNode*> tmp_nodes; tmp_nodes.clear();
+    for(int ih=0; ih<m_clusterCol[icl]->getCaloHits().size(); ih++){
+      ArborNode m_node(m_clusterCol[icl]->getCaloHits()[ih]);
+      auto iter = find( m_HcalNode.begin(), m_HcalNode.end(), m_node );
+      if(iter!=m_HcalNode.end()) tmp_nodes.push_back( &(*iter) );
+    }
 
-/*
-  InitArborTree(m_orderedNodes, m_ArborTreeCol, m_isoNodes);
-
-  std::vector<CRDEcalEDM::CRDArborTree> tmpTrees; tmpTrees.clear();
-  MergeConnectedTrees( m_ArborTreeCol, tmpTrees );
-  m_ArborTreeCol.clear(); m_ArborTreeCol = tmpTrees;
-
-  //Clean connection
-  for(int it=0; it<m_ArborTreeCol.size(); it++) CleanConnection(m_ArborTreeCol[it]);
-
-  //Depart trees after connection cleaning.
-  std::vector<CRDEcalEDM::CRDArborTree> m_departedTrees; m_departedTrees.clear();
-  for(int it=0; it<m_ArborTreeCol.size(); it++){
-    tmpTrees.clear();
-    DepartArborTree(m_ArborTreeCol[it], tmpTrees, m_isoNodes);
-    m_departedTrees.insert(m_departedTrees.end(), tmpTrees.begin(), tmpTrees.end());
-    //m_ArborTreeCol.clear(); m_ArborTreeCol = tmpTrees;
+    if(tmp_nodes.size()<2) continue; 
+    //sort(tmp_nodes.begin(), tmp_nodes.end(), compR);
+    for(int inode=0; inode<tmp_nodes.size()-1; inode++){
+      tmp_nodes[inode]->ConnectDaughter(tmp_nodes[inode+1]);
+      ArborLink m_link = make_pair(tmp_nodes[inode], tmp_nodes[inode+1]);
+      m_tree.push_back(m_link);
+    }
   }
-  m_ArborTreeCol.clear(); m_ArborTreeCol = m_departedTrees; m_departedTrees.clear();
+
+  //Initialize full links 
+  std::vector<PandoraPlus::ArborNode> isoNodes; 
+  //InitArborTree(m_HcalNode, m_ArborTreeCol, isoNodes );
+  //InitArborTree(m_EcalNode, m_ArborTreeCol, isoNodes );
+
+  //Link cleaning
+  for(int itree=0; itree<m_ArborTreeCol.size(); itree++) CleanConnection( m_ArborTreeCol[itree] );
 
 
-
-
-  //Transform ArborTree to Clusters. 
-
-
-
-  m_datacol.map_CaloCluster["ArborHCALCluster"] = 
-*/
   return StatusCode::SUCCESS;
 };
 
@@ -113,17 +126,55 @@ double ArborClusteringAlg::GetTrkCaloHitDistance(const PandoraPlus::Track* trk, 
 };
 
 
-StatusCode ArborClusteringAlg::InitArborTree( std::map<int, std::vector<ArborNode*> >& m_orderedNodes,
-                                              std::vector<ArborTree>& m_treeCol,
-                                              std::vector<ArborNode*>& m_isoNodes ){
+StatusCode ArborClusteringAlg::InitArborTree( std::vector<ArborNode>* p_nodeCol,
+                                              std::vector<ArborTree>* p_treeCol,
+                                              std::vector<ArborNode>* p_isoNodes ){
+  //Build full connections within radius R. 
+/*
+  //Extand existing trees
+  std::vector<ArborNode*> m_leftNodes; m_leftNodes.clear();
+  for(int it=0; it<p_treeCol->size(); it++){
+    ArborNode* m_nodeA = p_treeCol->at(it).first; 
+    for(int in=0; in<p_nodeCol->size(); in++){
+      TVector3 pos = p_nodeCol->at(in).getPosition();
+      double R_AB = (pos-m_nodeA->getPosition()).Mag();
+      if(pos.Mag()<m_nodeA->getPosition().Mag()) continue; //In front of node A. 
+      if(R_AB>settings.map_floatPars["Rth"]) continue;
+
+      ArborLink m_link = make_pair(m_nodeA, &(p_nodeCol->at(i)));
+      auto iter = find(p_nodeCol->begin(), p_nodeCol->end(), m_link );
+      if(iter==p_nodeCol->end()) p_treeCol->at(it).push_back(m_link);
+      else{
+        auto iter_node = find(m_leftNodes.begin(), m_leftNodes.end(), &(p_nodeCol->at(i)) );
+        if( iter_node==m_leftNodes.end() ) m_leftNodes.push_back( &(p_nodeCol->at(i)) );
+      }
+    }
+  }
+
+
+  //Build new trees 
+  for(int in=0; in<m_leftNodes.size(); in++){
+  for(int jn=0; jn!=in && jn<m_leftNodes.size(); jn++){
+    TVector3 posA = m_leftNodes[in]->getPosition();
+    TVector3 posB = m_leftNodes[jn]->getPosition();
+    if(posA.Mag()>posB.Mag()) continue;
+    if( (posA-posB).Mag()>settings.map_floatPars["Rth"] ) continue;
+
+    ArborLink m_link = make_pair( m_leftNodes[in], m_leftNodes[jn] );
+    
+  }
+
+  }
+*/
+
 
   return StatusCode::SUCCESS;
 }
 
-StatusCode ArborClusteringAlg::MergeConnectedTrees( std::vector<ArborTree>& m_inTreeCol, std::vector<ArborTree>& m_outTreeCol ){
+//StatusCode ArborClusteringAlg::MergeConnectedTrees( std::vector<ArborTree>& m_inTreeCol, std::vector<ArborTree>& m_outTreeCol ){
 
-  return StatusCode::SUCCESS;
-}
+//  return StatusCode::SUCCESS;
+//}
 
 StatusCode ArborClusteringAlg::CleanConnection( ArborTree& m_tree ){
 

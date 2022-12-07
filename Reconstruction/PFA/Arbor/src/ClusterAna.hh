@@ -38,12 +38,12 @@ protected:
     MCParticleColHandler m_mcParticle{"MCParticle", Gaudi::DataHandle::Reader, this};
 
     typedef DataHandle<edm4hep::CalorimeterHitCollection> CaloHitColHandler;
-    CaloHitColHandler m_ecalbarrelhitcol{"ECALBarrel", Gaudi::DataHandle::Reader, this};
-    CaloHitColHandler m_ecalendcaphitcol{"ECALEndcap", Gaudi::DataHandle::Reader, this};
+    CaloHitColHandler m_ecalbarrelhitcol{"RecECALBarrel", Gaudi::DataHandle::Reader, this};
+    //CaloHitColHandler m_ecalendcaphitcol{"ECALEndcap", Gaudi::DataHandle::Reader, this};
 
     CaloHitColHandler m_hcalbarrelhitcol{"HCALBarrel", Gaudi::DataHandle::Reader, this};
-    CaloHitColHandler m_hcalendcaphitcol{"HCALEndcap", Gaudi::DataHandle::Reader, this};
-    CaloHitColHandler m_hcalotherhitcol {"HCALOther", Gaudi::DataHandle::Reader, this};
+    //CaloHitColHandler m_hcalendcaphitcol{"HCALEndcap", Gaudi::DataHandle::Reader, this};
+    //CaloHitColHandler m_hcalotherhitcol {"HCALOther", Gaudi::DataHandle::Reader, this};
 
     typedef DataHandle<edm4hep::ClusterCollection> CluColHandler;
     CluColHandler m_Clu{"EHBushes", Gaudi::DataHandle::Reader, this};
@@ -51,7 +51,7 @@ protected:
     typedef DataHandle<edm4hep::ReconstructedParticleCollection> PFOColHandler;
     PFOColHandler m_PFO{"ArborPFO", Gaudi::DataHandle::Reader, this};
 
-Gaudi::Property<std::string> _treeFileName{this,
+    Gaudi::Property<std::string> _treeFileName{this,
             "TreeOutputFile", "Ana.root",
             "The name of the file to which the ROOT tree will be written"};
     Gaudi::Property<std::string> _treeName{this,

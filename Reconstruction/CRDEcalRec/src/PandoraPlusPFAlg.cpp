@@ -93,6 +93,7 @@ StatusCode PandoraPlusPFAlg::initialize()
   m_algorithmManager.RegisterAlgorithmFactory("EnergyTimeMatchingAlg",  new EnergyTimeMatchingAlg::Factory);
   m_algorithmManager.RegisterAlgorithmFactory("ConeClusteringAlg",      new ConeClusteringAlg::Factory);
   m_algorithmManager.RegisterAlgorithmFactory("ConeClusteringAlgHCAL",  new ConeClusteringAlg::Factory);
+  m_algorithmManager.RegisterAlgorithmFactory("ArborClusteringAlg",     new ArborClusteringAlg::Factory);
 
 
   //--- Create algorithm from readin settings ---
@@ -211,6 +212,9 @@ StatusCode PandoraPlusPFAlg::execute()
     m_digiHit_E.push_back(p_hit->getEnergy());
     m_digiHit_layer.push_back(p_hit->getDlayer());
   }
+  std::vector<PandoraPlus::Calo3DCluster*> m_clusvec = m_DataCol.map_CaloCluster["TrackHCALCluster"];
+  //for(int icl=0; icl<m_clusvec.size(); icl++){
+  //std::vector<const PandoraPlus::CaloHit*> m_hitcol = m_clusvec[icl]->getCaloHits();
   for(int ihit=0; ihit<m_hitcol.size(); ihit++){
     const PandoraPlus::CaloHit* p_hit = m_hitcol[ihit];
     m_digiHit_x.push_back(p_hit->getPosition().x());
@@ -219,6 +223,7 @@ StatusCode PandoraPlusPFAlg::execute()
     m_digiHit_E.push_back(p_hit->getEnergy());
     m_digiHit_layer.push_back(p_hit->getLayer());
   }
+  //}
   t_digiHit->Fill();
 
 
@@ -244,7 +249,7 @@ StatusCode PandoraPlusPFAlg::execute()
 
   //Save Cluster
   ClearCluster();
-  std::vector<PandoraPlus::Calo3DCluster*> m_clusvec = m_DataCol.map_CaloCluster["HCALCluster"];
+  //std::vector<PandoraPlus::Calo3DCluster*> m_clusvec = m_DataCol.map_CaloCluster["TrackHCALCluster"];
   m_Nclus = m_clusvec.size();
   for(int ic=0; ic<m_clusvec.size(); ic++){
     m_Clus_x.push_back( m_clusvec[ic]->getHitCenter().x() );

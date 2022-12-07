@@ -63,7 +63,7 @@ StatusCode EnergySplittingAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
       if(minLayerV>m_LongiClusVCol[ic]->getBeginningDlayer()) minLayerV = m_LongiClusVCol[ic]->getBeginningDlayer();
       if(maxLayerV<m_LongiClusVCol[ic]->getEndDlayer()) maxLayerV = m_LongiClusVCol[ic]->getEndDlayer();
     }
-printf("  Layer range from LongiClusters: [%d, %d] / [%d, %d] \n", minLayerU, maxLayerU, minLayerV, maxLayerV);
+//printf("  Layer range from LongiClusters: [%d, %d] / [%d, %d] \n", minLayerU, maxLayerU, minLayerV, maxLayerV);
 
 
     //Make clusters and shwoers in each layer:
@@ -418,7 +418,7 @@ for(int ic=0; ic<m_3dcluster->getCluster().size(); ic++){
   cout<<endl;
 }
 */
-
+/*
 cout<<"Split3DClusterToTowers: Get LongiCluster U: "<<m_LongiClusterUCol.size()<<", V: "<<m_LongiClusterVCol.size()<<endl;
 for(int il=0; il<m_LongiClusterUCol.size(); il++){
   printf("  Check LongiClusterU #%d: shower size %d \n", il, m_LongiClusterUCol[il]->getBarShowers().size());
@@ -447,8 +447,7 @@ for(int il=0; il<m_LongiClusterVCol.size(); il++){
                               m_LongiClusterVCol[il]->getBarShowers()[is] );
   cout<<endl;
 }
-
-
+*/
 
   std::map<std::vector<int>, std::vector<const PandoraPlus::Calo2DCluster*> > map_2DCluster;
   std::map<std::vector<int>, std::vector<const PandoraPlus::LongiCluster*> > map_LongiClusterU; 
@@ -625,7 +624,7 @@ for(auto iter:barShowerVMap) {
 
   }
 
-cout<<"  Start Split LongiClusterU"<<endl;
+//cout<<"  Start Split LongiClusterU"<<endl;
   //Split LongiClusterU
   for(int il=0; il<m_LongiClusterUCol.size(); il++){
     if(m_LongiClusterUCol[il]->getBarShowers().size()==0) {std::cout<<"WARNING: Have an empty LongiCluster! Skip it! "<<std::endl; continue;}
@@ -645,7 +644,7 @@ cout<<"  Start Split LongiClusterU"<<endl;
     tmp_towerIDCol.erase( iter_id, tmp_towerIDCol.end() );
     if(tmp_towerIDCol.size()>1) fl_coverTower=true;
 
-cout<<" Cover tower: "<<fl_coverTower<<", tower size "<<tmp_towerIDCol.size()<<endl;
+//cout<<" Cover tower: "<<fl_coverTower<<", tower size "<<tmp_towerIDCol.size()<<endl;
 
     //LongiCluster does not cover tower: 
     if(!fl_coverTower){
@@ -703,7 +702,7 @@ cout<<" Cover tower: "<<fl_coverTower<<", tower size "<<tmp_towerIDCol.size()<<e
   }
 
 
-cout<<"  Start Split LongiClusterV"<<endl;
+//cout<<"  Start Split LongiClusterV"<<endl;
   //Split LongiClusterV
   for(int il=0; il<m_LongiClusterVCol.size(); il++){
     if(m_LongiClusterVCol[il]->getBarShowers().size()==0) {std::cout<<"WARNING: Have an empty LongiCluster! Skip it! "<<std::endl; continue;}
@@ -722,7 +721,7 @@ cout<<"  Start Split LongiClusterV"<<endl;
     tmp_towerIDCol.erase( iter_id, tmp_towerIDCol.end() );
     if(tmp_towerIDCol.size()>1) fl_coverTower=true;
 
-cout<<" Cover tower: "<<fl_coverTower<<", tower size "<<tmp_towerIDCol.size()<<endl;
+//cout<<" Cover tower: "<<fl_coverTower<<", tower size "<<tmp_towerIDCol.size()<<endl;
 
     //LongiCluster does not cover tower:
     if(!fl_coverTower){

@@ -1,21 +1,21 @@
-#ifndef _ARBORNODE_
-#define _ARBORNODE_
-#include "Objects/CaloHit.h"
+#ifndef _ARBORNODE_H
+#define _ARBORNODE_H
 #include "TVector3.h"
 #include <vector>
-
-namespace PandoraPlus{
 
 
   class ArborNode{
   
   public:
 
-    ArborNode(const PandoraPlus::CaloHit* _calohit ) ;  
+    ArborNode(const edm4hep::CalorimeterHit* _calohit ) ;  
     ~ArborNode() { Clear(); }
 
     inline bool operator == (const ArborNode &x) const{
       return (pos==x.getPosition() && En==x.getEnergy() && Type==x.getType() && calohit==x.calohit) ;
+    }
+    inline bool operator < (const ArborNode &x) const{
+      return (pos.Mag()<x.getPosition().Mag()) ;
     }
    
     void Clear() {
@@ -28,19 +28,19 @@ namespace PandoraPlus{
     double getEnergy() const { return En; }
     int getLayer() const { return calohit->getLayer();  }
     int getType() const { return Type; }
-    const PandoraPlus::CaloHit* getOriginCaloHit() const { return calohit; }
-    std::vector<PandoraPlus::ArborNode*> getParentNodes() const { return parentNodes; }
-    std::vector<PandoraPlus::ArborNode*> getDaughterNodes() const { return daughterNodes; } 
+    const edm4hep::CalorimeterHit* getOriginCalorimeterHit() const { return calohit; }
+    std::vector<ArborNode*> getParentNodes() const { return parentNodes; }
+    std::vector<ArborNode*> getDaughterNodes() const { return daughterNodes; } 
 
     void setPosition(TVector3& _vecP) { pos=_vecP; }
     void setRefDir(TVector3& _vecRef) { Rref=_vecRef; }
     void setEnergy( double _en ) { En=_en; }
     void setType( int _type ) { Type=_type; }
 
-    void ConnectDaughter( PandoraPlus::ArborNode* _Dnode);
-    void ConnectParent  ( PandoraPlus::ArborNode* _Pnode);
-    void DisconnectDaughter( PandoraPlus::ArborNode* _Dnode);
-    void DisconnectParent  ( PandoraPlus::ArborNode* _Pnode);
+    void ConnectDaughter( ArborNode* _Dnode);
+    void ConnectParent  ( ArborNode* _Pnode);
+    void DisconnectDaughter( ArborNode* _Dnode);
+    void DisconnectParent  ( ArborNode* _Pnode);
 
   private: 
     TVector3 pos; 
@@ -52,13 +52,10 @@ namespace PandoraPlus{
               //3: branch node.
               //4: root node. 
               //5: star root node. 
-    const PandoraPlus::CaloHit* calohit;  
+    const edm4hep::CalorimeterHit* calohit;  
 
-    std::vector<PandoraPlus::ArborNode*> parentNodes; 
-    std::vector<PandoraPlus::ArborNode*> daughterNodes; 
-
-    static bool compR( const PandoraPlus::ArborNode* node1, const PandoraPlus::ArborNode* node2 )
-      { return node1->getPosition().Mag() < node2->getPosition().Mag(); }
+    std::vector<ArborNode*> parentNodes; 
+    std::vector<ArborNode*> daughterNodes; 
 
   };
 

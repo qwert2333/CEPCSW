@@ -23,6 +23,7 @@
 #include "Algorithm/EnergySplittingAlg.h"
 #include "Algorithm/EnergyTimeMatchingAlg.h"
 #include "Algorithm/ConeClusteringAlg.h"
+#include "Algorithm/ArborClusteringAlg.h"
 #include "Algorithm/TrackExtrapolatingAlg.h"
 
 #include "TVector3.h"
