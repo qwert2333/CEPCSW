@@ -243,7 +243,7 @@ StatusCode FullLDCTrackingAlg::execute() {
   debug() << "Cleanup is done." << endmsg;
   _nEvt++;
   //  getchar();
-  if(m_tuple){
+  if(m_dumpTime && m_tuple){
     m_timeTotal = stopwatch.RealTime()*1000;
     m_tuple->write();
   }
@@ -579,7 +579,7 @@ void FullLDCTrackingAlg::AddTrackColToEvt(TrackExtendedVec & trkVec, edm4hep::Tr
       debug() << " Add Track to final Collection: ID = " << track.id() << " for trkCand "<< trkCand << endmsg;
     }
   }
-  if(m_tuple) m_timeKalman = stopwatch.RealTime()*1000;
+  if(m_dumpTime && m_tuple) m_timeKalman = stopwatch.RealTime()*1000;
   // streamlog_out(DEBUG5) << endmsg;
   debug() << "Number of accepted " << _OutputTrackColHdl.fullKey() << " = " << nTotTracks << endmsg;
   debug() << "Total 4-momentum of " << _OutputTrackColHdl.fullKey() << " : E = " << eTot
