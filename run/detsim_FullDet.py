@@ -32,6 +32,10 @@ from Configurables import GeomSvc
 geosvc = GeomSvc("GeomSvc")
 geosvc.compact = geometry_path
 
+from Configurables import NTupleSvc
+ntsvc = NTupleSvc("NTupleSvc")
+#ntsvc.Output = ["MyTuples DATAFILE='result.root' OPT='NEW' TYP='ROOT'"]
+
 ##############################################################################
 # Physics Generator
 ##############################################################################
@@ -41,7 +45,7 @@ from Configurables import StdHepRdr
 from Configurables import SLCIORdr
 from Configurables import HepMCRdr
 from Configurables import GenPrinter
-'''
+
 gun = GtGunTool("GtGunTool")
 gun.Particles = ["mu-"]
 #gun.Particles = ["nu_e"]
@@ -54,10 +58,10 @@ gun.ThetaMins  = [90 ]    # deg
 gun.ThetaMaxs  = [90,]  # deg
 gun.PhiMins    = [68.7 ]    # deg
 gun.PhiMaxs    = [68.7 ]  # deg
-'''
 
-stdheprdr = StdHepRdr("StdHepRdr")
-stdheprdr.Input = "/cefs/data/stdhep/CEPC240/higgs/exclusive/E240.Pnnh_aa_wo_ISR.e0.p0.whizard195/nnh_aa_wo_ISR.e0.p0.00001.stdhep"
+
+# stdheprdr = StdHepRdr("StdHepRdr")
+# stdheprdr.Input = "/cefs/data/stdhep/CEPC240/higgs/exclusive/E240.Pnnh_bb.e0.p0.whizard195/nnh_bb.e0.p0.00001.stdhep"
 
 # lciordr = SLCIORdr("SLCIORdr")
 # lciordr.Input = "/cefs/data/stdhep/lcio250/signal/Higgs/E250.Pbbh.whizard195/E250.Pbbh_X.e0.p0.whizard195/Pbbh_X.e0.p0.00001.slcio"
@@ -67,9 +71,9 @@ stdheprdr.Input = "/cefs/data/stdhep/CEPC240/higgs/exclusive/E240.Pnnh_aa_wo_ISR
 genprinter = GenPrinter("GenPrinter")
 
 genalg = GenAlgo("GenAlgo")
-#genalg.GenTools = ["GtGunTool"]
-genalg.GenTools = ["StdHepRdr"]
-#genalg.GenTools = ["StdHepRdr", "GenPrinter"]
+genalg.GenTools = ["GtGunTool"]
+# genalg.GenTools = ["StdHepRdr"]
+# genalg.GenTools = ["StdHepRdr", "GenPrinter"]
 # genalg.GenTools = ["SLCIORdr", "GenPrinter"]
 # genalg.GenTools = ["HepMCRdr", "GenPrinter"]
 
@@ -190,10 +194,11 @@ tracking.VTXHitCollection = vxdhitname
 tracking.SITHitCollection = sithitname
 tracking.FTDPixelHitCollection = ftdhitname
 tracking.FTDSpacePointCollection = ftdspname
-tracking.SITRawHitCollection = "NotNeedForPixelSIT"
+tracking.SITRawHitCollection = sithitname
 tracking.FTDRawHitCollection = ftdhitname
 tracking.UseSIT = True
 tracking.SmoothOn = False
+tracking.DumpTime = False
 #tracking.OutputLevel = DEBUG
 
 from Configurables import ForwardTrackingAlg
@@ -208,6 +213,7 @@ forward.Criteria = ["Crit2_DeltaPhi","Crit2_StraightTrackRatio","Crit3_3DAngle",
                     "Crit2_DeltaRho","Crit2_RZRatio","Crit3_PT"]
 forward.CriteriaMin = [0,  0.9,  0,  0.995, 0,  0.8, 0,   20,  1.002, 0.1,      0,   0.99, 0,    0.999, 0,   0.99, 0]
 forward.CriteriaMax = [30, 1.02, 10, 1.015, 20, 1.3, 1.0, 150, 1.08,  99999999, 0.8, 1.01, 0.35, 1.001, 1.5, 1.01, 0.05]
+forward.DumpTime = False
 #forward.OutputLevel = DEBUG
 
 from Configurables import TrackSubsetAlg
@@ -215,6 +221,7 @@ subset = TrackSubsetAlg("TrackSubset")
 subset.TrackInputCollections = ["ForwardTracks", "SiTracks"]
 subset.RawTrackerHitCollections = [vxdhitname, sithitname, ftdhitname, ftdspname]
 subset.TrackSubsetCollection = "SubsetTracks"
+subset.DumpTime = False
 #subset.OutputLevel = DEBUG
 
 #TODO: DC reconstruction, as preliminary, use Clupatra like as TPC
@@ -234,12 +241,13 @@ full.TPCTrackerHits = dchitname # add TPC or DC tracker hit here, if TPC or DC t
 full.SETTrackerHits = sethitname
 full.FTDPixelTrackerHits = ftdhitname
 full.FTDSpacePoints = ftdspname
-full.SITRawHits     = "NotNeedForPixelSIT"
+full.SITRawHits     = sithitname
 full.SETRawHits     = sethitname
 full.FTDRawHits     = ftdhitname
 full.TPCTracks = "ClupatraTracks" # add standalone TPC or DC track here
 full.SiTracks  = "SubsetTracks"
 full.OutputTracks  = "MarlinTrkTracks"
+full.DumpTime = False
 #full.SITHitToTrackDistance = 3.
 #full.SETHitToTrackDistance = 5.
 #full.OutputLevel = DEBUG
@@ -264,15 +272,14 @@ elif dedxoption == "BetheBlochEquationDedxSimTool":
 # output
 from Configurables import PodioOutput
 out = PodioOutput("outputalg")
-out.filename = "CRD_E240_nnHaa_FullDet.root"
+out.filename = "sim_nnbb_1.root"
 out.outputCommands = ["keep *"]
 
 # ApplicationMgr
 from Configurables import ApplicationMgr
 ApplicationMgr(
-    #TopAlg = [genalg, detsimalg, digiVXD, digiSIT, digiSET, digiFTD, spFTD, digiDC, tracking, forward, subset, out],
+    #TopAlg = [genalg, detsimalg, digiVXD, digiSIT, digiSET, digiFTD, spSET, digiDC, tracking, forward, subset, full, out],
     TopAlg = [genalg, detsimalg, digiVXD, digiSIT, digiSET, digiFTD, spSET, digiDC, tracking, forward, subset, full, out],
-    #TopAlg = [genalg, detsimalg, out],
     EvtSel = 'NONE',
     EvtMax = 10,
     ExtSvc = [rndmengine, rndmgensvc, dsvc, evtseeder, geosvc, gearsvc, tracksystemsvc],
