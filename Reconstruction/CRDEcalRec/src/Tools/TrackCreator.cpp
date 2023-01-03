@@ -49,6 +49,7 @@ namespace PandoraPlus{
                                        const_TrkCol[itrk].getTrackStates(its).referencePoint[2] );
 
         m_trk->AddTrackState( m_trkst );
+        m_trk->setType(const_TrkCol[itrk].getType());
       }
       m_trkCol.push_back(m_trk);
       m_DataCol.bk_TrackCol.push_back( m_trk );

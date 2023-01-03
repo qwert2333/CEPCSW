@@ -19,12 +19,15 @@ namespace PandoraPlus {
   void setTrackStates( std::vector<TrackState>& _states ) { m_trackStates=_states; }
   void AddTrackState( TrackState& _state ) { m_trackStates.push_back(_state); }
 
+  void setType(int _type) { m_type=_type; }
+  int getType() const { return m_type; }
+
   private:
     static const double B ; //direction of magnetic field and charge need to check
 
     std::vector<TrackState> m_trackStates; 
 
-
+    int m_type;
   };
 
 };

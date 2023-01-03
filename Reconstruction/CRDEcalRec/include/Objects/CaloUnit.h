@@ -46,6 +46,8 @@ namespace PandoraPlus{
     bool isAtUpperEdgeZ() const; 
     bool isNeighbor(const CaloUnit* x) const;
     bool isModuleAdjacent( const CaloUnit* x ) const;
+    bool isLongiNeighbor(const CaloUnit* x) const;
+    bool isLongiModuleAdjacent( const CaloUnit* x ) const;
 
     void setGeomInfo(int _m, int _p, int _s, int _l, int _phi, int _z) { Nmodule=_m; Npart=_p; Nstave=_s; Nlayer=_l; NbarPhi=_phi; NbarZ=_z; }
     void setcellID(unsigned long long _cellid) { cellID = _cellid; }
@@ -61,7 +63,9 @@ namespace PandoraPlus{
     static int Nlayer;
     static int NbarPhi;
     static int NbarZ;
-
+    static int over_module[28];
+    static int over_module_set;
+    
   private:
 		unsigned long long cellID;
 		int system;

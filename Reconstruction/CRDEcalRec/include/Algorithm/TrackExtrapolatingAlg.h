@@ -50,6 +50,7 @@ public:
   float GetRefAlpha0(const PandoraPlus::TrackState & trk_state, const TVector2 & center);
   // If the charged particle return back 
   bool IsReturn(float rho, TVector2 & center);
+  StatusCode GetTrackPoints(const PandoraPlus::TrackState & ECAL_trk_state, PandoraPlus::Track* p_track);
 
 private: 
 

@@ -68,6 +68,7 @@ std::cout<<"  Track size: "<<p_tracks->size()<<std::endl;
 //                                          <<ECAL_trk_state.referencePoint.Z()<<")"<<std::endl;
 
     ExtrapolateByLayer(normal_vectors, layer_points, ECAL_trk_state, p_tracks->at(itrk));
+    GetTrackPoints(ECAL_trk_state, p_tracks->at(itrk));
   } // end loop tracks
 
   // std::cout<<"  Run SelfAlg1"<<std::endl;
@@ -282,5 +283,62 @@ bool TrackExtrapolatingAlg::IsReturn(float rho, TVector2 & center){
   else{return false;}
 }
 
+// ...oooOO0OOooo......oooOO0OOooo......oooOO0OOooo...
+StatusCode TrackExtrapolatingAlg::GetTrackPoints(const PandoraPlus::TrackState & ECAL_trk_state, 
+                                                 PandoraPlus::Track* p_track){
+  float rho = GetRho(ECAL_trk_state);
+  TVector2 center = GetCenterOfCircle(ECAL_trk_state, rho);
+  float alpha0 = GetRefAlpha0(ECAL_trk_state, center); 
+
+  // the angle from center point(x_C, y_c) of the helix circle to IP(0, 0)
+  float IP_angle = ATan2( -center.Y(), -center.X() );
+
+  vector<float> delta_phi;
+
+  // negative charged particle
+  // IP_angle should be < alpha0
+  if(ECAL_trk_state.Kappa < 0){
+    while ( IP_angle > alpha0 ){
+      IP_angle = IP_angle - 2*Pi();
+    }
+  }
+  // positive charged particle
+  // IP_angle should be > alpha0
+  else{
+    while (IP_angle < alpha0){
+      IP_angle = IP_angle + 2*Pi();
+    }
+  }
+
+  for(int i = 0; i <= 100; i++){
+    float t_phi = (IP_angle - alpha0) / 100. * i;
+    delta_phi.push_back(t_phi);
+  }
+
+  std::vector<TVector3> ext_points;
+  for(int ip=0; ip<delta_phi.size(); ip++){
+    float x = center.X() + (rho*Cos(alpha0+delta_phi[ip]));
+    float y = center.Y() + (rho*Sin(alpha0+delta_phi[ip]));
+    float z;
+    if(ECAL_trk_state.Kappa > 0){
+      z = ECAL_trk_state.referencePoint.Z() + ECAL_trk_state.Z0 - 
+              (delta_phi[ip]*rho*ECAL_trk_state.tanLambda);
+    }else{
+      z = ECAL_trk_state.referencePoint.Z() + ECAL_trk_state.Z0 + 
+              (delta_phi[ip]*rho*ECAL_trk_state.tanLambda);
+    }
+    TVector3 t_vec3(x,y,z);
+    ext_points.push_back(t_vec3);
+  }
+
+  for(int ip=0; ip<ext_points.size(); ip++){
+    TrackState t_state = ECAL_trk_state;
+    t_state.location = PandoraPlus::TrackState::AtOther;
+    t_state.referencePoint = ext_points[ip];
+    p_track->AddTrackState(t_state);
+  }
+
+  return StatusCode::SUCCESS;
+}
 
 #endif

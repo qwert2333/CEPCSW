@@ -3,6 +3,7 @@ gaudi_add_library(CRDEcalRecLib
                   SOURCES src/Objects/CaloUnit.cc
                           src/Objects/Calo1DCluster.cc
                           src/Objects/Calo2DCluster.cc
+                          src/Objects/CaloHalfCluster.cc
                           src/Objects/Calo3DCluster.cc
                           src/Objects/CaloTower.cc
                           src/Objects/TransShower.cc
