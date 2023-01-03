@@ -6,6 +6,7 @@ using namespace PandoraPlus;
 
 StatusCode GlobalClusteringAlg::ReadSettings(PandoraPlus::Settings& m_settings){
   settings = m_settings;
+  if(settings.map_floatPars.find("unit_threshold")==settings.map_floatPars.end())  settings.map_floatPars["unit_threshold"] = 0.001;
 
   return StatusCode::SUCCESS;
 };
@@ -16,20 +17,40 @@ StatusCode GlobalClusteringAlg::Initialize(){
 };
 
 StatusCode GlobalClusteringAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
+  system("/cefs/higgs/songwz/winter22/CEPCSW/workarea/memory/memory_test.sh cluster_begin");
+  time_t time_cb;  
+  time(&time_cb);  
+  cout<<" When begin clustering: "<<ctime(&time_cb)<<endl;
 
   std::vector<PandoraPlus::CaloUnit*> m_bars = m_datacol.BarCol; 
-  std::vector<PandoraPlus::Calo1DCluster*> m_1dclusters; m_1dclusters.clear();
-  std::vector<PandoraPlus::Calo2DCluster*> m_2dclusters; m_2dclusters.clear();
-  std::vector<PandoraPlus::Calo3DCluster*> m_3dclusters; m_3dclusters.clear();
+  std::vector<PandoraPlus::CaloUnit*> m_processbars;         m_processbars.clear();
+  std::vector<PandoraPlus::CaloUnit*> m_restbars;            m_restbars.clear();
+  std::vector<PandoraPlus::Calo1DCluster*> m_1dclusters;     m_1dclusters.clear();
+  std::vector<PandoraPlus::Calo2DCluster*> m_2dclusters;     m_2dclusters.clear();
+  std::vector<PandoraPlus::CaloHalfCluster*> m_halfclusters; m_halfclusters.clear();
+  std::vector<PandoraPlus::Calo3DCluster*> m_3dclusters;     m_3dclusters.clear();
 
-cout<<"  Clustering bars to 1DClusters: "<<endl;
-  Clustering(m_bars, m_1dclusters);
-cout<<"  1DCluster size: "<<m_1dclusters.size()<<".  Clustering 1DClusters to 2DClusters: "<<endl;
-  Clustering(m_1dclusters, m_2dclusters);
-cout<<"  2DCluster size: "<<m_2dclusters.size()<<".  Clustering 2DClusters to 3DClusters: "<<endl;
-  Clustering(m_2dclusters, m_3dclusters);
-cout<<"  3DCluster size: "<<m_3dclusters.size()<<endl;
-
+  for(int ibar=0; ibar<m_bars.size(); ibar++)
+  {
+    if(m_bars.at(ibar)->getEnergy()>settings.map_floatPars["unit_threshold"])
+    {
+      m_processbars.push_back(m_bars.at(ibar));
+    }
+    else
+    {
+      m_restbars.push_back(m_bars.at(ibar));
+    }
+  }
+  cout<<"  How many bars: "<<m_bars.size()<<endl;
+  cout<<"  How many bars over threshold: "<<m_processbars.size()<<endl;
+  cout<<"  Clustering bars to 1DClusters: "<<endl;
+  Clustering(m_processbars, m_1dclusters);
+  cout<<"  1DCluster size: "<<m_1dclusters.size()<<".  Clustering 1DClusters to HalfClusters: "<<endl;
+  Clustering(m_1dclusters, m_halfclusters);
+  cout<<"  HalfCluster size: "<<m_halfclusters.size()<<endl;
+  // Clustering(m_2dclusters, m_3dclusters);
+  // cout<<"  3DCluster size: "<<m_3dclusters.size()<<endl;
+  
 
 
 /*
@@ -52,16 +73,22 @@ cout<<endl;
 cout<<endl;
 */
 
-
+  for(int irest=0; irest<m_restbars.size(); irest++) m_datacol.bk_RestBarCol.push_back(m_restbars.at(irest));
   for(int i1d=0; i1d<m_1dclusters.size(); i1d++) m_datacol.bk_Cluster1DCol.push_back(m_1dclusters.at(i1d));
   for(int i2d=0; i2d<m_2dclusters.size(); i2d++) m_datacol.bk_Cluster2DCol.push_back(m_2dclusters.at(i2d));
+  for(int ihalf=0; ihalf<m_halfclusters.size(); ihalf++) m_datacol.bk_ClusterHalfCol.push_back(m_halfclusters.at(ihalf));
   for(int i3d=0; i3d<m_3dclusters.size(); i3d++) m_datacol.bk_Cluster3DCol.push_back(m_3dclusters.at(i3d));
 
-
+  m_datacol.RestBarCol = m_restbars;
 	m_datacol.Cluster1DCol = m_1dclusters;
 	m_datacol.Cluster2DCol = m_2dclusters;
+  m_datacol.ClusterHalfCol = m_halfclusters;
 	m_datacol.Cluster3DCol = m_3dclusters;
 
+  time_t time_ce;  
+  time(&time_ce); 
+  cout<<" When end clustering: "<<ctime(&time_ce)<<endl;
+  system("/cefs/higgs/songwz/winter22/CEPCSW/workarea/memory/memory_test.sh cluster_end");
   return StatusCode::SUCCESS;
 };
 

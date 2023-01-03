@@ -3,6 +3,12 @@
 
 #include "Tools/Algorithm.h"
 
+#include "time.h"
+#include <TTimeStamp.h> 
+#include <ctime>
+
+#include <cstdlib>
+
 using namespace PandoraPlus;
 
 class GlobalClusteringAlg : public PandoraPlus::Algorithm{

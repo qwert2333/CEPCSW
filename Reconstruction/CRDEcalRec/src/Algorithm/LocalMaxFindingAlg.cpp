@@ -33,17 +33,27 @@ cout<<"LocalMaxFinding: input 2DCluster size = "<<m_2dClusCol.size()<<endl;
       m_datacol.bk_BarShowerCol.push_back( const_cast<PandoraPlus::Calo1DCluster *>(m_2dClusCol[ic]->getShowerVCol()[is]) );
   }
 */
-  std::vector<PandoraPlus::Calo3DCluster*>* p_3DClusters = &(m_datacol.Cluster3DCol);
-  if(!p_3DClusters) {std::cout<<"ERROR: No 3DCluster in present data collection! "<<std::endl; return StatusCode::FAILURE; }
+  std::vector<PandoraPlus::CaloHalfCluster*>* p_2DClusters = &(m_datacol.ClusterHalfCol);
+  if(!p_2DClusters) {std::cout<<"ERROR: No 2DCluster in present data collection! "<<std::endl; return StatusCode::FAILURE; }
 
-  for(int i3d=0; i3d<p_3DClusters->size(); i3d++){
-    std::vector<const PandoraPlus::Calo1DCluster*> m_localMaxUCol; m_localMaxUCol.clear();
-    std::vector<const PandoraPlus::Calo1DCluster*> m_localMaxVCol; m_localMaxVCol.clear();
+  for(int i2d=0; i2d<p_2DClusters->size(); i2d++){
+    if(p_2DClusters->at(i2d)->getSlayer()==0)
+    {
+      std::vector<const PandoraPlus::Calo1DCluster*> m_localMaxUCol; m_localMaxUCol.clear();
 
-    std::vector<const Calo2DCluster*> m_2dClusCol = p_3DClusters->at(i3d)->getCluster();
-    for(int i2d=0; i2d<m_2dClusCol.size(); i2d++) GetLocalMax(m_2dClusCol[i2d], m_localMaxUCol, m_localMaxVCol);
+      std::vector<const Calo1DCluster*> m_1dClusCol = p_2DClusters->at(i2d)->getCluster();
+      for(int i1d=0; i1d<m_1dClusCol.size(); i1d++) GetLocalMax(m_1dClusCol[i1d], m_localMaxUCol);
+      p_2DClusters->at(i2d)->setLocalMax(settings.map_stringPars["OutputLocalMaxName"], m_localMaxUCol);
+    }
+    else
+    {
+      std::vector<const PandoraPlus::Calo1DCluster*> m_localMaxVCol; m_localMaxVCol.clear();
 
-    p_3DClusters->at(i3d)->setLocalMax(settings.map_stringPars["OutputLocalMaxName"], m_localMaxUCol, settings.map_stringPars["OutputLocalMaxName"], m_localMaxVCol);
+      std::vector<const Calo1DCluster*> m_1dClusCol = p_2DClusters->at(i2d)->getCluster();
+      for(int i1d=0; i1d<m_1dClusCol.size(); i1d++) GetLocalMax(m_1dClusCol[i1d], m_localMaxVCol);
+      p_2DClusters->at(i2d)->setLocalMax(settings.map_stringPars["OutputLocalMaxName"], m_localMaxVCol);
+    }
+    
 
 //cout<<"LocalMaxFinding: LocalMax in 3DCluster #"<<i3d<<endl;
 //cout<<"LocalMaxU: "<<endl;
@@ -54,7 +64,7 @@ cout<<"LocalMaxFinding: input 2DCluster size = "<<m_2dClusCol.size()<<endl;
 //  printf("  #%d: (%.3f, %.3f, %.3f) \n ", i, m_localMaxVCol[i]->getPos().x(), m_localMaxVCol[i]->getPos().y(), m_localMaxVCol[i]->getPos().z());
 
   }
-  p_3DClusters = nullptr;
+  p_2DClusters = nullptr;
 
   return StatusCode::SUCCESS;
 }
@@ -64,37 +74,29 @@ StatusCode LocalMaxFindingAlg::ClearAlgorithm(){
   return StatusCode::SUCCESS;
 }
 
-StatusCode LocalMaxFindingAlg::GetLocalMax( const PandoraPlus::Calo2DCluster* m_2dClus, 
-                                            std::vector<const PandoraPlus::Calo1DCluster*>& m_outputU, 
-                                            std::vector<const PandoraPlus::Calo1DCluster*>& m_outputV){
+StatusCode LocalMaxFindingAlg::GetLocalMax( const PandoraPlus::Calo1DCluster* m_1dClus, 
+                                            std::vector<const PandoraPlus::Calo1DCluster*>& m_output){
 
-  if(m_2dClus->getBarUCol().size()==0 && m_2dClus->getBarVCol().size()==0) return StatusCode::SUCCESS;
+  if(m_1dClus->getBars().size()==0) return StatusCode::SUCCESS;
 
-  std::vector<const PandoraPlus::CaloUnit*> m_barUCol = m_2dClus->getBarUCol();
-  std::vector<const PandoraPlus::CaloUnit*> m_barVCol = m_2dClus->getBarVCol();
+  std::vector<const PandoraPlus::CaloUnit*> m_barCol = m_1dClus->getBars();
 
 //cout<<"  LocalMaxFindingAlg::GetLocalMax: Input bar collection size: "<<m_barUCol.size()<<"  "<<m_barVCol.size()<<endl;
 
-  std::vector<const PandoraPlus::CaloUnit*> localMaxUCol; localMaxUCol.clear();
-  std::vector<const PandoraPlus::CaloUnit*> localMaxVCol; localMaxVCol.clear();
-  GetLocalMaxBar( m_barUCol, localMaxUCol );
-  GetLocalMaxBar( m_barVCol, localMaxVCol );
+  std::vector<const PandoraPlus::CaloUnit*> localMaxCol; localMaxCol.clear();
+
+  GetLocalMaxBar( m_barCol, localMaxCol );
 
 //cout<<"  LocalMaxFindingAlg::GetLocalMax: Found local max bar size: "<<localMaxUCol.size()<<"  "<<localMaxVCol.size()<<endl;
 //cout<<"  Transfer bar to barShower"<<endl;
 
-  for(int j=0; j<localMaxUCol.size(); j++){
+  for(int j=0; j<localMaxCol.size(); j++){
     PandoraPlus::Calo1DCluster* m_shower = new PandoraPlus::Calo1DCluster();
-    m_shower->addUnit( localMaxUCol[j] );
-    m_shower->addSeed( localMaxUCol[j] );
-    m_outputU.push_back(m_shower);
+    m_shower->addUnit( localMaxCol[j] );
+    m_shower->addSeed( localMaxCol[j] );
+    m_output.push_back(m_shower);
   }
-  for(int j=0; j<localMaxVCol.size(); j++){
-    PandoraPlus::Calo1DCluster* m_shower = new PandoraPlus::Calo1DCluster();
-    m_shower->addUnit( localMaxVCol[j] );
-    m_shower->addSeed( localMaxVCol[j] );
-    m_outputV.push_back(m_shower);
-  }
+
 //cout<<"  Output bar shower size: "<<m_outputU.size()<<"  "<<m_outputV.size()<<endl;
 //cout<<endl;
 

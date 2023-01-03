@@ -8,6 +8,7 @@
 #include "Objects/CaloUnit.h"
 #include "Objects/Calo1DCluster.h"
 #include "Objects/Calo2DCluster.h"
+#include "Objects/CaloHalfCluster.h"
 #include "Objects/Calo3DCluster.h"
 //#include "Objects/CaloBlock.h"
 //#include "Objects/CaloTower.h"
@@ -65,8 +66,10 @@ public:
 
 
   std::vector<PandoraPlus::CaloUnit*>       BarCol; 
+  std::vector<PandoraPlus::CaloUnit*>       RestBarCol;
   std::vector<PandoraPlus::Calo1DCluster*>  Cluster1DCol; 
   std::vector<PandoraPlus::Calo2DCluster*>  Cluster2DCol;  
+  std::vector<PandoraPlus::CaloHalfCluster*>  ClusterHalfCol;
   std::vector<PandoraPlus::Calo3DCluster*>  Cluster3DCol;
 
 
@@ -75,8 +78,10 @@ public:
 
   std::vector<PandoraPlus::CaloHit*>        bk_HitCol;
   std::vector<PandoraPlus::CaloUnit*>       bk_BarCol;
+  std::vector<PandoraPlus::CaloUnit*>       bk_RestBarCol;
   std::vector<PandoraPlus::Calo1DCluster*>  bk_Cluster1DCol; 
   std::vector<PandoraPlus::Calo2DCluster*>  bk_Cluster2DCol;  
+  std::vector<PandoraPlus::CaloHalfCluster*>  bk_ClusterHalfCol;
   std::vector<PandoraPlus::Calo3DCluster*>  bk_Cluster3DCol;
   std::vector<PandoraPlus::LongiCluster*>   bk_LongiClusCol;
 

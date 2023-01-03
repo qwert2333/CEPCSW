@@ -94,6 +94,10 @@ StatusCode CRDEcalDigiAlg::initialize()
 
 StatusCode CRDEcalDigiAlg::execute()
 {
+	system("/cefs/higgs/songwz/winter22/CEPCSW/workarea/memory/memory_test.sh digi_begin");
+	time_t time_db;  
+  	time(&time_db);  
+  	cout<<" When begin digi: "<<ctime(&time_db)<<endl;
 	if(_nEvt==0) std::cout<<"CRDEcalDigiAlg::execute Start"<<std::endl;
 	std::cout<<"Processing event: "<<_nEvt<<std::endl;
    if(_nEvt<_Nskip){ _nEvt++; return StatusCode::SUCCESS; }
@@ -311,6 +315,10 @@ StatusCode CRDEcalDigiAlg::execute()
   _nEvt ++ ;
   //delete SimHitCol, caloVec, caloAssoVec; 
   m_simhitCol.clear();
+  system("/cefs/higgs/songwz/winter22/CEPCSW/workarea/memory/memory_test.sh digi_end");
+  time_t time_de;  
+  time(&time_de);  
+  cout<<" When end digi: "<<ctime(&time_de)<<endl;
   return StatusCode::SUCCESS;
 }
 

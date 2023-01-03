@@ -31,6 +31,8 @@
 #include "TTree.h"
 #include "TBranch.h"
 
+#include <cstdlib>
+
 using namespace PandoraPlus;
 using namespace std;
 class PandoraPlusPFAlg : public GaudiAlgorithm
@@ -142,8 +144,8 @@ protected:
 
   TTree *t_Layers;
   int m_NshowerU, m_NshowerV;
-  FloatVec m_barShowerU_x, m_barShowerU_y, m_barShowerU_z, m_barShowerU_E, m_barShowerU_part, m_barShowerU_stave;
-  FloatVec m_barShowerV_x, m_barShowerV_y, m_barShowerV_z, m_barShowerV_E, m_barShowerV_part, m_barShowerV_stave;
+  FloatVec m_barShowerU_tag, m_barShowerU_x, m_barShowerU_y, m_barShowerU_z, m_barShowerU_E, m_barShowerU_module, m_barShowerU_part, m_barShowerU_stave, m_barShowerU_dlayer, m_barShowerU_slayer, m_barShowerU_bar;
+  FloatVec m_barShowerV_tag, m_barShowerV_x, m_barShowerV_y, m_barShowerV_z, m_barShowerV_E, m_barShowerV_module, m_barShowerV_part, m_barShowerV_stave, m_barShowerV_dlayer, m_barShowerV_slayer, m_barShowerV_bar;
 
   TTree *t_Cluster;
   int m_Nclus, m_Nmc;
@@ -168,12 +170,13 @@ protected:
   int m_3dcluster, m_2dcluster, m_1dcluster, m_barcluster, m_bar; //efficiency
   FloatVec m_E_3dcluster, m_E_2dcluster, m_E_1dcluster, m_E_barcluster, m_E_bar; //resolution
   FloatVec m_bar_tag, m_bar_energy, m_bar_dlayer, m_bar_slayer, m_bar_x, m_bar_y, m_bar_z, m_bar_module, m_bar_part, m_bar_stave, m_bar_bar; //distribution check
+  IntVec m_units_2dcluster, m_slayer_2dcluster;
 
   TTree * t_Track;
   int m_Ntrk; 
   FloatVec m_trkstate_d0, m_trkstate_z0, m_trkstate_phi, m_trkstate_tanL, m_trkstate_omega, m_trkstate_kappa;
   FloatVec m_trkstate_refx, m_trkstate_refy, m_trkstate_refz; 
-  IntVec m_trkstate_location; 
+  IntVec m_trkstate_tag, m_trkstate_location, m_type;
 
 
   void ClearBar();
