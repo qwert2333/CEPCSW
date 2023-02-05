@@ -147,6 +147,11 @@ protected:
   FloatVec m_barShowerU_tag, m_barShowerU_x, m_barShowerU_y, m_barShowerU_z, m_barShowerU_E, m_barShowerU_module, m_barShowerU_part, m_barShowerU_stave, m_barShowerU_dlayer, m_barShowerU_slayer, m_barShowerU_bar;
   FloatVec m_barShowerV_tag, m_barShowerV_x, m_barShowerV_y, m_barShowerV_z, m_barShowerV_E, m_barShowerV_module, m_barShowerV_part, m_barShowerV_stave, m_barShowerV_dlayer, m_barShowerV_slayer, m_barShowerV_bar;
 
+  // yyy: check Hough Algorithm
+  TTree *t_Hough;
+  FloatVec m_halfclusV_tag, m_longiclusV_tag, m_houghV_x, m_houghV_y, m_houghV_z, m_houghV_E, m_houghV_module, m_houghV_part, m_houghV_stave, m_houghV_dlayer, m_houghV_slayer;
+  FloatVec m_halfclusU_tag, m_longiclusU_tag, m_houghU_x, m_houghU_y, m_houghU_z, m_houghU_E, m_houghU_module, m_houghU_part, m_houghU_stave, m_houghU_dlayer, m_houghU_slayer;
+
   TTree *t_Cluster;
   int m_Nclus, m_Nmc;
   FloatVec m_Clus_x, m_Clus_y, m_Clus_z, m_Clus_E;
@@ -181,6 +186,7 @@ protected:
 
   void ClearBar();
   void ClearLayer();
+  void ClearHough(); // yyy
   void ClearShower();
   void ClearCluster();
   void ClearClustering();

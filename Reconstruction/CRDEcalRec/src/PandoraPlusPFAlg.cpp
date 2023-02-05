@@ -136,6 +136,7 @@ StatusCode PandoraPlusPFAlg::initialize()
     m_wfile = new TFile(s_outfile.c_str(), "recreate");
     t_SimBar = new TTree("SimBarHit", "SimBarHit");
     t_Layers = new TTree("RecLayers","RecLayers");
+    t_Hough = new TTree("Hough","Hough");   // yyy: Hough
     t_LongiClusU = new TTree("LoniClusU", "LoniClusU");
     t_LongiClusV = new TTree("LoniClusV", "LoniClusV");
     t_Shower = new TTree("RecShowers", "RecShowers");
@@ -183,6 +184,29 @@ StatusCode PandoraPlusPFAlg::initialize()
     t_Layers->Branch("barShowerV_dlayer", &m_barShowerV_dlayer);
     t_Layers->Branch("barShowerV_slayer", &m_barShowerV_slayer);
     t_Layers->Branch("barShowerV_bar", &m_barShowerV_bar);
+
+
+    // yyy: Hough cluster
+    t_Hough->Branch("halfclusV_tag", &m_halfclusV_tag);
+    t_Hough->Branch("longiclusV_tag", &m_longiclusV_tag);
+    t_Hough->Branch("houghV_x", &m_houghV_x);
+    t_Hough->Branch("houghV_y", &m_houghV_y);
+    t_Hough->Branch("houghV_E", &m_houghV_E);
+    t_Hough->Branch("houghV_module", &m_houghV_module);
+    t_Hough->Branch("houghV_part", &m_houghV_part);
+    t_Hough->Branch("houghV_stave", &m_houghV_stave);
+    t_Hough->Branch("houghV_dlayer", &m_houghV_dlayer);
+    t_Hough->Branch("houghV_slayer", &m_houghV_slayer);
+    t_Hough->Branch("halfclusU_tag", &m_halfclusU_tag);
+    t_Hough->Branch("longiclusU_tag", &m_longiclusU_tag);
+    t_Hough->Branch("houghU_x", &m_houghU_x);
+    t_Hough->Branch("houghU_y", &m_houghU_y);
+    t_Hough->Branch("houghU_E", &m_houghU_E);
+    t_Hough->Branch("houghU_module", &m_houghU_module);
+    t_Hough->Branch("houghU_part", &m_houghU_part);
+    t_Hough->Branch("houghU_stave", &m_houghU_stave);
+    t_Hough->Branch("houghU_dlayer", &m_houghU_dlayer);
+    t_Hough->Branch("houghU_slayer", &m_houghU_slayer);
 
 
     //LongiClusters
@@ -379,6 +403,62 @@ StatusCode PandoraPlusPFAlg::execute()
     
   }
   t_Layers->Fill();
+
+
+  // yyy: check Hough cluster
+  ClearHough();
+  std::vector<PandoraPlus::CaloHalfCluster*> m_halfclusterV;
+  std::vector<PandoraPlus::CaloHalfCluster*> m_halfclusterU;
+  for(int ic=0;ic<m_halfclusters.size();ic++){
+    if(m_halfclusters[ic]->getSlayer()==0){
+      m_halfclusterU.push_back(m_halfclusters[ic]);
+    }
+    else if(m_halfclusters[ic]->getSlayer()==1){
+      m_halfclusterV.push_back(m_halfclusters[ic]);
+    }
+    else{
+      std::cout << "PandoraPlusPFAlg: yyy: wrong slayer for m_halfclusters" << std::endl;
+    }
+  }
+  for(int ihc=0; ihc<m_halfclusterV.size(); ihc++){
+    std::vector<const PandoraPlus::LongiCluster*> vec_LongiV = m_halfclusterV[ihc]->getLongiClusterCol("EMLongiCluster");
+    
+    for(int ilc=0; ilc<vec_LongiV.size(); ilc++){
+      for(int ilm=0; ilm<vec_LongiV[ilc]->getBarShowers().size(); ilm++){
+        m_halfclusV_tag.push_back( m_halfclusterV[ihc]->getEnergy() );
+        m_longiclusV_tag.push_back( vec_LongiV[ilc]->getEnergy() );
+        m_houghV_x.push_back( vec_LongiV[ilc]->getBarShowers()[ilm]->getPos().x() );
+        m_houghV_y.push_back( vec_LongiV[ilc]->getBarShowers()[ilm]->getPos().y() );
+        m_houghV_z.push_back( vec_LongiV[ilc]->getBarShowers()[ilm]->getPos().z() );
+        m_houghV_E.push_back( vec_LongiV[ilc]->getBarShowers()[ilm]->getEnergy() );
+        m_houghV_module.push_back( vec_LongiV[ilc]->getBarShowers()[ilm]->getTowerID()[0][0] );
+        m_houghV_part.push_back( vec_LongiV[ilc]->getBarShowers()[ilm]->getTowerID()[0][1] );
+        m_houghV_stave.push_back( vec_LongiV[ilc]->getBarShowers()[ilm]->getTowerID()[0][2] );
+        m_houghV_dlayer.push_back( vec_LongiV[ilc]->getBarShowers()[ilm]->getDlayer() );
+        m_houghV_slayer.push_back( vec_LongiV[ilc]->getBarShowers()[ilm]->getSlayer() );
+      }
+    }
+  }
+  for(int ihc=0; ihc<m_halfclusterU.size(); ihc++){
+    std::vector<const PandoraPlus::LongiCluster*> vec_LongiU = m_halfclusterU[ihc]->getLongiClusterCol("EMLongiCluster");
+    
+    for(int ilc=0; ilc<vec_LongiU.size(); ilc++){
+      for(int ilm=0; ilm<vec_LongiU[ilc]->getBarShowers().size(); ilm++){
+        m_halfclusU_tag.push_back( m_halfclusterU[ihc]->getEnergy() );
+        m_longiclusU_tag.push_back( vec_LongiU[ilc]->getEnergy() );
+        m_houghU_x.push_back( vec_LongiU[ilc]->getBarShowers()[ilm]->getPos().x() );
+        m_houghU_y.push_back( vec_LongiU[ilc]->getBarShowers()[ilm]->getPos().y() );
+        m_houghU_z.push_back( vec_LongiU[ilc]->getBarShowers()[ilm]->getPos().z() );
+        m_houghU_E.push_back( vec_LongiU[ilc]->getBarShowers()[ilm]->getEnergy() );
+        m_houghU_module.push_back( vec_LongiU[ilc]->getBarShowers()[ilm]->getTowerID()[0][0] );
+        m_houghU_part.push_back( vec_LongiU[ilc]->getBarShowers()[ilm]->getTowerID()[0][1] );
+        m_houghU_stave.push_back( vec_LongiU[ilc]->getBarShowers()[ilm]->getTowerID()[0][2] );
+        m_houghU_dlayer.push_back( vec_LongiU[ilc]->getBarShowers()[ilm]->getDlayer() );
+        m_houghU_slayer.push_back( vec_LongiU[ilc]->getBarShowers()[ilm]->getSlayer() );
+      }
+    }
+  }
+  t_Hough->Fill();
 
 
   // for(int i=0; i<m_3dclusters.size(); i++){  
@@ -592,6 +672,7 @@ StatusCode PandoraPlusPFAlg::finalize()
   m_wfile->cd();
   t_SimBar->Write();
   t_Layers->Write();
+  t_Hough->Write(); // yyy
   t_LongiClusU->Write(); 
   t_LongiClusV->Write();
   t_Shower->Write();
@@ -599,7 +680,7 @@ StatusCode PandoraPlusPFAlg::finalize()
   t_Clustering->Write();
   t_Track->Write();
   m_wfile->Close();
-  delete m_wfile, t_SimBar, t_Layers, t_Cluster, t_Track, t_Clustering;
+  delete m_wfile, t_SimBar, t_Layers, t_Hough, t_Cluster, t_Track, t_Clustering;
 
 
   delete m_pMCParticleCreator;
@@ -664,6 +745,20 @@ void PandoraPlusPFAlg::ClearLayer(){
   m_barShowerV_dlayer.clear();
   m_barShowerV_slayer.clear();
   m_barShowerV_bar.clear();
+}
+
+// yyy
+void PandoraPlusPFAlg::ClearHough(){
+  m_halfclusV_tag.clear();
+  m_longiclusV_tag.clear();
+  m_houghV_x.clear();
+  m_houghV_y.clear();
+  m_houghV_E.clear();
+  m_halfclusU_tag.clear();
+  m_longiclusU_tag.clear();
+  m_houghU_x.clear();
+  m_houghU_y.clear();
+  m_houghU_E.clear();
 }
 
 void PandoraPlusPFAlg::ClearShower(){

@@ -3,6 +3,7 @@
 
 #include "Objects/CaloUnit.h"
 #include "Objects/Calo1DCluster.h"
+#include "Objects/LongiCluster.h"
 
 namespace PandoraPlus {
 
@@ -33,10 +34,15 @@ namespace PandoraPlus {
     void setLocalMax( std::string name, std::vector<const Calo1DCluster*>& _col)
     { map_localMax[name]=_col;  }
     std::vector<const Calo1DCluster*> getLocalMaxCol(std::string name) const;
+
+    void setLongiClusters( std::string name, std::vector<const PandoraPlus::LongiCluster*>& _cl) 
+    { map_longiClusCol[name]=_cl; }
+    std::vector<const LongiCluster*> getLongiClusterCol(std::string name) const;
   private:
     int m_slayer;
     std::vector<const Calo1DCluster*> m_1dclusters; 
     std::map<std::string, std::vector<const PandoraPlus::Calo1DCluster*> > map_localMax;
+    std::map<std::string, std::vector<const PandoraPlus::LongiCluster*> > map_longiClusCol;  
   };
 
 };

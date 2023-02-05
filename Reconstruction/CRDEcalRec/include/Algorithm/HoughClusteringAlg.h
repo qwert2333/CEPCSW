@@ -4,16 +4,15 @@
 #include "PandoraPlusDataCol.h"
 #include "Tools/Algorithm.h"
 #include "TVector2.h"
-#include "TF1.h"
-#include "TH2.h"
+#include <vector>
 using namespace PandoraPlus;
 
 class HoughClusteringAlg: public PandoraPlus::Algorithm{
 
 public: 
 
-	HoughClusteringAlg () {};
-	~HoughClusteringAlg() {};
+  HoughClusteringAlg () {};
+  ~HoughClusteringAlg() {};
 
   class Factory : public PandoraPlus::AlgorithmFactory
   {
@@ -26,13 +25,15 @@ public:
   StatusCode RunAlgorithm( PandoraPlusDataCol& m_datacol );
   StatusCode ClearAlgorithm();
 
-  StatusCode ConformalTransformation(std::vector<PandoraPlus::HoughObject>& m_Hobjects); 
-  StatusCode HoughTransformation(std::vector<PandoraPlus::HoughObject>& m_Hobjects);
-	StatusCode FillHoughSpace(std::vector<PandoraPlus::HoughObject>& m_Hobjects, PandoraPlus::HoughSpace& m_Hspace);
-  StatusCode FindingHills(PandoraPlus::HoughSpace& m_Hspace);
-  StatusCode Transform2Clusters(PandoraPlus::HoughSpace& m_Hspace, std::vector<PandoraPlus::HoughObject>& m_Hobjects, std::vector<const PandoraPlus::LongiCluster*>& m_longiClusCol );
-  StatusCode CleanClusters( std::vector<PandoraPlus::LongiCluster*>& m_longiClusCol );
-  int ExpandingPeak(TH2 &houghMap, int index_a, int index_b, PandoraPlus::HoughSpace::HoughHill& hill); 
+  StatusCode HoughTransformation(std::vector<PandoraPlus::HoughObject>& Hobjects);
+  StatusCode SetLineRange(int module, int slayer, double *range12, double* range34);
+  StatusCode FillHoughSpace(std::vector<PandoraPlus::HoughObject>& Hobjects, 
+                            PandoraPlus::HoughSpace& Hspace);
+  StatusCode ClusterFinding(std::vector<PandoraPlus::HoughObject>& Hobjects, 
+                            PandoraPlus::HoughSpace& Hspace, 
+                            std::vector<const PandoraPlus::LongiCluster*>& longiClusCol);
+  StatusCode CleanClusters(vector<PandoraPlus::LongiCluster*>& m_longiClusCol);
+  
 
 private:
 	

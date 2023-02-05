@@ -83,8 +83,14 @@ namespace PandoraPlus{
   }
 
   std::vector<const PandoraPlus::Calo1DCluster*> CaloHalfCluster::getLocalMaxCol(std::string name) const{
-    std::vector<const Calo1DCluster*> emptyCol; emptyCol.clear(); 
+    std::vector<const PandoraPlus::Calo1DCluster*> emptyCol; emptyCol.clear(); 
     if(map_localMax.find(name)!=map_localMax.end()) emptyCol = map_localMax.at(name);
+    return emptyCol;
+  }
+
+  std::vector<const PandoraPlus::LongiCluster*> CaloHalfCluster::getLongiClusterCol(std::string name) const{
+    std::vector<const PandoraPlus::LongiCluster*> emptyCol; emptyCol.clear(); 
+    if(map_longiClusCol.find(name)!=map_longiClusCol.end()) emptyCol = map_longiClusCol.at(name);
     return emptyCol;
   }
 

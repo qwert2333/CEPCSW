@@ -109,7 +109,13 @@ namespace PandoraPlus{
 
     for(int is=0; is<clus->getBarShowers().size(); is++)
       if( find(barShowerCol.begin(), barShowerCol.end(), clus->getBarShowers()[is])==barShowerCol.end() ) {return false; }
-    return true;
+    
+    if(barShowerCol.size() > clus->getBarShowers().size())
+      return true;
+    else{
+      if( TMath::Abs(Hough_rho) <= TMath::Abs(clus->getHoughRho()) ) { return true; }
+      else { return false; }
+    }
   }
 
   double LongiCluster::OverlapRatioE( const LongiCluster* clus) const{

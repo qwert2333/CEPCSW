@@ -1,49 +1,56 @@
 #ifndef CALOHOUGHOBJECT_H
 #define CALOHOUGHOBJECT_H
+
 #include "Objects/Calo1DCluster.h"
 #include "TVector2.h"
 #include "TF1.h"
+
+
 namespace PandoraPlus {
 
   class HoughObject{
-
-  public: 
+  public:
     HoughObject() {};
-    ~HoughObject() { Clear(); };
+    HoughObject( const PandoraPlus::Calo1DCluster* _localmax, double _cellSize, double _ecal_inner_radius);
+    ~HoughObject() { };
 
-    void Clean() { for(auto iter:originLocalMax) delete iter;  }
-    void Clear() { originLocalMax.clear(); ConformalPoint.SetX(0.); ConformalPoint.SetY(0.);}
 
-    //inline bool operator == (const HoughObject &x) const{
-    //  return  originLocalMax == x.originLocalMax;
-    //}
+    TVector2 getCenterPoint() const { return m_center_point; }
+    TVector2 getPointU()  const { return m_center_point + TVector2(0,  m_cell_size/TMath::Sqrt(2)); }
+    TVector2 getPointD()  const { return m_center_point + TVector2(0, -m_cell_size/TMath::Sqrt(2)); }
+    TVector2 getPointL()  const { return m_center_point + TVector2(-m_cell_size/TMath::Sqrt(2), 0); }
+    TVector2 getPointR()  const { return m_center_point + TVector2( m_cell_size/TMath::Sqrt(2), 0); }
+    TVector2 getPointUR() const { return m_center_point + TVector2( m_cell_size/2,  m_cell_size/2); }
+    TVector2 getPointDL() const { return m_center_point + TVector2(-m_cell_size/2, -m_cell_size/2); }
+    TVector2 getPointUL() const { return m_center_point + TVector2(-m_cell_size/2,  m_cell_size/2); }
+    TVector2 getPointDR() const { return m_center_point + TVector2( m_cell_size/2, -m_cell_size/2); }
 
-		std::vector<const PandoraPlus::Calo1DCluster*> getLocalMax() const { return originLocalMax; }
-		TVector2 getConformPointUR() const { return ConformalPoint+TVector2(cellSize/2., cellSize/2.);   }
-		TVector2 getConformPointUL() const { return ConformalPoint+TVector2(-cellSize/2., cellSize/2.);  }
-		TVector2 getConformPointDR() const { return ConformalPoint+TVector2(cellSize/2., -cellSize/2.);  }
-		TVector2 getConformPointDL() const { return ConformalPoint+TVector2(-cellSize/2., -cellSize/2.); }
-    TF1 getHoughLineUR() const { return HoughLine_ur; }
-    TF1 getHoughLineUL() const { return HoughLine_ul; }
-    TF1 getHoughLineDR() const { return HoughLine_dr; }
-    TF1 getHoughLineDL() const { return HoughLine_dl; }
+    TF1 getHoughLine1() const { return m_Hough_line_1; }
+    TF1 getHoughLine2() const { return m_Hough_line_2; }
+    TF1 getHoughLine3() const { return m_Hough_line_3; }
+    TF1 getHoughLine4() const { return m_Hough_line_4; }
 
-    void setCellSize(double _cell) { cellSize=_cell; }
-    void addLocalMax( const PandoraPlus::Calo1DCluster* _localmax ) { originLocalMax.push_back(_localmax); }
-    void setConformalPoint(TVector2& _vec) { ConformalPoint=_vec;}
-		void setHoughLine(TF1& _func_ur, TF1& _func_ul, TF1& _func_dr, TF1& _func_dl) 
-         { HoughLine_ur=_func_ur; HoughLine_ul=_func_ul; HoughLine_dr=_func_dr; HoughLine_dl=_func_dl; }
-		void setSlayer(int _slayer) { Slayer=_slayer; }
+    int getModule() const { return (m_local_max->getTowerID())[0][0]; }
+    int getSlayer() const { return m_local_max->getSlayer(); }
+    double getE() const { return m_local_max->getEnergy(); }
+    double getCellSize() const { return m_cell_size; }
+    const PandoraPlus::Calo1DCluster* getLocalMax() const { return m_local_max; }
 
-  private: 
-	  int Slayer;
-    double cellSize; //crystal cell size, unit: mm. 
-    std::vector<const PandoraPlus::Calo1DCluster*> originLocalMax;  //Local max
-		TVector2 ConformalPoint; //Center position. 
-		TF1 HoughLine_ur;
-		TF1 HoughLine_ul;
-		TF1 HoughLine_dr;
-		TF1 HoughLine_dl;
+    void setCellSize(double _cs) { m_cell_size=_cs; }
+    void setCenterPoint(double& _ecal_inner_radius);
+    void setHoughLine(int module, TF1& line1, TF1& line2, TF1& line3, TF1& line4);
+
+
+  private:
+    const PandoraPlus::Calo1DCluster* m_local_max;  //Local max
+    double m_cell_size;
+    TVector2 m_center_point;  // center position
+
+    TF1 m_Hough_line_1;    // ur or u
+    TF1 m_Hough_line_2;    // dl or d
+    TF1 m_Hough_line_3;    // ul or l
+    TF1 m_Hough_line_4;    // dr or r
+    // The above conversion is only for the octagon barrel ECAL
 
 };
 
