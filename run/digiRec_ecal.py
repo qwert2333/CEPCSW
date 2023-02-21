@@ -23,10 +23,8 @@ geomsvc.compact = geometry_path
 from Configurables import k4DataSvc
 podioevent = k4DataSvc("EventDataSvc")
 podioevent.inputs = [
-"/cefs/higgs/guofy/CEPCSW_v203/run/HyySim/bashes/CRD_E240_nnHaa_EcalOnly_1.root"
-#"/cefs/higgs/zyang/cepcsoft/CEPCSW/yang/physics/simdir/sim_nnh_bb.root"
-#"/cefs/higgs/guofy/CEPCSW_v203/run/SimSamples/Sim_GamGamGhost_central_EcalOnly.root"
-#"/cefs/higgs/guofy/CEPCSW_v203/run/SimSamples/Sim_Gam10GeV_module0_7_EcalOnly.root"
+# "/cefs/higgs/guofy/CEPCSW_v203/run/HyySim/bashes/CRD_E240_nnHaa_EcalOnly_1.root"
+"/cefs/higgs/zyang/cepcsoft/CEPCSW/yang/gamma/simdir/sim_gamma_10GeV_theta90_phiall.root"
 ]
 ##########################################
 
@@ -36,7 +34,8 @@ from Configurables import PodioInput
 inp = PodioInput("InputReader")
 #inp.collections = ["EcalBarrelCollection", "EcalEndcapRingCollection", "EcalEndcapsCollection", "MCParticle"]
 #inp.collections = ["EcalBarrelCollection", "HcalBarrelCollection", "MCParticle", "MarlinTrkTracks"]
-inp.collections = ["EcalBarrelCollection", "MCParticleG4"]
+# inp.collections = ["EcalBarrelCollection", "MCParticleG4"]
+inp.collections = ["EcalBarrelCollection", "MCParticle", "MarlinTrkTracks"]
 ##########################################
 
 ########## Digitalization ################
@@ -57,7 +56,7 @@ EcalDigi.TimeResolution = 0.5        #unit: ns
 EcalDigi.EnergyThreshold = 0.0001   #0.1 MeV
 EcalDigi.ChargeThresholdFrac = 0.05
 EcalDigi.Debug=1
-EcalDigi.OutFileName = "testTree_nnHaa.root"
+EcalDigi.OutFileName = "digi/CRDFull_Gam10GeV_theta90_phiall_digi.root"
 #########################################
 
 ##HCAL##
@@ -83,9 +82,9 @@ PandoraPlusPFAlg.BField = 3.
 PandoraPlusPFAlg.Debug = 0
 PandoraPlusPFAlg.SkipEvt = Nskip
 PandoraPlusPFAlg.WriteAna = 1
-PandoraPlusPFAlg.AnaFileName = "testRec_nnHaa.root"
+PandoraPlusPFAlg.AnaFileName = "rec/CRDFull_Gam10GeV_theta90_phiall_rec.root"
 ##----Readin collections----
-PandoraPlusPFAlg.MCParticleCollection = "MCParticleG4"
+PandoraPlusPFAlg.MCParticleCollection = "MCParticle"
 PandoraPlusPFAlg.TrackCollections = [""]
 PandoraPlusPFAlg.ECalCaloHitCollections = ["ECALBarrel"]
 PandoraPlusPFAlg.ECalReadOutNames = ["EcalBarrelCollection"]
@@ -117,26 +116,30 @@ PandoraPlusPFAlg.AlgList = ["ExampleAlg",
                             "GlobalClusteringAlg", 
                             "LocalMaxFindingAlg",
                             "HoughClusteringAlg",
-                            "EnergySplittingAlg",
-                            "EnergyTimeMatchingAlg"  ]
+                            # "EnergySplittingAlg",
+                            # "EnergyTimeMatchingAlg"  
+                            ]
 PandoraPlusPFAlg.AlgParNames = [ ["Par1", "Par2"], 
                                  ["Par1"], 
                                  ["Eth_localMax", "Eth_MaxWithNeigh"],
                                  ["th_Layers", "th_AxisE"] ,
-                                 [""], 
-                                 [""]  ]
+                                #  [""], 
+                                #  [""]  
+                               ]
 PandoraPlusPFAlg.AlgParTypes = [ ["double", "double"],
                                  ["double"],
                                  ["double", "double"],
                                  ["double", "double"],
-                                 [""],
-                                 [""]  ]
+                                #  [""],
+                                #  [""]  
+                                 ]
 PandoraPlusPFAlg.AlgParValues = [ ["1.", "3.14"], 
                                   ["1."], 
                                   ["0.005", "0."],
-                                  ["10", "0.5"],
-                                  [""],
-                                  [""]   ]
+                                  ["10", "0.15"],
+                                #   [""],
+                                #   [""]   
+                                  ]
 
 ########################################
 
@@ -156,7 +159,7 @@ ApplicationMgr(
     #TopAlg=[inp, EcalDigi,caloDigi, PandoraPlusPFAlg ],
     TopAlg=[inp, EcalDigi, PandoraPlusPFAlg],
     EvtSel="NONE",
-    EvtMax=Nevt,
+    EvtMax=50,
     ExtSvc=[podioevent, geomsvc],
     #OutputLevel=DEBUG
 )

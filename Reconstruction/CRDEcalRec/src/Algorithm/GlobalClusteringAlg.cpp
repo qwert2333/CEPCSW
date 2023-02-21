@@ -17,10 +17,10 @@ StatusCode GlobalClusteringAlg::Initialize(){
 };
 
 StatusCode GlobalClusteringAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
-  system("/cefs/higgs/songwz/winter22/CEPCSW/workarea/memory/memory_test.sh cluster_begin");
-  time_t time_cb;  
-  time(&time_cb);  
-  cout<<" When begin clustering: "<<ctime(&time_cb)<<endl;
+  //system("/cefs/higgs/songwz/winter22/CEPCSW/workarea/memory/memory_test.sh cluster_begin");
+  //time_t time_cb;  
+  //time(&time_cb);  
+  //cout<<" When begin clustering: "<<ctime(&time_cb)<<endl;
 
   std::vector<PandoraPlus::CaloUnit*> m_bars = m_datacol.BarCol; 
   std::vector<PandoraPlus::CaloUnit*> m_processbars;         m_processbars.clear();
@@ -41,13 +41,13 @@ StatusCode GlobalClusteringAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
       m_restbars.push_back(m_bars.at(ibar));
     }
   }
-  cout<<"  How many bars: "<<m_bars.size()<<endl;
-  cout<<"  How many bars over threshold: "<<m_processbars.size()<<endl;
-  cout<<"  Clustering bars to 1DClusters: "<<endl;
+  //cout<<"  How many bars: "<<m_bars.size()<<endl;
+  //cout<<"  How many bars over threshold: "<<m_processbars.size()<<endl;
+  //cout<<"  Clustering bars to 1DClusters: "<<endl;
   Clustering(m_processbars, m_1dclusters);
-  cout<<"  1DCluster size: "<<m_1dclusters.size()<<".  Clustering 1DClusters to HalfClusters: "<<endl;
+  //cout<<"  1DCluster size: "<<m_1dclusters.size()<<".  Clustering 1DClusters to HalfClusters: "<<endl;
   Clustering(m_1dclusters, m_halfclusters);
-  cout<<"  HalfCluster size: "<<m_halfclusters.size()<<endl;
+  //cout<<"  HalfCluster size: "<<m_halfclusters.size()<<endl;
   // Clustering(m_2dclusters, m_3dclusters);
   // cout<<"  3DCluster size: "<<m_3dclusters.size()<<endl;
   
@@ -81,14 +81,14 @@ cout<<endl;
 
   m_datacol.RestBarCol = m_restbars;
 	m_datacol.Cluster1DCol = m_1dclusters;
-	m_datacol.Cluster2DCol = m_2dclusters;
-  m_datacol.ClusterHalfCol = m_halfclusters;
-	m_datacol.Cluster3DCol = m_3dclusters;
+  m_datacol.map_LongiCluster["HalfClusterCol"] = m_halfclusters;
+	//m_datacol.Cluster2DCol = m_2dclusters;
+	//m_datacol.Cluster3DCol = m_3dclusters;
 
-  time_t time_ce;  
-  time(&time_ce); 
-  cout<<" When end clustering: "<<ctime(&time_ce)<<endl;
-  system("/cefs/higgs/songwz/winter22/CEPCSW/workarea/memory/memory_test.sh cluster_end");
+  //time_t time_ce;  
+  //time(&time_ce); 
+  //cout<<" When end clustering: "<<ctime(&time_ce)<<endl;
+  //system("/cefs/higgs/songwz/winter22/CEPCSW/workarea/memory/memory_test.sh cluster_end");
   return StatusCode::SUCCESS;
 };
 

@@ -33,7 +33,7 @@ cout<<"LocalMaxFinding: input 2DCluster size = "<<m_2dClusCol.size()<<endl;
       m_datacol.bk_BarShowerCol.push_back( const_cast<PandoraPlus::Calo1DCluster *>(m_2dClusCol[ic]->getShowerVCol()[is]) );
   }
 */
-  std::vector<PandoraPlus::CaloHalfCluster*>* p_2DClusters = &(m_datacol.ClusterHalfCol);
+  std::vector<PandoraPlus::CaloHalfCluster*>* p_2DClusters = &(m_datacol.map_LongiCluster["HalfClusterCol"]);
   if(!p_2DClusters) {std::cout<<"ERROR: No 2DCluster in present data collection! "<<std::endl; return StatusCode::FAILURE; }
 
   for(int i2d=0; i2d<p_2DClusters->size(); i2d++){

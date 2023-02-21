@@ -305,23 +305,19 @@ StatusCode PandoraPlusPFAlg::execute()
 
   if(_nEvt<m_Nskip){ _nEvt++;  return GaudiAlgorithm::initialize(); }
 
-  system("/cefs/higgs/songwz/winter22/CEPCSW/workarea/memory/memory_test.sh event_begin");
+  //system("/cefs/higgs/songwz/winter22/CEPCSW/workarea/memory/memory_test.sh event_begin");
   //InitializeForNewEvent(); 
   m_DataCol.Clear();
 
   //Readin collections 
-  cout<<"Readin MCParticle"<<endl;
   m_pMCParticleCreator->CreateMCParticle( m_DataCol, *r_MCParticleCol );
-  cout<<"Readin Tracks"<<endl;
   m_pTrackCreator->CreateTracks( m_DataCol, r_TrackCols );
-  cout<<"Readin CaloHits"<<endl;
   m_pCaloHitsCreator->CreateCaloHits( m_DataCol, r_CaloHitCols, map_readout_decoder );
 
-  system("/cefs/higgs/songwz/winter22/CEPCSW/workarea/memory/memory_test.sh read_data");
+  //system("/cefs/higgs/songwz/winter22/CEPCSW/workarea/memory/memory_test.sh read_data");
   //Perform PFA algorithm
-  cout<<"Run Algorithms"<<endl;
   m_algorithmManager.RunAlgorithm( m_DataCol );
-  system("/cefs/higgs/songwz/winter22/CEPCSW/workarea/memory/memory_test.sh after_alg");
+  //system("/cefs/higgs/songwz/winter22/CEPCSW/workarea/memory/memory_test.sh after_alg");
 
   m_pOutputCreator->CreateRecCaloHits( m_DataCol, w_RecCaloCol );
   m_pOutputCreator->CreateCluster( m_DataCol, w_ClusterCollection );
@@ -353,7 +349,7 @@ StatusCode PandoraPlusPFAlg::execute()
 
   //Save Layer info (local Max)
   ClearLayer();
-  std::vector<PandoraPlus::CaloHalfCluster*> m_halfclusters = m_DataCol.ClusterHalfCol;
+  std::vector<PandoraPlus::CaloHalfCluster*> m_halfclusters = m_DataCol.map_LongiCluster["HalfClusterCol"];
   for(int ic=0;ic<m_halfclusters.size();ic++){
     std::vector<const Calo1DCluster*> tmp_shower = m_halfclusters[ic]->getLocalMaxCol("AllLocalMax");
     
@@ -421,6 +417,26 @@ StatusCode PandoraPlusPFAlg::execute()
     }
   }
   for(int ihc=0; ihc<m_halfclusterV.size(); ihc++){
+    for(int ilm=0; ilm<m_halfclusterV[ihc]->getCluster().size(); ilm++){
+      m_houghV_module.push_back( m_halfclusterV[ihc]->getCluster()[ilm]->getTowerID()[0][0] );
+      m_houghV_part.push_back(   m_halfclusterV[ihc]->getCluster()[ilm]->getTowerID()[0][1] );
+      m_houghV_stave.push_back(  m_halfclusterV[ihc]->getCluster()[ilm]->getTowerID()[0][2] );
+      m_houghV_dlayer.push_back( m_halfclusterV[ihc]->getCluster()[ilm]->getDlayer() );
+      m_houghV_slayer.push_back( m_halfclusterV[ihc]->getCluster()[ilm]->getSlayer() );    
+    }
+  }
+  for(int ihc=0; ihc<m_halfclusterU.size(); ihc++){
+    for(int ilm=0; ilm<m_halfclusterU[ihc]->getCluster().size(); ilm++){
+      m_houghU_module.push_back( m_halfclusterU[ihc]->getCluster()[ilm]->getTowerID()[0][0] );
+      m_houghU_part.push_back(   m_halfclusterU[ihc]->getCluster()[ilm]->getTowerID()[0][1] );
+      m_houghU_stave.push_back(  m_halfclusterU[ihc]->getCluster()[ilm]->getTowerID()[0][2] );
+      m_houghU_dlayer.push_back( m_halfclusterU[ihc]->getCluster()[ilm]->getDlayer() );
+      m_houghU_slayer.push_back( m_halfclusterU[ihc]->getCluster()[ilm]->getSlayer() );
+    }
+  }
+
+/*
+  for(int ihc=0; ihc<m_halfclusterV.size(); ihc++){
     std::vector<const PandoraPlus::LongiCluster*> vec_LongiV = m_halfclusterV[ihc]->getLongiClusterCol("EMLongiCluster");
     
     for(int ilc=0; ilc<vec_LongiV.size(); ilc++){
@@ -458,6 +474,7 @@ StatusCode PandoraPlusPFAlg::execute()
       }
     }
   }
+*/
   t_Hough->Fill();
 
 
@@ -534,7 +551,7 @@ StatusCode PandoraPlusPFAlg::execute()
   t_Layers->Fill();
   }}
   //t_Layers->Fill();
-*/
+
 
   //Save Cluster and MCP info
   ClearCluster();
@@ -560,7 +577,7 @@ StatusCode PandoraPlusPFAlg::execute()
   }
   t_Cluster->Fill();
 
-/*
+
   //Showers in cluster: 
   //ClearShower();
   for(int ic=0; ic<m_clusvec.size(); ic++){
@@ -584,7 +601,7 @@ StatusCode PandoraPlusPFAlg::execute()
     t_Shower->Fill();
   }
   //t_Shower->Fill();
-*/
+
 	//neighbor clustering
 	ClearClustering();
 	std::vector<PandoraPlus::Calo3DCluster*>  tmp_3dclusters = m_DataCol.Cluster3DCol;
@@ -654,12 +671,12 @@ StatusCode PandoraPlusPFAlg::execute()
       m_trkstate_tag.push_back(itrk);
   }}
   t_Track->Fill();
-
+*/
 
   //Clean Events
-  system("/cefs/higgs/songwz/winter22/CEPCSW/workarea/memory/memory_test.sh before_clean");
+  //system("/cefs/higgs/songwz/winter22/CEPCSW/workarea/memory/memory_test.sh before_clean");
   m_DataCol.Clean();
-  system("/cefs/higgs/songwz/winter22/CEPCSW/workarea/memory/memory_test.sh event_end");
+  //system("/cefs/higgs/songwz/winter22/CEPCSW/workarea/memory/memory_test.sh event_end");
 
   std::cout<<"Event: "<<_nEvt<<" is done"<<std::endl;
   _nEvt ++ ;
@@ -668,7 +685,7 @@ StatusCode PandoraPlusPFAlg::execute()
 
 StatusCode PandoraPlusPFAlg::finalize()
 {
-  system("/cefs/higgs/songwz/winter22/CEPCSW/workarea/memory/memory_test.sh before_final");
+  //system("/cefs/higgs/songwz/winter22/CEPCSW/workarea/memory/memory_test.sh before_final");
   m_wfile->cd();
   t_SimBar->Write();
   t_Layers->Write();
@@ -700,7 +717,7 @@ StatusCode PandoraPlusPFAlg::finalize()
 
 
   info() << "Processed " << _nEvt << " events " << endmsg;
-  system("/cefs/higgs/songwz/winter22/CEPCSW/workarea/memory/memory_test.sh end_final");
+  //system("/cefs/higgs/songwz/winter22/CEPCSW/workarea/memory/memory_test.sh end_final");
   return GaudiAlgorithm::finalize();
 }
 

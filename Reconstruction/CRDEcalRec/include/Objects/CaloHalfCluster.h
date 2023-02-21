@@ -4,6 +4,7 @@
 #include "Objects/CaloUnit.h"
 #include "Objects/Calo1DCluster.h"
 #include "Objects/LongiCluster.h"
+#include "Tools/TrackFitInEcal.h"
 
 namespace PandoraPlus {
 
@@ -35,14 +36,19 @@ namespace PandoraPlus {
     { map_localMax[name]=_col;  }
     std::vector<const Calo1DCluster*> getLocalMaxCol(std::string name) const;
 
-    void setLongiClusters( std::string name, std::vector<const PandoraPlus::LongiCluster*>& _cl) 
-    { map_longiClusCol[name]=_cl; }
+    void setLongiClusters( std::string name, std::vector<const PandoraPlus::LongiCluster*>& _cl) { map_longiClusCol[name]=_cl; }
     std::vector<const LongiCluster*> getLongiClusterCol(std::string name) const;
+
   private:
     int m_slayer;
+    TVector3 axis;
+    double trk_dr;
+    double trk_dz;
     std::vector<const Calo1DCluster*> m_1dclusters; 
     std::map<std::string, std::vector<const PandoraPlus::Calo1DCluster*> > map_localMax;
-    std::map<std::string, std::vector<const PandoraPlus::LongiCluster*> > map_longiClusCol;  
+    std::map<std::string, std::vector<const PandoraPlus::CaloHalfCluster*> > map_longiClusCol;  
+
+    TrackFitInEcal* track = new TrackFitInEcal();
   };
 
 };

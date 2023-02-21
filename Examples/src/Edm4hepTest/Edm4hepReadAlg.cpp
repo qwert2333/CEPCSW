@@ -12,6 +12,7 @@ Edm4hepReadAlg::Edm4hepReadAlg(const std::string& name, ISvcLocator* svcLoc)
     declareProperty("HeaderCol", m_headerCol);
     declareProperty("MCParticleCol", m_mcParCol, "MCParticle collection (input)");
     declareProperty("SimCalorimeterHitCol", m_calorimeterCol, "MCParticle collection (input)");
+    declareProperty("TrackCol", m_trkCol, "Track collection (input)");
 }
 
 StatusCode Edm4hepReadAlg::initialize()
@@ -28,6 +29,10 @@ StatusCode Edm4hepReadAlg::initialize()
     m_wtree->Branch("mcPy", &m_mcPy);
     m_wtree->Branch("mcPz", &m_mcPz);
     m_wtree->Branch("mcEn", &m_mcEn);    
+    m_wtree->Branch("Ntrk", &m_Ntrk);
+    m_wtree->Branch("trkType", &m_trk_type);
+    m_wtree->Branch("trkNhit", &m_trk_Nhit);
+    m_wtree->Branch("trkAveOmega", &m_trk_aveOmega);
 
     return GaudiAlgorithm::initialize();
 }
@@ -59,7 +64,22 @@ StatusCode Edm4hepReadAlg::execute()
         }
     }
     if(p_gam.size()==2) m_deltaTheta_yy=p_gam[0].Angle(p_gam[1]);
-    m_wtree->Fill();
+
+    auto m_trks = m_trkCol.get();
+    m_Ntrk = m_trks->size();
+    std::cout<<m_Ntrk<<std::endl;
+    for(auto trk : *m_trks){
+      m_trk_type.push_back(trk.getType());
+      m_trk_Nhit.push_back(trk.trackerHits_size());
+
+      float aveOmega = 0;
+      for(int i=0; i<trk.trackStates_size(); i++){
+        aveOmega += trk.getTrackStates(i).omega;
+      }
+      m_trk_aveOmega.push_back(aveOmega);
+    }
+
+    m_wtree->Fill();    
 
     //info() << "}" << endmsg;
 
@@ -103,10 +123,16 @@ StatusCode Edm4hepReadAlg::finalize()
 void Edm4hepReadAlg::Clear(){
   m_Nmc=-99;
   m_deltaTheta_yy = -99;
+  m_Ntrk = -99;
   m_mcPdgid.clear();
   m_mcStatus.clear();
   m_mcPx.clear();
   m_mcPy.clear();
   m_mcPz.clear();
   m_mcEn.clear();
+
+  m_trk_type.clear();
+  m_trk_Nhit.clear();
+  m_trk_aveOmega.clear();
+
 }

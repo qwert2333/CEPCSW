@@ -18,6 +18,10 @@ StatusCode PandoraPlusDataCol::Clear(){
   Cluster2DCol.clear(); 
   ClusterHalfCol.clear();
   Cluster3DCol.clear();
+
+  map_CaloHit.clear();
+  map_ShowerInLayer.clear();
+  map_CaloCluster.clear();
   
   return StatusCode::SUCCESS; 
 };

@@ -73,7 +73,7 @@ StatusCode HoughClusteringAlg::ReadSettings(PandoraPlus::Settings& m_settings){
   if(settings.map_stringPars.find("LeftLocalMaxName")==settings.map_stringPars.end())    
     settings.map_stringPars["LeftLocalMaxName"] = "LeftLocalMax";
   if(settings.map_stringPars.find("OutputLongiClusName")==settings.map_stringPars.end()) 
-    settings.map_stringPars["OutputLongiClusName"] = "EMLongiCluster"; 
+    settings.map_stringPars["OutputLongiClusName"] = "HoughAxis"; 
 
   return StatusCode::SUCCESS;  
 }
@@ -85,22 +85,22 @@ StatusCode HoughClusteringAlg::Initialize(){
 
 StatusCode HoughClusteringAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
 cout << "yyy: Start RunAlgorithm() of HoughClusteringAlg" << endl;
-  if(m_datacol.ClusterHalfCol.size()<1){
+  if(m_datacol.map_LongiCluster["HalfClusterCol"].size()<1){
     cout << "HoughClusteringAlg: No HalfCluster input"<<endl;
     return StatusCode::SUCCESS;
   }
-cout << "  yyy: ClusterHalfCol.size() = " << m_datacol.ClusterHalfCol.size() << endl;
+//cout << "  yyy: ClusterHalfCol.size() = " << m_datacol.ClusterHalfCol.size() << endl;
 
   // There should be two 2D cluster in PandoraPlusDataCol.h
   // for both V and U plane
   // The two 2D cluster should be processed separately
   std::vector<PandoraPlus::CaloHalfCluster*> p_HalfClusterV;
   std::vector<PandoraPlus::CaloHalfCluster*> p_HalfClusterU;
-  for(int i=0; i<m_datacol.ClusterHalfCol.size(); i++){
-    if(m_datacol.ClusterHalfCol[i]->getSlayer()==0)
-      p_HalfClusterU.push_back(m_datacol.ClusterHalfCol[i]);
-    else if(m_datacol.ClusterHalfCol[i]->getSlayer()==1)
-      p_HalfClusterV.push_back(m_datacol.ClusterHalfCol[i]);
+  for(int i=0; i<m_datacol.map_LongiCluster["HalfClusterCol"].size(); i++){
+    if(m_datacol.map_LongiCluster["HalfClusterCol"][i]->getSlayer()==0)
+      p_HalfClusterU.push_back(m_datacol.map_LongiCluster["HalfClusterCol"][i]);
+    else if(m_datacol.map_LongiCluster["HalfClusterCol"][i]->getSlayer()==1)
+      p_HalfClusterV.push_back(m_datacol.map_LongiCluster["HalfClusterCol"][i]);
     else
       cout << "HoughClusteringAlg: Wrong slayer for input HalfCluster" << endl;
   }
@@ -163,9 +163,8 @@ cout << "  yyy: ClusterHalfCol.size() = " << m_datacol.ClusterHalfCol.size() << 
       }
       if(!fl_incluster && find(left_localMaxVCol.begin(), left_localMaxVCol.end(), tmp_localMaxVCol[is])==left_localMaxVCol.end() ) left_localMaxVCol.push_back(tmp_localMaxVCol[is]);
     }
-    p_HalfClusterV[it]->setLocalMax(settings.map_stringPars["LeftLocalMaxName"], left_localMaxVCol);
 
-      
+    p_HalfClusterV[it]->setLocalMax(settings.map_stringPars["LeftLocalMaxName"], left_localMaxVCol);
     p_HalfClusterV[it]->setLongiClusters(settings.map_stringPars["OutputLongiClusName"], m_longiClusVCol);
 
 
@@ -244,8 +243,8 @@ cout << "  yyy: modules.size() = " << modules.size() << endl;
       }
       if(!fl_incluster && find(left_localMaxUCol.begin(), left_localMaxUCol.end(), tmp_localMaxUCol[is])==left_localMaxUCol.end() ) left_localMaxUCol.push_back(tmp_localMaxUCol[is]);
     }
-    p_HalfClusterU[it]->setLocalMax(settings.map_stringPars["LeftLocalMaxName"], left_localMaxUCol);
 
+    p_HalfClusterU[it]->setLocalMax(settings.map_stringPars["LeftLocalMaxName"], left_localMaxUCol);
     p_HalfClusterU[it]->setLongiClusters(settings.map_stringPars["OutputLongiClusName"], m_longiClusUCol);
 
   }  // end of U plane

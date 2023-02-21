@@ -61,10 +61,11 @@ public:
   //General objects for all PFA
   std::vector<PandoraPlus::Track*>       TrackCol;
   std::map<std::string, std::vector<PandoraPlus::CaloHit*>> map_CaloHit;
-  std::map<std::string, std::vector<PandoraPlus::Calo2DCluster*>> map_ShowerInLayer;
-  std::map<std::string, std::vector<PandoraPlus::Calo3DCluster*>> map_CaloCluster;
+  std::map<std::string, std::vector<PandoraPlus::Calo2DCluster*>> map_ShowerInLayer; //Hit
+  std::map<std::string, std::vector<PandoraPlus::Calo3DCluster*>> map_CaloCluster; //Cluster
 
 
+  std::map<std::string, std::vector<PandoraPlus::CaloHalfCluster*>> map_LongiCluster;
   std::vector<PandoraPlus::CaloUnit*>       BarCol; 
   std::vector<PandoraPlus::CaloUnit*>       RestBarCol;
   std::vector<PandoraPlus::Calo1DCluster*>  Cluster1DCol; 

@@ -24,14 +24,14 @@
         </detector>
         <detector name="EcalBarrel" geartype="CalorimeterParameters">
             <layout type="Barrel" symmetry="8" phi0="0.000000000e+00" />
-            <dimensions inner_r="1.847415655e+03" outer_z="2.350000000e+03" />
+            <dimensions inner_r="1.860000000e+03" outer_z="3.300000000e+03" />
             <layer repeat="19" thickness="5.250000000e+00" absorberThickness="2.100000000e+00" cellSize0="1.016666667e+01" cellSize1="1.016666667e+01" />
             <layer repeat="1" thickness="6.300000000e+00" absorberThickness="2.100000000e+00" cellSize0="1.016666667e+01" cellSize1="1.016666667e+01" />
             <layer repeat="9" thickness="4.200000000e+00" absorberThickness="4.200000000e+00" cellSize0="1.016666667e+01" cellSize1="1.016666667e+01" />
         </detector>
         <detector name="EcalEndcap" geartype="CalorimeterParameters">
             <layout type="Endcap" symmetry="2" phi0="0.000000000e+00" />
-            <dimensions inner_r="4.000000000e+02" outer_r="2.088800000e+03" inner_z="2.450000000e+03" />
+            <dimensions inner_r="3.500000000e+02" outer_r="2.140000000e+03" inner_z="3.050000000e+03" />
             <layer repeat="19" thickness="5.250000000e+00" absorberThickness="2.100000000e+00" cellSize0="1.016666667e+01" cellSize1="1.016666667e+01" />
             <layer repeat="1" thickness="6.300000000e+00" absorberThickness="2.100000000e+00" cellSize0="1.016666667e+01" cellSize1="1.016666667e+01" />
             <layer repeat="9" thickness="4.200000000e+00" absorberThickness="4.200000000e+00" cellSize0="1.016666667e+01" cellSize1="1.016666667e+01" />
@@ -50,32 +50,32 @@
             <parameter name="YokePlugThickness" type="double" value="2.905700000e+02" />
         </detector>
         <detector name="VXD" geartype="ZPlanarParameters">
-            <type technology="CCD" />
-            <shell halfLength="1.450000000e+02" gap="2.698150000e+01" innerRadius="6.500000000e+01" outerRadius="6.549392000e+01" radLength="3.527597571e+02" />
+            <type technology="CMOS" />
+            <shell halfLength="1.450000000e+02" gap="0.000000000e+00" innerRadius="6.500000000e+01" outerRadius="6.549392000e+01" radLength="0.000000000e+00" />
             <layers>
                 <layer nLadders="10" phi0="-1.570796327e+00">
-                    <ladder distance="1.600000000e+01" thickness="1.000000000e+00" width="1.150000000e+01" length="6.250000000e+01" offset="-1.874869853e+00" radLength="1.014262538e+03" />
-                    <sensitive distance="1.595000000e+01" thickness="5.000000000e-02" width="1.100000000e+01" length="6.250000000e+01" offset="-1.624869853e+00" radLength="9.366083299e+01" />
+                    <ladder distance="1.600000000e+01" thickness="1.000000000e+00" width="1.150000000e+01" length="6.250000000e+01" offset="-1.874869853e+00" radLength="0.000000000e+00" />
+                    <sensitive distance="1.595000000e+01" thickness="5.000000000e-02" width="1.100000000e+01" length="6.250000000e+01" offset="-1.624869853e+00" radLength="0.000000000e+00" />
                 </layer>
                 <layer nLadders="10" phi0="-1.570796327e+00">
-                    <ladder distance="1.700000000e+01" thickness="1.000000000e+00" width="1.150000000e+01" length="6.250000000e+01" offset="-1.874869853e+00" radLength="1.014262538e+03" />
-                    <sensitive distance="1.800000000e+01" thickness="5.000000000e-02" width="1.100000000e+01" length="6.250000000e+01" offset="-1.624869853e+00" radLength="9.366083299e+01" />
+                    <ladder distance="1.700000000e+01" thickness="1.000000000e+00" width="1.150000000e+01" length="6.250000000e+01" offset="-1.874869853e+00" radLength="0.000000000e+00" />
+                    <sensitive distance="1.800000000e+01" thickness="5.000000000e-02" width="1.100000000e+01" length="6.250000000e+01" offset="-1.624869853e+00" radLength="0.000000000e+00" />
                 </layer>
                 <layer nLadders="11" phi0="-1.570796327e+00">
-                    <ladder distance="3.700000000e+01" thickness="1.000000000e+00" width="2.250000000e+01" length="1.250000000e+02" offset="-1.837940563e+00" radLength="1.014262538e+03" />
-                    <sensitive distance="3.695000000e+01" thickness="5.000000000e-02" width="2.200000000e+01" length="1.250000000e+02" offset="-1.587940563e+00" radLength="9.366083299e+01" />
+                    <ladder distance="3.700000000e+01" thickness="1.000000000e+00" width="2.250000000e+01" length="1.250000000e+02" offset="-1.837940563e+00" radLength="0.000000000e+00" />
+                    <sensitive distance="3.695000000e+01" thickness="5.000000000e-02" width="2.200000000e+01" length="1.250000000e+02" offset="-1.587940563e+00" radLength="0.000000000e+00" />
                 </layer>
                 <layer nLadders="11" phi0="-1.570796327e+00">
-                    <ladder distance="3.800000000e+01" thickness="1.000000000e+00" width="2.250000000e+01" length="1.250000000e+02" offset="-1.837940563e+00" radLength="1.014262538e+03" />
-                    <sensitive distance="3.900000000e+01" thickness="5.000000000e-02" width="2.200000000e+01" length="1.250000000e+02" offset="-1.587940563e+00" radLength="9.366083299e+01" />
+                    <ladder distance="3.800000000e+01" thickness="1.000000000e+00" width="2.250000000e+01" length="1.250000000e+02" offset="-1.837940563e+00" radLength="0.000000000e+00" />
+                    <sensitive distance="3.900000000e+01" thickness="5.000000000e-02" width="2.200000000e+01" length="1.250000000e+02" offset="-1.587940563e+00" radLength="0.000000000e+00" />
                 </layer>
                 <layer nLadders="17" phi0="-1.570796327e+00">
-                    <ladder distance="5.800000000e+01" thickness="1.000000000e+00" width="2.250000000e+01" length="1.250000000e+02" offset="-2.636744400e+00" radLength="1.014262538e+03" />
-                    <sensitive distance="5.795000000e+01" thickness="5.000000000e-02" width="2.200000000e+01" length="1.250000000e+02" offset="-2.386744400e+00" radLength="9.366083299e+01" />
+                    <ladder distance="5.800000000e+01" thickness="1.000000000e+00" width="2.250000000e+01" length="1.250000000e+02" offset="-2.636744400e+00" radLength="0.000000000e+00" />
+                    <sensitive distance="5.795000000e+01" thickness="5.000000000e-02" width="2.200000000e+01" length="1.250000000e+02" offset="-2.386744400e+00" radLength="0.000000000e+00" />
                 </layer>
                 <layer nLadders="17" phi0="-1.570796327e+00">
-                    <ladder distance="5.900000000e+01" thickness="1.000000000e+00" width="2.250000000e+01" length="1.250000000e+02" offset="-2.636744400e+00" radLength="1.014262538e+03" />
-                    <sensitive distance="6.000000000e+01" thickness="5.000000000e-02" width="2.200000000e+01" length="1.250000000e+02" offset="-2.386744400e+00" radLength="9.366083299e+01" />
+                    <ladder distance="5.900000000e+01" thickness="1.000000000e+00" width="2.250000000e+01" length="1.250000000e+02" offset="-2.636744400e+00" radLength="0.000000000e+00" />
+                    <sensitive distance="6.000000000e+01" thickness="5.000000000e-02" width="2.200000000e+01" length="1.250000000e+02" offset="-2.386744400e+00" radLength="0.000000000e+00" />
                 </layer>
             </layers>
         </detector>
@@ -156,9 +156,6 @@
         </detector>
     </detectors>
     <materials>
-        <material name="VXDFoamShellMaterial" A="0.000000000e+00" Z="0.000000000e+00" density="0.000000000e+00" radLength="0.000000000e+00" intLength="0.000000000e+00" />
-        <material name="VXDFoamShellMaterial_old" A="1.043890843e+01" Z="5.612886646e+00" density="2.500000000e+01" radLength="1.751650267e+04" intLength="0.000000000e+00" />
-        <material name="VXDSupportMaterial" A="2.075864251e+01" Z="1.039383117e+01" density="2.765900000e+02" radLength="1.014262538e+03" intLength="0.000000000e+00" />
-        <material name="VXDSupportMaterial_old" A="2.075865162e+01" Z="1.039383117e+01" density="2.765900000e+02" radLength="1.014262421e+03" intLength="3.341388059e+03" />
+        <material name="VXDSupportMaterial" A="1.938906835e+01" Z="9.646769556e+00" density="2.765900000e+02" radLength="1.014262538e+03" intLength="3.356509695e+03" />
     </materials>
 </gear>

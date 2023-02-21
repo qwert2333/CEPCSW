@@ -23,7 +23,27 @@ StatusCode EnergySplittingAlg::Initialize(){
 
 StatusCode EnergySplittingAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
 
-//cout<<"EnergySplittingAlg: TowerCol size = "<<m_datacol.TowerCol.size()<<endl;
+  //Input: HalfCluster (with 1D clusters and HoughAxis)
+  //Output: Create Towers for the matching. 
+
+  std::vector<PandoraPlus::CaloHalfCluster*>* p_HalfClusters = &(m_datacol.map_LongiCluster["HalfClusterCol"]);
+
+
+      //Split cluster to showers
+      std::vector<const PandoraPlus::Calo1DCluster*> m_barShowerUCol; m_barShowerUCol.clear();
+      for(int ic=0; ic<m_barClusUCol.size(); ic++){
+        std::vector<const PandoraPlus::Calo1DCluster*> m_showers; m_showers.clear();
+        ClusterSplitting( m_barClusUCol[ic], m_showers );
+        if(m_showers.size()==0) continue;
+        m_barShowerUCol.insert( m_barShowerUCol.end(), m_showers.begin(), m_showers.end() );
+      }
+      std::vector<const PandoraPlus::Calo1DCluster*> m_barShowerVCol; m_barShowerVCol.clear();
+      for(int ic=0; ic<m_barClusVCol.size(); ic++){
+        std::vector<const PandoraPlus::Calo1DCluster*> m_showers; m_showers.clear();
+        ClusterSplitting( m_barClusVCol[ic], m_showers );
+        if(m_showers.size()==0) continue;
+        m_barShowerVCol.insert( m_barShowerVCol.end(), m_showers.begin(), m_showers.end() );
+      }
 
   std::vector<PandoraPlus::Calo3DCluster*>* p_3DClusters = &(m_datacol.Cluster3DCol);
   if( !p_3DClusters || p_3DClusters->size()==0){ std::cout<<"Warning: Empty or invalid input in EnergySplittingAlg! Please check previous algorithm!"<<std::endl; return StatusCode::SUCCESS; }
