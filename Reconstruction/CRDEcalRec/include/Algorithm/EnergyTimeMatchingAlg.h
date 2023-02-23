@@ -22,7 +22,7 @@ public:
   ~EnergyTimeMatchingAlg(){};
 
   StatusCode ReadSettings( PandoraPlus::Settings& m_settings);
-  StatusCode Initialize();
+  StatusCode Initialize( PandoraPlusDataCol& m_datacol );
   StatusCode RunAlgorithm( PandoraPlusDataCol& m_datasvc );
   StatusCode ClearAlgorithm(); 
 

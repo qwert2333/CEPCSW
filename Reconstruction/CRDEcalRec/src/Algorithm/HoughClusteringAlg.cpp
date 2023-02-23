@@ -7,7 +7,6 @@
 #include "TCanvas.h"
 using namespace std;
 
-
 StatusCode HoughClusteringAlg::ReadSettings(PandoraPlus::Settings& m_settings){
   settings = m_settings;
 
@@ -78,39 +77,31 @@ StatusCode HoughClusteringAlg::ReadSettings(PandoraPlus::Settings& m_settings){
   return StatusCode::SUCCESS;  
 }
 
-StatusCode HoughClusteringAlg::Initialize(){
+StatusCode HoughClusteringAlg::Initialize( PandoraPlusDataCol& m_datacol ){
+  p_HalfClusterU.clear(); 
+  p_HalfClusterV.clear(); 
+
+
+  p_HalfClusterU = m_datacol.map_HalfCluster["HalfClusterColU"];
+  p_HalfClusterV = m_datacol.map_HalfCluster["HalfClusterColV"];
 
   return StatusCode::SUCCESS;
 }
 
 StatusCode HoughClusteringAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
-cout << "yyy: Start RunAlgorithm() of HoughClusteringAlg" << endl;
-  if(m_datacol.map_LongiCluster["HalfClusterCol"].size()<1){
-    cout << "HoughClusteringAlg: No HalfCluster input"<<endl;
+
+  if( (p_HalfClusterU.size()+p_HalfClusterV.size())<1 ){
+    std::cout << "HoughClusteringAlg: No HalfCluster input"<<std::endl;
     return StatusCode::SUCCESS;
   }
-//cout << "  yyy: ClusterHalfCol.size() = " << m_datacol.ClusterHalfCol.size() << endl;
 
-  // There should be two 2D cluster in PandoraPlusDataCol.h
-  // for both V and U plane
-  // The two 2D cluster should be processed separately
-  std::vector<PandoraPlus::CaloHalfCluster*> p_HalfClusterV;
-  std::vector<PandoraPlus::CaloHalfCluster*> p_HalfClusterU;
-  for(int i=0; i<m_datacol.map_LongiCluster["HalfClusterCol"].size(); i++){
-    if(m_datacol.map_LongiCluster["HalfClusterCol"][i]->getSlayer()==0)
-      p_HalfClusterU.push_back(m_datacol.map_LongiCluster["HalfClusterCol"][i]);
-    else if(m_datacol.map_LongiCluster["HalfClusterCol"][i]->getSlayer()==1)
-      p_HalfClusterV.push_back(m_datacol.map_LongiCluster["HalfClusterCol"][i]);
-    else
-      cout << "HoughClusteringAlg: Wrong slayer for input HalfCluster" << endl;
-  }
   
   if(p_HalfClusterV.size()==0){ std::cout<<"  HoughClusteringAlg: No HalfClusterV in present data collection! "<<std::endl; }
   if(p_HalfClusterU.size()==0){ std::cout<<"  HoughClusteringAlg: No HalfClusterU in present data collection! "<<std::endl; }
 
   // Processing V(xy) plane
   for(int it=0; it<p_HalfClusterV.size(); it++){ // process each HalfCluster respectively
-    std::vector<const PandoraPlus::Calo1DCluster*> m_localMaxVCol; m_localMaxVCol.clear();
+    m_localMaxVCol.clear();
     std::vector<const PandoraPlus::Calo1DCluster*> tmp_localMaxVCol = p_HalfClusterV[it]->getLocalMaxCol(settings.map_stringPars["ReadinLocalMaxName"]);
 
     for(int il=0; il<tmp_localMaxVCol.size(); il++){
@@ -119,60 +110,65 @@ cout << "yyy: Start RunAlgorithm() of HoughClusteringAlg" << endl;
     }
 
     if(m_localMaxVCol.size()<settings.map_intPars["th_peak"]){
-      std::cout << "    yyy: m_localMaxVCol.size()<th_peak, continue" << std::endl;
+      //std::cout << "    yyy: m_localMaxVCol.size()<th_peak, continue" << std::endl;
       continue; 
     } 
 
-    cout<<"  HoughClusteringAlg: Local maximum size V = "<<m_localMaxVCol.size()<<endl;
+    // cout<<"  HoughClusteringAlg: Local maximum size V = "<<m_localMaxVCol.size()<<endl;
     
-    cout<<"  HoughClusteringAlg: Creating m_HoughObjectsV"<<endl;
+    // cout<<"  HoughClusteringAlg: Creating m_HoughObjectsV"<<endl;
     std::vector<PandoraPlus::HoughObject> m_HoughObjectsV; m_HoughObjectsV.clear(); 
     for(int il=0; il<m_localMaxVCol.size(); il++){
       PandoraPlus::HoughObject m_obj(m_localMaxVCol[il], settings.map_floatPars["cell_size"], settings.map_floatPars["ecal_inner_radius"]);
       m_HoughObjectsV.push_back(m_obj);
     }
 
-    cout<<"  HoughClusteringAlg: Hough transformation"<<endl;
+    // cout<<"  HoughClusteringAlg: Hough transformation"<<endl;
     HoughTransformation(m_HoughObjectsV);
 
-    cout<<"  HoughClusteringAlg: Creating hough_spaceV"<<endl;
+    // cout<<"  HoughClusteringAlg: Creating hough_spaceV"<<endl;
     PandoraPlus::HoughSpace hough_spaceV(settings.map_floatPars["alpha_lowV"], settings.map_floatPars["alpha_highV"], 
                                          settings.map_floatPars["bin_width_alphaV"], settings.map_intPars["Nbins_alphaV"], 
                                          settings.map_floatPars["rho_low"], settings.map_floatPars["rho_high"], 
                                          settings.map_floatPars["bin_width_rho"], settings.map_intPars["Nbins_rho"]);
 
-    cout<<"  HoughClusteringAlg: Filling hough_spaceV"<<endl;
+    // cout<<"  HoughClusteringAlg: Filling hough_spaceV"<<endl;
     FillHoughSpace(m_HoughObjectsV, hough_spaceV);
 
-    cout<<"  HoughClusteringAlg: Finding clusters from Hough space"<<endl;
+    // cout<<"  HoughClusteringAlg: Finding clusters from Hough space"<<endl;
+
     //Create output HoughClusters
-    std::vector<const PandoraPlus::LongiCluster*> m_longiClusVCol; m_longiClusVCol.clear(); 
+    m_longiClusVCol.clear(); 
     ClusterFinding(m_HoughObjectsV, hough_spaceV, m_longiClusVCol);
 
     cout << "  HoughClusteringAlg: final output m_longiClusVCol.size() = " << m_longiClusVCol.size() << endl;
 
     for(int ic=0; ic<m_longiClusVCol.size(); ic++)
-      m_datacol.bk_LongiClusCol.push_back( const_cast<PandoraPlus::LongiCluster*>(m_longiClusVCol[ic]) );
+      m_datacol.bk_ClusterHalfCol.push_back( const_cast<PandoraPlus::CaloHalfCluster*>(m_longiClusVCol[ic]) );
 
     std::vector<const PandoraPlus::Calo1DCluster*> left_localMaxVCol; left_localMaxVCol.clear();
+    std::vector<const PandoraPlus::Calo1DCluster*> m_houghMax; m_houghMax.clear(); 
     for(int is=0; is<tmp_localMaxVCol.size(); is++){
       bool fl_incluster = false; 
       for(int ic=0; ic<m_longiClusVCol.size(); ic++){
-        std::vector<const PandoraPlus::Calo1DCluster*> p_showers = m_longiClusVCol[ic]->getBarShowers();
+        std::vector<const PandoraPlus::Calo1DCluster*> p_showers = m_longiClusVCol[ic]->getCluster();
         if( find(p_showers.begin(), p_showers.end(), tmp_localMaxVCol[is])!=p_showers.end() ) { fl_incluster = true; break; }
       }
       if(!fl_incluster && find(left_localMaxVCol.begin(), left_localMaxVCol.end(), tmp_localMaxVCol[is])==left_localMaxVCol.end() ) left_localMaxVCol.push_back(tmp_localMaxVCol[is]);
+      m_houghMax.push_back( tmp_localMaxVCol[is] );
     }
 
+    p_HalfClusterV[it]->setLocalMax("HoughLocalMax", m_houghMax);
     p_HalfClusterV[it]->setLocalMax(settings.map_stringPars["LeftLocalMaxName"], left_localMaxVCol);
-    p_HalfClusterV[it]->setLongiClusters(settings.map_stringPars["OutputLongiClusName"], m_longiClusVCol);
-
+    p_HalfClusterV[it]->setHalfClusters(settings.map_stringPars["OutputLongiClusName"], m_longiClusVCol);
+    m_houghMax.clear();
+    left_localMaxVCol.clear();
 
   }  // end of V plane
 
   // Processing U(r-phi) plane
   for(int it=0; it<p_HalfClusterU.size(); it++){
-    std::vector<const PandoraPlus::Calo1DCluster*> m_localMaxUCol; m_localMaxUCol.clear();
+    m_localMaxUCol.clear();
     std::vector<const PandoraPlus::Calo1DCluster*> tmp_localMaxUCol = p_HalfClusterU[it]->getLocalMaxCol(settings.map_stringPars["ReadinLocalMaxName"]);
 
     for(int il=0; il<tmp_localMaxUCol.size(); il++){
@@ -193,15 +189,15 @@ cout << "yyy: Start RunAlgorithm() of HoughClusteringAlg" << endl;
       m_HoughObjectsU.push_back(m_obj);
     }
 
-    cout<<"  HoughClusteringAlg: Hough transformation"<<endl;
+    // cout<<"  HoughClusteringAlg: Hough transformation"<<endl;
     HoughTransformation(m_HoughObjectsU);
 
-    cout<<"  HoughClusteringAlg: Divide m_HoughObjectsU module by module"<<endl;
+    // cout<<"  HoughClusteringAlg: Divide m_HoughObjectsU module by module"<<endl;
     set<int> modules;
     for(int il=0; il<m_localMaxUCol.size(); il++){
       modules.insert((m_localMaxUCol[il]->getTowerID())[0][0]);
     }
-cout << "  yyy: modules.size() = " << modules.size() << endl;
+// cout << "  yyy: modules.size() = " << modules.size() << endl;
     std::vector< std::vector<PandoraPlus::HoughObject> > m_HoughObjectsU_modules; m_HoughObjectsU_modules.clear();
     for(auto im=modules.begin(); im!=modules.end(); im++){
       std::vector<PandoraPlus::HoughObject> hobj;
@@ -213,7 +209,7 @@ cout << "  yyy: modules.size() = " << modules.size() << endl;
       m_HoughObjectsU_modules.push_back(hobj);
     }
 
-    cout << "  HoughClusteringAlg: Creating hough_spacesU module by module" << endl;
+    // cout << "  HoughClusteringAlg: Creating hough_spacesU module by module" << endl;
     std::vector<PandoraPlus::HoughSpace> hough_spacesU;
     for(int im=0; im<m_HoughObjectsU_modules.size(); im++){
       PandoraPlus::HoughSpace hspaceU(settings.map_floatPars["alpha_lowU"], settings.map_floatPars["alpha_highU"], 
@@ -224,28 +220,33 @@ cout << "  yyy: modules.size() = " << modules.size() << endl;
       hough_spacesU.push_back(hspaceU);
     }
 
-    cout<<"  HoughClusteringAlg: Finding clusters from Hough spaces"<<endl;
-    std::vector<const PandoraPlus::LongiCluster*> m_longiClusUCol; m_longiClusUCol.clear(); 
+    // cout<<"  HoughClusteringAlg: Finding clusters from Hough spaces"<<endl;
+    m_longiClusUCol.clear(); 
     for(int ih=0; ih<hough_spacesU.size(); ih++){
       ClusterFinding(m_HoughObjectsU_modules[ih], hough_spacesU[ih], m_longiClusUCol);
     }
 
-    cout << "  HoughClusteringAlg: final output m_longiClusUCol.size() = " << m_longiClusUCol.size() << endl;
+    // cout << "  HoughClusteringAlg: final output m_longiClusUCol.size() = " << m_longiClusUCol.size() << endl;
     for(int ic=0; ic<m_longiClusUCol.size(); ic++)
-      m_datacol.bk_LongiClusCol.push_back( const_cast<PandoraPlus::LongiCluster*>(m_longiClusUCol[ic]) );
+      m_datacol.bk_ClusterHalfCol.push_back( const_cast<PandoraPlus::CaloHalfCluster*>(m_longiClusUCol[ic]) );
     
     std::vector<const PandoraPlus::Calo1DCluster*> left_localMaxUCol; left_localMaxUCol.clear();
+    std::vector<const PandoraPlus::Calo1DCluster*> m_houghMax; m_houghMax.clear();
     for(int is=0; is<tmp_localMaxUCol.size(); is++){
       bool fl_incluster = false; 
       for(int ic=0; ic<m_longiClusUCol.size(); ic++){
-        std::vector<const PandoraPlus::Calo1DCluster*> p_showers = m_longiClusUCol[ic]->getBarShowers();
+        std::vector<const PandoraPlus::Calo1DCluster*> p_showers = m_longiClusUCol[ic]->getCluster();
         if( find(p_showers.begin(), p_showers.end(), tmp_localMaxUCol[is])!=p_showers.end() ) { fl_incluster = true; break; }
       }
       if(!fl_incluster && find(left_localMaxUCol.begin(), left_localMaxUCol.end(), tmp_localMaxUCol[is])==left_localMaxUCol.end() ) left_localMaxUCol.push_back(tmp_localMaxUCol[is]);
+      else m_houghMax.push_back( tmp_localMaxUCol[is] );
     }
 
+    p_HalfClusterU[it]->setLocalMax("HoughAxis", m_houghMax);
     p_HalfClusterU[it]->setLocalMax(settings.map_stringPars["LeftLocalMaxName"], left_localMaxUCol);
-    p_HalfClusterU[it]->setLongiClusters(settings.map_stringPars["OutputLongiClusName"], m_longiClusUCol);
+    p_HalfClusterU[it]->setHalfClusters(settings.map_stringPars["OutputLongiClusName"], m_longiClusUCol);
+    m_houghMax.clear();
+    left_localMaxUCol.clear(); 
 
   }  // end of U plane
 
@@ -254,6 +255,12 @@ cout << "  yyy: modules.size() = " << modules.size() << endl;
 }
 
 StatusCode HoughClusteringAlg::ClearAlgorithm(){
+  p_HalfClusterV.clear();
+  p_HalfClusterU.clear(); 
+  m_localMaxVCol.clear();
+  m_localMaxUCol.clear(); 
+  m_longiClusVCol.clear();
+  m_longiClusUCol.clear();
 
   return StatusCode::SUCCESS;
 };
@@ -472,20 +479,20 @@ StatusCode HoughClusteringAlg::FillHoughSpace(vector<PandoraPlus::HoughObject>& 
 
 
 StatusCode HoughClusteringAlg::ClusterFinding(vector<PandoraPlus::HoughObject>& Hobjects, PandoraPlus::HoughSpace& Hspace, 
-                                              vector<const PandoraPlus::LongiCluster*>& m_longiClusCol){
+                                              vector<const PandoraPlus::CaloHalfCluster*>& m_longiClusCol){
   if(Hobjects.size()==0) return StatusCode::SUCCESS;
 
   map< pair<int, int>, set<int> > Hough_bins = Hspace.getHoughBins();
 
   // transform candidate to longicluster
-  vector<PandoraPlus::LongiCluster*> m_clusCol; m_clusCol.clear();
+  vector<PandoraPlus::CaloHalfCluster*> m_clusCol; m_clusCol.clear();
   // for(auto ihb=Hough_bins.begin(); ihb!=Hough_bins.end(); ihb++){
     for(auto ihb : Hough_bins){
     if(ihb.second.size()<settings.map_intPars["th_peak"]) continue;
     
-    PandoraPlus::LongiCluster* m_clus = new PandoraPlus::LongiCluster();
+    PandoraPlus::CaloHalfCluster* m_clus = new PandoraPlus::CaloHalfCluster();
     for(auto it = (ihb.second).begin(); it!=(ihb.second).end(); it++){
-      m_clus->addBarShower(Hobjects[*it].getLocalMax(), 0);
+      m_clus->addUnit(Hobjects[*it].getLocalMax());
     }
 
     double t_alpha = Hspace.getAlphaBinCenter((ihb.first).first);
@@ -509,7 +516,7 @@ StatusCode HoughClusteringAlg::ClusterFinding(vector<PandoraPlus::HoughObject>& 
 }  // ClusterFinding() end
 
 
-StatusCode HoughClusteringAlg::CleanClusters(vector<PandoraPlus::LongiCluster*>& m_longiClusCol){
+StatusCode HoughClusteringAlg::CleanClusters(vector<PandoraPlus::CaloHalfCluster*>& m_longiClusCol){
   if(m_longiClusCol.size()==0)  return StatusCode::SUCCESS;
 
   // Remove repeated tracks
@@ -528,17 +535,17 @@ StatusCode HoughClusteringAlg::CleanClusters(vector<PandoraPlus::LongiCluster*>&
 
   //Depart the HoughCluster to 2 sub-clusters if it has blank in middle.
   for(int ic=0; ic<m_longiClusCol.size(); ic++){
-    int m_nhit = m_longiClusCol[ic]->getBarShowers().size(); 
-    m_longiClusCol[ic]->SortBarShowersByLayer();
+    int m_nhit = m_longiClusCol[ic]->getCluster().size(); 
+    m_longiClusCol[ic]->sortBarShowersByLayer();
 
     for(int ih=0; ih<m_nhit-1; ih++){
-      if(m_longiClusCol[ic]->getBarShowers()[ih+1]->getDlayer() - m_longiClusCol[ic]->getBarShowers()[ih]->getDlayer() > 2){
-        PandoraPlus::LongiCluster* clus_head = new PandoraPlus::LongiCluster();
-        PandoraPlus::LongiCluster* clus_tail = new PandoraPlus::LongiCluster();
+      if(m_longiClusCol[ic]->getCluster()[ih+1]->getDlayer() - m_longiClusCol[ic]->getCluster()[ih]->getDlayer() > 2){
+        PandoraPlus::CaloHalfCluster* clus_head = new PandoraPlus::CaloHalfCluster();
+        PandoraPlus::CaloHalfCluster* clus_tail = new PandoraPlus::CaloHalfCluster();
         for(int jh=0; jh<=ih; jh++) 
-          clus_head->addBarShower( m_longiClusCol[ic]->getBarShowers()[jh], 0 );
+          clus_head->addUnit( m_longiClusCol[ic]->getCluster()[jh]);
         for(int jh=ih+1; jh<m_nhit; jh++) 
-          clus_tail->addBarShower( m_longiClusCol[ic]->getBarShowers()[jh], 0 );
+          clus_tail->addUnit( m_longiClusCol[ic]->getCluster()[jh]);
         
         if( clus_head->isContinueN(settings.map_intPars["th_continueN"]) ) {
             clus_head->setHoughPars(m_longiClusCol[ic]->getHoughAlpha(), m_longiClusCol[ic]->getHoughRho());

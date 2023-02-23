@@ -62,7 +62,7 @@ namespace PandoraPlus{
 
     m_TrkExtraAlg = new TrackExtrapolatingAlg();
     m_TrkExtraAlg->ReadSettings(m_TrkExtraSettings);
-    m_TrkExtraAlg->Initialize();
+    m_TrkExtraAlg->Initialize( m_DataCol );
     m_TrkExtraAlg->RunAlgorithm( m_DataCol );
     m_TrkExtraAlg->ClearAlgorithm();
 

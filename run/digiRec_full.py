@@ -1,6 +1,6 @@
 from Gaudi.Configuration import *
 Nskip = 0
-Nevt = 5
+Nevt = 10
 
 ############## GeomSvc #################
 geometry_option = "CRD_o1_v01/CRD_o1_v01.xml"
@@ -23,12 +23,7 @@ geomsvc.compact = geometry_path
 from Configurables import k4DataSvc
 podioevent = k4DataSvc("EventDataSvc")
 podioevent.inputs = [
-#"SimSamples/CRD_SimMu_Module0_7_FullDet.root"
-#"Sim_Gam10GeV_Part23_Stave6_EcalOnly.root"
-#"SimSamples/CRD_SimMu_FullDet_200evt.root"
-#"CRD_Sim2Gam_FullDet.root"
-"SimSamples/CRD_Sim2Gam_FullDet_200evt.root"
-#"SimSamples/CRD_SimGamPi_FullDet.root"
+"CRDFull_Gam10GeV.root"
 ]
 ##########################################
 
@@ -98,26 +93,22 @@ PandoraPlusPFAlg.AlgList = ["ExampleAlg",
                             "GlobalClusteringAlg", 
                             "LocalMaxFindingAlg",
                             "HoughClusteringAlg", 
-                            "ConeClustering2DAlg", 
-                            "EnergySplittingAlg"  ]
+                            "ConeClustering2DAlg"]
 PandoraPlusPFAlg.AlgParNames = [ ["Par1", "Par2"], 
                                  ["Par1"], 
                                  ["Eth_localMax", "Eth_MaxWithNeigh"], 
                                  ["th_Layers"],
-                                 ["th_beginLayer"],
-                                 [""]  ]
+                                 ["th_beginLayer"] ]
 PandoraPlusPFAlg.AlgParTypes = [ ["double", "double"],
                                  ["double"],
                                  ["double", "double"],
                                  ["double"],
-                                 ["double"], 
-                                 [""]  ]
+                                 ["double"] ]
 PandoraPlusPFAlg.AlgParValues = [ ["1.", "3.14"], 
                                   ["1."], 
                                   ["0.005", "0."],
                                   ["15"],
-                                  ["1"],
-                                  [""]   ]
+                                  ["1"] ]
 
 ########################################
 

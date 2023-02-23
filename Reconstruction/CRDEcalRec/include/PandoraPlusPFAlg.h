@@ -19,9 +19,9 @@
 #include "Algorithm/GlobalClusteringAlg.h"
 #include "Algorithm/LocalMaxFindingAlg.h"
 #include "Algorithm/HoughClusteringAlg.h"
-//#include "Algorithm/ConeClustering2DAlg.h"
-#include "Algorithm/EnergySplittingAlg.h"
-#include "Algorithm/EnergyTimeMatchingAlg.h"
+#include "Algorithm/ConeClustering2DAlg.h"
+//#include "Algorithm/EnergySplittingAlg.h"
+//#include "Algorithm/EnergyTimeMatchingAlg.h"
 //#include "Algorithm/ConeClusteringAlg.h"
 #include "Algorithm/TrackExtrapolatingAlg.h"
 

@@ -13,63 +13,45 @@ StatusCode LocalMaxFindingAlg::ReadSettings(PandoraPlus::Settings& m_settings){
   return StatusCode::SUCCESS;
 }
 
-StatusCode LocalMaxFindingAlg::Initialize(){
+StatusCode LocalMaxFindingAlg::Initialize( PandoraPlusDataCol& m_datacol ){
+  p_HalfClusU = NULL;
+  p_HalfClusV = NULL; 
+
+  p_HalfClusU = &(m_datacol.map_HalfCluster["HalfClusterColU"]);
+  p_HalfClusV = &(m_datacol.map_HalfCluster["HalfClusterColV"]);
 
   return StatusCode::SUCCESS;
 }
 
 
 StatusCode LocalMaxFindingAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol){
-/*
-  std::vector<PandoraPlus::Calo2DCluster*> m_2dClusCol = m_datacol.Cluster2DCol;
 
-cout<<"LocalMaxFinding: input 2DCluster size = "<<m_2dClusCol.size()<<endl;  
-  for(int ic=0; ic<m_2dClusCol.size(); ic++){
-    GetLocalMax( m_2dClusCol[ic] );
+  if(!p_HalfClusU || !p_HalfClusV) {std::cout<<"ERROR: No HalfClusters in present data collection! "<<std::endl; return StatusCode::FAILURE; }
 
-    for(int is=0; is<m_2dClusCol[ic]->getShowerUCol().size(); is++)
-      m_datacol.bk_BarShowerCol.push_back( const_cast<PandoraPlus::Calo1DCluster *>(m_2dClusCol[ic]->getShowerUCol()[is]) );
-    for(int is=0; is<m_2dClusCol[ic]->getShowerVCol().size(); is++)
-      m_datacol.bk_BarShowerCol.push_back( const_cast<PandoraPlus::Calo1DCluster *>(m_2dClusCol[ic]->getShowerVCol()[is]) );
+  std::vector<const PandoraPlus::Calo1DCluster*> tmp_localMax; 
+  for(int iu = 0; iu<p_HalfClusU->size(); iu++){
+    tmp_localMax.clear();
+    std::vector<const Calo1DCluster*> m_1dClusCol = p_HalfClusU->at(iu)->getCluster();
+    for(int i1d=0; i1d<m_1dClusCol.size(); i1d++) GetLocalMax(m_1dClusCol[i1d], tmp_localMax);
+    p_HalfClusU->at(iu)->setLocalMax(settings.map_stringPars["OutputLocalMaxName"], tmp_localMax);
+    m_1dClusCol.clear(); 
   }
-*/
-  std::vector<PandoraPlus::CaloHalfCluster*>* p_2DClusters = &(m_datacol.map_LongiCluster["HalfClusterCol"]);
-  if(!p_2DClusters) {std::cout<<"ERROR: No 2DCluster in present data collection! "<<std::endl; return StatusCode::FAILURE; }
 
-  for(int i2d=0; i2d<p_2DClusters->size(); i2d++){
-    if(p_2DClusters->at(i2d)->getSlayer()==0)
-    {
-      std::vector<const PandoraPlus::Calo1DCluster*> m_localMaxUCol; m_localMaxUCol.clear();
-
-      std::vector<const Calo1DCluster*> m_1dClusCol = p_2DClusters->at(i2d)->getCluster();
-      for(int i1d=0; i1d<m_1dClusCol.size(); i1d++) GetLocalMax(m_1dClusCol[i1d], m_localMaxUCol);
-      p_2DClusters->at(i2d)->setLocalMax(settings.map_stringPars["OutputLocalMaxName"], m_localMaxUCol);
-    }
-    else
-    {
-      std::vector<const PandoraPlus::Calo1DCluster*> m_localMaxVCol; m_localMaxVCol.clear();
-
-      std::vector<const Calo1DCluster*> m_1dClusCol = p_2DClusters->at(i2d)->getCluster();
-      for(int i1d=0; i1d<m_1dClusCol.size(); i1d++) GetLocalMax(m_1dClusCol[i1d], m_localMaxVCol);
-      p_2DClusters->at(i2d)->setLocalMax(settings.map_stringPars["OutputLocalMaxName"], m_localMaxVCol);
-    }
-    
-
-//cout<<"LocalMaxFinding: LocalMax in 3DCluster #"<<i3d<<endl;
-//cout<<"LocalMaxU: "<<endl;
-//for(int i=0; i<m_localMaxUCol.size(); i++)
-//  printf("  #%d: (%.3f, %.3f, %.3f) \n ", i, m_localMaxUCol[i]->getPos().x(), m_localMaxUCol[i]->getPos().y(), m_localMaxUCol[i]->getPos().z());
-//cout<<"LocalMaxV: "<<endl;
-//for(int i=0; i<m_localMaxVCol.size(); i++)
-//  printf("  #%d: (%.3f, %.3f, %.3f) \n ", i, m_localMaxVCol[i]->getPos().x(), m_localMaxVCol[i]->getPos().y(), m_localMaxVCol[i]->getPos().z());
-
+  for(int iv=0; iv<p_HalfClusV->size(); iv++){
+    tmp_localMax.clear(); 
+    std::vector<const Calo1DCluster*> m_1dClusCol = p_HalfClusV->at(iv)->getCluster();
+    for(int i1d=0; i1d<m_1dClusCol.size(); i1d++) GetLocalMax(m_1dClusCol[i1d], tmp_localMax);
+    p_HalfClusU->at(iv)->setLocalMax(settings.map_stringPars["OutputLocalMaxName"], tmp_localMax);
+    m_1dClusCol.clear(); 
   }
-  p_2DClusters = nullptr;
+
 
   return StatusCode::SUCCESS;
 }
 
 StatusCode LocalMaxFindingAlg::ClearAlgorithm(){
+  p_HalfClusU = nullptr;
+  p_HalfClusV = nullptr;
 
   return StatusCode::SUCCESS;
 }

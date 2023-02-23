@@ -27,7 +27,7 @@ namespace PandoraPlus{
     virtual ~Algorithm() {};
 
     virtual StatusCode ReadSettings(Settings& m_settings) = 0;
-    virtual StatusCode Initialize() = 0;
+    virtual StatusCode Initialize( PandoraPlusDataCol& m_datacol ) = 0;
     virtual StatusCode RunAlgorithm( PandoraPlusDataCol& m_datacol ) = 0;
     virtual StatusCode ClearAlgorithm() = 0;
 
