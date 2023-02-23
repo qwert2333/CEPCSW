@@ -14,7 +14,7 @@ StatusCode ExampleAlg::ReadSettings(Settings& m_settings){
   return StatusCode::SUCCESS;
 };
 
-StatusCode ExampleAlg::Initialize(){
+StatusCode ExampleAlg::Initialize( PandoraPlusDataCol& m_datacol ){
   std::cout<<"Initialize ExampleAlg"<<std::endl;
 
   return StatusCode::SUCCESS;

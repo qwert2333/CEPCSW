@@ -19,83 +19,102 @@ StatusCode ConeClustering2DAlg::ReadSettings(Settings& m_settings){
 };
 
 
-StatusCode ConeClustering2DAlg::Initialize(){
+StatusCode ConeClustering2DAlg::Initialize( PandoraPlusDataCol& m_datacol ){
+  p_HalfClusterU.clear();
+  p_HalfClusterV.clear();
+
+
+  p_HalfClusterU = m_datacol.map_HalfCluster["HalfClusterColU"];
+  p_HalfClusterV = m_datacol.map_HalfCluster["HalfClusterColV"];
 
   return StatusCode::SUCCESS;
 }
 
 StatusCode ConeClustering2DAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
 
-  std::vector<PandoraPlus::Calo3DCluster*>* p_3DClusters = &(m_datacol.Cluster3DCol);
+  if( (p_HalfClusterU.size()+p_HalfClusterV.size())<1 ){
+    std::cout << "ConeClustering2DAlg: No HalfCluster input"<<std::endl;
+    return StatusCode::SUCCESS;
+  }   
+ 
+  std::vector<PandoraPlus::CaloHalfCluster*> tmp_longiClusCol; tmp_longiClusCol.clear(); 
+  std::map<int, std::vector<const PandoraPlus::Calo1DCluster*> > m_orderedLocalMax; 
 
-  for(int ic=0; ic<p_3DClusters->size(); ic++){
-    std::vector<const PandoraPlus::CaloBarShower*> m_localMaxUCol = p_3DClusters->at(ic)->getLocalMaxUCol(settings.map_stringPars["ReadinLocalMaxName"]);
-    std::vector<const PandoraPlus::CaloBarShower*> m_localMaxVCol = p_3DClusters->at(ic)->getLocalMaxVCol(settings.map_stringPars["ReadinLocalMaxName"]);
+  //Processing U plane:
+  for(int ic=0; ic<p_HalfClusterU.size(); ic++){
+    //Get LocalMax
+    m_localMaxUCol.clear(); 
+    m_localMaxUCol = p_HalfClusterU[ic]->getLocalMaxCol(settings.map_stringPars["ReadinLocalMaxName"]);
 
-    if(m_localMaxUCol.size()==0 && m_localMaxVCol.size()==0) continue;
-
-//cout<<"ConeClustering2DAlg: Print input localMax"<<endl;
-//cout<<"LocalMaxU: "<<endl;
-//for(int i=0; i<m_localMaxUCol.size(); i++)
-//  printf("  #%d: (%.3f, %.3f, %.3f) \n ", i, m_localMaxUCol[i]->getPos().x(), m_localMaxUCol[i]->getPos().y(), m_localMaxUCol[i]->getPos().z());
-//cout<<"LocalMaxV: "<<endl;
-//for(int i=0; i<m_localMaxVCol.size(); i++)
-//  printf("  #%d: (%.3f, %.3f, %.3f) \n ", i, m_localMaxVCol[i]->getPos().x(), m_localMaxVCol[i]->getPos().y(), m_localMaxVCol[i]->getPos().z());
-
-
-    std::map<int, std::vector<const PandoraPlus::CaloBarShower*> > m_orderedShowerU; m_orderedShowerU.clear(); 
-    std::map<int, std::vector<const PandoraPlus::CaloBarShower*> > m_orderedShowerV; m_orderedShowerV.clear(); 
+    //Get ordered LocalMax
+    m_orderedLocalMax.clear();
     for(int is=0; is<m_localMaxUCol.size(); is++)
-      m_orderedShowerU[m_localMaxUCol[is]->getDlayer()].push_back(m_localMaxUCol[is]);
-    for(int is=0; is<m_localMaxVCol.size(); is++)
-      m_orderedShowerV[m_localMaxVCol[is]->getDlayer()].push_back(m_localMaxVCol[is]);
-   
+      m_orderedLocalMax[m_localMaxUCol[is]->getDlayer()].push_back(m_localMaxUCol[is]);
 
-    std::vector<PandoraPlus::LongiCluster*> m_longiClusUCol; m_longiClusUCol.clear(); 
-    std::vector<PandoraPlus::LongiCluster*> m_longiClusVCol; m_longiClusVCol.clear(); 
+    tmp_longiClusCol.clear();
+    LongiConeLinking( m_orderedLocalMax, tmp_longiClusCol );
 
-    LongiConeLinking( m_orderedShowerU, m_longiClusUCol );
-    LongiConeLinking( m_orderedShowerV, m_longiClusVCol );
-   
-    //Convert LongiClusters to const object.
-    std::vector<const PandoraPlus::LongiCluster*> const_longiClusUCol; const_longiClusUCol.clear();
-    std::vector<const PandoraPlus::LongiCluster*> const_longiClusVCol; const_longiClusVCol.clear();
-    for(int ic=0; ic<m_longiClusUCol.size(); ic++)
-      if(m_longiClusUCol[ic]->getBarShowers().size()>=settings.map_floatPars["th_Nshowers"]) const_longiClusUCol.push_back(m_longiClusUCol[ic]);
-     
-    for(int ic=0; ic<m_longiClusVCol.size(); ic++) 
-      if(m_longiClusVCol[ic]->getBarShowers().size()>=settings.map_floatPars["th_Nshowers"]) const_longiClusVCol.push_back(m_longiClusVCol[ic]);
+    //Convert LongiClusters to const object.    
+    const_longiClusUCol.clear();
+    for(int ic=0; ic<tmp_longiClusCol.size(); ic++)
+      if(tmp_longiClusCol[ic]->getCluster().size()>=settings.map_floatPars["th_Nshowers"]) const_longiClusUCol.push_back(tmp_longiClusCol[ic]);
+    for(int ic=0; ic<tmp_longiClusCol.size(); ic++) m_datacol.bk_ClusterHalfCol.push_back( tmp_longiClusCol[ic] );
 
-    for(int ic=0; ic<m_longiClusUCol.size(); ic++) m_datacol.bk_LongiClusCol.push_back( m_longiClusUCol[ic] );
-    for(int ic=0; ic<m_longiClusVCol.size(); ic++) m_datacol.bk_LongiClusCol.push_back( m_longiClusVCol[ic] );
-
-    p_3DClusters->at(ic)->setLongiClusters( settings.map_stringPars["OutputLongiClusName"], const_longiClusUCol,
-                                            settings.map_stringPars["OutputLongiClusName"], const_longiClusVCol);
+    p_HalfClusterU[ic]->setHalfClusters(settings.map_stringPars["OutputLongiClusName"], const_longiClusUCol);    
   }
-  p_3DClusters = nullptr;
+
+  //Processing V plane:
+  for(int ic=0; ic<p_HalfClusterV.size(); ic++){
+    m_localMaxVCol.clear();
+    m_localMaxVCol = p_HalfClusterV[ic]->getLocalMaxCol(settings.map_stringPars["ReadinLocalMaxName"]);
+
+    m_orderedLocalMax.clear();
+    for(int is=0; is<m_localMaxVCol.size(); is++)
+      m_orderedLocalMax[m_localMaxVCol[is]->getDlayer()].push_back(m_localMaxUCol[is]);
+
+    tmp_longiClusCol.clear();
+    LongiConeLinking(m_orderedLocalMax, tmp_longiClusCol);
+
+    //Convert LongiClusters to const object.
+    const_longiClusVCol.clear();
+    for(int ic=0; ic<tmp_longiClusCol.size(); ic++)
+      if(tmp_longiClusCol[ic]->getCluster().size()>=settings.map_floatPars["th_Nshowers"]) const_longiClusVCol.push_back(tmp_longiClusCol[ic]);
+    for(int ic=0; ic<tmp_longiClusCol.size(); ic++) m_datacol.bk_ClusterHalfCol.push_back( tmp_longiClusCol[ic] );
+
+    p_HalfClusterV[ic]->setHalfClusters(settings.map_stringPars["OutputLongiClusName"], const_longiClusVCol);
+  }
+
+  tmp_longiClusCol.clear();
+  m_orderedLocalMax.clear();
   return StatusCode::SUCCESS;
 }
 
 StatusCode ConeClustering2DAlg::ClearAlgorithm(){
+  p_HalfClusterV.clear(); 
+  p_HalfClusterU.clear();
+  m_localMaxVCol.clear();
+  m_localMaxUCol.clear();
+  const_longiClusVCol.clear();
+  const_longiClusUCol.clear();
 
   return StatusCode::SUCCESS;
 }
 
 
-StatusCode ConeClustering2DAlg::LongiConeLinking(  std::map<int, std::vector<const PandoraPlus::CaloBarShower*> >& orderedShower,
-                                                   std::vector<PandoraPlus::LongiCluster*>& ClusterCol)
+StatusCode ConeClustering2DAlg::LongiConeLinking(  std::map<int, std::vector<const PandoraPlus::Calo1DCluster*> >& orderedShower,
+                                                   std::vector<PandoraPlus::CaloHalfCluster*>& ClusterCol)
 {
   if(orderedShower.size()==0) return StatusCode::SUCCESS;
-
-  std::map<int, std::vector<const PandoraPlus::CaloBarShower*>>::iterator iter = orderedShower.begin();
+ 
+  std::map<int, std::vector<const PandoraPlus::Calo1DCluster*>>::iterator iter = orderedShower.begin();
   //In first layer: initial clusters. All showers in the first layer are regarded as cluster seed.
   //cluster initial direction = R.
-  std::vector<const PandoraPlus::CaloBarShower*> ShowersinFirstLayer;  ShowersinFirstLayer.clear();
+  std::vector<const PandoraPlus::Calo1DCluster*> ShowersinFirstLayer;  ShowersinFirstLayer.clear();
   ShowersinFirstLayer = iter->second;
   for(int i=0;i<ShowersinFirstLayer.size(); i++){
     if(iter->first < settings.map_floatPars["th_beginLayer"] || iter->first > settings.map_floatPars["th_stopLayer"] ) continue; 
-    PandoraPlus::LongiCluster* m_clus = new  PandoraPlus::LongiCluster();
-    m_clus->addBarShower(ShowersinFirstLayer[i], 1);
+    PandoraPlus::CaloHalfCluster* m_clus = new  PandoraPlus::CaloHalfCluster();
+    m_clus->addUnit(ShowersinFirstLayer[i]);
     ClusterCol.push_back(m_clus);
   }
   iter++;
@@ -103,16 +122,16 @@ StatusCode ConeClustering2DAlg::LongiConeLinking(  std::map<int, std::vector<con
 
   for(iter; iter!=orderedShower.end(); iter++){
     if(iter->first < settings.map_floatPars["th_beginLayer"] || iter->first > settings.map_floatPars["th_stopLayer"] ) continue; 
-    std::vector<const PandoraPlus::CaloBarShower*> ShowersinLayer = iter->second;
+    std::vector<const PandoraPlus::Calo1DCluster*> ShowersinLayer = iter->second;
 
     for(int is=0; is<ShowersinLayer.size(); is++){
       for(int ic=0; ic<ClusterCol.size(); ic++ ){
-        const PandoraPlus::CaloBarShower* shower_in_clus = ClusterCol[ic]->getBarShowers().back();
+        const PandoraPlus::Calo1DCluster* shower_in_clus = ClusterCol[ic]->getCluster().back();
         if(!shower_in_clus) continue; 
 
         TVector3 relR = ShowersinLayer[is]->getPos() - shower_in_clus->getPos();
         if( relR.Angle(ClusterCol[ic]->getAxis())<settings.map_floatPars["th_ConeTheta"] && relR.Mag()<settings.map_floatPars["th_ConeR"] ){
-          ClusterCol[ic]->addBarShower(ShowersinLayer[is], 1);
+          ClusterCol[ic]->addUnit(ShowersinLayer[is]);
           ShowersinLayer.erase(ShowersinLayer.begin()+is);
           is--;
           break;  
@@ -121,8 +140,8 @@ StatusCode ConeClustering2DAlg::LongiConeLinking(  std::map<int, std::vector<con
     }//end loop showers in layer.
     if(ShowersinLayer.size()>0){
       for(int i=0;i<ShowersinLayer.size(); i++){
-        PandoraPlus::LongiCluster* m_clus = new PandoraPlus::LongiCluster();
-        m_clus->addBarShower(ShowersinLayer[i], 1);
+        PandoraPlus::CaloHalfCluster* m_clus = new PandoraPlus::CaloHalfCluster();
+        m_clus->addUnit(ShowersinLayer[i]);
         ClusterCol.push_back(m_clus);
     }}//end new cluster
   }//end loop layers.

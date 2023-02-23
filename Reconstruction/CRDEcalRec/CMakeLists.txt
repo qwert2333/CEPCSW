@@ -9,7 +9,6 @@ gaudi_add_library(CRDEcalRecLib
                           src/Objects/TransShower.cc
                           src/Objects/CaloCluster.cc 
                           src/Objects/Track.cc
-                          src/Objects/LongiCluster.cc
                           src/Objects/HoughSpace.cc
                           src/Objects/HoughObject.cc
                   LINK    k4FWCore::k4FWCore
@@ -39,8 +38,7 @@ gaudi_add_module(CRDEcalRec
                          src/Algorithm/GlobalClusteringAlg.cpp
                          src/Algorithm/LocalMaxFindingAlg.cpp
                          src/Algorithm/HoughClusteringAlg.cpp
-                         src/Algorithm/EnergySplittingAlg.cpp
-                         src/Algorithm/EnergyTimeMatchingAlg.cpp
+                         src/Algorithm/ConeClustering2DAlg.cpp
                  LINK    CRDEcalRecLib
 )
 target_include_directories(CRDEcalRec PUBLIC

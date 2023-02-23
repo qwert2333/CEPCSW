@@ -21,7 +21,7 @@ public:
   };
 
   StatusCode ReadSettings(PandoraPlus::Settings& m_settings);
-  StatusCode Initialize();
+  StatusCode Initialize( PandoraPlusDataCol& m_datacol );
   StatusCode RunAlgorithm( PandoraPlusDataCol& m_datacol );
   StatusCode ClearAlgorithm();
 
@@ -31,12 +31,19 @@ public:
                             PandoraPlus::HoughSpace& Hspace);
   StatusCode ClusterFinding(std::vector<PandoraPlus::HoughObject>& Hobjects, 
                             PandoraPlus::HoughSpace& Hspace, 
-                            std::vector<const PandoraPlus::LongiCluster*>& longiClusCol);
-  StatusCode CleanClusters(vector<PandoraPlus::LongiCluster*>& m_longiClusCol);
+                            std::vector<const PandoraPlus::CaloHalfCluster*>& longiClusCol);
+  StatusCode CleanClusters(vector<PandoraPlus::CaloHalfCluster*>& m_longiClusCol);
   
 
 private:
-	
+	std::vector<PandoraPlus::CaloHalfCluster*> p_HalfClusterV;
+  std::vector<PandoraPlus::CaloHalfCluster*> p_HalfClusterU;
+
+  std::vector<const PandoraPlus::Calo1DCluster*> m_localMaxVCol;
+  std::vector<const PandoraPlus::Calo1DCluster*> m_localMaxUCol;
+  std::vector<const PandoraPlus::CaloHalfCluster*> m_longiClusVCol;
+  std::vector<const PandoraPlus::CaloHalfCluster*> m_longiClusUCol;
+
 
 };
 #endif

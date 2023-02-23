@@ -34,7 +34,7 @@ StatusCode TrackExtrapolatingAlg::ReadSettings(Settings& m_settings){
 };
 
 
-StatusCode TrackExtrapolatingAlg::Initialize(){
+StatusCode TrackExtrapolatingAlg::Initialize( PandoraPlusDataCol& m_datacol ){
   std::cout<<"Initialize TrackExtrapolatingAlg"<<std::endl;
 
   return StatusCode::SUCCESS;

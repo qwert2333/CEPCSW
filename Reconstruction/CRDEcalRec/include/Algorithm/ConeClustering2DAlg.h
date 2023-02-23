@@ -20,14 +20,22 @@ public:
   };
 
   StatusCode ReadSettings(PandoraPlus::Settings& m_settings);
-  StatusCode Initialize();
+  StatusCode Initialize( PandoraPlusDataCol& m_datacol );
   StatusCode RunAlgorithm( PandoraPlusDataCol& m_datacol );
   StatusCode ClearAlgorithm();
 
   //Self defined algorithms
-  StatusCode LongiConeLinking( std::map<int, std::vector<const PandoraPlus::CaloBarShower*> >& orderedShower, std::vector<PandoraPlus::LongiCluster*>& ClusterCol);
+  StatusCode LongiConeLinking( std::map<int, std::vector<const PandoraPlus::Calo1DCluster*> >& orderedShower, std::vector<PandoraPlus::CaloHalfCluster*>& ClusterCol);
 
 private: 
+
+  std::vector<PandoraPlus::CaloHalfCluster*> p_HalfClusterV;
+  std::vector<PandoraPlus::CaloHalfCluster*> p_HalfClusterU;
+
+  std::vector<const PandoraPlus::Calo1DCluster*> m_localMaxVCol;
+  std::vector<const PandoraPlus::Calo1DCluster*> m_localMaxUCol;
+  std::vector<const PandoraPlus::CaloHalfCluster*> const_longiClusVCol;
+  std::vector<const PandoraPlus::CaloHalfCluster*> const_longiClusUCol;
 
 };
 #endif

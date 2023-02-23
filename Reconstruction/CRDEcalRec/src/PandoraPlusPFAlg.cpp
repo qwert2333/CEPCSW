@@ -90,9 +90,9 @@ StatusCode PandoraPlusPFAlg::initialize()
   m_algorithmManager.RegisterAlgorithmFactory("GlobalClusteringAlg",    new GlobalClusteringAlg::Factory);
   m_algorithmManager.RegisterAlgorithmFactory("LocalMaxFindingAlg",     new LocalMaxFindingAlg::Factory);
   m_algorithmManager.RegisterAlgorithmFactory("HoughClusteringAlg",     new HoughClusteringAlg::Factory);
-  //m_algorithmManager.RegisterAlgorithmFactory("ConeClustering2DAlg",    new ConeClustering2DAlg::Factory);
-  m_algorithmManager.RegisterAlgorithmFactory("EnergySplittingAlg",     new EnergySplittingAlg::Factory);
-  m_algorithmManager.RegisterAlgorithmFactory("EnergyTimeMatchingAlg",  new EnergyTimeMatchingAlg::Factory);
+  m_algorithmManager.RegisterAlgorithmFactory("ConeClustering2DAlg",    new ConeClustering2DAlg::Factory);
+  //m_algorithmManager.RegisterAlgorithmFactory("EnergySplittingAlg",     new EnergySplittingAlg::Factory);
+  //m_algorithmManager.RegisterAlgorithmFactory("EnergyTimeMatchingAlg",  new EnergyTimeMatchingAlg::Factory);
   //m_algorithmManager.RegisterAlgorithmFactory("ConeClusteringAlg",      new ConeClusteringAlg::Factory);
   //m_algorithmManager.RegisterAlgorithmFactory("ConeClusteringAlgHCAL",  new ConeClusteringAlg::Factory);
 
@@ -310,12 +310,16 @@ StatusCode PandoraPlusPFAlg::execute()
   m_DataCol.Clear();
 
   //Readin collections 
+  std::cout<<"Readin MCParticle"<<std::endl;
   m_pMCParticleCreator->CreateMCParticle( m_DataCol, *r_MCParticleCol );
+  cout<<"Readin Tracks"<<endl;
   m_pTrackCreator->CreateTracks( m_DataCol, r_TrackCols );
+  cout<<"Readin CaloHits"<<endl;
   m_pCaloHitsCreator->CreateCaloHits( m_DataCol, r_CaloHitCols, map_readout_decoder );
 
   //system("/cefs/higgs/songwz/winter22/CEPCSW/workarea/memory/memory_test.sh read_data");
   //Perform PFA algorithm
+  cout<<"Run Algorithms"<<endl;
   m_algorithmManager.RunAlgorithm( m_DataCol );
   //system("/cefs/higgs/songwz/winter22/CEPCSW/workarea/memory/memory_test.sh after_alg");
 
@@ -327,7 +331,7 @@ StatusCode PandoraPlusPFAlg::execute()
 
   //Save Raw bars information
   ClearBar();
-  std::vector<PandoraPlus::CaloUnit*> m_barcol = m_DataCol.BarCol;
+  std::vector<PandoraPlus::CaloUnit*> m_barcol = m_DataCol.map_BarCol["BarCol"];
   for(int ibar=0;ibar<m_barcol.size();ibar++){
     const PandoraPlus::CaloUnit* p_hitbar = m_barcol[ibar];
     m_simBar_x.push_back(p_hitbar->getPosition().x());
@@ -349,7 +353,7 @@ StatusCode PandoraPlusPFAlg::execute()
 
   //Save Layer info (local Max)
   ClearLayer();
-  std::vector<PandoraPlus::CaloHalfCluster*> m_halfclusters = m_DataCol.map_LongiCluster["HalfClusterCol"];
+  std::vector<PandoraPlus::CaloHalfCluster*> m_halfclusters = m_DataCol.map_HalfCluster["HalfClusterCol"];
   for(int ic=0;ic<m_halfclusters.size();ic++){
     std::vector<const Calo1DCluster*> tmp_shower = m_halfclusters[ic]->getLocalMaxCol("AllLocalMax");
     

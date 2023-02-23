@@ -18,7 +18,7 @@ public:
   };
 
   StatusCode ReadSettings(PandoraPlus::Settings& m_settings);
-  StatusCode Initialize();
+  StatusCode Initialize( PandoraPlusDataCol& m_datacol );
   StatusCode RunAlgorithm( PandoraPlusDataCol& m_datacol );
   StatusCode ClearAlgorithm();
 
@@ -27,6 +27,9 @@ public:
   std::vector<const PandoraPlus::CaloUnit*>  getNeighbors(const PandoraPlus::CaloUnit* seed, std::vector<const PandoraPlus::CaloUnit*>& barCol);
 
 private: 
+
+  std::vector<PandoraPlus::CaloHalfCluster*>* p_HalfClusU = NULL;
+  std::vector<PandoraPlus::CaloHalfCluster*>* p_HalfClusV = NULL;
 
   static bool compBar( const PandoraPlus::CaloUnit* bar1, const PandoraPlus::CaloUnit* bar2 )
       { return bar1->getBar() < bar2->getBar(); }

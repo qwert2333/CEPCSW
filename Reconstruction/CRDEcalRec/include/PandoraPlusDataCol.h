@@ -60,31 +60,31 @@ public:
   //Self used objects
   //General objects for all PFA
   std::vector<PandoraPlus::Track*>       TrackCol;
-  std::map<std::string, std::vector<PandoraPlus::CaloHit*>> map_CaloHit;
-  std::map<std::string, std::vector<PandoraPlus::Calo2DCluster*>> map_ShowerInLayer; //Hit
+  std::map<std::string, std::vector<PandoraPlus::CaloHit*>> map_CaloHit; //Hit
+
+  //std::vector<PandoraPlus::CaloUnit*>       BarCol; 
+  //std::vector<PandoraPlus::CaloUnit*>       RestBarCol;
+  //std::vector<PandoraPlus::Calo1DCluster*>  Cluster1DCol; 
+  //std::vector<PandoraPlus::Calo2DCluster*>  Cluster2DCol;  
+  //std::vector<PandoraPlus::CaloHalfCluster*>  ClusterHalfCol;
+  //std::vector<PandoraPlus::Calo3DCluster*>  Cluster3DCol;
+  std::map<std::string, std::vector<PandoraPlus::CaloUnit*>> map_BarCol; 
+  std::map<std::string, std::vector<PandoraPlus::Calo1DCluster*>> map_1DCluster; 
+  std::map<std::string, std::vector<PandoraPlus::CaloHalfCluster*>> map_HalfCluster;
+  std::map<std::string, std::vector<PandoraPlus::Calo2DCluster*>> map_2DCluster; 
   std::map<std::string, std::vector<PandoraPlus::Calo3DCluster*>> map_CaloCluster; //Cluster
-
-
-  std::map<std::string, std::vector<PandoraPlus::CaloHalfCluster*>> map_LongiCluster;
-  std::vector<PandoraPlus::CaloUnit*>       BarCol; 
-  std::vector<PandoraPlus::CaloUnit*>       RestBarCol;
-  std::vector<PandoraPlus::Calo1DCluster*>  Cluster1DCol; 
-  std::vector<PandoraPlus::Calo2DCluster*>  Cluster2DCol;  
-  std::vector<PandoraPlus::CaloHalfCluster*>  ClusterHalfCol;
-  std::vector<PandoraPlus::Calo3DCluster*>  Cluster3DCol;
 
 
   //Backup collections, for memory clean. TODO: replace with object managers. 
   std::vector<PandoraPlus::Track*>          bk_TrackCol;
 
-  std::vector<PandoraPlus::CaloHit*>        bk_HitCol;
-  std::vector<PandoraPlus::CaloUnit*>       bk_BarCol;
-  std::vector<PandoraPlus::CaloUnit*>       bk_RestBarCol;
-  std::vector<PandoraPlus::Calo1DCluster*>  bk_Cluster1DCol; 
-  std::vector<PandoraPlus::Calo2DCluster*>  bk_Cluster2DCol;  
+  std::vector<PandoraPlus::CaloHit*>          bk_HitCol;
+  std::vector<PandoraPlus::CaloUnit*>         bk_BarCol;
+  std::vector<PandoraPlus::Calo1DCluster*>    bk_Cluster1DCol; 
+  std::vector<PandoraPlus::Calo2DCluster*>    bk_Cluster2DCol;  
   std::vector<PandoraPlus::CaloHalfCluster*>  bk_ClusterHalfCol;
-  std::vector<PandoraPlus::Calo3DCluster*>  bk_Cluster3DCol;
-  std::vector<PandoraPlus::LongiCluster*>   bk_LongiClusCol;
+  std::vector<PandoraPlus::Calo3DCluster*>    bk_Cluster3DCol;
+  //std::vector<PandoraPlus::LongiCluster*>     bk_LongiClusCol;
 
 
 };

@@ -87,7 +87,7 @@ namespace PandoraPlus{
         m_DataCol.bk_BarCol.push_back(m_bar);  //For every new object: save it into DataCol.backupCol. 
       }
    
-      m_DataCol.BarCol = m_barCol; 
+      m_DataCol.map_BarCol["BarCol"] = m_barCol; 
       //Group bars to Blocks
     }
     return StatusCode::SUCCESS;

@@ -6,8 +6,10 @@
 namespace PandoraPlus{
 
   void CaloHalfCluster::Clear() {
-    m_slayer=99;
+    m_slayer=-99;
     m_1dclusters.clear(); 
+    map_localMax.clear();
+    map_halfClusCol.clear();
   }
 
   void CaloHalfCluster::Check(){
@@ -16,9 +18,17 @@ namespace PandoraPlus{
   	}
 
   void CaloHalfCluster::Clean(){
-	for(int i=0; i<m_1dclusters.size(); i++){ delete m_1dclusters[i]; m_1dclusters[i]=NULL; }
+    for(int i=0; i<m_1dclusters.size(); i++){ delete m_1dclusters[i]; m_1dclusters[i]=NULL; }
+    for(auto it: map_localMax) { 
+      //for(auto iter: it.second){ delete it.second[iter]; it.second[iter]=NULL; }
+      it.second.clear();
+    }
+    for(auto it: map_halfClusCol) {
+      //for(auto iter: it.second){ delete it.second[iter]; it.second[iter]=NULL; }
+      it.second.clear();
+    }
     Clear();
-  	}
+  }
 
   bool CaloHalfCluster::isNeighbor(const PandoraPlus::Calo1DCluster* m_1dcluster) const{
     assert(m_1dcluster->getBars().size() > 0 && getCluster().at(0)->getBars().size()>0 );
@@ -35,18 +45,6 @@ namespace PandoraPlus{
         }
       }
     }
-
-    // std::vector<const PandoraPlus::CaloUnit*> bars_1d = m_1dcluster->getBars();
-    // for(int ib1d=0; ib1d<bars_1d.size(); ib1d++)
-    // {
-    //   for(int ic=0; ic<m_1dclusters.size(); ic++)
-    //   {
-    //     for(int ib2d=0; ib2d<m_1dclusters[ic]->getBars().size(); ib2d++)
-    //     {
-    //       if(bars_1d[ib1d]->isModuleAdjacent(m_1dclusters[ic]->getBars()[ib2d])) return true;
-    //     }
-    //   } 
-    // }    
     
     return false;
   }
@@ -59,7 +57,7 @@ namespace PandoraPlus{
     m_1dclusters.push_back(_1dcluster);
   }
   
-  std::vector<const CaloUnit*> CaloHalfCluster::getBars() const
+/*  std::vector<const CaloUnit*> CaloHalfCluster::getBars() const
   {
     std::vector<const CaloUnit*> results;
     results.clear();
@@ -72,6 +70,7 @@ namespace PandoraPlus{
     }
     return results;
   }
+*/
 
   double CaloHalfCluster::getEnergy() const {
     double sumE = 0;
@@ -82,16 +81,149 @@ namespace PandoraPlus{
     return sumE;
   }
 
+  TVector3 CaloHalfCluster::getPos() const{
+    TVector3 pos(0, 0, 0);
+    double Etot = getEnergy();
+    for(int i=0; i<m_1dclusters.size(); i++){
+      TVector3 m_pos(m_1dclusters[i]->getPos().x(), m_1dclusters[i]->getPos().y(), m_1dclusters[i]->getPos().z());
+      pos += m_pos * (m_1dclusters[i]->getEnergy()/Etot);
+    }
+    return pos;
+  }
+
   std::vector<const PandoraPlus::Calo1DCluster*> CaloHalfCluster::getLocalMaxCol(std::string name) const{
     std::vector<const PandoraPlus::Calo1DCluster*> emptyCol; emptyCol.clear(); 
     if(map_localMax.find(name)!=map_localMax.end()) emptyCol = map_localMax.at(name);
     return emptyCol;
   }
 
-  std::vector<const PandoraPlus::LongiCluster*> CaloHalfCluster::getLongiClusterCol(std::string name) const{
-    std::vector<const PandoraPlus::LongiCluster*> emptyCol; emptyCol.clear(); 
-    if(map_longiClusCol.find(name)!=map_longiClusCol.end()) emptyCol = map_longiClusCol.at(name);
+  std::vector<const PandoraPlus::CaloHalfCluster*> CaloHalfCluster::getHalfClusterCol(std::string name) const{
+    std::vector<const PandoraPlus::CaloHalfCluster*> emptyCol; emptyCol.clear(); 
+    if(map_halfClusCol.find(name)!=map_halfClusCol.end()) emptyCol = map_halfClusCol.at(name);
     return emptyCol;
+  }
+
+  int CaloHalfCluster::getBeginningDlayer() const{
+    int Lstart = 99;
+    for(int i=0; i<m_1dclusters.size(); i++)
+      if(m_1dclusters[i]->getDlayer()<Lstart) Lstart = m_1dclusters[i]->getDlayer();
+    if(Lstart==99) return -99;
+    else return Lstart;
+  }
+
+
+  int CaloHalfCluster::getEndDlayer() const{
+    int Lend = -99;
+    for(int i=0; i<m_1dclusters.size(); i++)
+      if(m_1dclusters[i]->getDlayer()>Lend) Lend = m_1dclusters[i]->getDlayer();
+    return Lend;
+  }  
+
+  bool CaloHalfCluster::isContinue() const{
+    int ly_max = -1;
+    int ly_min = 99;
+    std::vector<int> vec_layers; vec_layers.clear();
+    for(int il=0; il<m_1dclusters.size(); il++){
+      vec_layers.push_back(m_1dclusters[il]->getDlayer());
+      if(m_1dclusters[il]->getDlayer()>ly_max) ly_max = m_1dclusters[il]->getDlayer();
+      if(m_1dclusters[il]->getDlayer()<ly_min) ly_min = m_1dclusters[il]->getDlayer();
+    }
+
+    bool flag = true;
+    std::sort(vec_layers.begin(), vec_layers.end());
+    for(int il=0; il<vec_layers.size() && vec_layers[il]!=ly_max; il++)
+      if( find(vec_layers.begin(), vec_layers.end(), vec_layers[il]+1) == vec_layers.end() ){ flag=false; break; }
+
+    return flag;
+  }
+
+  bool CaloHalfCluster::isContinueN(int n) const{
+    if(n<=0) return true;
+
+    int ly_max = -1;
+    int ly_min = 99;
+    std::vector<int> vec_layers; vec_layers.clear();
+    for(int il=0; il<m_1dclusters.size(); il++){
+      vec_layers.push_back(m_1dclusters[il]->getDlayer());
+      if(m_1dclusters[il]->getDlayer()>ly_max) ly_max = m_1dclusters[il]->getDlayer();
+      if(m_1dclusters[il]->getDlayer()<ly_min) ly_min = m_1dclusters[il]->getDlayer();
+    }
+    if(n>(ly_max-ly_min+1)) return false;
+
+    bool flag = false;
+    std::sort(vec_layers.begin(), vec_layers.end());
+    for(int il=0; il<vec_layers.size(); il++){
+      bool fl_continueN = true;
+      for(int in=1; in<n; in++)
+        if( find(vec_layers.begin(), vec_layers.end(), vec_layers[il]+in)==vec_layers.end() ) { fl_continueN=false; break; }
+
+      if(fl_continueN) {flag = true; break;}
+    }
+    return flag;
+  }
+
+
+  bool CaloHalfCluster::isSubset(const CaloHalfCluster* clus) const{
+
+    for(int is=0; is<clus->getCluster().size(); is++)
+      if( find(m_1dclusters.begin(), m_1dclusters.end(), clus->getCluster()[is])==m_1dclusters.end() ) {return false; }
+
+    if(m_1dclusters.size() > clus->getCluster().size())
+      return true;
+    else{
+      if( TMath::Abs(Hough_rho) <= TMath::Abs(clus->getHoughRho()) ) { return true; }
+      else { return false; }
+    }
+  }
+
+  double CaloHalfCluster::OverlapRatioE( const CaloHalfCluster* clus) const{
+    double Eshare = 0.;
+    for(int is=0; is<clus->getCluster().size(); is++)
+      if( find(m_1dclusters.begin(), m_1dclusters.end(), clus->getCluster()[is])!=m_1dclusters.end() ) Eshare += clus->getCluster()[is]->getEnergy();
+
+    return Eshare / getEnergy() ;
+  }
+
+
+  void CaloHalfCluster::fitAxis( std::string name ){
+    std::vector<const PandoraPlus::Calo1DCluster*> barShowerCol; barShowerCol.clear();
+    if(!name.empty() && map_localMax.find(name)!=map_localMax.end() ) barShowerCol = map_localMax.at(name);
+    else barShowerCol = m_1dclusters; 
+
+    if(barShowerCol.size()==0){ axis.SetXYZ(0,0,0); return; }
+    else if(barShowerCol.size()==1){
+      axis.SetXYZ(barShowerCol[0]->getPos().x(), barShowerCol[0]->getPos().y(), barShowerCol[0]->getPos().z());
+      axis = axis.Unit();
+      return;
+    }
+    else if(barShowerCol.size()==2){
+      TVector3 rpos = barShowerCol.back()->getPos() - barShowerCol.front()->getPos();
+      axis.SetXYZ( rpos.x(), rpos.y(), rpos.z() );
+      axis = axis.Unit();
+      return;
+    }
+    else{
+      track->clear();
+      double barAngle = (barShowerCol[0]->getTowerID()[0][0]+2)*TMath::Pi()/4.;
+      double posErr = 10./sqrt(12);
+      if(barAngle>=TMath::TwoPi()) barAngle = barAngle-TMath::TwoPi();
+      track->setBarAngle(barAngle);
+      for(int is=0; is<barShowerCol.size(); is++){
+        TVector3 b_pos = barShowerCol[is]->getPos();
+        track->setGlobalPoint(0, b_pos.x(), posErr, b_pos.y(), posErr, b_pos.z(), posErr);
+        track->setGlobalPoint(1, b_pos.x(), posErr, b_pos.y(), posErr, b_pos.z(), posErr);
+      }
+
+      track->fitTrack();
+      double fitPhi = track->getPhi();
+      double fitTheta = track->getTheta();
+
+      trk_dr = track->getDr();
+      trk_dz = track->getDz();
+      axis.SetMag(1.);
+      axis.SetPhi(fitPhi);
+      axis.SetTheta(fitTheta);
+    }
   }
 
 };

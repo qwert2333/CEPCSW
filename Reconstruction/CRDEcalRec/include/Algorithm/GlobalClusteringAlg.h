@@ -25,7 +25,7 @@ public:
   };
  
   StatusCode ReadSettings(PandoraPlus::Settings& m_settings); 
-  StatusCode Initialize();
+  StatusCode Initialize( PandoraPlusDataCol& m_datacol );
   StatusCode RunAlgorithm( PandoraPlusDataCol& m_datacol );
   StatusCode ClearAlgorithm();
 
@@ -43,14 +43,13 @@ public:
 
 private:
 
-  static const int m_module = 7;
-  static const int m_modulestart = 0;
-  static const int m_part = 4;
-  static const int m_stave = 11;
-  static const int m_superlayer = 14;
-  static const int m_startnumber = 1;
-  static const int m_phibarnumber = 60;
-  static const int m_zbarnumber = 47;
+  std::vector<PandoraPlus::CaloUnit*> m_bars; 
+  std::vector<PandoraPlus::CaloUnit*> m_processbars;        
+  std::vector<PandoraPlus::CaloUnit*> m_restbars;           
+  std::vector<PandoraPlus::Calo1DCluster*> m_1dclusters;    
+  std::vector<PandoraPlus::CaloHalfCluster*> m_halfclusters; 
+  //std::vector<PandoraPlus::Calo2DCluster*> m_2dclusters;     m_2dclusters.clear();
+  //std::vector<PandoraPlus::Calo3DCluster*> m_3dclusters;     m_3dclusters.clear();
   
 };
 #endif
