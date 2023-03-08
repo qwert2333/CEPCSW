@@ -20,6 +20,7 @@ StatusCode LocalMaxFindingAlg::Initialize( PandoraPlusDataCol& m_datacol ){
   p_HalfClusU = &(m_datacol.map_HalfCluster["HalfClusterColU"]);
   p_HalfClusV = &(m_datacol.map_HalfCluster["HalfClusterColV"]);
 
+
   return StatusCode::SUCCESS;
 }
 
@@ -27,6 +28,7 @@ StatusCode LocalMaxFindingAlg::Initialize( PandoraPlusDataCol& m_datacol ){
 StatusCode LocalMaxFindingAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol){
 
   if(!p_HalfClusU || !p_HalfClusV) {std::cout<<"ERROR: No HalfClusters in present data collection! "<<std::endl; return StatusCode::FAILURE; }
+printf("  GlobalClustering: HalfCluster size (%d, %d) \n", p_HalfClusU->size(), p_HalfClusV->size());
 
   std::vector<const PandoraPlus::Calo1DCluster*> tmp_localMax; 
   for(int iu = 0; iu<p_HalfClusU->size(); iu++){
@@ -41,10 +43,9 @@ StatusCode LocalMaxFindingAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol){
     tmp_localMax.clear(); 
     std::vector<const Calo1DCluster*> m_1dClusCol = p_HalfClusV->at(iv)->getCluster();
     for(int i1d=0; i1d<m_1dClusCol.size(); i1d++) GetLocalMax(m_1dClusCol[i1d], tmp_localMax);
-    p_HalfClusU->at(iv)->setLocalMax(settings.map_stringPars["OutputLocalMaxName"], tmp_localMax);
+    p_HalfClusV->at(iv)->setLocalMax(settings.map_stringPars["OutputLocalMaxName"], tmp_localMax);
     m_1dClusCol.clear(); 
   }
-
 
   return StatusCode::SUCCESS;
 }
@@ -75,7 +76,6 @@ StatusCode LocalMaxFindingAlg::GetLocalMax( const PandoraPlus::Calo1DCluster* m_
   for(int j=0; j<localMaxCol.size(); j++){
     PandoraPlus::Calo1DCluster* m_shower = new PandoraPlus::Calo1DCluster();
     m_shower->addUnit( localMaxCol[j] );
-    m_shower->addSeed( localMaxCol[j] );
     m_output.push_back(m_shower);
   }
 

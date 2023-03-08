@@ -20,8 +20,8 @@
 #include "Algorithm/LocalMaxFindingAlg.h"
 #include "Algorithm/HoughClusteringAlg.h"
 #include "Algorithm/ConeClustering2DAlg.h"
-//#include "Algorithm/EnergySplittingAlg.h"
-//#include "Algorithm/EnergyTimeMatchingAlg.h"
+#include "Algorithm/EnergySplittingAlg.h"
+#include "Algorithm/EnergyTimeMatchingAlg.h"
 //#include "Algorithm/ConeClusteringAlg.h"
 #include "Algorithm/TrackExtrapolatingAlg.h"
 
@@ -149,6 +149,7 @@ protected:
 
   // yyy: check Hough Algorithm
   TTree *t_Hough;
+  int m_NaxisU, m_NaxisV; 
   FloatVec m_halfclusV_tag, m_longiclusV_tag, m_houghV_x, m_houghV_y, m_houghV_z, m_houghV_E, m_houghV_module, m_houghV_part, m_houghV_stave, m_houghV_dlayer, m_houghV_slayer;
   FloatVec m_halfclusU_tag, m_longiclusU_tag, m_houghU_x, m_houghU_y, m_houghU_z, m_houghU_E, m_houghU_module, m_houghU_part, m_houghU_stave, m_houghU_dlayer, m_houghU_slayer;
 
@@ -164,10 +165,9 @@ protected:
   FloatVec m_shower2D_x, m_shower2D_y, m_shower2D_z, m_shower2D_E;
   IntVec m_shower2D_Module, m_shower2D_Stave, m_shower2D_Part, m_shower2D_Dlayer;
 
-  TTree *t_LongiClusU; 
-  FloatVec m_showerU_x, m_showerU_y, m_showerU_z, m_showerU_E, m_showerU_stave, m_showerU_part;
-  TTree *t_LongiClusV; 
-  FloatVec m_showerV_x, m_showerV_y, m_showerV_z, m_showerV_E, m_showerV_stave, m_showerV_part;
+  TTree *t_LongiClus; 
+  int m_NHfClusU, m_NHfClusV;
+  FloatVec m_HfClusU_E, m_HfClusU_Nhit, m_HfClusV_E, m_HfClusV_Nhit;
 
 
   //check neighbor clustering

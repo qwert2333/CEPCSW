@@ -13,7 +13,7 @@ StatusCode ConeClustering2DAlg::ReadSettings(Settings& m_settings){
   if(settings.map_floatPars.find("th_ConeR")==settings.map_floatPars.end())        settings.map_floatPars["th_ConeR"] = 60;
   if(settings.map_floatPars.find("th_Nshowers")==settings.map_floatPars.end())     settings.map_floatPars["th_Nshowers"] = 4;
   if(settings.map_stringPars.find("ReadinLocalMaxName")==settings.map_stringPars.end()) settings.map_stringPars["ReadinLocalMaxName"] = "LeftLocalMax";
-  if(settings.map_stringPars.find("OutputLongiClusName")==settings.map_stringPars.end()) settings.map_stringPars["OutputLongiClusName"] = "ConeLongiCluster";
+  if(settings.map_stringPars.find("OutputLongiClusName")==settings.map_stringPars.end()) settings.map_stringPars["OutputLongiClusName"] = "ConeAxis";
 
   return StatusCode::SUCCESS;
 };
@@ -70,10 +70,11 @@ StatusCode ConeClustering2DAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
 
     m_orderedLocalMax.clear();
     for(int is=0; is<m_localMaxVCol.size(); is++)
-      m_orderedLocalMax[m_localMaxVCol[is]->getDlayer()].push_back(m_localMaxUCol[is]);
+      m_orderedLocalMax[m_localMaxVCol[is]->getDlayer()].push_back(m_localMaxVCol[is]);
 
     tmp_longiClusCol.clear();
     LongiConeLinking(m_orderedLocalMax, tmp_longiClusCol);
+
 
     //Convert LongiClusters to const object.
     const_longiClusVCol.clear();

@@ -27,6 +27,7 @@ namespace PandoraPlus {
     TVector3 getPos() const; 
     TVector3 getAxis() { fitAxis(""); return axis; }
     int getSlayer() const { return m_slayer; }
+    std::vector< std::vector<int> > getTowerID() const { return towerID; }
     double getHoughAlpha() const { return Hough_alpha; }
     double getHoughRho() const { return Hough_rho; }
     double getHoughIntercept() const { return Hough_intercept; }
@@ -34,7 +35,10 @@ namespace PandoraPlus {
     //std::vector<const CaloUnit*> getBars() const;
     std::vector<const Calo1DCluster*> getCluster() const { return m_1dclusters;};
     std::vector<const Calo1DCluster*> getLocalMaxCol(std::string name) const;
+    std::vector<const Calo1DCluster*> getAllLocalMaxCol() const;
+    std::vector<const Calo1DCluster*> getClusterInLayer(int _layer) const;
     std::vector<const CaloHalfCluster*> getHalfClusterCol(std::string name) const;
+    std::vector<const CaloHalfCluster*> getAllHalfClusterCol() const;
 
     int getBeginningDlayer() const;
     int getEndDlayer() const;
@@ -48,11 +52,15 @@ namespace PandoraPlus {
     void addUnit(const Calo1DCluster* _1dcluster);
     void setLocalMax( std::string name, std::vector<const Calo1DCluster*> _col) { map_localMax[name]=_col; }
     void setHalfClusters( std::string name, std::vector<const PandoraPlus::CaloHalfCluster*>& _cl) { map_halfClusCol[name]=_cl; }
+    void addCousinCluster( const PandoraPlus::CaloHalfCluster* _cl ) { map_halfClusCol["CousinCluster"].push_back(_cl); }
     void setHoughPars(double _a, double _r) { Hough_alpha=_a; Hough_rho=_r; }
     void setIntercept(double _in) { Hough_intercept=_in; }
     void mergeHalfCluster( const CaloHalfCluster* clus );
+    void addTowerID(int _m, int _p, int _s) { std::vector<int> id(3); id[0] = _m; id[1] = _p; id[2] = _s; towerID.push_back(id); }
+    void addTowerID(std::vector<int> id) { towerID.push_back(id); }
 
   private:
+    std::vector< std::vector<int> > towerID; //[module, part, stave]
     int m_slayer;
     TVector3 axis;
     double trk_dr;

@@ -27,23 +27,17 @@ public:
   StatusCode ClearAlgorithm(); 
 
 
-  StatusCode LongiClusterLinking( std::vector<PandoraPlus::Calo2DCluster*>& m_blocks, std::vector<const PandoraPlus::LongiCluster*>& m_oldClusCol, std::vector<const PandoraPlus::LongiCluster*>& m_outClusCol );
+  StatusCode LongitudinalLinking( std::vector<const PandoraPlus::Calo1DCluster*>& m_showers, std::vector<const PandoraPlus::CaloHalfCluster*>& m_oldClusCol, std::vector<const PandoraPlus::CaloHalfCluster*>& m_newClusCol );
 
-  StatusCode Split3DClusterToTowers( PandoraPlus::Calo3DCluster* m_3dcluster ); 
+  StatusCode HalfClusterToTowers( std::vector<const PandoraPlus::CaloHalfCluster*>& m_halfClusU, 
+                                  std::vector<const PandoraPlus::CaloHalfCluster*>& m_halfClusV, 
+                                  std::vector<const PandoraPlus::Calo3DCluster*>& m_towers ); 
 
-  StatusCode Clustering( std::vector<const PandoraPlus::CaloUnit*>& barCol, std::vector<PandoraPlus::Calo1DCluster*>& outClus, std::vector<const PandoraPlus::LongiCluster*>& m_longiClusCol );
-
-  StatusCode Clustering( std::vector<const PandoraPlus::CaloUnit*>& barCol, std::vector<PandoraPlus::Calo1DCluster*>& outClus );
-
-  StatusCode ClusterSplitting( PandoraPlus::Calo1DCluster* m_cluster, std::vector<const PandoraPlus::Calo1DCluster*>& outshCol );
+  StatusCode ClusterSplitting( const PandoraPlus::Calo1DCluster* m_cluster, std::vector<const PandoraPlus::Calo1DCluster*>& outshCol );
 
   StatusCode MergeToClosestCluster( PandoraPlus::Calo1DCluster* iclus, std::vector<PandoraPlus::Calo1DCluster*>& clusvec );
 
-  StatusCode MergeToClosestCluster( const PandoraPlus::Calo1DCluster* m_shower, std::vector<PandoraPlus::LongiCluster*>& m_clusters );
-
-  StatusCode findSeeds( PandoraPlus::Calo1DCluster* m_cluster, std::vector<const PandoraPlus::CaloUnit*>& seedCol );
-
-  std::vector<const PandoraPlus::CaloUnit*>  getNeighbors(PandoraPlus::Calo1DCluster* m_cluster, const PandoraPlus::CaloUnit* seed); 
+  StatusCode MergeToClosestCluster( const PandoraPlus::Calo1DCluster* m_shower, std::vector<PandoraPlus::CaloHalfCluster*>& m_clusters );
 
   void CalculateInitialEseed( const std::vector<const PandoraPlus::CaloUnit*>& Seeds, const TVector3* pos, double* Eseed);
 
@@ -51,6 +45,18 @@ public:
 
 
 private: 
+  std::vector<PandoraPlus::CaloHalfCluster*>* p_HalfClustersU = NULL; 
+  std::vector<PandoraPlus::CaloHalfCluster*>* p_HalfClustersV = NULL; 
+  std::vector<const PandoraPlus::CaloHalfCluster*> m_axisUCol; 
+  std::vector<const PandoraPlus::CaloHalfCluster*> m_axisVCol; 
+  std::vector<const PandoraPlus::CaloHalfCluster*> m_newClusUCol; 
+  std::vector<const PandoraPlus::CaloHalfCluster*> m_newClusVCol; 
+  std::vector<const PandoraPlus::Calo1DCluster*> m_1dclusCol;
+
+  std::vector<const PandoraPlus::Calo1DCluster*> m_1dShowerUCol; 
+  std::vector<const PandoraPlus::Calo1DCluster*> m_1dShowerVCol; 
+
+  std::vector<const PandoraPlus::Calo3DCluster*> m_towerCol;
 
   //static bool compBar( const PandoraPlus::CaloUnit* bar1, const PandoraPlus::CaloUnit* bar2 )
   //  { return bar1->getBar() < bar2->getBar(); }

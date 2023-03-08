@@ -91,8 +91,8 @@ StatusCode PandoraPlusPFAlg::initialize()
   m_algorithmManager.RegisterAlgorithmFactory("LocalMaxFindingAlg",     new LocalMaxFindingAlg::Factory);
   m_algorithmManager.RegisterAlgorithmFactory("HoughClusteringAlg",     new HoughClusteringAlg::Factory);
   m_algorithmManager.RegisterAlgorithmFactory("ConeClustering2DAlg",    new ConeClustering2DAlg::Factory);
-  //m_algorithmManager.RegisterAlgorithmFactory("EnergySplittingAlg",     new EnergySplittingAlg::Factory);
-  //m_algorithmManager.RegisterAlgorithmFactory("EnergyTimeMatchingAlg",  new EnergyTimeMatchingAlg::Factory);
+  m_algorithmManager.RegisterAlgorithmFactory("EnergySplittingAlg",     new EnergySplittingAlg::Factory);
+  m_algorithmManager.RegisterAlgorithmFactory("EnergyTimeMatchingAlg",  new EnergyTimeMatchingAlg::Factory);
   //m_algorithmManager.RegisterAlgorithmFactory("ConeClusteringAlg",      new ConeClusteringAlg::Factory);
   //m_algorithmManager.RegisterAlgorithmFactory("ConeClusteringAlgHCAL",  new ConeClusteringAlg::Factory);
 
@@ -137,8 +137,7 @@ StatusCode PandoraPlusPFAlg::initialize()
     t_SimBar = new TTree("SimBarHit", "SimBarHit");
     t_Layers = new TTree("RecLayers","RecLayers");
     t_Hough = new TTree("Hough","Hough");   // yyy: Hough
-    t_LongiClusU = new TTree("LoniClusU", "LoniClusU");
-    t_LongiClusV = new TTree("LoniClusV", "LoniClusV");
+    t_LongiClus = new TTree("HalfClus", "HalfClus");
     t_Shower = new TTree("RecShowers", "RecShowers");
     t_Cluster = new TTree("RecClusters", "RecClusters");
     t_Clustering = new TTree("Clustering", "Clustering");
@@ -187,20 +186,20 @@ StatusCode PandoraPlusPFAlg::initialize()
 
 
     // yyy: Hough cluster
-    t_Hough->Branch("halfclusV_tag", &m_halfclusV_tag);
-    t_Hough->Branch("longiclusV_tag", &m_longiclusV_tag);
+    t_Hough->Branch("NaxisV", &m_NaxisV);
     t_Hough->Branch("houghV_x", &m_houghV_x);
     t_Hough->Branch("houghV_y", &m_houghV_y);
+    t_Hough->Branch("houghV_z", &m_houghV_z);
     t_Hough->Branch("houghV_E", &m_houghV_E);
     t_Hough->Branch("houghV_module", &m_houghV_module);
     t_Hough->Branch("houghV_part", &m_houghV_part);
     t_Hough->Branch("houghV_stave", &m_houghV_stave);
     t_Hough->Branch("houghV_dlayer", &m_houghV_dlayer);
     t_Hough->Branch("houghV_slayer", &m_houghV_slayer);
-    t_Hough->Branch("halfclusU_tag", &m_halfclusU_tag);
-    t_Hough->Branch("longiclusU_tag", &m_longiclusU_tag);
+    t_Hough->Branch("NaxisU", &m_NaxisU);
     t_Hough->Branch("houghU_x", &m_houghU_x);
     t_Hough->Branch("houghU_y", &m_houghU_y);
+    t_Hough->Branch("houghU_z", &m_houghU_z);
     t_Hough->Branch("houghU_E", &m_houghU_E);
     t_Hough->Branch("houghU_module", &m_houghU_module);
     t_Hough->Branch("houghU_part", &m_houghU_part);
@@ -209,19 +208,13 @@ StatusCode PandoraPlusPFAlg::initialize()
     t_Hough->Branch("houghU_slayer", &m_houghU_slayer);
 
 
-    //LongiClusters
-    t_LongiClusU->Branch("showerU_x", &m_showerU_x);
-    t_LongiClusU->Branch("showerU_y", &m_showerU_y);
-    t_LongiClusU->Branch("showerU_z", &m_showerU_z);
-    t_LongiClusU->Branch("showerU_E", &m_showerU_E);
-    t_LongiClusU->Branch("showerU_stave", &m_showerU_stave);
-    t_LongiClusU->Branch("showerU_part", &m_showerU_part);
-    t_LongiClusV->Branch("showerV_x", &m_showerV_x);
-    t_LongiClusV->Branch("showerV_y", &m_showerV_y);
-    t_LongiClusV->Branch("showerV_z", &m_showerV_z);
-    t_LongiClusV->Branch("showerV_E", &m_showerV_E);
-    t_LongiClusV->Branch("showerV_stave", &m_showerV_stave);
-    t_LongiClusV->Branch("showerV_part", &m_showerV_part);
+    //CaloHalfClusters
+    t_LongiClus->Branch("NHfClusU", &m_NHfClusU);
+    t_LongiClus->Branch("NHfClusV", &m_NHfClusV);
+    t_LongiClus->Branch("HfClusU_E", &m_HfClusU_E);
+    t_LongiClus->Branch("HfClusU_Nhit", &m_HfClusU_Nhit);
+    t_LongiClus->Branch("HfClusV_E", &m_HfClusV_E);
+    t_LongiClus->Branch("HfClusV_Nhit", &m_HfClusV_Nhit);
 
 
     //2DShowers in each cluster
@@ -350,178 +343,139 @@ StatusCode PandoraPlusPFAlg::execute()
   }
   t_SimBar->Fill();
 
-
+/*
   //Save Layer info (local Max)
   ClearLayer();
-  std::vector<PandoraPlus::CaloHalfCluster*> m_halfclusters = m_DataCol.map_HalfCluster["HalfClusterCol"];
+  std::vector<PandoraPlus::CaloHalfCluster*> m_halfclusters = m_DataCol.map_HalfCluster["HalfClusterColU"];
   for(int ic=0;ic<m_halfclusters.size();ic++){
     std::vector<const Calo1DCluster*> tmp_shower = m_halfclusters[ic]->getLocalMaxCol("AllLocalMax");
-    
-    if(m_halfclusters[ic]->getSlayer()==0)
+    m_NshowerU = tmp_shower.size(); 
+    for(int is=0; is<m_NshowerU; is++)
     {
-      m_NshowerU = tmp_shower.size(); 
-      for(int is=0; is<m_NshowerU; is++)
+      for(int iseed=0; iseed<tmp_shower[is]->getSeeds().size(); iseed++)
       {
-        for(int iseed=0; iseed<tmp_shower[is]->getSeeds().size(); iseed++)
-        {
-          m_barShowerU_tag.push_back( m_halfclusters[ic]->getEnergy() );
-          m_barShowerU_x.push_back( tmp_shower[is]->getSeeds().at(iseed)->getPosition().x() );
-          m_barShowerU_y.push_back( tmp_shower[is]->getSeeds().at(iseed)->getPosition().y() );
-          m_barShowerU_z.push_back( tmp_shower[is]->getSeeds().at(iseed)->getPosition().z() );
-          m_barShowerU_E.push_back( tmp_shower[is]->getSeeds().at(iseed)->getEnergy() );
-          m_barShowerU_module.push_back( tmp_shower[is]->getSeeds().at(iseed)->getModule() );
-          m_barShowerU_stave.push_back( tmp_shower[is]->getSeeds().at(iseed)->getStave() );
-          m_barShowerU_part.push_back( tmp_shower[is]->getSeeds().at(iseed)->getPart() );
-          m_barShowerU_dlayer.push_back( tmp_shower[is]->getSeeds().at(iseed)->getDlayer() );
-          m_barShowerU_slayer.push_back( tmp_shower[is]->getSeeds().at(iseed)->getSlayer() );
-          m_barShowerU_bar.push_back( tmp_shower[is]->getSeeds().at(iseed)->getBar() );
-        }
-        
+        m_barShowerU_tag.push_back( m_halfclusters[ic]->getEnergy() );
+        m_barShowerU_x.push_back( tmp_shower[is]->getSeeds().at(iseed)->getPosition().x() );
+        m_barShowerU_y.push_back( tmp_shower[is]->getSeeds().at(iseed)->getPosition().y() );
+        m_barShowerU_z.push_back( tmp_shower[is]->getSeeds().at(iseed)->getPosition().z() );
+        m_barShowerU_E.push_back( tmp_shower[is]->getSeeds().at(iseed)->getEnergy() );
+        m_barShowerU_module.push_back( tmp_shower[is]->getSeeds().at(iseed)->getModule() );
+        m_barShowerU_stave.push_back( tmp_shower[is]->getSeeds().at(iseed)->getStave() );
+        m_barShowerU_part.push_back( tmp_shower[is]->getSeeds().at(iseed)->getPart() );
+        m_barShowerU_dlayer.push_back( tmp_shower[is]->getSeeds().at(iseed)->getDlayer() );
+        m_barShowerU_slayer.push_back( tmp_shower[is]->getSeeds().at(iseed)->getSlayer() );
+        m_barShowerU_bar.push_back( tmp_shower[is]->getSeeds().at(iseed)->getBar() );
+      }
+      
+    }
+  }
+  m_halfclusters.clear();
+  m_halfclusters = m_DataCol.map_HalfCluster["HalfClusterColV"];
+  for(int ic=0;ic<m_halfclusters.size();ic++){
+    std::vector<const Calo1DCluster*> tmp_shower = m_halfclusters[ic]->getLocalMaxCol("AllLocalMax");
+    m_NshowerV = tmp_shower.size(); 
+    for(int is=0; is<m_NshowerV; is++)
+    {
+      for(int iseed=0; iseed<tmp_shower[is]->getSeeds().size(); iseed++)
+      {
+        m_barShowerV_tag.push_back( m_halfclusters[ic]->getEnergy() );
+        m_barShowerV_x.push_back( tmp_shower[is]->getSeeds().at(iseed)->getPosition().x() );
+        m_barShowerV_y.push_back( tmp_shower[is]->getSeeds().at(iseed)->getPosition().y() );
+        m_barShowerV_z.push_back( tmp_shower[is]->getSeeds().at(iseed)->getPosition().z() );
+        m_barShowerV_E.push_back( tmp_shower[is]->getSeeds().at(iseed)->getEnergy() );
+        m_barShowerV_module.push_back( tmp_shower[is]->getSeeds().at(iseed)->getModule() );
+        m_barShowerV_stave.push_back( tmp_shower[is]->getSeeds().at(iseed)->getStave() );
+        m_barShowerV_part.push_back( tmp_shower[is]->getSeeds().at(iseed)->getPart() );
+        m_barShowerV_dlayer.push_back( tmp_shower[is]->getSeeds().at(iseed)->getDlayer() );
+        m_barShowerV_slayer.push_back( tmp_shower[is]->getSeeds().at(iseed)->getSlayer() );
+        m_barShowerV_bar.push_back( tmp_shower[is]->getSeeds().at(iseed)->getBar() );
       }
     }
-    else
-    {
-      m_NshowerV = tmp_shower.size(); 
-      for(int is=0; is<m_NshowerV; is++)
-      {
-        for(int iseed=0; iseed<tmp_shower[is]->getSeeds().size(); iseed++)
-        {
-          m_barShowerV_tag.push_back( m_halfclusters[ic]->getEnergy() );
-          m_barShowerV_x.push_back( tmp_shower[is]->getSeeds().at(iseed)->getPosition().x() );
-          m_barShowerV_y.push_back( tmp_shower[is]->getSeeds().at(iseed)->getPosition().y() );
-          m_barShowerV_z.push_back( tmp_shower[is]->getSeeds().at(iseed)->getPosition().z() );
-          m_barShowerV_E.push_back( tmp_shower[is]->getSeeds().at(iseed)->getEnergy() );
-          m_barShowerV_module.push_back( tmp_shower[is]->getSeeds().at(iseed)->getModule() );
-          m_barShowerV_stave.push_back( tmp_shower[is]->getSeeds().at(iseed)->getStave() );
-          m_barShowerV_part.push_back( tmp_shower[is]->getSeeds().at(iseed)->getPart() );
-          m_barShowerV_dlayer.push_back( tmp_shower[is]->getSeeds().at(iseed)->getDlayer() );
-          m_barShowerV_slayer.push_back( tmp_shower[is]->getSeeds().at(iseed)->getSlayer() );
-          m_barShowerV_bar.push_back( tmp_shower[is]->getSeeds().at(iseed)->getBar() );
-        }
-      }
-    }
-    
   }
   t_Layers->Fill();
 
 
   // yyy: check Hough cluster
   ClearHough();
-  std::vector<PandoraPlus::CaloHalfCluster*> m_halfclusterV;
-  std::vector<PandoraPlus::CaloHalfCluster*> m_halfclusterU;
-  for(int ic=0;ic<m_halfclusters.size();ic++){
-    if(m_halfclusters[ic]->getSlayer()==0){
-      m_halfclusterU.push_back(m_halfclusters[ic]);
-    }
-    else if(m_halfclusters[ic]->getSlayer()==1){
-      m_halfclusterV.push_back(m_halfclusters[ic]);
-    }
-    else{
-      std::cout << "PandoraPlusPFAlg: yyy: wrong slayer for m_halfclusters" << std::endl;
-    }
+  std::vector<PandoraPlus::CaloHalfCluster*> m_halfclusterV = m_DataCol.map_HalfCluster["HalfClusterColV"];
+  std::vector<PandoraPlus::CaloHalfCluster*> m_halfclusterU = m_DataCol.map_HalfCluster["HalfClusterColU"];
+  std::vector<const PandoraPlus::CaloHalfCluster*> m_houghaxisU; m_houghaxisU.clear(); 
+  std::vector<const PandoraPlus::CaloHalfCluster*> m_houghaxisV; m_houghaxisV.clear(); 
+  for(int i=0; i<m_halfclusterU.size(); i++){
+    std::vector<const PandoraPlus::CaloHalfCluster*> tmp_clus = m_halfclusterU[i]->getHalfClusterCol("HoughAxis"); 
+    m_houghaxisU.insert( m_houghaxisU.end(), tmp_clus.begin(), tmp_clus.end() );
   }
-  for(int ihc=0; ihc<m_halfclusterV.size(); ihc++){
-    for(int ilm=0; ilm<m_halfclusterV[ihc]->getCluster().size(); ilm++){
-      m_houghV_module.push_back( m_halfclusterV[ihc]->getCluster()[ilm]->getTowerID()[0][0] );
-      m_houghV_part.push_back(   m_halfclusterV[ihc]->getCluster()[ilm]->getTowerID()[0][1] );
-      m_houghV_stave.push_back(  m_halfclusterV[ihc]->getCluster()[ilm]->getTowerID()[0][2] );
-      m_houghV_dlayer.push_back( m_halfclusterV[ihc]->getCluster()[ilm]->getDlayer() );
-      m_houghV_slayer.push_back( m_halfclusterV[ihc]->getCluster()[ilm]->getSlayer() );    
-    }
-  }
-  for(int ihc=0; ihc<m_halfclusterU.size(); ihc++){
-    for(int ilm=0; ilm<m_halfclusterU[ihc]->getCluster().size(); ilm++){
-      m_houghU_module.push_back( m_halfclusterU[ihc]->getCluster()[ilm]->getTowerID()[0][0] );
-      m_houghU_part.push_back(   m_halfclusterU[ihc]->getCluster()[ilm]->getTowerID()[0][1] );
-      m_houghU_stave.push_back(  m_halfclusterU[ihc]->getCluster()[ilm]->getTowerID()[0][2] );
-      m_houghU_dlayer.push_back( m_halfclusterU[ihc]->getCluster()[ilm]->getDlayer() );
-      m_houghU_slayer.push_back( m_halfclusterU[ihc]->getCluster()[ilm]->getSlayer() );
-    }
+  for(int i=0; i<m_halfclusterV.size(); i++){
+    std::vector<const PandoraPlus::CaloHalfCluster*> tmp_clus = m_halfclusterV[i]->getHalfClusterCol("HoughAxis");
+    m_houghaxisV.insert( m_houghaxisV.end(), tmp_clus.begin(), tmp_clus.end() );
   }
 
-/*
-  for(int ihc=0; ihc<m_halfclusterV.size(); ihc++){
-    std::vector<const PandoraPlus::LongiCluster*> vec_LongiV = m_halfclusterV[ihc]->getLongiClusterCol("EMLongiCluster");
-    
-    for(int ilc=0; ilc<vec_LongiV.size(); ilc++){
-      for(int ilm=0; ilm<vec_LongiV[ilc]->getBarShowers().size(); ilm++){
-        m_halfclusV_tag.push_back( m_halfclusterV[ihc]->getEnergy() );
-        m_longiclusV_tag.push_back( vec_LongiV[ilc]->getEnergy() );
-        m_houghV_x.push_back( vec_LongiV[ilc]->getBarShowers()[ilm]->getPos().x() );
-        m_houghV_y.push_back( vec_LongiV[ilc]->getBarShowers()[ilm]->getPos().y() );
-        m_houghV_z.push_back( vec_LongiV[ilc]->getBarShowers()[ilm]->getPos().z() );
-        m_houghV_E.push_back( vec_LongiV[ilc]->getBarShowers()[ilm]->getEnergy() );
-        m_houghV_module.push_back( vec_LongiV[ilc]->getBarShowers()[ilm]->getTowerID()[0][0] );
-        m_houghV_part.push_back( vec_LongiV[ilc]->getBarShowers()[ilm]->getTowerID()[0][1] );
-        m_houghV_stave.push_back( vec_LongiV[ilc]->getBarShowers()[ilm]->getTowerID()[0][2] );
-        m_houghV_dlayer.push_back( vec_LongiV[ilc]->getBarShowers()[ilm]->getDlayer() );
-        m_houghV_slayer.push_back( vec_LongiV[ilc]->getBarShowers()[ilm]->getSlayer() );
+  m_NaxisU = m_houghaxisU.size();
+  m_NaxisV = m_houghaxisV.size();
+  for(int ihc=0; ihc<m_houghaxisV.size(); ihc++){
+    m_houghV_x.push_back( m_houghaxisV[ihc]->getPos().x() );
+    m_houghV_y.push_back( m_houghaxisV[ihc]->getPos().y() );
+    m_houghV_z.push_back( m_houghaxisV[ihc]->getPos().z() );
+    m_houghV_E.push_back( m_houghaxisV[ihc]->getEnergy()  );
+  }
+  for(int ihc=0; ihc<m_houghaxisU.size(); ihc++){
+    m_houghU_x.push_back( m_houghaxisU[ihc]->getPos().x() );
+    m_houghU_y.push_back( m_houghaxisU[ihc]->getPos().y() );
+    m_houghU_z.push_back( m_houghaxisU[ihc]->getPos().z() );
+    m_houghU_E.push_back( m_houghaxisU[ihc]->getEnergy()  );
+  }
+
+    for(int ilc=0; ilc<m_houghaxisV.size(); ilc++){
+      for(int ilm=0; ilm<m_houghaxisV[ilc]->getCluster().size(); ilm++){
+        m_halfclusV_tag.push_back( m_houghaxisV[ilc]->getEnergy() );
+        m_houghV_x.push_back( m_houghaxisV[ilc]->getCluster()[ilm]->getPos().x() );
+        m_houghV_y.push_back( m_houghaxisV[ilc]->getCluster()[ilm]->getPos().y() );
+        m_houghV_z.push_back( m_houghaxisV[ilc]->getCluster()[ilm]->getPos().z() );
+        m_houghV_E.push_back( m_houghaxisV[ilc]->getCluster()[ilm]->getEnergy() );
+        m_houghV_module.push_back( m_houghaxisV[ilc]->getCluster()[ilm]->getTowerID()[0][0] );
+        m_houghV_part.push_back( m_houghaxisV[ilc]->getCluster()[ilm]->getTowerID()[0][1] );
+        m_houghV_stave.push_back( m_houghaxisV[ilc]->getCluster()[ilm]->getTowerID()[0][2] );
+        m_houghV_dlayer.push_back( m_houghaxisV[ilc]->getCluster()[ilm]->getDlayer() );
+        m_houghV_slayer.push_back( m_houghaxisV[ilc]->getCluster()[ilm]->getSlayer() );
       }
     }
-  }
-  for(int ihc=0; ihc<m_halfclusterU.size(); ihc++){
-    std::vector<const PandoraPlus::LongiCluster*> vec_LongiU = m_halfclusterU[ihc]->getLongiClusterCol("EMLongiCluster");
-    
-    for(int ilc=0; ilc<vec_LongiU.size(); ilc++){
-      for(int ilm=0; ilm<vec_LongiU[ilc]->getBarShowers().size(); ilm++){
-        m_halfclusU_tag.push_back( m_halfclusterU[ihc]->getEnergy() );
-        m_longiclusU_tag.push_back( vec_LongiU[ilc]->getEnergy() );
-        m_houghU_x.push_back( vec_LongiU[ilc]->getBarShowers()[ilm]->getPos().x() );
-        m_houghU_y.push_back( vec_LongiU[ilc]->getBarShowers()[ilm]->getPos().y() );
-        m_houghU_z.push_back( vec_LongiU[ilc]->getBarShowers()[ilm]->getPos().z() );
-        m_houghU_E.push_back( vec_LongiU[ilc]->getBarShowers()[ilm]->getEnergy() );
-        m_houghU_module.push_back( vec_LongiU[ilc]->getBarShowers()[ilm]->getTowerID()[0][0] );
-        m_houghU_part.push_back( vec_LongiU[ilc]->getBarShowers()[ilm]->getTowerID()[0][1] );
-        m_houghU_stave.push_back( vec_LongiU[ilc]->getBarShowers()[ilm]->getTowerID()[0][2] );
-        m_houghU_dlayer.push_back( vec_LongiU[ilc]->getBarShowers()[ilm]->getDlayer() );
-        m_houghU_slayer.push_back( vec_LongiU[ilc]->getBarShowers()[ilm]->getSlayer() );
+
+    for(int ilc=0; ilc<m_houghaxisU.size(); ilc++){
+      for(int ilm=0; ilm<m_houghaxisU[ilc]->getCluster().size(); ilm++){
+        m_halfclusU_tag.push_back( m_halfclusterU[ilc]->getEnergy() );
+        m_houghU_x.push_back( m_houghaxisU[ilc]->getCluster()[ilm]->getPos().x() );
+        m_houghU_y.push_back( m_houghaxisU[ilc]->getCluster()[ilm]->getPos().y() );
+        m_houghU_z.push_back( m_houghaxisU[ilc]->getCluster()[ilm]->getPos().z() );
+        m_houghU_E.push_back( m_houghaxisU[ilc]->getCluster()[ilm]->getEnergy() );
+        m_houghU_module.push_back( m_houghaxisU[ilc]->getCluster()[ilm]->getTowerID()[0][0] );
+        m_houghU_part.push_back( m_houghaxisU[ilc]->getCluster()[ilm]->getTowerID()[0][1] );
+        m_houghU_stave.push_back( m_houghaxisU[ilc]->getCluster()[ilm]->getTowerID()[0][2] );
+        m_houghU_dlayer.push_back( m_houghaxisU[ilc]->getCluster()[ilm]->getDlayer() );
+        m_houghU_slayer.push_back( m_houghaxisU[ilc]->getCluster()[ilm]->getSlayer() );
       }
     }
-  }
-*/
+
   t_Hough->Fill();
+*/
 
-
-  // for(int i=0; i<m_3dclusters.size(); i++){  
-
-  //   std::vector<const PandoraPlus::LongiCluster*> vec_LongiU = m_3dclusters[i]->getLongiClusterUCol("EMLongiCluster"); 
-  //   std::vector<const PandoraPlus::LongiCluster*> vec_LongiV = m_3dclusters[i]->getLongiClusterVCol("EMLongiCluster"); 
-
-  //   for(int il=0; il<vec_LongiU.size(); il++){
-  //     m_showerU_x.clear(); 
-  //     m_showerU_y.clear(); 
-  //     m_showerU_z.clear(); 
-  //     m_showerU_E.clear(); 
-  //     m_showerU_stave.clear();
-  //     m_showerU_part.clear();
-  //     for(int is=0; is<vec_LongiU[il]->getBarShowers().size(); is++){
-  //       m_showerU_x.push_back( vec_LongiU[il]->getBarShowers()[is]->getPos().x() );
-  //       m_showerU_y.push_back( vec_LongiU[il]->getBarShowers()[is]->getPos().y() );
-  //       m_showerU_z.push_back( vec_LongiU[il]->getBarShowers()[is]->getPos().z() );
-  //       m_showerU_E.push_back( vec_LongiU[il]->getBarShowers()[is]->getEnergy()  );
-  //       //m_showerU_stave.push_back( vec_LongiU[il]->getBarShowers()[is]->getStave() );
-  //       //m_showerU_part.push_back( vec_LongiU[il]->getBarShowers()[is]->getPart() );
-  //     }
-  //     t_LongiClusU->Fill();
-  //   }
-  //   for(int il=0; il<vec_LongiV.size(); il++){
-  //     m_showerV_x.clear();
-  //     m_showerV_y.clear();
-  //     m_showerV_z.clear();
-  //     m_showerV_E.clear();
-  //     m_showerV_stave.clear();
-  //     m_showerV_part.clear();
-  //     for(int is=0; is<vec_LongiV[il]->getBarShowers().size(); is++){
-  //       m_showerV_x.push_back( vec_LongiV[il]->getBarShowers()[is]->getPos().x() );
-  //       m_showerV_y.push_back( vec_LongiV[il]->getBarShowers()[is]->getPos().y() );
-  //       m_showerV_z.push_back( vec_LongiV[il]->getBarShowers()[is]->getPos().z() );
-  //       m_showerV_E.push_back( vec_LongiV[il]->getBarShowers()[is]->getEnergy()  );
-  //       //m_showerV_stave.push_back( vec_LongiV[il]->getBarShowers()[is]->getStave() );
-  //       //m_showerV_part.push_back( vec_LongiV[il]->getBarShowers()[is]->getPart() );
-  //     }
-  //     t_LongiClusV->Fill();
-  //   }
-  // }
+    std::vector<PandoraPlus::CaloHalfCluster*> vec_LongiU = m_DataCol.map_HalfCluster["ESHalfClusterU"]; 
+    std::vector<PandoraPlus::CaloHalfCluster*> vec_LongiV = m_DataCol.map_HalfCluster["ESHalfClusterV"]; 
+   
+    m_NHfClusU = vec_LongiU.size();
+    m_NHfClusV = vec_LongiV.size();
+    m_HfClusU_E.clear();
+    m_HfClusU_Nhit.clear();
+    m_HfClusV_E.clear();
+    m_HfClusV_Nhit.clear();
+    for(int ih=0; ih<m_NHfClusU; ih++){
+      m_HfClusU_E.push_back(vec_LongiU[ih]->getEnergy());
+      m_HfClusU_Nhit.push_back( vec_LongiU[ih]->getCluster().size() );
+    }
+    for(int ih=0; ih<m_NHfClusV; ih++){
+      m_HfClusV_E.push_back(vec_LongiV[ih]->getEnergy());
+      m_HfClusV_Nhit.push_back( vec_LongiV[ih]->getCluster().size() );
+    }  
+    t_LongiClus->Fill();
 
 
 /*
@@ -533,7 +487,7 @@ StatusCode PandoraPlusPFAlg::execute()
   ClearLayer();
     const Calo3DCluster* p_tower = m_3dclusters[i]->getTowers()[itw];
 
-    std::vector<const LongiCluster*> m_longiClusU = p_tower->getLongiClusterUCol("ESLongiCluster");
+    std::vector<const CaloHalfCluster*> m_longiClusU = p_tower->getCaloHalfClusterUCol("ESCaloHalfCluster");
     for(int il=0; il<m_longiClusU.size(); il++){
       for(int is=0; is<m_longiClusU[il]->getBarShowers().size(); is++){
         m_barShowerU_x.push_back( m_longiClusU[il]->getBarShowers()[is]->getPos().x() );
@@ -543,7 +497,7 @@ StatusCode PandoraPlusPFAlg::execute()
       }
     }
 
-    std::vector<const LongiCluster*> m_longiClusV = p_tower->getLongiClusterVCol("ESLongiCluster");
+    std::vector<const CaloHalfCluster*> m_longiClusV = p_tower->getCaloHalfClusterVCol("ESCaloHalfCluster");
     for(int il=0; il<m_longiClusV.size(); il++){
       for(int is=0; is<m_longiClusV[il]->getBarShowers().size(); is++){
         m_barShowerV_x.push_back( m_longiClusV[il]->getBarShowers()[is]->getPos().x() );
@@ -555,7 +509,7 @@ StatusCode PandoraPlusPFAlg::execute()
   t_Layers->Fill();
   }}
   //t_Layers->Fill();
-
+*/
 
   //Save Cluster and MCP info
   ClearCluster();
@@ -581,7 +535,7 @@ StatusCode PandoraPlusPFAlg::execute()
   }
   t_Cluster->Fill();
 
-
+/*
   //Showers in cluster: 
   //ClearShower();
   for(int ic=0; ic<m_clusvec.size(); ic++){
@@ -694,14 +648,13 @@ StatusCode PandoraPlusPFAlg::finalize()
   t_SimBar->Write();
   t_Layers->Write();
   t_Hough->Write(); // yyy
-  t_LongiClusU->Write(); 
-  t_LongiClusV->Write();
+  t_LongiClus->Write(); 
   t_Shower->Write();
   t_Cluster->Write();
   t_Clustering->Write();
   t_Track->Write();
   m_wfile->Close();
-  delete m_wfile, t_SimBar, t_Layers, t_Hough, t_Cluster, t_Track, t_Clustering;
+  delete m_wfile, t_SimBar, t_Layers, t_Hough, t_LongiClus, t_Cluster, t_Track, t_Clustering;
 
 
   delete m_pMCParticleCreator;
@@ -770,15 +723,15 @@ void PandoraPlusPFAlg::ClearLayer(){
 
 // yyy
 void PandoraPlusPFAlg::ClearHough(){
-  m_halfclusV_tag.clear();
-  m_longiclusV_tag.clear();
+  m_NaxisU = -99;
+  m_NaxisV = -99;
   m_houghV_x.clear();
   m_houghV_y.clear();
+  m_houghV_z.clear();
   m_houghV_E.clear();
-  m_halfclusU_tag.clear();
-  m_longiclusU_tag.clear();
   m_houghU_x.clear();
   m_houghU_y.clear();
+  m_houghU_z.clear();
   m_houghU_E.clear();
 }
 

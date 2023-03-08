@@ -175,14 +175,14 @@ namespace PandoraPlus{
   }
 
 
-  std::vector<const PandoraPlus::LongiCluster*> Calo3DCluster::getLongiClusterUCol(std::string name) const {
-    std::vector<const LongiCluster*> emptyCol; emptyCol.clear(); 
+  std::vector<const PandoraPlus::CaloHalfCluster*> Calo3DCluster::getHalfClusterUCol(std::string name) const {
+    std::vector<const CaloHalfCluster*> emptyCol; emptyCol.clear(); 
     if(map_longiClusUCol.find(name)!=map_longiClusUCol.end()) emptyCol = map_longiClusUCol.at(name);
     return emptyCol;
   }
 
-  std::vector<const PandoraPlus::LongiCluster*> Calo3DCluster::getLongiClusterVCol(std::string name) const {
-    std::vector<const LongiCluster*> emptyCol; emptyCol.clear(); 
+  std::vector<const PandoraPlus::CaloHalfCluster*> Calo3DCluster::getHalfClusterVCol(std::string name) const {
+    std::vector<const CaloHalfCluster*> emptyCol; emptyCol.clear(); 
     if(map_longiClusVCol.find(name)!=map_longiClusVCol.end()) emptyCol = map_longiClusVCol.at(name);
     return emptyCol;
   }

@@ -44,6 +44,6 @@ Keep the collection names compatible between the prototype and the existing CEPC
 * TPCCollection
 * SETCollection
 
-## Update in branch dev-EcalRec-v1.2: 
-* Update to CEPCSW LCG 101.0.0
-* Re-writing the Reconstruction
+## Update in branch : EcalRec-2.0.6.1.alpha
+* Full reconstruction chain with EDM HalfCluster
+* WIP: Check ConeClustering2DAlg performance, debug for covering towers & modules.

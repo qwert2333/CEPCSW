@@ -19,7 +19,7 @@ StatusCode GlobalClusteringAlg::Initialize( PandoraPlusDataCol& m_datacol ){
   m_halfclusters.clear();
 
   //Readin data from DataCol: 
-  std::vector<PandoraPlus::CaloUnit*> m_bars = m_datacol.map_BarCol["BarCol"];
+  m_bars = m_datacol.map_BarCol["BarCol"];
 
 
   return StatusCode::SUCCESS;
@@ -30,7 +30,7 @@ StatusCode GlobalClusteringAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
   //time_t time_cb;  
   //time(&time_cb);  
   //cout<<" When begin clustering: "<<ctime(&time_cb)<<endl;
-
+cout<<"  GlobalClusteringAlg: Readin Bar size: "<<m_bars.size()<<endl;
 
   //Threshold and scale factor (Todo) for bars. 
   for(int ibar=0; ibar<m_bars.size(); ibar++)
@@ -49,27 +49,34 @@ StatusCode GlobalClusteringAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
   //Clustering
   Clustering(m_processbars, m_1dclusters);
   Clustering(m_1dclusters, m_halfclusters);
-  
 
   //Store created objects to backup col. 
   for(int irest=0; irest<m_restbars.size(); irest++)       m_datacol.bk_BarCol.push_back(m_restbars.at(irest));
   for(int i1d=0; i1d<m_1dclusters.size(); i1d++)           m_datacol.bk_Cluster1DCol.push_back(m_1dclusters.at(i1d));
   for(int ihalf=0; ihalf<m_halfclusters.size(); ihalf++)   m_datacol.bk_ClusterHalfCol.push_back(m_halfclusters.at(ihalf));
 
+
+  std::vector<PandoraPlus::CaloHalfCluster*> m_HalfClusterV; m_HalfClusterV.clear();
+  std::vector<PandoraPlus::CaloHalfCluster*> m_HalfClusterU; m_HalfClusterU.clear();
+  for(int i=0; i<m_halfclusters.size() && m_halfclusters[i]; i++){
+    if(m_halfclusters[i]->getSlayer()==0)
+      m_HalfClusterU.push_back(m_halfclusters[i]);
+    else if(m_halfclusters[i]->getSlayer()==1)
+      m_HalfClusterV.push_back(m_halfclusters[i]);
+  }
+
+printf("  GlobalClustering: HalfCluster size (%d, %d) \n", m_HalfClusterU.size(), m_HalfClusterV.size());
+for(int ic=0; ic<m_HalfClusterU.size(); ic++) cout<<m_HalfClusterU[ic]->getEnergy()<<'\t';
+cout<<endl;
+for(int ic=0; ic<m_HalfClusterV.size(); ic++) cout<<m_HalfClusterV[ic]->getEnergy()<<'\t';
+cout<<endl;
+
+
   //Write results into DataCol.
   m_datacol.map_BarCol["RestBarCol"] = m_restbars;
   m_datacol.map_1DCluster["Cluster1DCol"] = m_1dclusters;
-
-  std::vector<PandoraPlus::CaloHalfCluster*> p_HalfClusterV; p_HalfClusterV.clear();
-  std::vector<PandoraPlus::CaloHalfCluster*> p_HalfClusterU; p_HalfClusterU.clear();
-  for(int i=0; i<m_halfclusters.size() && !m_halfclusters[i]; i++){
-    if(m_halfclusters[i]->getSlayer()==0)
-      p_HalfClusterU.push_back(m_halfclusters[i]);
-    else if(m_halfclusters[i]->getSlayer()==1)
-      p_HalfClusterV.push_back(m_halfclusters[i]);
-  }
-  m_datacol.map_HalfCluster["HalfClusterColU"] = p_HalfClusterU;
-  m_datacol.map_HalfCluster["HalfClusterColV"] = p_HalfClusterV;
+  m_datacol.map_HalfCluster["HalfClusterColU"] = m_HalfClusterU;
+  m_datacol.map_HalfCluster["HalfClusterColV"] = m_HalfClusterV;
 
   //time_t time_ce;  
   //time(&time_ce); 

@@ -55,15 +55,12 @@ namespace PandoraPlus{
     void setSeeds( std::vector<const PandoraPlus::CaloUnit*> _seeds) { Seeds = _seeds; }
     void addCousinCluster( const PandoraPlus::Calo1DCluster* clus ) { CousinClusters.push_back(clus); }
     void addChildCluster( const PandoraPlus::Calo1DCluster* clus ) { ChildClusters.push_back(clus); }
-    void setSeed();  //Set the most energitic unit as seed. 
+    void setSeed();  //Set the most energitic unit as seed, Eseed>5 MeV (hardcoded). 
     void setIDInfo(); 
 
     int getDlayer() const { if(Bars.size()>0) return Bars[0]->getDlayer(); return -99;  }
     int getSlayer() const { if(Bars.size()>0) return Bars[0]->getSlayer(); return -99;  }
     std::vector< std::vector<int> > getTowerID() const { return towerID; }
-    //std::vector<int> getModules() const { return m_modules; }
-    //std::vector<int> getParts() const { return m_parts; }
-    //std::vector<int> getStaves() const { return m_staves; }
     
   private: 
     std::vector<const PandoraPlus::CaloUnit*> Bars;
@@ -72,21 +69,10 @@ namespace PandoraPlus{
     TVector3 pos;
 
     std::vector< std::vector<int> > towerID; //[module, part, stave]
-    //std::vector<int> m_modules;
-    //std::vector<int> m_parts;
-    //std::vector<int> m_staves;
 
     std::vector< const PandoraPlus::Calo1DCluster* > CousinClusters;
     std::vector< const PandoraPlus::Calo1DCluster* > ChildClusters;
 
-    //static const int m_module = 7;
-    //static const int m_modulestart = 0;
-    //static const int m_part = 4;
-    //static const int m_stave = 11;
-    //static const int m_superlayer = 14;
-    //static const int m_startnumber = 1;
-    //static const int m_phibarnumber = 60;
-    //static const int m_zbarnumber = 47;
   };
 }
 #endif

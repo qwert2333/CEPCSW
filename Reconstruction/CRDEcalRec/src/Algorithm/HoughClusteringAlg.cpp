@@ -90,10 +90,10 @@ StatusCode HoughClusteringAlg::Initialize( PandoraPlusDataCol& m_datacol ){
 
 StatusCode HoughClusteringAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
 
-  if( (p_HalfClusterU.size()+p_HalfClusterV.size())<1 ){
-    std::cout << "HoughClusteringAlg: No HalfCluster input"<<std::endl;
-    return StatusCode::SUCCESS;
-  }
+  //if( (p_HalfClusterU.size()+p_HalfClusterV.size())<1 ){
+  //  std::cout << "HoughClusteringAlg: No HalfCluster input"<<std::endl;
+  //  return StatusCode::SUCCESS;
+  //}
 
   
   if(p_HalfClusterV.size()==0){ std::cout<<"  HoughClusteringAlg: No HalfClusterV in present data collection! "<<std::endl; }
@@ -242,7 +242,7 @@ StatusCode HoughClusteringAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
       else m_houghMax.push_back( tmp_localMaxUCol[is] );
     }
 
-    p_HalfClusterU[it]->setLocalMax("HoughAxis", m_houghMax);
+    p_HalfClusterU[it]->setLocalMax("HoughLocalMax", m_houghMax);
     p_HalfClusterU[it]->setLocalMax(settings.map_stringPars["LeftLocalMaxName"], left_localMaxUCol);
     p_HalfClusterU[it]->setHalfClusters(settings.map_stringPars["OutputLongiClusName"], m_longiClusUCol);
     m_houghMax.clear();

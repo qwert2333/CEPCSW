@@ -32,8 +32,6 @@ namespace PandoraPlus {
     std::vector<const CaloUnit *> getBarVCol() const { return barVCol; }
     std::vector<const Calo1DCluster*> getShowerUCol() const {return barShowerUCol;}
     std::vector<const Calo1DCluster*> getShowerVCol() const {return barShowerVCol;}
-    std::vector<const Calo1DCluster*> getClusterU() const { return barClusterUCol; }
-    std::vector<const Calo1DCluster*> getClusterV() const { return barClusterVCol; }
     std::vector<const Calo1DCluster*> getCluster() const;
     double getEnergy() const; 
     TVector3 getPos() const; 
@@ -58,8 +56,6 @@ namespace PandoraPlus {
     std::vector<const CaloUnit*> barVCol;  //slayer == 1.
     std::vector<const Calo1DCluster*> barShowerUCol; 
     std::vector<const Calo1DCluster*> barShowerVCol; 
-    std::vector<const Calo1DCluster*> barClusterUCol;
-    std::vector<const Calo1DCluster*> barClusterVCol;
 
     //static const int m_module = 7;
     //static const int m_modulestart = 0;

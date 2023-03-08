@@ -7,6 +7,7 @@ namespace PandoraPlus{
 
   void CaloHalfCluster::Clear() {
     m_slayer=-99;
+    towerID.clear(); 
     m_1dclusters.clear(); 
     map_localMax.clear();
     map_halfClusCol.clear();
@@ -55,6 +56,10 @@ namespace PandoraPlus{
     if(_1dcluster->getSlayer()==0) m_slayer=0;
     if(_1dcluster->getSlayer()==1) m_slayer=1;
     m_1dclusters.push_back(_1dcluster);
+
+    std::vector< std::vector<int> > id = _1dcluster->getTowerID();
+    for(int ii=0; ii<id.size(); ii++)
+      if( find(towerID.begin(), towerID.end(), id[ii])==towerID.end() ) towerID.push_back(id[ii]);    
   }
   
 /*  std::vector<const CaloUnit*> CaloHalfCluster::getBars() const
@@ -97,11 +102,31 @@ namespace PandoraPlus{
     return emptyCol;
   }
 
+  std::vector<const Calo1DCluster*> CaloHalfCluster::getAllLocalMaxCol() const{
+    std::vector<const PandoraPlus::Calo1DCluster*> emptyCol; emptyCol.clear();
+    for(auto &iter: map_localMax) emptyCol.insert(emptyCol.end(), iter.second.begin(), iter.second.end());
+    return emptyCol;
+  }
+
   std::vector<const PandoraPlus::CaloHalfCluster*> CaloHalfCluster::getHalfClusterCol(std::string name) const{
     std::vector<const PandoraPlus::CaloHalfCluster*> emptyCol; emptyCol.clear(); 
     if(map_halfClusCol.find(name)!=map_halfClusCol.end()) emptyCol = map_halfClusCol.at(name);
     return emptyCol;
   }
+
+  std::vector<const PandoraPlus::CaloHalfCluster*> CaloHalfCluster::getAllHalfClusterCol() const{
+    std::vector<const PandoraPlus::CaloHalfCluster*> emptyCol; emptyCol.clear();
+    for(auto &iter: map_halfClusCol) emptyCol.insert(emptyCol.end(), iter.second.begin(), iter.second.end());
+    return emptyCol;
+  }
+
+  std::vector<const PandoraPlus::Calo1DCluster*> CaloHalfCluster::getClusterInLayer(int _layer) const{
+    std::vector<const PandoraPlus::Calo1DCluster*> outShowers; outShowers.clear();
+    for(int i=0; i<m_1dclusters.size(); i++)
+      if(m_1dclusters[i]->getDlayer()==_layer) outShowers.push_back(m_1dclusters[i]);
+    return outShowers;
+  }
+
 
   int CaloHalfCluster::getBeginningDlayer() const{
     int Lstart = 99;
