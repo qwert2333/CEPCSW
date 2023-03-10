@@ -98,7 +98,7 @@ cout<<"  Print reconstructed cluster energy: "<<endl;
 for(int i=0; i<m_clusterCol.size(); i++) cout<<m_clusterCol[i]->getEnergy()<<endl;
 
 
-/*
+cout<<"Cluster Merge Type1: from 1DShower aspect"<<endl;
   //Merge reconstructed cluster
   //  Type1: from 1DShower aspect
   for(int ic=0; ic<m_clusterCol.size() && m_clusterCol.size()>1; ic++){
@@ -107,30 +107,34 @@ for(int i=0; i<m_clusterCol.size(); i++) cout<<m_clusterCol[i]->getEnergy()<<end
       int NlinkedU = 0; 
       int NlinkedV = 0;
 
-      //Save out BarShowers in Cluster[jc]
+      //Save out BarShowers(Calo1DCluster) in Cluster[jc]
       std::vector<const Calo1DCluster*> m_1DshowerUCol; m_1DshowerUCol.clear();
       std::vector<const Calo1DCluster*> m_1DshowerVCol; m_1DshowerVCol.clear();
       for(int is=0; is<m_clusterCol[jc]->getCluster().size(); is++){
-        for(int js=0; js<m_clusterCol[jc]->getCluster()[is]->getClusterU().size(); js++)
-          m_1DshowerUCol.push_back( m_clusterCol[jc]->getCluster()[is]->getClusterU()[js] );
-        for(int js=0; js<m_clusterCol[jc]->getCluster()[is]->getClusterV().size(); js++)
-          m_1DshowerVCol.push_back( m_clusterCol[jc]->getCluster()[is]->getClusterV()[js] );
+        for(int js=0; js<m_clusterCol[jc]->getCluster()[is]->getShowerUCol().size(); js++)
+          m_1DshowerUCol.push_back( m_clusterCol[jc]->getCluster()[is]->getShowerUCol()[js] );
+        for(int js=0; js<m_clusterCol[jc]->getCluster()[is]->getShowerVCol().size(); js++)
+          m_1DshowerVCol.push_back( m_clusterCol[jc]->getCluster()[is]->getShowerVCol()[js] );
       }
 
-
+printf("  1DShower size in Cl #%d: [%d, %d] \n", jc, m_1DshowerUCol.size(), m_1DshowerVCol.size());
+cout<<"  Check for cousins: "<<endl;
       //Loop in Cluster[ic], count the linked showers
       for(int is=0; is<m_clusterCol[ic]->getCluster().size(); is++){
         const Calo2DCluster* p_shower = m_clusterCol[ic]->getCluster()[is];
 
-        for(int icc=0; icc<p_shower->getClusterU()[0]->getCousinClusters().size(); icc++)
-          if( find(m_1DshowerUCol.begin(), m_1DshowerUCol.end(), p_shower->getClusterU()[0]->getCousinClusters()[icc])!=m_1DshowerUCol.end() ){ NlinkedU++; break; }
+printf("    In 3D Cluster %d 2DShower %d: CousinU size %d, CousinV size %d \n", ic, is, p_shower->getShowerUCol()[0]->getCousinClusters().size(), p_shower->getShowerVCol()[0]->getCousinClusters().size());
 
-        for(int icc=0; icc<p_shower->getClusterV()[0]->getCousinClusters().size(); icc++)
-          if( find(m_1DshowerVCol.begin(), m_1DshowerVCol.end(), p_shower->getClusterV()[0]->getCousinClusters()[icc])!=m_1DshowerVCol.end() ){ NlinkedV++; break; }
+        for(int icc=0; icc<p_shower->getShowerUCol()[0]->getCousinClusters().size(); icc++)
+          if( find(m_1DshowerUCol.begin(), m_1DshowerUCol.end(), p_shower->getShowerUCol()[0]->getCousinClusters()[icc])!=m_1DshowerUCol.end() ){ NlinkedU++; break; }
+
+        for(int icc=0; icc<p_shower->getShowerVCol()[0]->getCousinClusters().size(); icc++)
+          if( find(m_1DshowerVCol.begin(), m_1DshowerVCol.end(), p_shower->getShowerVCol()[0]->getCousinClusters()[icc])!=m_1DshowerVCol.end() ){ NlinkedV++; break; }
 
         p_shower = nullptr;
       }
 
+cout<<"  Found linked shower: "<<NlinkedU<<", "<<NlinkedV<<endl;
       if(NlinkedU/(float)m_clusterCol[ic]->getCluster().size()>0.7 || NlinkedV/(float)m_clusterCol[ic]->getCluster().size()>0.7){
         m_clusterCol[ic]->mergeCluster( m_clusterCol[jc] );
         m_clusterCol.erase(m_clusterCol.begin()+jc);
@@ -140,18 +144,22 @@ for(int i=0; i<m_clusterCol.size(); i++) cout<<m_clusterCol[i]->getEnergy()<<end
 
   }}
 
+
+cout<<"Cluster Merge Type2: from HalfCluster aspect"<<endl;
   //  Type2: from longiCluster aspect
   for(int ic=0; ic<m_clusterCol.size() && m_clusterCol.size()>1; ic++){
-    if( m_clusterCol[ic]->getHalfClusterUMap("LinkedLongiCluster")[0]->getCousinClusters().size()==0 && 
-        m_clusterCol[ic]->getHalfClusterVMap("LinkedLongiCluster")[0]->getCousinClusters().size()==0 ) continue;
+    if( m_clusterCol[ic]->getHalfClusterUCol("LinkedLongiCluster")[0]->getHalfClusterCol("CousinCluster").size()==0 && 
+        m_clusterCol[ic]->getHalfClusterVCol("LinkedLongiCluster")[0]->getHalfClusterCol("CousinCluster").size()==0 ) continue;
+cout<<"  Cluster ic has cousin"<<endl;
     for(int jc=ic+1; jc<m_clusterCol.size(); jc++){
-      if( m_clusterCol[jc]->getHalfClusterUMap("LinkedLongiCluster")[0]->getCousinClusters().size()==0 && 
-          m_clusterCol[jc]->getHalfClusterVMap("LinkedLongiCluster")[0]->getCousinClusters().size()==0 ) continue;
+      if( m_clusterCol[jc]->getHalfClusterUCol("LinkedLongiCluster")[0]->getHalfClusterCol("CousinCluster").size()==0 && 
+          m_clusterCol[jc]->getHalfClusterVCol("LinkedLongiCluster")[0]->getHalfClusterCol("CousinCluster").size()==0 ) continue;
+cout<<"  Cluster jc also has cousin, start check"<<endl;
 
-      std::vector<const PandoraPlus::LongiCluster*> m_cousinU = m_clusterCol[ic]->getHalfClusterUMap("LinkedLongiCluster")[0]->getCousinClusters(); 
-      std::vector<const PandoraPlus::LongiCluster*> m_cousinV = m_clusterCol[ic]->getHalfClusterVMap("LinkedLongiCluster")[0]->getCousinClusters(); 
-      if( find(m_cousinU.begin(), m_cousinU.end(), m_clusterCol[jc]->getHalfClusterUMap("LinkedLongiCluster")[0] )!=m_cousinU.end() ||
-          find(m_cousinV.begin(), m_cousinV.end(), m_clusterCol[jc]->getHalfClusterVMap("LinkedLongiCluster")[0] )!=m_cousinV.end() ){
+      std::vector<const PandoraPlus::CaloHalfCluster*> m_cousinU = m_clusterCol[ic]->getHalfClusterUCol("LinkedLongiCluster")[0]->getHalfClusterCol("CousinCluster"); 
+      std::vector<const PandoraPlus::CaloHalfCluster*> m_cousinV = m_clusterCol[ic]->getHalfClusterVCol("LinkedLongiCluster")[0]->getHalfClusterCol("CousinCluster"); 
+      if( find(m_cousinU.begin(), m_cousinU.end(), m_clusterCol[jc]->getHalfClusterUCol("LinkedLongiCluster")[0] )!=m_cousinU.end() ||
+          find(m_cousinV.begin(), m_cousinV.end(), m_clusterCol[jc]->getHalfClusterVCol("LinkedLongiCluster")[0] )!=m_cousinV.end() ){
         m_clusterCol[ic]->mergeCluster( m_clusterCol[jc] );
         m_clusterCol.erase(m_clusterCol.begin()+jc);
         jc--;
@@ -159,7 +167,7 @@ for(int i=0; i<m_clusterCol.size(); i++) cout<<m_clusterCol[i]->getEnergy()<<end
       }        
   }}
 cout<<"    After merge: cluster size "<<m_clusterCol.size()<<endl;
-*/
+
 
 
   m_datacol.map_2DCluster["EcalShowerInLayer"] = m_transhowerCol;

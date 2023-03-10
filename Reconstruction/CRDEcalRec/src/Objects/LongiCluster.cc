@@ -158,9 +158,9 @@ namespace PandoraPlus{
 
       trk_dr = track->getDr();
       trk_dz = track->getDz();
-      axis.SetMag(1.); 
       axis.SetPhi(fitPhi);
       axis.SetTheta(fitTheta);
+      axis.SetMag(1.); 
     }
   }
   
