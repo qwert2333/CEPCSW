@@ -38,6 +38,7 @@ gaudi_add_module(CRDEcalRec
                          src/Algorithm/GlobalClusteringAlg.cpp
                          src/Algorithm/LocalMaxFindingAlg.cpp
                          src/Algorithm/HoughClusteringAlg.cpp
+                         src/Algorithm/TrackMatchingAlg.cpp
                          src/Algorithm/ConeClustering2DAlg.cpp
                          src/Algorithm/EnergySplittingAlg.cpp
                          src/Algorithm/EnergyTimeMatchingAlg.cpp

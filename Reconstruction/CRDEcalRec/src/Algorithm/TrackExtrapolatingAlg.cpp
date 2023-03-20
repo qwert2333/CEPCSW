@@ -42,7 +42,7 @@ StatusCode TrackExtrapolatingAlg::Initialize( PandoraPlusDataCol& m_datacol ){
 
 
 StatusCode TrackExtrapolatingAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
-std::cout<<"---oooOO0OOooo---Excute TrackExtrapolatingAlg---oooOO0OOooo---"<<std::endl;
+std::cout<<"---oooOO0OOooo--- Excuting TrackExtrapolatingAlg ---oooOO0OOooo---"<<std::endl;
 
   std::vector<PandoraPlus::Track*>* p_tracks = &(m_datacol.TrackCol);
 std::cout<<"  Track size: "<<p_tracks->size()<<std::endl;
@@ -68,7 +68,8 @@ std::cout<<"  Track size: "<<p_tracks->size()<<std::endl;
 //                                          <<ECAL_trk_state.referencePoint.Z()<<")"<<std::endl;
 
     ExtrapolateByLayer(normal_vectors, layer_points, ECAL_trk_state, p_tracks->at(itrk));
-    GetTrackPoints(ECAL_trk_state, p_tracks->at(itrk));
+    // The folowing function GetTrackPoints() is not needed in Reconstruction. It is only used for event displaying
+    // GetTrackPoints(ECAL_trk_state, p_tracks->at(itrk));
   } // end loop tracks
 
   // std::cout<<"  Run SelfAlg1"<<std::endl;
@@ -236,13 +237,21 @@ StatusCode TrackExtrapolatingAlg::ExtrapolateByLayer(const std::vector<TVector2>
       }
     }
     
-    // Add track state to the track
+    // Sort Extrapolated points
+    std::vector<TrackState> t_states;
     for(int ip=0; ip<ext_points.size(); ip++){
       TrackState t_state = ECAL_trk_state;
       t_state.location = PandoraPlus::TrackState::AtOther;
       t_state.referencePoint = ext_points[ip];
-      p_track->AddTrackState(t_state);
+      // Note GetExtrapolatedPhi0 is not same as the definition of phi0 in TrackState
+      t_state.phi0 = GetExtrapolatedPhi0(ECAL_trk_state.Kappa, ECAL_trk_state.phi0, center, ext_points[ip]);
+      t_states.push_back(t_state);
     }
+    std::sort(t_states.begin(), t_states.end(), SortByPhi0);
+    for(int ip=0; ip<t_states.size(); ip++){
+      p_track->AddTrackState(t_states[ip]);
+    }
+    
     return StatusCode::SUCCESS;
 }
 
@@ -340,5 +349,21 @@ StatusCode TrackExtrapolatingAlg::GetTrackPoints(const PandoraPlus::TrackState &
 
   return StatusCode::SUCCESS;
 }
+
+// ...oooOO0OOooo......oooOO0OOooo......oooOO0OOooo...
+float TrackExtrapolatingAlg::GetExtrapolatedPhi0(float Kappa, float ECAL_phi0, TVector2 center, TVector3 ext_point){
+  // Note: phi0 of extrapolated points is (phi of velocity at extrapolated point) - (phi of velocity at ECAL front face)
+  TVector2 ext_point_xy(ext_point.X(), ext_point.Y());
+  TVector2 ext2center = center - ext_point_xy;
+  float ext_phi0;
+  if(Kappa>=0) ext_phi0 =  ext2center.Phi() + TMath::Pi()/2.;
+  else ext_phi0 = ext2center.Phi() - TMath::Pi()/2.;
+
+  float phi0 = ext_phi0 - ECAL_phi0;
+  while(phi0 < -Pi())  phi0 = phi0 + 2*Pi();
+  while(phi0 >  Pi())  phi0 = phi0 - 2*Pi();
+  return phi0;
+}
+
 
 #endif

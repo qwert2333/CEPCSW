@@ -52,6 +52,12 @@ public:
   bool IsReturn(float rho, TVector2 & center);
   StatusCode GetTrackPoints(const PandoraPlus::TrackState & ECAL_trk_state, PandoraPlus::Track* p_track);
 
+    // Get phi0 of extrapolated points. Note that this phi0 is not same as the definition of the phi0 in TrackState, but will be stored in TrackState
+  float GetExtrapolatedPhi0(float Kappa, float ECAL_phi0, TVector2 center, TVector3 ext_point);
+  // To sort the extrapolatedpoints, define the following comparison function
+  static bool SortByPhi0(const PandoraPlus::TrackState& trk_state1, const PandoraPlus::TrackState& trk_state2 ) 
+  { return TMath::Abs(trk_state1.phi0) < TMath::Abs(trk_state2.phi0); }
+  
 private: 
 
 };

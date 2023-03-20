@@ -62,7 +62,7 @@ namespace PandoraPlus{
       if( find(towerID.begin(), towerID.end(), id[ii])==towerID.end() ) towerID.push_back(id[ii]);    
   }
   
-/*  std::vector<const CaloUnit*> CaloHalfCluster::getBars() const
+  std::vector<const CaloUnit*> CaloHalfCluster::getBars() const
   {
     std::vector<const CaloUnit*> results;
     results.clear();
@@ -75,7 +75,7 @@ namespace PandoraPlus{
     }
     return results;
   }
-*/
+
 
   double CaloHalfCluster::getEnergy() const {
     double sumE = 0;
