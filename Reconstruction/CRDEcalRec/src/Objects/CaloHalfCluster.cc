@@ -75,7 +75,7 @@ namespace PandoraPlus{
     fitAxis("");
   }
   
-/*  std::vector<const CaloUnit*> CaloHalfCluster::getBars() const
+  std::vector<const CaloUnit*> CaloHalfCluster::getBars() const
   {
     std::vector<const CaloUnit*> results;
     results.clear();
@@ -88,7 +88,7 @@ namespace PandoraPlus{
     }
     return results;
   }
-*/
+
 
   double CaloHalfCluster::getEnergy() const {
     double sumE = 0;

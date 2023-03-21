@@ -3,6 +3,7 @@
 
 #include "Objects/CaloUnit.h"
 #include "Objects/Calo1DCluster.h"
+#include "Objects/Track.h"
 #include "Tools/TrackFitInEcal.h"
 
 namespace PandoraPlus {
@@ -32,13 +33,14 @@ namespace PandoraPlus {
     double getHoughRho() const { return Hough_rho; }
     double getHoughIntercept() const { return Hough_intercept; }
 
-    //std::vector<const CaloUnit*> getBars() const;
+    std::vector<const CaloUnit*> getBars() const;
     std::vector<const Calo1DCluster*> getCluster() const { return m_1dclusters;};
     std::vector<const Calo1DCluster*> getLocalMaxCol(std::string name) const;
     std::vector<const Calo1DCluster*> getAllLocalMaxCol() const;
     std::vector<const Calo1DCluster*> getClusterInLayer(int _layer) const;
     std::vector<const CaloHalfCluster*> getHalfClusterCol(std::string name) const;
     std::vector<const CaloHalfCluster*> getAllHalfClusterCol() const;
+    std::vector<const PandoraPlus::Track*> getAssotiatedTracks() const { return m_TrackCol; }
 
     int getBeginningDlayer() const;
     int getEndDlayer() const;
@@ -58,6 +60,7 @@ namespace PandoraPlus {
     void mergeHalfCluster( const CaloHalfCluster* clus );
     void addTowerID(int _m, int _p, int _s) { std::vector<int> id(3); id[0] = _m; id[1] = _p; id[2] = _s; towerID.push_back(id); }
     void addTowerID(std::vector<int> id) { towerID.push_back(id); }
+    void addAssociatedTrack(const PandoraPlus::Track* _track){ m_TrackCol.push_back(_track); }
 
   private:
     std::vector< std::vector<int> > towerID; //[module, part, stave]
@@ -71,6 +74,7 @@ namespace PandoraPlus {
     std::vector<const Calo1DCluster*> m_1dclusters; 
     std::map<std::string, std::vector<const PandoraPlus::Calo1DCluster*> > map_localMax;
     std::map<std::string, std::vector<const PandoraPlus::CaloHalfCluster*> > map_halfClusCol;  
+    std::vector<const PandoraPlus::Track*> m_TrackCol;
 
     TrackFitInEcal* track = new TrackFitInEcal();
 
