@@ -9,8 +9,8 @@ StatusCode ConeClustering2DAlg::ReadSettings(Settings& m_settings){
   //Initialize parameters
   if(settings.map_floatPars.find("th_beginLayer")==settings.map_floatPars.end())   settings.map_floatPars["th_beginLayer"] = 1;
   if(settings.map_floatPars.find("th_stopLayer")==settings.map_floatPars.end())    settings.map_floatPars["th_stopLayer"] = 15;
-  if(settings.map_floatPars.find("th_ConeTheta")==settings.map_floatPars.end())    settings.map_floatPars["th_ConeTheta"] = TMath::Pi()/2.;
-  if(settings.map_floatPars.find("th_ConeR")==settings.map_floatPars.end())        settings.map_floatPars["th_ConeR"] = 60;
+  if(settings.map_floatPars.find("th_ConeTheta")==settings.map_floatPars.end())    settings.map_floatPars["th_ConeTheta"] = TMath::Pi()/4.;
+  if(settings.map_floatPars.find("th_ConeR")==settings.map_floatPars.end())        settings.map_floatPars["th_ConeR"] = 50;
   if(settings.map_floatPars.find("th_Nshowers")==settings.map_floatPars.end())     settings.map_floatPars["th_Nshowers"] = 4;
   if(settings.map_stringPars.find("ReadinLocalMaxName")==settings.map_stringPars.end()) settings.map_stringPars["ReadinLocalMaxName"] = "LeftLocalMax";
   if(settings.map_stringPars.find("OutputLongiClusName")==settings.map_stringPars.end()) settings.map_stringPars["OutputLongiClusName"] = "ConeAxis";
@@ -40,11 +40,15 @@ StatusCode ConeClustering2DAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
   std::vector<PandoraPlus::CaloHalfCluster*> tmp_longiClusCol; tmp_longiClusCol.clear(); 
   std::map<int, std::vector<const PandoraPlus::Calo1DCluster*> > m_orderedLocalMax; 
 
+//cout<<"  ConeClustering: Input HalfCluster size "<<p_HalfClusterU.size()<<", "<<p_HalfClusterV.size()<<endl;
+
   //Processing U plane:
   for(int ic=0; ic<p_HalfClusterU.size(); ic++){
     //Get LocalMax
     m_localMaxUCol.clear(); 
     m_localMaxUCol = p_HalfClusterU[ic]->getLocalMaxCol(settings.map_stringPars["ReadinLocalMaxName"]);
+
+//cout<<"    In ClusU #"<<ic<<": localMax size "<<m_localMaxUCol.size()<<endl;
 
     //Get ordered LocalMax
     m_orderedLocalMax.clear();
@@ -54,10 +58,15 @@ StatusCode ConeClustering2DAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
     tmp_longiClusCol.clear();
     LongiConeLinking( m_orderedLocalMax, tmp_longiClusCol );
 
+//cout<<"    Cluster size after ConeLinking: "<<tmp_longiClusCol.size()<<endl;
+
     //Convert LongiClusters to const object.    
     const_longiClusUCol.clear();
-    for(int ic=0; ic<tmp_longiClusCol.size(); ic++)
+    for(int ic=0; ic<tmp_longiClusCol.size(); ic++){
+      tmp_longiClusCol[ic]->Check();
       if(tmp_longiClusCol[ic]->getCluster().size()>=settings.map_floatPars["th_Nshowers"]) const_longiClusUCol.push_back(tmp_longiClusCol[ic]);
+    }
+//cout<<"    Cluster size after requiring Nhit: "<<const_longiClusUCol.size()<<endl;
     for(int ic=0; ic<tmp_longiClusCol.size(); ic++) m_datacol.bk_ClusterHalfCol.push_back( tmp_longiClusCol[ic] );
 
     p_HalfClusterU[ic]->setHalfClusters(settings.map_stringPars["OutputLongiClusName"], const_longiClusUCol);    
@@ -78,8 +87,10 @@ StatusCode ConeClustering2DAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
 
     //Convert LongiClusters to const object.
     const_longiClusVCol.clear();
-    for(int ic=0; ic<tmp_longiClusCol.size(); ic++)
+    for(int ic=0; ic<tmp_longiClusCol.size(); ic++){
+      tmp_longiClusCol[ic]->Check();
       if(tmp_longiClusCol[ic]->getCluster().size()>=settings.map_floatPars["th_Nshowers"]) const_longiClusVCol.push_back(tmp_longiClusCol[ic]);
+    }
     for(int ic=0; ic<tmp_longiClusCol.size(); ic++) m_datacol.bk_ClusterHalfCol.push_back( tmp_longiClusCol[ic] );
 
     p_HalfClusterV[ic]->setHalfClusters(settings.map_stringPars["OutputLongiClusName"], const_longiClusVCol);

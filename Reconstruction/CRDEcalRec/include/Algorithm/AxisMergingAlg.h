@@ -1,0 +1,40 @@
+#ifndef _AXISMERGING_ALG_H
+#define _AXISMERGING_ALG_H
+
+#include "Tools/Algorithm.h"
+
+using namespace PandoraPlus;
+class AxisMergingAlg: public PandoraPlus::Algorithm{
+public: 
+
+  AxisMergingAlg(){};
+  ~AxisMergingAlg(){};
+
+  class Factory : public PandoraPlus::AlgorithmFactory
+  {
+  public: 
+    PandoraPlus::Algorithm* CreateAlgorithm() const{ return new AxisMergingAlg(); } 
+
+  };
+
+  StatusCode ReadSettings( PandoraPlus::Settings& m_settings );
+  StatusCode Initialize( PandoraPlusDataCol& m_datacol );
+  StatusCode RunAlgorithm( PandoraPlusDataCol& m_datacol );
+  StatusCode ClearAlgorithm();
+
+  //Self defined algorithms
+
+
+private: 
+
+  std::vector<PandoraPlus::CaloHalfCluster*>* p_HalfClustersU = NULL;
+  std::vector<PandoraPlus::CaloHalfCluster*>* p_HalfClustersV = NULL;
+  std::vector<const PandoraPlus::CaloHalfCluster*> m_axisUCol;
+  std::vector<const PandoraPlus::CaloHalfCluster*> m_axisVCol;
+  std::vector<PandoraPlus::CaloHalfCluster*> m_newAxisUCol;
+  std::vector<PandoraPlus::CaloHalfCluster*> m_newAxisVCol;
+
+
+};
+
+#endif

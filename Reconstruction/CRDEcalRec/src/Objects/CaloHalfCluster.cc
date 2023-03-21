@@ -16,7 +16,7 @@ namespace PandoraPlus{
   void CaloHalfCluster::Check(){
     for(int i=0; i<m_1dclusters.size(); i++)
       if(!m_1dclusters[i]) { m_1dclusters.erase(m_1dclusters.begin()+i); i--; }
-  	}
+  }
 
   void CaloHalfCluster::Clean(){
     for(int i=0; i<m_1dclusters.size(); i++){ delete m_1dclusters[i]; m_1dclusters[i]=NULL; }
@@ -29,6 +29,17 @@ namespace PandoraPlus{
       it.second.clear();
     }
     Clear();
+  }
+
+  CaloHalfCluster* CaloHalfCluster::Clone() const{
+    PandoraPlus::CaloHalfCluster* m_clus = new PandoraPlus::CaloHalfCluster();
+    for(int i1d=0; i1d<m_1dclusters.size(); i1d++) m_clus->addUnit(m_1dclusters[i1d]);
+    for(auto iter:map_localMax)     m_clus->setLocalMax( iter.first, iter.second );
+    for(auto iter:map_halfClusCol)  m_clus->setHalfClusters( iter.first, iter.second );
+    m_clus->setHoughPars( Hough_alpha, Hough_rho );
+    m_clus->setIntercept( Hough_intercept );
+
+    return m_clus;
   }
 
   bool CaloHalfCluster::isNeighbor(const PandoraPlus::Calo1DCluster* m_1dcluster) const{
@@ -60,6 +71,8 @@ namespace PandoraPlus{
     std::vector< std::vector<int> > id = _1dcluster->getTowerID();
     for(int ii=0; ii<id.size(); ii++)
       if( find(towerID.begin(), towerID.end(), id[ii])==towerID.end() ) towerID.push_back(id[ii]);    
+
+    fitAxis("");
   }
   
 /*  std::vector<const CaloUnit*> CaloHalfCluster::getBars() const
@@ -245,11 +258,19 @@ namespace PandoraPlus{
 
       trk_dr = track->getDr();
       trk_dz = track->getDz();
-      axis.SetMag(1.);
       axis.SetPhi(fitPhi);
       axis.SetTheta(fitTheta);
+      axis.SetMag(1.);
     }
   }
+
+  void CaloHalfCluster::mergeHalfCluster(const CaloHalfCluster* clus ){
+    for(int is=0; is<clus->getCluster().size(); is++){
+      if( find(m_1dclusters.begin(), m_1dclusters.end(), clus->getCluster()[is])==m_1dclusters.end() )
+        m_1dclusters.push_back( clus->getCluster()[is] );
+    }
+  }
+
 
 };
 #endif

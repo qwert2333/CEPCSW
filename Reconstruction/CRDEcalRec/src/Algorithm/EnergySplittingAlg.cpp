@@ -9,6 +9,7 @@ StatusCode EnergySplittingAlg::ReadSettings(Settings& m_settings){
   if(settings.map_floatPars.find("th_split")==settings.map_floatPars.end()) settings.map_floatPars["th_split"] = -1;
   if(settings.map_floatPars.find("Eth_Seed")==settings.map_floatPars.end()) settings.map_floatPars["Eth_Seed"] = 0.005;
   if(settings.map_floatPars.find("Eth_ShowerAbs")==settings.map_floatPars.end()) settings.map_floatPars["Eth_Shower"] = 0.005;
+  if(settings.map_stringPars.find("ReadinAxisName")==settings.map_stringPars.end()) settings.map_stringPars["ReadinAxisName"] = "MergedAxis";
   if(settings.map_stringPars.find("OutputClusName")==settings.map_stringPars.end()) settings.map_stringPars["OutputClusName"] = "ESHalfCluster";
   if(settings.map_stringPars.find("OutputTowerName")==settings.map_stringPars.end()) settings.map_stringPars["OutputTowerName"] = "ESTower";
 
@@ -49,7 +50,8 @@ StatusCode EnergySplittingAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
   for(int ih=0; ih<p_HalfClustersU->size(); ih++){
     //Get all axis in U cluster.
     m_axisUCol.clear();
-    m_axisUCol = p_HalfClustersU->at(ih)->getAllHalfClusterCol(); 
+    if( settings.map_stringPars["ReadinAxisName"] == "AllAxis" ) m_axisUCol = p_HalfClustersU->at(ih)->getAllHalfClusterCol(); 
+    else m_axisUCol = p_HalfClustersU->at(ih)->getHalfClusterCol(settings.map_stringPars["ReadinAxisName"]);
    
     //  Loop for 1DClusters.
     m_1dShowerUCol.clear();
@@ -109,7 +111,8 @@ StatusCode EnergySplittingAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
   m_newClusVCol.clear();
   for(int ih=0; ih<p_HalfClustersV->size(); ih++){
     m_axisVCol.clear();
-    m_axisVCol = p_HalfClustersV->at(ih)->getAllHalfClusterCol();
+    if( settings.map_stringPars["ReadinAxisName"] == "AllAxis" ) m_axisVCol = p_HalfClustersV->at(ih)->getAllHalfClusterCol(); 
+    else m_axisVCol = p_HalfClustersV->at(ih)->getHalfClusterCol(settings.map_stringPars["ReadinAxisName"]);
 
     m_1dclusCol.clear();
     m_1dclusCol = p_HalfClustersV->at(ih)->getCluster();

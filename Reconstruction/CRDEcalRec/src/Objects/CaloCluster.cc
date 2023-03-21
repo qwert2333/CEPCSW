@@ -296,9 +296,9 @@ namespace PandoraPlus{
       double fitTheta = trackFitter.getTrkPar(3);
 //printf("\t DEBUG: fitted phi and theta: %.3f \t %.3f \n", fitPhi, fitTheta);
 
-      axis.SetMag(1.);
       axis.SetPhi(fitPhi);
       axis.SetTheta(fitTheta);
+      axis.SetMag(1.);
     } 
   }
 
@@ -361,9 +361,9 @@ namespace PandoraPlus{
     double fitTheta = trackFitter.getTrkPar(3);
 //printf("\t DEBUG: fitted phi and theta: %.3f \t %.3f \n", fitPhi, fitTheta);
 
-    axis.SetMag(1.);
     axis.SetPhi(fitPhi);
     axis.SetTheta(fitTheta);
+    axis.SetMag(1.);
 
     }
   }

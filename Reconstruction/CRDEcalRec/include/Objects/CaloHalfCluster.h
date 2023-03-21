@@ -19,13 +19,13 @@ namespace PandoraPlus {
     inline bool operator == (const CaloHalfCluster &x) const{
       return m_1dclusters==x.getCluster();
     }
-
+    CaloHalfCluster* Clone() const; 
 
     bool isNeighbor(const PandoraPlus::Calo1DCluster* m_1dcluster) const; 
 
     double getEnergy() const; 
     TVector3 getPos() const; 
-    TVector3 getAxis() { fitAxis(""); return axis; }
+    TVector3 getAxis() const { return axis; }
     int getSlayer() const { return m_slayer; }
     std::vector< std::vector<int> > getTowerID() const { return towerID; }
     double getHoughAlpha() const { return Hough_alpha; }

@@ -20,6 +20,7 @@
 #include "Algorithm/LocalMaxFindingAlg.h"
 #include "Algorithm/HoughClusteringAlg.h"
 #include "Algorithm/ConeClustering2DAlg.h"
+#include "Algorithm/AxisMergingAlg.h"
 #include "Algorithm/EnergySplittingAlg.h"
 #include "Algorithm/EnergyTimeMatchingAlg.h"
 //#include "Algorithm/ConeClusteringAlg.h"
@@ -149,9 +150,14 @@ protected:
 
   // yyy: check Hough Algorithm
   TTree *t_Hough;
-  int m_NaxisU, m_NaxisV; 
-  FloatVec m_halfclusV_tag, m_longiclusV_tag, m_houghV_x, m_houghV_y, m_houghV_z, m_houghV_E, m_houghV_module, m_houghV_part, m_houghV_stave, m_houghV_dlayer, m_houghV_slayer;
-  FloatVec m_halfclusU_tag, m_longiclusU_tag, m_houghU_x, m_houghU_y, m_houghU_z, m_houghU_E, m_houghU_module, m_houghU_part, m_houghU_stave, m_houghU_dlayer, m_houghU_slayer;
+  int m_NHoughAxisU, m_NHoughAxisV, m_NConeAxisU, m_NConeAxisV, m_NMergedAxisU, m_NMergedAxisV; 
+  FloatVec m_halfclusV_tag, m_houghV_x, m_houghV_y, m_houghV_z, m_houghV_E, m_houghV_module, m_houghV_part, m_houghV_stave, m_houghV_dlayer, m_houghV_slayer;
+  FloatVec m_halfclusU_tag, m_houghU_x, m_houghU_y, m_houghU_z, m_houghU_E, m_houghU_module, m_houghU_part, m_houghU_stave, m_houghU_dlayer, m_houghU_slayer;
+  FloatVec m_coneaxisV_tag, m_coneaxisV_x, m_coneaxisV_y, m_coneaxisV_z, m_coneaxisV_E;
+  FloatVec m_coneaxisU_tag, m_coneaxisU_x, m_coneaxisU_y, m_coneaxisU_z, m_coneaxisU_E;
+  FloatVec m_mergedaxisV_tag, m_mergedaxisV_x, m_mergedaxisV_y, m_mergedaxisV_z, m_mergedaxisV_E;
+  FloatVec m_mergedaxisU_tag, m_mergedaxisU_x, m_mergedaxisU_y, m_mergedaxisU_z, m_mergedaxisU_E;
+
 
   TTree *t_Cluster;
   int m_Nclus, m_Nmc;
