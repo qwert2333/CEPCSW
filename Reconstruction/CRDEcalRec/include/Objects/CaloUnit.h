@@ -37,6 +37,7 @@ namespace PandoraPlus{
     double getQ2()  const { return Q2;     }
     double getT1()  const { return T1;     }
     double getT2()  const { return T2;     }
+    double getBarLength() const {return barLength; }
 
     TVector3 getPosition() const { return position; }
     double getEnergy() const { return (Q1+Q2)/2.; }
@@ -55,6 +56,7 @@ namespace PandoraPlus{
     void setPosition( TVector3 posv3) { position.SetXYZ( posv3.x(), posv3.y(), posv3.z() ); }
     void setQ(double _q1, double _q2) { Q1=_q1; Q2=_q2; }
     void setT(double _t1, double _t2) { T1=_t1; T2=_t2; }
+    void setBarLength(double _barLength) { barLength=_barLength; }
     CaloUnit* Clone() const;
 
     static int Nmodule;
@@ -80,6 +82,8 @@ namespace PandoraPlus{
 		double Q2;      // Q in right readout;
 		double T1;    // T in left readout;
 		double T2;    // T in right readout;
+
+    double barLength;
 
 
     //static int Nmodule;

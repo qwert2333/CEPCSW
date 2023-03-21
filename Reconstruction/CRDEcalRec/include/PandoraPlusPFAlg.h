@@ -154,6 +154,12 @@ protected:
   FloatVec m_halfclusV_tag, m_longiclusV_tag, m_houghV_x, m_houghV_y, m_houghV_z, m_houghV_E, m_houghV_module, m_houghV_part, m_houghV_stave, m_houghV_dlayer, m_houghV_slayer;
   FloatVec m_halfclusU_tag, m_longiclusU_tag, m_houghU_x, m_houghU_y, m_houghU_z, m_houghU_E, m_houghU_module, m_houghU_part, m_houghU_stave, m_houghU_dlayer, m_houghU_slayer;
 
+  // yyy: check TrackMatchingAlg
+  TTree * t_Match;
+  FloatVec matchV_track_axis_tag, matchV_track_axis_x, matchV_track_axis_y, matchV_track_axis_z; 
+  FloatVec matchU_track_axis_tag, matchU_track_axis_x, matchU_track_axis_y, matchU_track_axis_z; 
+
+
   TTree *t_Cluster;
   int m_Nclus, m_Nmc;
   FloatVec m_Clus_x, m_Clus_y, m_Clus_z, m_Clus_E;
@@ -188,6 +194,7 @@ protected:
   void ClearBar();
   void ClearLayer();
   void ClearHough(); // yyy
+  void ClearMatch(); // yyy
   void ClearShower();
   void ClearCluster();
   void ClearClustering();

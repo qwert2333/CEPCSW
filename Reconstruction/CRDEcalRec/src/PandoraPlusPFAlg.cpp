@@ -138,6 +138,7 @@ StatusCode PandoraPlusPFAlg::initialize()
     t_SimBar = new TTree("SimBarHit", "SimBarHit");
     t_Layers = new TTree("RecLayers","RecLayers");
     t_Hough = new TTree("Hough","Hough");   // yyy: Hough
+    t_Match = new TTree("Match","Match");   // yyy: Match
     t_LongiClus = new TTree("HalfClus", "HalfClus");
     t_Shower = new TTree("RecShowers", "RecShowers");
     t_Cluster = new TTree("RecClusters", "RecClusters");
@@ -209,6 +210,18 @@ StatusCode PandoraPlusPFAlg::initialize()
     t_Hough->Branch("houghU_stave", &m_houghU_stave);
     t_Hough->Branch("houghU_dlayer", &m_houghU_dlayer);
     t_Hough->Branch("houghU_slayer", &m_houghU_slayer);
+
+
+    // yyy: Match
+    t_Match->Branch("matchV_track_axis_tag", &matchV_track_axis_tag);
+    t_Match->Branch("matchV_track_axis_x", &matchV_track_axis_x);
+    t_Match->Branch("matchV_track_axis_y", &matchV_track_axis_y);
+    t_Match->Branch("matchV_track_axis_z", &matchV_track_axis_z);
+    t_Match->Branch("matchU_track_axis_tag", &matchU_track_axis_tag);
+    t_Match->Branch("matchU_track_axis_x", &matchU_track_axis_x);
+    t_Match->Branch("matchU_track_axis_y", &matchU_track_axis_y);
+    t_Match->Branch("matchU_track_axis_z", &matchU_track_axis_z);
+    
 
 
     //CaloHalfClusters
@@ -432,6 +445,33 @@ StatusCode PandoraPlusPFAlg::execute()
   }  // end loop half cluster U
   t_Hough->Fill();
 
+  // yyy: TrackMatchingAlg
+  ClearMatch();
+  for(int i=0; i<m_halfclusterV.size(); i++){  // loop half cluster V
+    std::vector<const PandoraPlus::CaloHalfCluster*> m_trackaxisV = m_halfclusterV[i]->getHalfClusterCol("TrackAxis");
+    for(int ita=0; ita<m_trackaxisV.size(); ita++){ // loop track axis V
+      for(int ilm=0; ilm<m_trackaxisV[ita]->getCluster().size(); ilm++){ // loop local max
+        matchV_track_axis_tag.push_back( m_trackaxisV[ita]->getEnergy() );
+        matchV_track_axis_x.push_back( m_trackaxisV[ita]->getCluster()[ilm]->getPos().x() );
+        matchV_track_axis_y.push_back( m_trackaxisV[ita]->getCluster()[ilm]->getPos().y() );
+        matchV_track_axis_z.push_back( m_trackaxisV[ita]->getCluster()[ilm]->getPos().z() );
+      } 
+    }
+  }
+  for(int i=0; i<m_halfclusterU.size(); i++){  // loop half cluster U
+    std::vector<const PandoraPlus::CaloHalfCluster*> m_trackaxisU = m_halfclusterU[i]->getHalfClusterCol("TrackAxis");
+    for(int ita=0; ita<m_trackaxisU.size(); ita++){ // loop track axis V
+      for(int ilm=0; ilm<m_trackaxisU[ita]->getCluster().size(); ilm++){ // loop local max
+        matchU_track_axis_tag.push_back( m_trackaxisU[ita]->getEnergy() );
+        matchU_track_axis_x.push_back( m_trackaxisU[ita]->getCluster()[ilm]->getPos().x() );
+        matchU_track_axis_y.push_back( m_trackaxisU[ita]->getCluster()[ilm]->getPos().y() );
+        matchU_track_axis_z.push_back( m_trackaxisU[ita]->getCluster()[ilm]->getPos().z() );
+      }
+    }
+  }
+  t_Match->Fill();
+
+
 
     std::vector<PandoraPlus::CaloHalfCluster*> vec_LongiU = m_DataCol.map_HalfCluster["ESHalfClusterU"]; 
     std::vector<PandoraPlus::CaloHalfCluster*> vec_LongiV = m_DataCol.map_HalfCluster["ESHalfClusterV"]; 
@@ -612,13 +652,14 @@ StatusCode PandoraPlusPFAlg::finalize()
   t_SimBar->Write();
   t_Layers->Write();
   t_Hough->Write(); // yyy
+  t_Match->Write(); // yyy
   t_LongiClus->Write(); 
   t_Shower->Write();
   t_Cluster->Write();
   t_Clustering->Write();
   t_Track->Write();
   m_wfile->Close();
-  delete m_wfile, t_SimBar, t_Layers, t_Hough, t_LongiClus, t_Cluster, t_Track, t_Clustering;
+  delete m_wfile, t_SimBar, t_Layers, t_Hough, t_Match, t_LongiClus, t_Cluster, t_Track, t_Clustering;
 
 
   delete m_pMCParticleCreator;
@@ -708,6 +749,18 @@ void PandoraPlusPFAlg::ClearHough(){
   m_houghU_stave.clear();
   m_houghU_dlayer.clear();
   m_houghU_slayer.clear();
+}
+
+// yyy
+void PandoraPlusPFAlg::ClearMatch(){
+  matchV_track_axis_tag.clear();
+  matchV_track_axis_x.clear();
+  matchV_track_axis_y.clear();
+  matchV_track_axis_z.clear();
+  matchU_track_axis_tag.clear();
+  matchU_track_axis_x.clear();
+  matchU_track_axis_y.clear();
+  matchU_track_axis_z.clear();
 }
 
 void PandoraPlusPFAlg::ClearShower(){

@@ -8,8 +8,8 @@ StatusCode TrackMatchingAlg::ReadSettings(PandoraPlus::Settings& m_settings){
   settings = m_settings;
   // ECAL geometry settings
   // Note: Bar half length is also geometry parameter, but obtained from the function GetBarHalfLength()
-  if(settings.map_floatPars.find("cell_size")==settings.map_floatPars.end())
-    settings.map_floatPars["cell_size"] = 10; // unit: mm
+  if(settings.map_floatPars.find("localmax_area")==settings.map_floatPars.end())
+    settings.map_floatPars["localmax_area"] = 10; // unit: mm
   if(settings.map_intPars.find("Nmodule")==settings.map_intPars.end()) 
     settings.map_intPars["Nmodule"] = 8;
 
@@ -46,6 +46,7 @@ StatusCode TrackMatchingAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
 
     // Get local max of the HalfCluster
     std::vector<const PandoraPlus::Calo1DCluster*> localMaxColV = m_HalfClusterV[ihc]->getLocalMaxCol("AllLocalMax");
+
     for(int itrk=0; itrk<m_TrackCol.size(); itrk++){  // loop tracks
       // Get extrapolated points of the track. These points are sorted by the track
       std::vector<TVector3> extrapo_points;
@@ -217,8 +218,8 @@ StatusCode TrackMatchingAlg::CreateTrackAxis(vector<TVector3>& extrapo_points, s
     for(int ilm=0; ilm<localMaxCol.size(); ilm++){
       // distance from the extrpolated point to the center of the local max bar
       TVector3 distance = extrapo_points[ipt] - localMaxCol[ilm]->getPos();
-      if(TMath::Abs(distance.Z()) < GetBarHalfLength(localMaxCol[ilm])
-         && TMath::Sqrt(distance.X()*distance.X() + distance.Y()*distance.Y()) < settings.map_floatPars["cell_size"] ) { 
+      if(TMath::Abs(distance.Z()) < (localMaxCol[ilm]->getBars()[0]->getBarLength())/2.
+         && TMath::Sqrt(distance.X()*distance.X() + distance.Y()*distance.Y()) < settings.map_floatPars["localmax_area"] ) { 
         t_track_axis->addUnit(localMaxCol[ilm]);
       }
       else { continue; }
@@ -231,8 +232,8 @@ StatusCode TrackMatchingAlg::CreateTrackAxis(vector<TVector3>& extrapo_points, s
       TVector3 distance = extrapo_points[ipt] - localMaxCol[ilm]->getPos();
       // rotate the distance to module 6
       distance.RotateZ( TMath::Pi()/4.*(6-localMaxCol[ilm]->getTowerID()[0][0]) );
-      if(TMath::Abs(distance.Y()) < GetBarHalfLength(localMaxCol[ilm])
-         && TMath::Sqrt(distance.X()*distance.X() + distance.Z()*distance.Z()) < settings.map_floatPars["cell_size"] ) { 
+      if(TMath::Abs(distance.Y()) < (localMaxCol[ilm]->getBars()[0]->getBarLength())/2.
+         && TMath::Sqrt(distance.X()*distance.X() + distance.Z()*distance.Z()) < settings.map_floatPars["localmax_area"] ) { 
         t_track_axis->addUnit(localMaxCol[ilm]);
       }
       else { continue; }
@@ -243,13 +244,6 @@ std::cout << "end calling CreateTrackAxis()" << std::endl;
   return StatusCode::SUCCESS;
 }
 
-
-float TrackMatchingAlg::GetBarHalfLength(const PandoraPlus::Calo1DCluster* bar){
-  // copied from digitizer
-  //TODO: reading bar length from geosvc. 
-	if(bar->getSlayer()==1) return 600./2.;
-	else return 480.-bar->getDlayer()*10.;
-}
 
 
 #endif
