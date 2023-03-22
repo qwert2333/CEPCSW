@@ -26,6 +26,8 @@ public:
 
   //Self defined algorithms
   StatusCode LongiConeLinking( std::map<int, std::vector<const PandoraPlus::Calo1DCluster*> >& orderedShower, std::vector<PandoraPlus::CaloHalfCluster*>& ClusterCol);
+  TVector2 GetProjectedAxis( const PandoraPlus::CaloHalfCluster* m_shower );
+  TVector2 GetProjectedRelR( const PandoraPlus::Calo1DCluster* m_shower1, const PandoraPlus::Calo1DCluster* m_shower2 );
 
 private: 
 

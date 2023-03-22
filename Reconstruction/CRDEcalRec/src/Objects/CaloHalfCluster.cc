@@ -109,6 +109,18 @@ namespace PandoraPlus{
     return pos;
   }
 
+  TVector3 CaloHalfCluster::getEnergyCenter() const{
+    TVector3 pos = getPos();
+    double maxEn = -99;
+    for(int i=0; i<m_1dclusters.size(); i++){
+      if(m_1dclusters[i]->getEnergy()>maxEn){
+        maxEn = m_1dclusters[i]->getEnergy();
+        pos = m_1dclusters[i]->getPos();
+      }
+    }
+    return pos;
+  }
+
   std::vector<const PandoraPlus::Calo1DCluster*> CaloHalfCluster::getLocalMaxCol(std::string name) const{
     std::vector<const PandoraPlus::Calo1DCluster*> emptyCol; emptyCol.clear(); 
     if(map_localMax.find(name)!=map_localMax.end()) emptyCol = map_localMax.at(name);

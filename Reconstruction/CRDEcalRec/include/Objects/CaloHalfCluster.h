@@ -27,6 +27,7 @@ namespace PandoraPlus {
     double getEnergy() const; 
     TVector3 getPos() const; 
     TVector3 getAxis() const { return axis; }
+    TVector3 getEnergyCenter() const;
     int getSlayer() const { return m_slayer; }
     std::vector< std::vector<int> > getTowerID() const { return towerID; }
     double getHoughAlpha() const { return Hough_alpha; }
@@ -40,6 +41,7 @@ namespace PandoraPlus {
     std::vector<const Calo1DCluster*> getClusterInLayer(int _layer) const;
     std::vector<const CaloHalfCluster*> getHalfClusterCol(std::string name) const;
     std::vector<const CaloHalfCluster*> getAllHalfClusterCol() const;
+    std::map<std::string, std::vector<const PandoraPlus::CaloHalfCluster*> > getHalfClusterMap() const {return map_halfClusCol; }
     std::vector<const PandoraPlus::Track*> getAssotiatedTracks() const { return m_TrackCol; }
 
     int getBeginningDlayer() const;

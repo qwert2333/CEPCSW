@@ -34,6 +34,8 @@ private:
   std::vector<PandoraPlus::CaloHalfCluster*> m_newAxisUCol;
   std::vector<PandoraPlus::CaloHalfCluster*> m_newAxisVCol;
 
+  static bool compLayer( const PandoraPlus::CaloHalfCluster* sh1, const PandoraPlus::CaloHalfCluster* sh2 )
+    { return sh1->getBeginningDlayer() < sh2->getBeginningDlayer(); }
 
 };
 

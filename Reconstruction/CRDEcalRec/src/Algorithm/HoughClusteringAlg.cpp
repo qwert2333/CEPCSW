@@ -177,12 +177,12 @@ StatusCode HoughClusteringAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
     }
 
     if(m_localMaxUCol.size()<settings.map_intPars["th_peak"]){
-      std::cout << "    yyy: m_localMaxUCol.size()<th_peak, continue" << std::endl;
+//std::cout << "    yyy: m_localMaxUCol.size()<th_peak, continue" << std::endl;
       continue; 
     } 
-    cout << "  HoughClusteringAlg: Local maximum size U = " << m_localMaxUCol.size() << endl;
+//cout << "  HoughClusteringAlg: Local maximum size U = " << m_localMaxUCol.size() << endl;
 
-    cout << "  HoughClusteringAlg: Creating m_HoughObjectsU" << endl;
+//cout << "  HoughClusteringAlg: Creating m_HoughObjectsU" << endl;
     std::vector<PandoraPlus::HoughObject> m_HoughObjectsU; m_HoughObjectsU.clear(); 
     for(int il=0; il<m_localMaxUCol.size(); il++){
       PandoraPlus::HoughObject m_obj(m_localMaxUCol[il], settings.map_floatPars["cell_size"], settings.map_floatPars["ecal_inner_radius"]);
@@ -209,7 +209,7 @@ StatusCode HoughClusteringAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
       m_HoughObjectsU_modules.push_back(hobj);
     }
 
-    // cout << "  HoughClusteringAlg: Creating hough_spacesU module by module" << endl;
+// cout << "  HoughClusteringAlg: Creating hough_spacesU module by module" << endl;
     std::vector<PandoraPlus::HoughSpace> hough_spacesU;
     for(int im=0; im<m_HoughObjectsU_modules.size(); im++){
       PandoraPlus::HoughSpace hspaceU(settings.map_floatPars["alpha_lowU"], settings.map_floatPars["alpha_highU"], 
@@ -220,13 +220,13 @@ StatusCode HoughClusteringAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
       hough_spacesU.push_back(hspaceU);
     }
 
-    // cout<<"  HoughClusteringAlg: Finding clusters from Hough spaces"<<endl;
+// cout<<"  HoughClusteringAlg: Finding clusters from Hough spaces"<<endl;
     m_longiClusUCol.clear(); 
     for(int ih=0; ih<hough_spacesU.size(); ih++){
       ClusterFinding(m_HoughObjectsU_modules[ih], hough_spacesU[ih], m_longiClusUCol);
     }
 
-    // cout << "  HoughClusteringAlg: final output m_longiClusUCol.size() = " << m_longiClusUCol.size() << endl;
+// cout << "  HoughClusteringAlg: final output m_longiClusUCol.size() = " << m_longiClusUCol.size() << endl;
     for(int ic=0; ic<m_longiClusUCol.size(); ic++)
       m_datacol.bk_ClusterHalfCol.push_back( const_cast<PandoraPlus::CaloHalfCluster*>(m_longiClusUCol[ic]) );
     
