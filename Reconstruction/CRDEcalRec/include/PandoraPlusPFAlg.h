@@ -160,6 +160,12 @@ protected:
   FloatVec m_mergedaxisU_tag, m_mergedaxisU_x, m_mergedaxisU_y, m_mergedaxisU_z, m_mergedaxisU_E;
 
 
+  // yyy: check TrackMatchingAlg
+  TTree * t_Match;
+  FloatVec matchV_track_axis_tag, matchV_track_axis_x, matchV_track_axis_y, matchV_track_axis_z; 
+  FloatVec matchU_track_axis_tag, matchU_track_axis_x, matchU_track_axis_y, matchU_track_axis_z; 
+
+
   TTree *t_Cluster;
   int m_Nclus, m_Nmc;
   FloatVec m_Clus_x, m_Clus_y, m_Clus_z, m_Clus_E;
@@ -194,6 +200,7 @@ protected:
   void ClearBar();
   void ClearLayer();
   void ClearHough(); // yyy
+  void ClearMatch(); // yyy
   void ClearShower();
   void ClearCluster();
   void ClearClustering();

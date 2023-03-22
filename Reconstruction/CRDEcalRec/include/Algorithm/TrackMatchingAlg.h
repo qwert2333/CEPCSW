@@ -27,7 +27,6 @@ public:
   StatusCode GetExtrpoPoints(const PandoraPlus::Track* track, std::vector<TVector3>& extrapo_points);
   StatusCode CreateTrackAxis(vector<TVector3>& extrapo_points, std::vector<const PandoraPlus::Calo1DCluster*>& localMaxVCol,
                              PandoraPlus::CaloHalfCluster* t_track_axis);
-  float GetBarHalfLength(const PandoraPlus::Calo1DCluster* local_max);
 
 private:
   std::vector<PandoraPlus::Track*> m_TrackCol;

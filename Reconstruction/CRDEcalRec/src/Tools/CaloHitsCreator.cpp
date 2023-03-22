@@ -83,6 +83,15 @@ namespace PandoraPlus{
         m_bar->setPosition(hit.second[0].getPosition());
         m_bar->setQ( hit.second[0].getEnergy(), hit.second[1].getEnergy() );
         m_bar->setT( hit.second[0].getT1(), hit.second[1].getT1() );
+
+        //---oooOOO000OOOooo---set bar length---oooOOO000OOOooo---
+        //TODO: reading bar length from geosvc. 
+        double t_bar_length;
+        if(m_bar->getSlayer()==1) { t_bar_length = 600.; }
+        else { t_bar_length = 480.-m_bar->getDlayer()*10.; }
+        m_bar->setBarLength(t_bar_length);
+        //---oooOOO000OOOooo---set bar length---oooOOO000OOOooo---
+
         m_barCol.push_back(m_bar);  //Save for later use in algorithms
         m_DataCol.bk_BarCol.push_back(m_bar);  //For every new object: save it into DataCol.backupCol. 
       }
