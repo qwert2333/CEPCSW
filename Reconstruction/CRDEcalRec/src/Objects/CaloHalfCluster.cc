@@ -6,7 +6,8 @@
 namespace PandoraPlus{
 
   void CaloHalfCluster::Clear() {
-    m_slayer=-99;
+    type = -1; 
+    slayer=-99;
     towerID.clear(); 
     m_1dclusters.clear(); 
     map_localMax.clear();
@@ -33,11 +34,13 @@ namespace PandoraPlus{
 
   CaloHalfCluster* CaloHalfCluster::Clone() const{
     PandoraPlus::CaloHalfCluster* m_clus = new PandoraPlus::CaloHalfCluster();
-    for(int i1d=0; i1d<m_1dclusters.size(); i1d++) m_clus->addUnit(m_1dclusters[i1d]);
+    for(int i1d=0; i1d<m_1dclusters.size(); i1d++)  m_clus->addUnit(m_1dclusters[i1d]);
+    for(int itrk=0; itrk<m_TrackCol.size(); itrk++) m_clus->addAssociatedTrack(m_TrackCol[itrk]);
     for(auto iter:map_localMax)     m_clus->setLocalMax( iter.first, iter.second );
     for(auto iter:map_halfClusCol)  m_clus->setHalfClusters( iter.first, iter.second );
     m_clus->setHoughPars( Hough_alpha, Hough_rho );
     m_clus->setIntercept( Hough_intercept );
+    m_clus->setType( type );
 
     return m_clus;
   }
@@ -64,8 +67,8 @@ namespace PandoraPlus{
  
   void CaloHalfCluster::addUnit(const Calo1DCluster* _1dcluster)
   {
-    if(_1dcluster->getSlayer()==0) m_slayer=0;
-    if(_1dcluster->getSlayer()==1) m_slayer=1;
+    if(_1dcluster->getSlayer()==0) slayer=0;
+    if(_1dcluster->getSlayer()==1) slayer=1;
     m_1dclusters.push_back(_1dcluster);
 
     std::vector< std::vector<int> > id = _1dcluster->getTowerID();
@@ -279,8 +282,33 @@ namespace PandoraPlus{
   void CaloHalfCluster::mergeHalfCluster(const CaloHalfCluster* clus ){
     for(int is=0; is<clus->getCluster().size(); is++){
       if( find(m_1dclusters.begin(), m_1dclusters.end(), clus->getCluster()[is])==m_1dclusters.end() )
-        m_1dclusters.push_back( clus->getCluster()[is] );
+        addUnit( clus->getCluster()[is] );
     }
+
+    for(int itrk=0; itrk<clus->getAssociatedTracks().size(); itrk++){
+      if( find(m_TrackCol.begin(), m_TrackCol.end(), clus->getAssociatedTracks()[itrk])==m_TrackCol.end() )
+        m_TrackCol.push_back( clus->getAssociatedTracks()[itrk] );
+    }
+
+    for(auto iter:clus->getLocalMaxMap() ){
+      if(map_localMax.find(iter.first)==map_localMax.end()) map_localMax[iter.first] = iter.second;
+      else{
+        for(int il=0; il<iter.second.size(); il++)
+          if( find(map_localMax[iter.first].begin(), map_localMax[iter.first].end(), iter.second[il])==map_localMax[iter.first].end() ) 
+            map_localMax[iter.first].push_back( iter.second[il] );
+      }
+    }
+
+    for(auto iter:clus->getHalfClusterMap() ){
+      if(map_halfClusCol.find(iter.first)==map_halfClusCol.end()) map_halfClusCol[iter.first] = iter.second;
+      else{
+        for(int il=0; il<iter.second.size(); il++)
+          if( find(map_halfClusCol[iter.first].begin(), map_halfClusCol[iter.first].end(), iter.second[il])==map_halfClusCol[iter.first].end() )
+            map_halfClusCol[iter.first].push_back( iter.second[il] );
+      }
+    }
+
+    fitAxis("");
   }
 
 

@@ -154,10 +154,13 @@ protected:
   int m_NHoughAxisU, m_NHoughAxisV, m_NConeAxisU, m_NConeAxisV, m_NMergedAxisU, m_NMergedAxisV; 
   FloatVec m_halfclusV_tag, m_houghV_x, m_houghV_y, m_houghV_z, m_houghV_E, m_houghV_module, m_houghV_part, m_houghV_stave, m_houghV_dlayer, m_houghV_slayer;
   FloatVec m_halfclusU_tag, m_houghU_x, m_houghU_y, m_houghU_z, m_houghU_E, m_houghU_module, m_houghU_part, m_houghU_stave, m_houghU_dlayer, m_houghU_slayer;
-  FloatVec m_coneaxisV_tag, m_coneaxisV_x, m_coneaxisV_y, m_coneaxisV_z, m_coneaxisV_E;
-  FloatVec m_coneaxisU_tag, m_coneaxisU_x, m_coneaxisU_y, m_coneaxisU_z, m_coneaxisU_E;
-  FloatVec m_mergedaxisV_tag, m_mergedaxisV_x, m_mergedaxisV_y, m_mergedaxisV_z, m_mergedaxisV_E;
-  FloatVec m_mergedaxisU_tag, m_mergedaxisU_x, m_mergedaxisU_y, m_mergedaxisU_z, m_mergedaxisU_E;
+
+  TTree *t_axis;
+  int m_NaxisU, m_NaxisV;
+  IntVec m_axisU_Nhit, m_axisU_type, m_axisV_Nhit, m_axisV_type;
+  FloatVec m_axisU_E, m_axisV_E;
+  FloatVec m_axisUhit_tag, m_axisUhit_type, m_axisUhit_x, m_axisUhit_y, m_axisUhit_z, m_axisUhit_E;
+  FloatVec m_axisVhit_tag, m_axisVhit_type, m_axisVhit_x, m_axisVhit_y, m_axisVhit_z, m_axisVhit_E;
 
 
   // yyy: check TrackMatchingAlg
@@ -183,14 +186,7 @@ protected:
   FloatVec m_HfClusU_E, m_HfClusU_Nhit, m_HfClusV_E, m_HfClusV_Nhit;
 
 
-  //check neighbor clustering
-  TTree* t_Clustering;
-  int m_3dcluster, m_2dcluster, m_1dcluster, m_barcluster, m_bar; //efficiency
-  FloatVec m_E_3dcluster, m_E_2dcluster, m_E_1dcluster, m_E_barcluster, m_E_bar; //resolution
-  FloatVec m_bar_tag, m_bar_energy, m_bar_dlayer, m_bar_slayer, m_bar_x, m_bar_y, m_bar_z, m_bar_module, m_bar_part, m_bar_stave, m_bar_bar; //distribution check
-  IntVec m_units_2dcluster, m_slayer_2dcluster;
-
-  TTree * t_Track;
+  TTree *t_Track;
   int m_Ntrk; 
   FloatVec m_trkstate_d0, m_trkstate_z0, m_trkstate_phi, m_trkstate_tanL, m_trkstate_omega, m_trkstate_kappa;
   FloatVec m_trkstate_refx, m_trkstate_refy, m_trkstate_refz; 
@@ -203,8 +199,8 @@ protected:
   void ClearMatch(); // yyy
   void ClearShower();
   void ClearCluster();
-  void ClearClustering();
   void ClearTrack();
+  void ClearAxis();
 
 };
 #endif

@@ -30,8 +30,8 @@ public:
 
 private:
   std::vector<PandoraPlus::Track*> m_TrackCol;
-  std::vector<PandoraPlus::CaloHalfCluster*> m_HalfClusterV;
-  std::vector<PandoraPlus::CaloHalfCluster*> m_HalfClusterU;
+  std::vector<PandoraPlus::CaloHalfCluster*>* p_HalfClusterV;
+  std::vector<PandoraPlus::CaloHalfCluster*>* p_HalfClusterU;
 
   std::vector<const PandoraPlus::CaloHalfCluster*> m_trackAxisVCol;
   std::vector<const PandoraPlus::CaloHalfCluster*> m_trackAxisUCol;

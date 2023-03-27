@@ -503,7 +503,7 @@ StatusCode HoughClusteringAlg::ClusterFinding(vector<PandoraPlus::HoughObject>& 
       delete m_clus;
       continue;
     } 
-    
+    m_clus->setType(1); //EM-type axis.     
     m_clusCol.push_back(m_clus);
   }
 
@@ -548,6 +548,7 @@ StatusCode HoughClusteringAlg::CleanClusters(vector<PandoraPlus::CaloHalfCluster
           clus_tail->addUnit( m_longiClusCol[ic]->getCluster()[jh]);
         
         if( clus_head->isContinueN(settings.map_intPars["th_continueN"]) ) {
+            clus_head->setType(1); 
             clus_head->setHoughPars(m_longiClusCol[ic]->getHoughAlpha(), m_longiClusCol[ic]->getHoughRho());
             m_longiClusCol.push_back(clus_head);
         }
@@ -556,6 +557,7 @@ StatusCode HoughClusteringAlg::CleanClusters(vector<PandoraPlus::CaloHalfCluster
         }
         if( clus_tail->isContinueN(settings.map_intPars["th_continueN"]) ) {
           clus_tail->setHoughPars(m_longiClusCol[ic]->getHoughAlpha(), m_longiClusCol[ic]->getHoughRho());
+          clus_tail->setType(1);
           m_longiClusCol.push_back(clus_tail);
         }
         else{

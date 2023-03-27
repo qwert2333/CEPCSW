@@ -143,8 +143,8 @@ StatusCode PandoraPlusPFAlg::initialize()
     t_LongiClus = new TTree("HalfClus", "HalfClus");
     t_Shower = new TTree("RecShowers", "RecShowers");
     t_Cluster = new TTree("RecClusters", "RecClusters");
-    t_Clustering = new TTree("Clustering", "Clustering");
     t_Track = new TTree("RecTracks", "RecTracks");
+    t_axis = new TTree("Axis","Axis"); 
 
     //Bar
     t_SimBar->Branch("simBar_x", &m_simBar_x);
@@ -211,30 +211,6 @@ StatusCode PandoraPlusPFAlg::initialize()
     //t_Hough->Branch("houghU_stave", &m_houghU_stave);
     //t_Hough->Branch("houghU_dlayer", &m_houghU_dlayer);
     //t_Hough->Branch("houghU_slayer", &m_houghU_slayer);
-    t_Hough->Branch("NConeAxisV", &m_NConeAxisV);
-    t_Hough->Branch("coneaxisV_tag", &m_coneaxisV_tag);
-    t_Hough->Branch("coneaxisV_x", &m_coneaxisV_x);
-    t_Hough->Branch("coneaxisV_y", &m_coneaxisV_y);
-    t_Hough->Branch("coneaxisV_z", &m_coneaxisV_z);
-    t_Hough->Branch("coneaxisV_E", &m_coneaxisV_E);
-    t_Hough->Branch("NConeAxisU", &m_NConeAxisU);
-    t_Hough->Branch("coneaxisU_tag", &m_coneaxisU_tag);
-    t_Hough->Branch("coneaxisU_x", &m_coneaxisU_x);
-    t_Hough->Branch("coneaxisU_y", &m_coneaxisU_y);
-    t_Hough->Branch("coneaxisU_z", &m_coneaxisU_z);
-    t_Hough->Branch("coneaxisU_E", &m_coneaxisU_E);
-    t_Hough->Branch("NMergedAxisV", &m_NMergedAxisV);
-    t_Hough->Branch("mergedaxisV_tag", &m_mergedaxisV_tag);
-    t_Hough->Branch("mergedaxisV_x",   &m_mergedaxisV_x);
-    t_Hough->Branch("mergedaxisV_y",   &m_mergedaxisV_y);
-    t_Hough->Branch("mergedaxisV_z",   &m_mergedaxisV_z);
-    t_Hough->Branch("mergedaxisV_E",   &m_mergedaxisV_E);
-    t_Hough->Branch("NMergedAxisU", &m_NMergedAxisU);
-    t_Hough->Branch("mergedaxisU_tag", &m_mergedaxisU_tag);
-    t_Hough->Branch("mergedaxisU_x",   &m_mergedaxisU_x);
-    t_Hough->Branch("mergedaxisU_y",   &m_mergedaxisU_y);
-    t_Hough->Branch("mergedaxisU_z",   &m_mergedaxisU_z);
-    t_Hough->Branch("mergedaxisU_E",   &m_mergedaxisU_E);
 
 
     // yyy: Match
@@ -246,7 +222,6 @@ StatusCode PandoraPlusPFAlg::initialize()
     t_Match->Branch("matchU_track_axis_x", &matchU_track_axis_x);
     t_Match->Branch("matchU_track_axis_y", &matchU_track_axis_y);
     t_Match->Branch("matchU_track_axis_z", &matchU_track_axis_z);
-    
 
 
     //CaloHalfClusters
@@ -271,7 +246,7 @@ StatusCode PandoraPlusPFAlg::initialize()
     t_Shower->Branch("shower2D_Dlayer", &m_shower2D_Dlayer);
 
 
-    //Clusters
+    //Clusters and MCParticles
     t_Cluster->Branch("Nclus", &m_Nclus);
     t_Cluster->Branch("Clus_x", &m_Clus_x);
     t_Cluster->Branch("Clus_y", &m_Clus_y);
@@ -287,31 +262,6 @@ StatusCode PandoraPlusPFAlg::initialize()
     t_Cluster->Branch("mcEn", &m_mcEn);
 
 
-    //neighbor clustering
-    t_Clustering->Branch("m_3dcluster", &m_3dcluster);
-    t_Clustering->Branch("m_2dcluster", &m_2dcluster);
-    t_Clustering->Branch("m_1dcluster", &m_1dcluster);
-    t_Clustering->Branch("m_barcluster", &m_barcluster);
-    t_Clustering->Branch("m_bar", &m_bar);
-    t_Clustering->Branch("m_units_2dcluster", &m_units_2dcluster);
-    t_Clustering->Branch("m_slayer_2dcluster", &m_slayer_2dcluster);
-    t_Clustering->Branch("m_E_3dcluster", &m_E_3dcluster);
-    t_Clustering->Branch("m_E_2dcluster", &m_E_2dcluster);
-    t_Clustering->Branch("m_E_1dcluster", &m_E_1dcluster);
-    t_Clustering->Branch("m_E_barcluster", &m_E_barcluster);
-    t_Clustering->Branch("m_E_bar", &m_E_bar);
-    t_Clustering->Branch("m_bar_tag", &m_bar_tag);
-    t_Clustering->Branch("m_bar_energy", &m_bar_energy);
-    t_Clustering->Branch("m_bar_dlayer", &m_bar_dlayer);
-    t_Clustering->Branch("m_bar_slayer", &m_bar_slayer);
-    t_Clustering->Branch("m_bar_x", &m_bar_x);
-    t_Clustering->Branch("m_bar_y", &m_bar_y);
-    t_Clustering->Branch("m_bar_z", &m_bar_z);
-    t_Clustering->Branch("m_bar_module", &m_bar_module);
-    t_Clustering->Branch("m_bar_part", &m_bar_part);
-    t_Clustering->Branch("m_bar_stave", &m_bar_stave);
-    t_Clustering->Branch("m_bar_bar", &m_bar_bar);
-
     // Tracks
     t_Track->Branch("m_Ntrk", &m_Ntrk);
     t_Track->Branch("m_type", &m_type);
@@ -326,6 +276,29 @@ StatusCode PandoraPlusPFAlg::initialize()
     t_Track->Branch("m_trkstate_refz", &m_trkstate_refz);
     t_Track->Branch("m_trkstate_location", &m_trkstate_location);
     t_Track->Branch("m_trkstate_tag", &m_trkstate_tag);
+
+
+    // Axis
+    t_axis->Branch("NaxisU", &m_NaxisU);
+    t_axis->Branch("NaxisV", &m_NaxisV);
+    t_axis->Branch("axisU_Nhit", &m_axisU_Nhit);
+    t_axis->Branch("axisU_type", &m_axisU_type);
+    t_axis->Branch("axisV_Nhit", &m_axisV_Nhit);
+    t_axis->Branch("axisV_type", &m_axisV_type);
+    t_axis->Branch("axisU_E", &m_axisU_E);
+    t_axis->Branch("axisV_E", &m_axisV_E);
+    t_axis->Branch("axisUhit_tag", &m_axisUhit_tag);
+    t_axis->Branch("axisUhit_type", &m_axisUhit_type);
+    t_axis->Branch("axisUhit_x", &m_axisUhit_x);
+    t_axis->Branch("axisUhit_y", &m_axisUhit_y);
+    t_axis->Branch("axisUhit_z", &m_axisUhit_z);
+    t_axis->Branch("axisUhit_E", &m_axisUhit_E);
+    t_axis->Branch("axisVhit_tag", &m_axisVhit_tag);
+    t_axis->Branch("axisVhit_type", &m_axisVhit_type);
+    t_axis->Branch("axisVhit_x", &m_axisVhit_x);
+    t_axis->Branch("axisVhit_y", &m_axisVhit_y);
+    t_axis->Branch("axisVhit_z", &m_axisVhit_z);
+    t_axis->Branch("axisVhit_E", &m_axisVhit_E);
 
   }
 
@@ -358,10 +331,11 @@ StatusCode PandoraPlusPFAlg::execute()
   m_pOutputCreator->CreateCluster( m_DataCol, w_ClusterCollection );
   m_pOutputCreator->CreatePFO( m_DataCol, w_ReconstructedParticleCollection );
 
-  //Write Ana tuples
-  cout<<"Writing tuples"<<endl;
 
-cout<<"  Bar info"<<endl;
+
+
+  //---------------------Write Ana tuples-------------------------
+
   //Save Raw bars information
   ClearBar();
   std::vector<PandoraPlus::CaloUnit*> m_barcol = m_DataCol.map_BarCol["BarCol"];
@@ -382,12 +356,11 @@ cout<<"  Bar info"<<endl;
     m_simBar_bar.push_back(p_hitbar->getBar());
   }
   t_SimBar->Fill();
+  // ------------------------------------
 
-cout<<"  LocalMax info"<<endl;
   //Save Layer info (local Max)
   ClearLayer();
   std::vector<PandoraPlus::CaloHalfCluster*> m_halfclusters = m_DataCol.map_HalfCluster["HalfClusterColU"];
-cout<<"  HalfClusterU size: "<<m_halfclusters.size()<<endl;
   for(int ic=0;ic<m_halfclusters.size(); ic++){
     std::vector<const Calo1DCluster*> tmp_shower = m_halfclusters[ic]->getLocalMaxCol("AllLocalMax");
     m_NshowerU = tmp_shower.size(); 
@@ -410,7 +383,6 @@ cout<<"  HalfClusterU size: "<<m_halfclusters.size()<<endl;
 
   m_halfclusters.clear();
   m_halfclusters = m_DataCol.map_HalfCluster["HalfClusterColV"];
-cout<<"  HalfClusterV size: "<<m_halfclusters.size();
   for(int ic=0;ic<m_halfclusters.size();ic++){
     std::vector<const Calo1DCluster*> tmp_shower = m_halfclusters[ic]->getLocalMaxCol("AllLocalMax");
     m_NshowerV = tmp_shower.size(); 
@@ -431,7 +403,8 @@ cout<<"  HalfClusterV size: "<<m_halfclusters.size();
   }
   t_Layers->Fill();
 
-cout<<"  Hough axis info"<<endl;
+
+  // ------------------------------------
   // yyy: check Hough cluster
   ClearHough();
   std::vector<PandoraPlus::CaloHalfCluster*> m_halfclusterV = m_DataCol.map_HalfCluster["HalfClusterColV"];
@@ -462,9 +435,7 @@ cout<<"  Hough axis info"<<endl;
     m_houghU_E.push_back( m_houghaxisU[ihc]->getEnergy()  );
   }
 */
-cout<<"  HoughAxisV size: "<<m_houghaxisV.size()<<endl;
   for(int ilc=0; ilc<m_houghaxisV.size(); ilc++){
-cout<<"    In Hough #"<<ilc<<": tag "<<m_houghaxisV[ilc]->getEnergy()<<"cluster size "<<m_houghaxisV[ilc]->getCluster().size()<<endl;
     for(int ilm=0; ilm<m_houghaxisV[ilc]->getCluster().size(); ilm++){
       m_halfclusV_tag.push_back( m_houghaxisV[ilc]->getEnergy() );
       m_houghV_x.push_back( m_houghaxisV[ilc]->getCluster()[ilm]->getPos().x() );
@@ -479,9 +450,7 @@ cout<<"    In Hough #"<<ilc<<": tag "<<m_houghaxisV[ilc]->getEnergy()<<"cluster 
     }
   }
 
-cout<<"  HoughAxisU size: "<<m_houghaxisU.size()<<endl;
   for(int ilc=0; ilc<m_houghaxisU.size(); ilc++){
-cout<<"    In Hough #"<<ilc<<": tag "<<m_houghaxisU[ilc]->getEnergy()<<"cluster size "<<m_houghaxisU[ilc]->getCluster().size()<<endl;
     for(int ilm=0; ilm<m_houghaxisU[ilc]->getCluster().size(); ilm++){
       m_halfclusU_tag.push_back( m_houghaxisU[ilc]->getEnergy() );
       m_houghU_x.push_back( m_houghaxisU[ilc]->getCluster()[ilm]->getPos().x() );
@@ -495,84 +464,14 @@ cout<<"    In Hough #"<<ilc<<": tag "<<m_houghaxisU[ilc]->getEnergy()<<"cluster 
       //m_houghU_slayer.push_back( m_houghaxisU[ilc]->getCluster()[ilm]->getSlayer() );
     }
   }
-
-
-cout<<"  Cone axis info"<<endl;
-  //Cone clustered axis
-  std::vector<const PandoraPlus::CaloHalfCluster*> m_coneaxisU; m_coneaxisU.clear();
-  std::vector<const PandoraPlus::CaloHalfCluster*> m_coneaxisV; m_coneaxisV.clear();
-  for(int i=0; i<m_halfclusterU.size(); i++){
-    std::vector<const PandoraPlus::CaloHalfCluster*> tmp_clus = m_halfclusterU[i]->getHalfClusterCol("ConeAxis");
-    m_coneaxisU.insert( m_coneaxisU.end(), tmp_clus.begin(), tmp_clus.end() );
-  }
-  for(int i=0; i<m_halfclusterV.size(); i++){
-    std::vector<const PandoraPlus::CaloHalfCluster*> tmp_clus = m_halfclusterV[i]->getHalfClusterCol("ConeAxis");
-    m_coneaxisV.insert( m_coneaxisV.end(), tmp_clus.begin(), tmp_clus.end() );
-  }  
-
-  m_NConeAxisU = m_coneaxisU.size(); 
-  m_NConeAxisV = m_coneaxisV.size(); 
-  for(int ilc=0; ilc<m_coneaxisV.size(); ilc++){
-    for(int ilm=0; ilm<m_coneaxisV[ilc]->getCluster().size(); ilm++){
-      m_coneaxisV_tag.push_back( ilc );
-      m_coneaxisV_x.push_back( m_coneaxisV[ilc]->getCluster()[ilm]->getPos().x() );
-      m_coneaxisV_y.push_back( m_coneaxisV[ilc]->getCluster()[ilm]->getPos().y() );
-      m_coneaxisV_z.push_back( m_coneaxisV[ilc]->getCluster()[ilm]->getPos().z() );
-      m_coneaxisV_E.push_back( m_coneaxisV[ilc]->getCluster()[ilm]->getEnergy() );
-    }
-  }
-
-
-  for(int ilc=0; ilc<m_coneaxisU.size(); ilc++){
-    for(int ilm=0; ilm<m_coneaxisU[ilc]->getCluster().size(); ilm++){
-      m_coneaxisU_tag.push_back( ilc );
-      m_coneaxisU_x.push_back( m_coneaxisU[ilc]->getCluster()[ilm]->getPos().x() );
-      m_coneaxisU_y.push_back( m_coneaxisU[ilc]->getCluster()[ilm]->getPos().y() );
-      m_coneaxisU_z.push_back( m_coneaxisU[ilc]->getCluster()[ilm]->getPos().z() );
-      m_coneaxisU_E.push_back( m_coneaxisU[ilc]->getCluster()[ilm]->getEnergy() );
-    }
-  }
-
-  //Merged axes
-  std::vector<const PandoraPlus::CaloHalfCluster*> m_mergedaxisU; m_mergedaxisU.clear();
-  std::vector<const PandoraPlus::CaloHalfCluster*> m_mergedaxisV; m_mergedaxisV.clear();
-  for(int i=0; i<m_halfclusterU.size(); i++){
-    std::vector<const PandoraPlus::CaloHalfCluster*> tmp_clus = m_halfclusterU[i]->getHalfClusterCol("MergedAxis");
-    m_mergedaxisU.insert( m_mergedaxisU.end(), tmp_clus.begin(), tmp_clus.end() );
-  }
-  for(int i=0; i<m_halfclusterV.size(); i++){
-    std::vector<const PandoraPlus::CaloHalfCluster*> tmp_clus = m_halfclusterV[i]->getHalfClusterCol("MergedAxis");
-    m_mergedaxisV.insert( m_mergedaxisV.end(), tmp_clus.begin(), tmp_clus.end() );
-  }
-
-  m_NMergedAxisU = m_mergedaxisU.size();
-  m_NMergedAxisV = m_mergedaxisV.size();
-  for(int ilc=0; ilc<m_mergedaxisV.size(); ilc++){
-    for(int ilm=0; ilm<m_mergedaxisV[ilc]->getCluster().size(); ilm++){
-      m_mergedaxisV_tag.push_back( m_mergedaxisV[ilc]->getEnergy() );
-      m_mergedaxisV_x.push_back( m_mergedaxisV[ilc]->getCluster()[ilm]->getPos().x() );
-      m_mergedaxisV_y.push_back( m_mergedaxisV[ilc]->getCluster()[ilm]->getPos().y() );
-      m_mergedaxisV_z.push_back( m_mergedaxisV[ilc]->getCluster()[ilm]->getPos().z() );
-      m_mergedaxisV_E.push_back( m_mergedaxisV[ilc]->getCluster()[ilm]->getEnergy() );
-    }
-  }
-
-  for(int ilc=0; ilc<m_mergedaxisU.size(); ilc++){
-    for(int ilm=0; ilm<m_mergedaxisU[ilc]->getCluster().size(); ilm++){
-      m_mergedaxisU_tag.push_back( m_mergedaxisU[ilc]->getEnergy() );
-      m_mergedaxisU_x.push_back( m_mergedaxisU[ilc]->getCluster()[ilm]->getPos().x() );
-      m_mergedaxisU_y.push_back( m_mergedaxisU[ilc]->getCluster()[ilm]->getPos().y() );
-      m_mergedaxisU_z.push_back( m_mergedaxisU[ilc]->getCluster()[ilm]->getPos().z() );
-      m_mergedaxisU_E.push_back( m_mergedaxisU[ilc]->getCluster()[ilm]->getEnergy() );
-    }
-  }  
-  
   t_Hough->Fill();
 
+
+  // ------------------------------------
   // yyy: TrackMatchingAlg
   ClearMatch();
   for(int i=0; i<m_halfclusterV.size(); i++){  // loop half cluster V
-    std::vector<const PandoraPlus::CaloHalfCluster*> m_trackaxisV = m_halfclusterV[i]->getHalfClusterCol("TrackAxis");
+    std::vector<const PandoraPlus::CaloHalfCluster*> m_trackaxisV = m_halfclusterV[i]->getHalfClusterCol("MergedAxis");
     for(int ita=0; ita<m_trackaxisV.size(); ita++){ // loop track axis V
       for(int ilm=0; ilm<m_trackaxisV[ita]->getCluster().size(); ilm++){ // loop local max
         matchV_track_axis_tag.push_back( m_trackaxisV[ita]->getEnergy() );
@@ -583,7 +482,7 @@ cout<<"  Cone axis info"<<endl;
     }
   }
   for(int i=0; i<m_halfclusterU.size(); i++){  // loop half cluster U
-    std::vector<const PandoraPlus::CaloHalfCluster*> m_trackaxisU = m_halfclusterU[i]->getHalfClusterCol("TrackAxis");
+    std::vector<const PandoraPlus::CaloHalfCluster*> m_trackaxisU = m_halfclusterU[i]->getHalfClusterCol("MergedAxis");
     for(int ita=0; ita<m_trackaxisU.size(); ita++){ // loop track axis V
       for(int ilm=0; ilm<m_trackaxisU[ita]->getCluster().size(); ilm++){ // loop local max
         matchU_track_axis_tag.push_back( m_trackaxisU[ita]->getEnergy() );
@@ -596,28 +495,54 @@ cout<<"  Cone axis info"<<endl;
   t_Match->Fill();
 
 
-cout<<"  HalfCluster info"<<endl;
-  //Half clusters after splitting.
-  std::vector<PandoraPlus::CaloHalfCluster*> vec_LongiU = m_DataCol.map_HalfCluster["ESHalfClusterU"]; 
-  std::vector<PandoraPlus::CaloHalfCluster*> vec_LongiV = m_DataCol.map_HalfCluster["ESHalfClusterV"]; 
-  m_NHfClusU = vec_LongiU.size();
-  m_NHfClusV = vec_LongiV.size();
-  m_HfClusU_E.clear();
-  m_HfClusU_Nhit.clear();
-  m_HfClusV_E.clear();
-  m_HfClusV_Nhit.clear();
-  for(int ih=0; ih<m_NHfClusU; ih++){
-    m_HfClusU_E.push_back(vec_LongiU[ih]->getEnergy());
-    m_HfClusU_Nhit.push_back( vec_LongiU[ih]->getCluster().size() );
+  // ---------------------------------------------
+  // Save axis info
+  ClearAxis();
+  std::vector<const PandoraPlus::CaloHalfCluster*> m_allaxisU; m_allaxisU.clear();
+  std::vector<const PandoraPlus::CaloHalfCluster*> m_allaxisV; m_allaxisV.clear();
+  for(int i=0; i<m_halfclusterU.size(); i++){
+    std::vector<const PandoraPlus::CaloHalfCluster*> tmp_clus = m_halfclusterU[i]->getHalfClusterCol("MergedAxis");
+    //std::vector<const PandoraPlus::CaloHalfCluster*> tmp_clus = m_halfclusterU[i]->getAllHalfClusterCol();
+    m_allaxisU.insert( m_allaxisU.end(), tmp_clus.begin(), tmp_clus.end() );
   }
-  for(int ih=0; ih<m_NHfClusV; ih++){
-    m_HfClusV_E.push_back(vec_LongiV[ih]->getEnergy());
-    m_HfClusV_Nhit.push_back( vec_LongiV[ih]->getCluster().size() );
-  }  
-  t_LongiClus->Fill();
+  for(int i=0; i<m_halfclusterV.size(); i++){
+    std::vector<const PandoraPlus::CaloHalfCluster*> tmp_clus = m_halfclusterV[i]->getHalfClusterCol("MergedAxis");
+    //std::vector<const PandoraPlus::CaloHalfCluster*> tmp_clus = m_halfclusterV[i]->getAllHalfClusterCol();
+    m_allaxisV.insert( m_allaxisV.end(), tmp_clus.begin(), tmp_clus.end() );
+  }
 
+  m_NaxisU = m_allaxisU.size();
+  m_NaxisV = m_allaxisV.size();
+  for(int iax=0; iax<m_allaxisU.size(); iax++){
+    m_axisU_Nhit.push_back( m_allaxisU[iax]->getCluster().size() );
+    m_axisU_type.push_back( m_allaxisU[iax]->getType() );
+    m_axisU_E.push_back( m_allaxisU[iax]->getEnergy() );
+    for(int ihit=0; ihit<m_allaxisU[iax]->getCluster().size(); ihit++){
+      m_axisUhit_tag.push_back( m_allaxisU[iax]->getEnergy() );
+      m_axisUhit_type.push_back( m_allaxisU[iax]->getType() );
+      m_axisUhit_x.push_back( m_allaxisU[iax]->getCluster()[ihit]->getPos().x() );
+      m_axisUhit_y.push_back( m_allaxisU[iax]->getCluster()[ihit]->getPos().y() );
+      m_axisUhit_z.push_back( m_allaxisU[iax]->getCluster()[ihit]->getPos().z() );
+      m_axisUhit_E.push_back( m_allaxisU[iax]->getCluster()[ihit]->getEnergy() );
+    }
+  }
 
-cout<<"  Cluster and MCtruth info"<<endl;
+  for(int iax=0; iax<m_allaxisV.size(); iax++){
+    m_axisV_Nhit.push_back( m_allaxisV[iax]->getCluster().size() );
+    m_axisV_type.push_back( m_allaxisV[iax]->getType() );
+    m_axisV_E.push_back( m_allaxisV[iax]->getEnergy() );
+    for(int ihit=0; ihit<m_allaxisV[iax]->getCluster().size(); ihit++){
+      m_axisVhit_tag.push_back( m_allaxisV[iax]->getEnergy() );
+      m_axisVhit_type.push_back( m_allaxisV[iax]->getType() );
+      m_axisVhit_x.push_back( m_allaxisV[iax]->getCluster()[ihit]->getPos().x() );
+      m_axisVhit_y.push_back( m_allaxisV[iax]->getCluster()[ihit]->getPos().y() );
+      m_axisVhit_z.push_back( m_allaxisV[iax]->getCluster()[ihit]->getPos().z() );
+      m_axisVhit_E.push_back( m_allaxisV[iax]->getCluster()[ihit]->getEnergy() );
+    }
+  }
+  t_axis->Fill();
+
+  // ---------------------------------------------
   //Save Cluster and MCP info
   ClearCluster();
   std::vector<PandoraPlus::Calo3DCluster*> m_clusvec = m_DataCol.map_CaloCluster["EcalCluster"];
@@ -642,6 +567,8 @@ cout<<"  Cluster and MCtruth info"<<endl;
   }
   t_Cluster->Fill();
 
+
+  // ---------------------------------------------
 /*
   //Showers in cluster: 
   //ClearShower();
@@ -668,43 +595,9 @@ cout<<"  Cluster and MCtruth info"<<endl;
   //t_Shower->Fill();
 
 
+*/
 
-	//neighbor clustering
-	ClearClustering();
-	std::vector<PandoraPlus::CaloHalfCluster*>  tmp_halfclustersU = m_DataCol.map_HalfCluster["HalfClusterColU"];
-  std::vector<PandoraPlus::CaloHalfCluster*>  tmp_halfclustersV = m_DataCol.map_HalfCluster["HalfClusterColV"];
-  std::vector<PandoraPlus::CaloHalfCluster*>  tmp_halfclusters; tmp_halfclusters.clear();
-  tmp_halfclusters.insert(tmp_halfclusters.end(), tmp_halfclustersU.begin(), tmp_halfclustersU.end());
-  tmp_halfclusters.insert(tmp_halfclusters.end(), tmp_halfclustersV.begin(), tmp_halfclustersV.end());
-
-	m_2dcluster = tmp_halfclusters.size();
-
-	for(int i=0; i<tmp_halfclusters.size(); i++)
-	{
-		PandoraPlus::CaloHalfCluster* tmp_halfcluster = tmp_halfclusters.at(i);
-		m_E_2dcluster.push_back(tmp_halfcluster->getEnergy()); //
-    m_units_2dcluster.push_back(tmp_halfcluster->getBars().size());
-    m_slayer_2dcluster.push_back(tmp_halfcluster->getSlayer());
-		std::vector<const PandoraPlus::CaloUnit*> allthebars = tmp_halfcluster->getBars(); //
-		for(int n=0; n<allthebars.size(); n++)
-		{
-			const PandoraPlus::CaloUnit* the_bar = allthebars.at(n); //need to be fixed
-			m_bar_tag.push_back(tmp_halfcluster->getEnergy());
-			m_bar_energy.push_back(the_bar->getEnergy());
-			m_bar_dlayer.push_back(the_bar->getDlayer());
-			m_bar_slayer.push_back(the_bar->getSlayer());
-			m_bar_x.push_back(the_bar->getPosition().x());
-			m_bar_y.push_back(the_bar->getPosition().y());
-			m_bar_z.push_back(the_bar->getPosition().z());
-			m_bar_module.push_back(the_bar->getModule());
-			m_bar_part.push_back(the_bar->getPart());
-			m_bar_stave.push_back(the_bar->getStave());
-      m_bar_bar.push_back(the_bar->getBar());
-		}
-	}
-	t_Clustering->Fill();
-
-
+  // ---------------------------------------------
   // Save Track info
   ClearTrack();
   std::vector<PandoraPlus::Track*> m_trkCol = m_DataCol.TrackCol;
@@ -725,7 +618,11 @@ cout<<"  Cluster and MCtruth info"<<endl;
       m_trkstate_tag.push_back(itrk);
   }}
   t_Track->Fill();
-*/
+
+
+  
+
+
 
   //Clean Events
   //system("/cefs/higgs/songwz/winter22/CEPCSW/workarea/memory/memory_test.sh before_clean");
@@ -744,13 +641,13 @@ StatusCode PandoraPlusPFAlg::finalize()
   t_Layers->Write();
   t_Hough->Write(); // yyy
   t_Match->Write(); // yyy
-  t_LongiClus->Write(); 
+  //t_LongiClus->Write(); 
   t_Shower->Write();
   t_Cluster->Write();
-  t_Clustering->Write();
   t_Track->Write();
+  t_axis->Write();
   m_wfile->Close();
-  delete m_wfile, t_SimBar, t_Layers, t_Hough, t_Match, t_LongiClus, t_Cluster, t_Track, t_Clustering;
+  delete m_wfile, t_SimBar, t_Layers, t_Hough, t_Match, t_LongiClus, t_Cluster, t_Track, t_axis;
 
 
   delete m_pMCParticleCreator;
@@ -834,26 +731,6 @@ void PandoraPlusPFAlg::ClearHough(){
   m_houghU_y.clear();
   m_houghU_z.clear();
   m_houghU_E.clear();
-  m_coneaxisV_tag.clear();
-  m_coneaxisV_x.clear();
-  m_coneaxisV_y.clear();
-  m_coneaxisV_z.clear();
-  m_coneaxisV_E.clear();
-  m_coneaxisU_tag.clear();
-  m_coneaxisU_x.clear();
-  m_coneaxisU_y.clear();
-  m_coneaxisU_z.clear();
-  m_coneaxisU_E.clear();
-  m_mergedaxisV_tag.clear();
-  m_mergedaxisV_x.clear();
-  m_mergedaxisV_y.clear();
-  m_mergedaxisV_z.clear();
-  m_mergedaxisV_E.clear();
-  m_mergedaxisU_tag.clear();
-  m_mergedaxisU_x.clear();
-  m_mergedaxisU_y.clear();
-  m_mergedaxisU_z.clear();
-  m_mergedaxisU_E.clear();
 }
 
 // yyy
@@ -895,43 +772,9 @@ void PandoraPlusPFAlg::ClearCluster(){
   m_mcPy.clear();
   m_mcPz.clear();
   m_mcEn.clear();
-
-  //m_showerU_x.clear(); 
-  //m_showerU_y.clear(); 
-  //m_showerU_z.clear(); 
-  //m_showerU_E.clear(); 
-  //m_showerV_x.clear(); 
-  //m_showerV_y.clear(); 
-  //m_showerV_z.clear(); 
-  //m_showerV_E.clear(); 
 }
 
 
-void PandoraPlusPFAlg::ClearClustering(){
-	m_3dcluster=0;
-	m_2dcluster=0;
-	m_1dcluster=0;
-	m_barcluster=0;
-	m_bar=0;
-  m_units_2dcluster.clear();
-  m_slayer_2dcluster.clear();
-	m_E_3dcluster.clear();
-	m_E_2dcluster.clear();
-	m_E_1dcluster.clear();
-	m_E_barcluster.clear();
-	m_E_bar.clear();
-	m_bar_tag.clear();
-	m_bar_energy.clear();
-	m_bar_dlayer.clear();
-	m_bar_slayer.clear(); 
-	m_bar_x.clear();
-	m_bar_y.clear();
-	m_bar_z.clear();
-  m_bar_module.clear();
-  m_bar_part.clear();
-  m_bar_stave.clear();
-  m_bar_bar.clear();
-}
 
 void PandoraPlusPFAlg::ClearTrack(){
   m_Ntrk=-99;
@@ -948,4 +791,30 @@ void PandoraPlusPFAlg::ClearTrack(){
   m_trkstate_location.clear();
   m_trkstate_tag.clear();
 }
+
+
+void PandoraPlusPFAlg::ClearAxis(){
+  m_NaxisU = -99;
+  m_NaxisV = -99;
+  m_axisU_Nhit.clear(); 
+  m_axisU_type.clear(); 
+  m_axisV_Nhit.clear(); 
+  m_axisV_type.clear();
+  m_axisU_E.clear();
+  m_axisV_E.clear();
+  m_axisUhit_tag.clear();
+  m_axisUhit_type.clear();
+  m_axisUhit_x.clear(); 
+  m_axisUhit_y.clear(); 
+  m_axisUhit_z.clear(); 
+  m_axisUhit_E.clear();
+  m_axisVhit_tag.clear();
+  m_axisVhit_type.clear();
+  m_axisVhit_x.clear();
+  m_axisVhit_y.clear();
+  m_axisVhit_z.clear();
+  m_axisVhit_E.clear();
+
+}
+
 #endif

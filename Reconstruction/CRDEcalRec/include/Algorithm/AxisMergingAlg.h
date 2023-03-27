@@ -23,7 +23,9 @@ public:
   StatusCode ClearAlgorithm();
 
   //Self defined algorithms
-
+  StatusCode TrkMatchedMerging( std::vector<PandoraPlus::CaloHalfCluster*>& m_axisCol );
+  StatusCode OverlapMerging( std::vector<PandoraPlus::CaloHalfCluster*>& m_axisCol );
+  StatusCode ConeMerging( std::vector<PandoraPlus::CaloHalfCluster*>& m_axisCol );
 
 private: 
 
