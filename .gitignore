@@ -4,6 +4,7 @@ spack*
 Generator/output/
 Generator/options/
 run/*.root
+run/*.h5
 build/
 InstallArea
 *.swp
