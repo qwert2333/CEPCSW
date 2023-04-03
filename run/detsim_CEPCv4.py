@@ -211,32 +211,6 @@ pandoralg.AbsorberIntLengthOther= 0.006
 ##############################################################################
 
 
-from Configurables import PandoraPlusPFAlg
-PandoraPlusPFAlg = PandoraPlusPFAlg("PandoraPlusPFAlg")
-##----Global parameters----
-PandoraPlusPFAlg.Seed = 1024
-PandoraPlusPFAlg.BField = 3.
-PandoraPlusPFAlg.Debug = 0
-PandoraPlusPFAlg.EcalType = "SiWEcal"
-#PandoraPlusPFAlg.SkipEvt = 23
-PandoraPlusPFAlg.WriteAna = 1
-PandoraPlusPFAlg.AnaFileName = "testRec_Gam_CEPCv4.root"
-##----Readin collections----
-PandoraPlusPFAlg.MCParticleCollection = "MCParticle"
-PandoraPlusPFAlg.TrackCollections = [""]
-PandoraPlusPFAlg.ECalCaloHitCollections = ["ECALBarrel"]
-PandoraPlusPFAlg.ECalReadOutNames = ["EcalBarrelCollection"]
-PandoraPlusPFAlg.HCalCaloHitCollections = [""]
-PandoraPlusPFAlg.HCalReadOutNames = [""]
-
-#----Algorithms----
-PandoraPlusPFAlg.AlgList = ["ConeClusteringAlg"]
-PandoraPlusPFAlg.AlgParNames = [ ["ReadinHit", "OutputCluster", "th_ConeTheta_l1", "th_ConeR_l1", "th_ConeTheta_l2", "th_ConeR_l2"] ]
-PandoraPlusPFAlg.AlgParTypes = [ ["string", "string", "double", "double", "double", "double"] ]
-PandoraPlusPFAlg.AlgParValues = [ ["ECALBarrel", "ECALCluster", "0.8", "60", "0.8", "60"] ]
-
-
-
 # write PODIO file
 from Configurables import PodioOutput
 write = PodioOutput("write")
@@ -247,7 +221,7 @@ write.outputCommands = ["keep *"]
 from Configurables import ApplicationMgr
 ApplicationMgr(
         #TopAlg = [genalg, detsimalg, simHitMerge, caloDigi, pandoralg, write],
-        TopAlg = [genalg, detsimalg, simHitMerge, caloDigi, write],
+        TopAlg = [genalg, detsimalg, simHitMerge, write],
         EvtSel = 'NONE',
         EvtMax = 1,
         ExtSvc = [rndmengine, rndmgensvc, dsvc, geosvc, gearSvc,detsimsvc],

@@ -78,7 +78,7 @@ write.outputCommands = ["keep *"]
 
 from Configurables import ApplicationMgr
 ApplicationMgr( 
-    TopAlg=[inp, caloDigi, readin, write],
+    TopAlg=[inp, caloDigi, readin],
     EvtSel="NONE",
     EvtMax=100,
     ExtSvc=[podioevent, geomsvc],
