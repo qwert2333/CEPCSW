@@ -11,6 +11,7 @@
 #include "edm4hep/CalorimeterHitCollection.h"
 #include "edm4hep/SimCalorimeterHitCollection.h"
 #include "edm4hep/MCRecoCaloAssociationCollection.h"
+#include "edm4hep/MCRecoCaloParticleAssociationCollection.h"
 #include "edm4hep/MCParticleCollection.h"
 
 #include <DDRec/DetectorData.h>
@@ -85,8 +86,8 @@ protected:
 
      /* typedef DataHandle<edm4hep::MCRecoCaloAssociationCollection>  McRecoCaloAssoType; */
      /* Gaudi::Property<std::vector<std::string>> m_caloTruthLinkColName{this, "caloTruthLinkCollection", {}, "caloTruthLinkCollection"}; */
-     /* std::vector<McRecoCaloAssoType*> _caloTruthLinkCollection; */
      DataHandle<edm4hep::MCRecoCaloAssociationCollection> _caloTruthLinkCollection{"MCRecoCaloAssociationCollection", Gaudi::DataHandle::Writer, this};
+     //DataHandle<edm4hep::MCRecoCaloParticleAssociationCollection> _caloMCPTruthLinkCollection{"MCRecoCaloParticleAssociationCollection", Gaudi::DataHandle::Writer, this};
 
      mutable Gaudi::Property<std::vector<float>> m_ChargeSpatialDistri{this, "ChargeSpatialDistribution", {0.1, 0.2, 0.4, 0.2, 0.1}, "Spactial Distribution of MIP charge X*Y;"};
      mutable Gaudi::Property<std::vector<float>> _calibCoeffEcal{this, "CalibrECAL", {40.91, 81.81}, "Calibration coefficients for ECAL"};

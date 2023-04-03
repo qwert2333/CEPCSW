@@ -32,7 +32,7 @@ dsvc = k4DataSvc("EventDataSvc")
 # Geometry Svc
 ##############################################################################
 
-geometry_option = "CepC_v4-onlyECAL.xml"
+geometry_option = "CepC_v4.xml"
 
 if not os.getenv("DETCEPCV4ROOT"):
     print("Can't find the geometry. Please setup envvar DETCEPCV4ROOT." )
@@ -58,13 +58,13 @@ from Configurables import HepMCRdr
 from Configurables import GenPrinter
 
 gun = GtGunTool("GtGunTool")
-gun.Particles = ["mu-"]
+gun.Particles = ["pi-"]
 gun.EnergyMins= [10] # GeV
 gun.EnergyMaxs= [10] # GeV
 gun.ThetaMins = [90] # degree
 gun.ThetaMaxs = [90] # degree
-gun.PhiMins   = [0 ] # degree
-gun.PhiMaxs   = [0 ] # degree
+gun.PhiMins   = [0. ] # degree
+gun.PhiMaxs   = [360. ] # degree
 
 
 #stdheprdr = StdHepRdr("StdHepRdr")
@@ -247,7 +247,7 @@ write.outputCommands = ["keep *"]
 from Configurables import ApplicationMgr
 ApplicationMgr(
         #TopAlg = [genalg, detsimalg, simHitMerge, caloDigi, pandoralg, write],
-        TopAlg = [genalg, detsimalg, simHitMerge, caloDigi, PandoraPlusPFAlg, write],
+        TopAlg = [genalg, detsimalg, simHitMerge, caloDigi, write],
         EvtSel = 'NONE',
         EvtMax = 1,
         ExtSvc = [rndmengine, rndmgensvc, dsvc, geosvc, gearSvc,detsimsvc],

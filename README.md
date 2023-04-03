@@ -12,11 +12,19 @@ SSH to lxslc7 (CentOS 7).
 Before run following commands, please make sure you setup the CVMFS:
 
 ```
-$ git clone git@github.com:cepc/CEPCSW.git
+$ git clone https://code.ihep.ac.cn/guofangyi/CEPCSW.git
 $ cd CEPCSW
-$ git checkout dev-EcalRec-v1.1 # branch name
+$ git checkout DL-model # branch name
 $ source setup.sh
-$ ./build.sh
+$ mkdir build run
+$ cd build
+$ cmake ..
+$ make -j8
+```
+
+Environment is set up now if everything is fine. You can check with helloworld:
+```
+$ cd ../run/
 $ ./run.sh Examples/options/helloalg.py
 ```
 
@@ -44,6 +52,6 @@ Keep the collection names compatible between the prototype and the existing CEPC
 * TPCCollection
 * SETCollection
 
-## Update in branch dev-EcalRec-v1.2: 
-* Update to CEPCSW LCG 101.0.0
-* Re-writing the Reconstruction
+## Update in this branch : 
+* Generating simulation samples for DL study with CEPC-v4 detector. 
+* Todo: add function and config in digitization to support cell merging (in case we need to reduce the input size). 
