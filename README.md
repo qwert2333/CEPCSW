@@ -16,7 +16,7 @@ $ git clone https://code.ihep.ac.cn/guofangyi/CEPCSW.git
 $ cd CEPCSW
 $ git checkout DL-model # branch name
 $ source setup.sh
-$ mkdir build run
+$ mkdir build
 $ cd build
 $ cmake ..
 $ make -j8
@@ -25,7 +25,7 @@ $ make -j8
 Environment is set up now if everything is fine. You can check with helloworld:
 ```
 $ cd ../run/
-$ ./run.sh Examples/options/helloalg.py
+$ ./run.sh ../Examples/options/helloalg.py
 ```
 
 ## Packages

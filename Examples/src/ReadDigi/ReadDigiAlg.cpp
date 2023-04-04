@@ -254,13 +254,25 @@ StatusCode ReadDigiAlg::Clear()
 
   Nhit_EcalB = -99;
   EcalBHit_MCtag.clear();
+  EcalBHit_MCpid.clear();
   EcalBHit_x.clear();
   EcalBHit_y.clear();
   EcalBHit_z.clear();
   EcalBHit_E.clear();
   EcalBHit_T.clear();
 
+  Nhit_EcalE = -99;
+  EcalEHit_MCtag.clear();
+  EcalEHit_MCpid.clear();
+  EcalEHit_x.clear();
+  EcalEHit_y.clear();
+  EcalEHit_z.clear();
+  EcalEHit_E.clear();
+  EcalEHit_T.clear();
+
   Nhit_HcalB = -99;
+  HcalBHit_MCtag.clear();
+  HcalBHit_MCpid.clear();
   HcalBHit_x.clear();
   HcalBHit_y.clear();
   HcalBHit_z.clear();
@@ -268,6 +280,8 @@ StatusCode ReadDigiAlg::Clear()
   HcalBHit_T.clear();
 
   Nhit_HcalE = -99;
+  HcalEHit_MCtag.clear();
+  HcalEHit_MCpid.clear();
   HcalEHit_x.clear();
   HcalEHit_y.clear();
   HcalEHit_z.clear();
