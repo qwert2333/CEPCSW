@@ -211,80 +211,80 @@ static Ref_t create_detector(Detector& theDetector, xml_h element, SensitiveDete
       Volume sliceVol(slice_name, sliceSolid, slice_material);
       
       if ( x_slice.isSensitive() ) {
-	sliceVol.setSensitiveDetector(sens);
-	if(RPC_EdgeWidth>0){
-	  double RPC_GazInlet_In_Z  = halfZ - RPC_EdgeWidth - RPCGazInletOuterRadius;
-	  double RPC_GazInlet_In_Y  = halfY - RPC_EdgeWidth/2;
-	  double RPC_GazInlet_Out_Z = -RPC_GazInlet_In_Z;
-	  double RPC_GazInlet_Out_Y =  RPC_GazInlet_In_Y;
-
-	  string mateialName = x_slice.attr<string>(_Unicode(edge_material));
-	  Material edge_material = theDetector.material(mateialName);
-	  Box solidRPCEdge1(halfY, halfZ, slice_thickness/2.);
-	  Box solidRPCEdge2(halfY-RPC_EdgeWidth, halfZ-RPC_EdgeWidth, slice_thickness/2.);
-	  SubtractionSolid solidRPCEdge(solidRPCEdge1, solidRPCEdge2, Position(0,0,0));
-	  Volume logicRPCEdge(slice_name+"_edge", solidRPCEdge, edge_material);
-	  logicRPCEdge.setAttributes(theDetector,x_slice.regionStr(),x_slice.limitsStr(),x_slice.visStr());
-	  sliceVol.placeVolume(logicRPCEdge);
-
-	  RotationZYX rotGaz(0, pi/2., 0);
-	  Tube solidRPCGazInlet(RPCGazInletInnerRadius,RPCGazInletOuterRadius,RPC_EdgeWidth/*RPCGazInletLength*//2);
-	  Volume logicRPCGazInlet(slice_name+"_GazInlet", solidRPCGazInlet, edge_material);
-	  logicRPCGazInlet.setAttributes(theDetector,x_slice.regionStr(),x_slice.limitsStr(),x_slice.visStr());
-	  logicRPCEdge.placeVolume(logicRPCGazInlet, Transform3D(rotGaz, Position(RPC_GazInlet_In_Y,RPC_GazInlet_In_Z, 0)));
-	  logicRPCEdge.placeVolume(logicRPCGazInlet, Transform3D(rotGaz, Position(RPC_GazInlet_Out_Y,RPC_GazInlet_Out_Z, 0)));
-	  
-	  Tube solidRPCGazInsideInlet(0,RPCGazInletInnerRadius,RPC_EdgeWidth/*RPCGazInletLength*//2);
-	  Volume logicRPCGazInsideInlet(slice_name+"_GazInsideInlet", solidRPCGazInsideInlet, slice_material);
-	  logicRPCGazInsideInlet.setAttributes(theDetector,x_slice.regionStr(),x_slice.limitsStr(),"SeeThrough");
-	  logicRPCEdge.placeVolume(logicRPCGazInsideInlet, Transform3D(rotGaz, Position(RPC_GazInlet_In_Y,RPC_GazInlet_In_Z, 0)));
-	  logicRPCEdge.placeVolume(logicRPCGazInsideInlet, Transform3D(rotGaz,Position(RPC_GazInlet_Out_Y,RPC_GazInlet_Out_Z, 0)));
-	}
-	if(Hcal_spacer_thickness>0){
-	  Tube solidRPCSpacer(0,Hcal_spacer_thickness/2,slice_thickness/2);
-	  Material space_material = theDetector.material(x_slice.attr<string>(_Unicode(spacer_material)));
-	  Volume logicRPCSpacer(slice_name+"_spacer", solidRPCSpacer, space_material);
-	  logicRPCSpacer.setAttributes(theDetector,x_slice.regionStr(),x_slice.limitsStr(),x_slice.visStr());
-	  RotationZYX rotSpacer(0, 0, 0);
-	  
-	  double gap_hZ = halfZ-RPC_EdgeWidth;
-	  double gap_hY = halfY-RPC_EdgeWidth;
-	  int y_number_of_separations = (int)(2*gap_hY/Hcal_spacer_separation);
-	  int z_number_of_separations = (int)(2*gap_hZ/Hcal_spacer_separation);
-	  double y_lateral_space = (2*gap_hY - y_number_of_separations*Hcal_spacer_separation)/2;
-	  double z_lateral_space = (2*gap_hZ - z_number_of_separations*Hcal_spacer_separation)/2;
-	  if(y_lateral_space < Hcal_spacer_thickness/2.){
-	    y_number_of_separations = (int)((2*gap_hY-Hcal_spacer_thickness)/Hcal_spacer_separation);
-	    y_lateral_space = (2*gap_hY - y_number_of_separations*Hcal_spacer_separation)/2;
-	  }
-	  if(z_lateral_space < Hcal_spacer_thickness/2.){
-	    z_number_of_separations = (int)((2*gap_hZ-Hcal_spacer_thickness)/Hcal_spacer_separation);
-	    z_lateral_space = (2*gap_hZ - z_number_of_separations*Hcal_spacer_separation)/2;
-	  }
-	  for(int y_counter = 0; y_counter <=y_number_of_separations; y_counter++){
-	    double SpacerY = gap_hY - y_lateral_space - y_counter*Hcal_spacer_separation;
-	    for(int z_counter = 0; z_counter <=z_number_of_separations; z_counter++){
-	      double SpacerZ = gap_hZ - z_lateral_space - z_counter*Hcal_spacer_separation;
-	      PlacedVolume space_pv = sliceVol.placeVolume(logicRPCSpacer, Transform3D(rotSpacer, Position(SpacerY,SpacerZ,0)));
-	    }
-	  }
-	}
-
-	caloLayer.inner_nRadiationLengths = nRadiationLengths;
-	caloLayer.inner_nInteractionLengths = nInteractionLengths;
-	caloLayer.inner_thickness = thickness_sum;
-	if(layer_id==1) cout<<"Hcal_Barrel:  inner_thickness= "<<thickness_sum<<endl;
-        //Store readout gasgap thickness
-	caloLayer.sensitive_thickness = slice_thickness;
-        //Reset counters to measure "outside" quantitites
-	nRadiationLengths=0.;
-	nInteractionLengths=0.;
-	thickness_sum = 0.;
+        sliceVol.setSensitiveDetector(sens);
+        if(RPC_EdgeWidth>0){
+          double RPC_GazInlet_In_Z  = halfZ - RPC_EdgeWidth - RPCGazInletOuterRadius;
+          double RPC_GazInlet_In_Y  = halfY - RPC_EdgeWidth/2;
+          double RPC_GazInlet_Out_Z = -RPC_GazInlet_In_Z;
+          double RPC_GazInlet_Out_Y =  RPC_GazInlet_In_Y;
+        
+          string mateialName = x_slice.attr<string>(_Unicode(edge_material));
+          Material edge_material = theDetector.material(mateialName);
+          Box solidRPCEdge1(halfY, halfZ, slice_thickness/2.);
+          Box solidRPCEdge2(halfY-RPC_EdgeWidth, halfZ-RPC_EdgeWidth, slice_thickness/2.);
+          SubtractionSolid solidRPCEdge(solidRPCEdge1, solidRPCEdge2, Position(0,0,0));
+          Volume logicRPCEdge(slice_name+"_edge", solidRPCEdge, edge_material);
+          logicRPCEdge.setAttributes(theDetector,x_slice.regionStr(),x_slice.limitsStr(),x_slice.visStr());
+          sliceVol.placeVolume(logicRPCEdge);
+        
+          RotationZYX rotGaz(0, pi/2., 0);
+          Tube solidRPCGazInlet(RPCGazInletInnerRadius,RPCGazInletOuterRadius,RPC_EdgeWidth/*RPCGazInletLength*//2);
+          Volume logicRPCGazInlet(slice_name+"_GazInlet", solidRPCGazInlet, edge_material);
+          logicRPCGazInlet.setAttributes(theDetector,x_slice.regionStr(),x_slice.limitsStr(),x_slice.visStr());
+          logicRPCEdge.placeVolume(logicRPCGazInlet, Transform3D(rotGaz, Position(RPC_GazInlet_In_Y,RPC_GazInlet_In_Z, 0)));
+          logicRPCEdge.placeVolume(logicRPCGazInlet, Transform3D(rotGaz, Position(RPC_GazInlet_Out_Y,RPC_GazInlet_Out_Z, 0)));
+          
+          Tube solidRPCGazInsideInlet(0,RPCGazInletInnerRadius,RPC_EdgeWidth/*RPCGazInletLength*//2);
+          Volume logicRPCGazInsideInlet(slice_name+"_GazInsideInlet", solidRPCGazInsideInlet, slice_material);
+          logicRPCGazInsideInlet.setAttributes(theDetector,x_slice.regionStr(),x_slice.limitsStr(),"SeeThrough");
+          logicRPCEdge.placeVolume(logicRPCGazInsideInlet, Transform3D(rotGaz, Position(RPC_GazInlet_In_Y,RPC_GazInlet_In_Z, 0)));
+          logicRPCEdge.placeVolume(logicRPCGazInsideInlet, Transform3D(rotGaz,Position(RPC_GazInlet_Out_Y,RPC_GazInlet_Out_Z, 0)));
+        }
+        if(Hcal_spacer_thickness>0){
+          Tube solidRPCSpacer(0,Hcal_spacer_thickness/2,slice_thickness/2);
+          Material space_material = theDetector.material(x_slice.attr<string>(_Unicode(spacer_material)));
+          Volume logicRPCSpacer(slice_name+"_spacer", solidRPCSpacer, space_material);
+          logicRPCSpacer.setAttributes(theDetector,x_slice.regionStr(),x_slice.limitsStr(),x_slice.visStr());
+          RotationZYX rotSpacer(0, 0, 0);
+          
+          double gap_hZ = halfZ-RPC_EdgeWidth;
+          double gap_hY = halfY-RPC_EdgeWidth;
+          int y_number_of_separations = (int)(2*gap_hY/Hcal_spacer_separation);
+          int z_number_of_separations = (int)(2*gap_hZ/Hcal_spacer_separation);
+          double y_lateral_space = (2*gap_hY - y_number_of_separations*Hcal_spacer_separation)/2;
+          double z_lateral_space = (2*gap_hZ - z_number_of_separations*Hcal_spacer_separation)/2;
+          if(y_lateral_space < Hcal_spacer_thickness/2.){
+            y_number_of_separations = (int)((2*gap_hY-Hcal_spacer_thickness)/Hcal_spacer_separation);
+            y_lateral_space = (2*gap_hY - y_number_of_separations*Hcal_spacer_separation)/2;
+          }
+          if(z_lateral_space < Hcal_spacer_thickness/2.){
+            z_number_of_separations = (int)((2*gap_hZ-Hcal_spacer_thickness)/Hcal_spacer_separation);
+            z_lateral_space = (2*gap_hZ - z_number_of_separations*Hcal_spacer_separation)/2;
+          }
+          for(int y_counter = 0; y_counter <=y_number_of_separations; y_counter++){
+            double SpacerY = gap_hY - y_lateral_space - y_counter*Hcal_spacer_separation;
+            for(int z_counter = 0; z_counter <=z_number_of_separations; z_counter++){
+              double SpacerZ = gap_hZ - z_lateral_space - z_counter*Hcal_spacer_separation;
+              PlacedVolume space_pv = sliceVol.placeVolume(logicRPCSpacer, Transform3D(rotSpacer, Position(SpacerY,SpacerZ,0)));
+            }
+          }
+        }
+        
+        caloLayer.inner_nRadiationLengths = nRadiationLengths;
+        caloLayer.inner_nInteractionLengths = nInteractionLengths;
+        caloLayer.inner_thickness = thickness_sum;
+        if(layer_id==1) cout<<"Hcal_Barrel:  inner_thickness= "<<thickness_sum<<endl;
+              //Store readout gasgap thickness
+        caloLayer.sensitive_thickness = slice_thickness;
+              //Reset counters to measure "outside" quantitites
+        nRadiationLengths=0.;
+        nInteractionLengths=0.;
+        thickness_sum = 0.;
 	
-	sliceVol.setAttributes(theDetector,x_slice.regionStr(),x_slice.limitsStr(),"SeeThrough");
+        sliceVol.setAttributes(theDetector,x_slice.regionStr(),x_slice.limitsStr(),"SeeThrough");
       }
       else{
-	sliceVol.setAttributes(theDetector,x_slice.regionStr(),x_slice.limitsStr(),x_slice.visStr());
+        sliceVol.setAttributes(theDetector,x_slice.regionStr(),x_slice.limitsStr(),x_slice.visStr());
       }
       nRadiationLengths += slice_thickness/(2.*slice_material.radLength());
       nInteractionLengths += slice_thickness/(2.*slice_material.intLength());
@@ -293,8 +293,8 @@ static Ref_t create_detector(Detector& theDetector, xml_h element, SensitiveDete
       // slice PlacedVolume
       PlacedVolume slice_phv = chamberLogical.placeVolume(sliceVol,Position(0,0,slice_pos_z));
       if ( x_slice.isSensitive() ) {
-	int slice_id  = (layer_id > Hcal_nlayers)? 1:-1;
-	slice_phv.addPhysVolID("layer",layer_id).addPhysVolID("slice",slice_id);
+        int slice_id  = (layer_id > Hcal_nlayers)? 1:-1;
+        slice_phv.addPhysVolID("layer",layer_id).addPhysVolID("slice",slice_id);
       }
       DetElement sliceDetE(layer_name,_toString(slice_number,"slice%d"),x_det.id());
       sliceDetE.setPlacement(slice_phv);
@@ -332,11 +332,11 @@ static Ref_t create_detector(Detector& theDetector, xml_h element, SensitiveDete
         Position localPos(localXPos,localYPos,module_z_offset);
         Position newPos = rotInverse*localPos;
 
-	Transform3D tran3D(rotAll, newPos);
-	PlacedVolume pv = logicCalo.placeVolume(chamberLogical, tran3D);
-	pv.addPhysVolID("stave",stave_id).addPhysVolID("module",module_id);//.addPhysVolID("layer",layer_id);
-	DetElement layer(calo, name+_toString(stave_id,"_stave%d")+_toString(module_id,"_module%d")+_toString(layer_id,"_layer%d"), det_id);
-	layer.setPlacement(pv);
+        Transform3D tran3D(rotAll, newPos);
+        PlacedVolume pv = logicCalo.placeVolume(chamberLogical, tran3D);
+        pv.addPhysVolID("stave",stave_id).addPhysVolID("module",module_id);//.addPhysVolID("layer",layer_id);
+        DetElement layer(calo, name+_toString(stave_id,"_stave%d")+_toString(module_id,"_module%d")+_toString(layer_id,"_layer%d"), det_id);
+        layer.setPlacement(pv);
       }
     }
   }

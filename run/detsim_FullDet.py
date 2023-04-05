@@ -47,7 +47,7 @@ from Configurables import HepMCRdr
 from Configurables import GenPrinter
 
 gun = GtGunTool("GtGunTool")
-gun.Particles = ["gamma"]
+gun.Particles = ["pi-"]
 #gun.Particles = ["nu_e"]
 gun.PositionXs = [0. ]
 gun.PositionYs = [0. ]
@@ -272,7 +272,7 @@ elif dedxoption == "BetheBlochEquationDedxSimTool":
 # output
 from Configurables import PodioOutput
 out = PodioOutput("outputalg")
-out.filename = "CRDFull_Gam10GeV.root"
+out.filename = "CRDFull_Pi-10GeV.root"
 out.outputCommands = ["keep *"]
 
 # ApplicationMgr
