@@ -11,7 +11,7 @@ StatusCode AxisMergingAlg::ReadSettings(Settings& m_settings){
   if(settings.map_floatPars.find("th_overlap")==settings.map_floatPars.end()) settings.map_floatPars["th_overlap"] = 0.5;
   if(settings.map_floatPars.find("axis_Angle")==settings.map_floatPars.end()) settings.map_floatPars["axis_Angle"] = TMath::Pi()/4.;
   if(settings.map_floatPars.find("relP_Angle")==settings.map_floatPars.end()) settings.map_floatPars["relP_Angle"] = TMath::Pi()/4.;
-  if(settings.map_floatPars.find("skipLayer")==settings.map_floatPars.end()) settings.map_floatPars["skipLayer"] = 3;
+  if(settings.map_floatPars.find("relP_Dis")==settings.map_floatPars.end()) settings.map_floatPars["relP_Dis"] = 5*PandoraPlus::CaloUnit::barsize;
 
   return StatusCode::SUCCESS;
 };
@@ -80,9 +80,11 @@ cout<<endl;
 //}
     //Case1: Merge axes associated to the same track. 
     TrkMatchedMerging(m_newAxisUCol);    
+printf("  In HalfClusterU #%d: After Step1: axis size %d \n", ih, m_newAxisUCol.size());
 
     //Case1: Merge axes that share same localMax.
     OverlapMerging(m_newAxisUCol);
+printf("  In HalfClusterU #%d: After Step2: axis size %d \n", ih, m_newAxisUCol.size());
 
     //Case2: Merge nearby axes. 
     ConeMerging(m_newAxisUCol);
@@ -127,7 +129,7 @@ cout<<endl;
       continue;
     }
     std::sort( m_newAxisVCol.begin(), m_newAxisVCol.end(), compLayer );
-
+/*
 printf("  In HalfClusterV #%d: readin axis size %d \n", ih, m_newAxisVCol.size());
 std::map<std::string, std::vector<const PandoraPlus::CaloHalfCluster*> > tmp_HClusMap =  p_HalfClustersV->at(ih)->getHalfClusterMap();
 cout<<"Print Readin AxisV: "<<endl;
@@ -140,7 +142,7 @@ for(auto iter : tmp_HClusMap){
   }
 cout<<endl;
 }
-
+*/
     //Case1: Merge axes associated to the same track. 
     TrkMatchedMerging(m_newAxisVCol);
 printf("  In HalfClusterV #%d: After Step1: axis size %d \n", ih, m_newAxisVCol.size());
@@ -191,7 +193,7 @@ StatusCode AxisMergingAlg::TrkMatchedMerging( std::vector<PandoraPlus::CaloHalfC
     for(int jax=iax+1; jax<m_axisCol.size(); jax++){
       std::vector<const PandoraPlus::Track*> p_trkCol = m_axisCol[jax]->getAssociatedTracks();
 
-printf("  In pair (%d, %d): associated trk size (%d, %d) \n", iax, jax, m_trkCol.size(), p_trkCol.size());
+//printf("  In pair (%d, %d): associated trk size (%d, %d) \n", iax, jax, m_trkCol.size(), p_trkCol.size());
 
       bool fl_match = false;
       for(int itrk=0; itrk<m_trkCol.size(); itrk++){
@@ -199,7 +201,7 @@ printf("  In pair (%d, %d): associated trk size (%d, %d) \n", iax, jax, m_trkCol
           fl_match = true; break;
         }
       }
-printf("  In pair (%d, %d): match = %d \n", iax, jax, fl_match);
+//printf("  In pair (%d, %d): match = %d \n", iax, jax, fl_match);
 
       if(fl_match){
         m_axisCol[iax]->mergeHalfCluster( m_axisCol[jax] );
@@ -227,18 +229,16 @@ StatusCode AxisMergingAlg::OverlapMerging( std::vector<PandoraPlus::CaloHalfClus
       for(int ihit=0; ihit<m_axis->getCluster().size(); ihit++)
         if( find(tmp_localMax.begin(), tmp_localMax.end(), m_axis->getCluster()[ihit])!=tmp_localMax.end() ) nsharedHits++;
 
-printf("  In pair (%d, %d): hit size (%d, %d), shared hit size %d \n",iax, jax, m_axis->getCluster().size(), p_axis->getCluster().size(), nsharedHits);
+//printf("  In pair (%d, %d): hit size (%d, %d), shared hit size %d \n",iax, jax, m_axis->getCluster().size(), p_axis->getCluster().size(), nsharedHits);
       
       if( (m_axis->getCluster().size()<=p_axis->getCluster().size() && (float)nsharedHits/m_axis->getCluster().size()>settings.map_floatPars["th_overlap"] ) || 
           (p_axis->getCluster().size()<m_axis->getCluster().size() && (float)nsharedHits/p_axis->getCluster().size()>settings.map_floatPars["th_overlap"] ) ){
 
-cout<<"  Merge: Yes. "<<endl;
+//cout<<"  Merge: Yes. "<<endl;
         m_axisCol[iax]->mergeHalfCluster( m_axisCol[jax] );
 
-        //if(m_axisCol[iax]->getType()==0 || m_axisCol[jax]->getType()==0)  m_axisCol[iax]->setType(0);
-        //else if( m_axisCol[iax]->getType()==1 || m_axisCol[jax]->getType()==1 ) m_axisCol[iax]->setType(1);
-        //else m_axisCol[iax]->setType(2);
-        m_axisCol[iax]->setType(3);
+        if(m_axisCol[iax]->getType()==1 || m_axisCol[jax]->getType()==1)  m_axisCol[iax]->setType(3);
+        else m_axisCol[iax]->setType(4);
 
         delete m_axisCol[jax]; m_axisCol[jax]=NULL;
         m_axisCol.erase(m_axisCol.begin()+jax);
@@ -264,17 +264,15 @@ cout<<"  Merge: Yes. "<<endl;
       for(int ihit=0; ihit<m_axis->getCluster().size(); ihit++)
         if( find(tmp_localMax.begin(), tmp_localMax.end(), m_axis->getCluster()[ihit])!=tmp_localMax.end() ) nsharedHits++;
 
-printf("  In pair (%d, %d): hit size (%d, %d), shared hit size %d \n",iax, jax, m_axis->getCluster().size(), p_axis->getCluster().size(), nsharedHits);
+//printf("  In pair (%d, %d): hit size (%d, %d), shared hit size %d \n",iax, jax, m_axis->getCluster().size(), p_axis->getCluster().size(), nsharedHits);
 
       if( (m_axis->getCluster().size()<=p_axis->getCluster().size() && (float)nsharedHits/m_axis->getCluster().size()>settings.map_floatPars["th_overlap"] ) ||
           (p_axis->getCluster().size()<m_axis->getCluster().size() && (float)nsharedHits/p_axis->getCluster().size()>settings.map_floatPars["th_overlap"] ) ){
 
-cout<<"  Merge: Yes. "<<endl;
+//cout<<"  Merge: Yes. "<<endl;
         m_axisCol[iax]->mergeHalfCluster( m_axisCol[jax] );  
-        //if(m_axisCol[iax]->getType()==0 || m_axisCol[jax]->getType()==0)  m_axisCol[iax]->setType(0);
-        //else if( m_axisCol[iax]->getType()==1 || m_axisCol[jax]->getType()==1 ) m_axisCol[iax]->setType(1);
-        //else m_axisCol[iax]->setType(2);
-        m_axisCol[iax]->setType(3);
+        if(m_axisCol[iax]->getType()==1 || m_axisCol[jax]->getType()==1 || m_axisCol[iax]->getType()==3 || m_axisCol[jax]->getType()==3)  m_axisCol[iax]->setType(3);
+        else m_axisCol[iax]->setType(4);
 
         delete m_axisCol[jax]; m_axisCol[jax]=NULL;
         m_axisCol.erase(m_axisCol.begin()+jax);
@@ -296,22 +294,45 @@ cout<<"  Merge: Yes. "<<endl;
 StatusCode AxisMergingAlg::ConeMerging( std::vector<PandoraPlus::CaloHalfCluster*>& m_axisCol ){
   if(m_axisCol.size()<2) return StatusCode::SUCCESS;
 
+  std::sort( m_axisCol.begin(), m_axisCol.end(), compLayer );
   for(int iax=0; iax<m_axisCol.size(); iax++){
     const PandoraPlus::CaloHalfCluster* m_axis = m_axisCol[iax];
     for(int jax=iax+1; jax<m_axisCol.size(); jax++){
       const PandoraPlus::CaloHalfCluster* p_axis = m_axisCol[jax];
 
+//printf("  Layer range: axis %d: [%d, %d], axis %d: [%d, %d] \n", iax, m_axis->getBeginningDlayer(), m_axis->getEndDlayer(), jax, p_axis->getBeginningDlayer(), p_axis->getEndDlayer());
+
+      TVector3 m_beginPoint = m_axis->getClusterInLayer( m_axis->getBeginningDlayer() )[0]->getPos();
+      TVector3 m_endPoint   = m_axis->getClusterInLayer( m_axis->getEndDlayer() )[0]->getPos();
+      TVector3 p_beginPoint = p_axis->getClusterInLayer( p_axis->getBeginningDlayer() )[0]->getPos();
+      TVector3 p_endPoint   = p_axis->getClusterInLayer( p_axis->getEndDlayer() )[0]->getPos();
+      double relDis = -1.; 
+      if( m_endPoint.Mag()<p_beginPoint.Mag() )      relDis = p_beginPoint.Mag() - m_endPoint.Mag(); 
+      else if( p_endPoint.Mag()<m_beginPoint.Mag() ) relDis = m_beginPoint.Mag() - p_endPoint.Mag();
+      else if( m_beginPoint.Mag()>p_beginPoint.Mag() && m_endPoint.Mag()>p_endPoint.Mag() )  relDis = p_endPoint.Mag() - m_beginPoint.Mag();
+      else if( p_beginPoint.Mag()>m_beginPoint.Mag() && p_endPoint.Mag()>m_endPoint.Mag() )  relDis = m_endPoint.Mag() - p_beginPoint.Mag();
+      else if( (m_beginPoint.Mag()>p_beginPoint.Mag() && m_endPoint.Mag()<p_endPoint.Mag()) ||
+               (m_beginPoint.Mag()<p_beginPoint.Mag() && m_endPoint.Mag()>p_endPoint.Mag()) ) relDis = 9999.;
+
       double minRelAngle = min( sin( (m_axis->getPos()-p_axis->getPos()).Angle(m_axis->getAxis())),
                                 sin( (m_axis->getPos()-p_axis->getPos()).Angle(p_axis->getAxis())) );
-      int skipLayer = m_axis->getBeginningDlayer()<p_axis->getBeginningDlayer() ?
-                      (p_axis->getBeginningDlayer()-m_axis->getEndDlayer()) : (m_axis->getBeginningDlayer()-p_axis->getEndDlayer());
+//      int skipLayer = m_axis->getBeginningDlayer()<p_axis->getBeginningDlayer() ?
+//                      (p_axis->getBeginningDlayer()-m_axis->getEndDlayer()) : (m_axis->getBeginningDlayer()-p_axis->getEndDlayer());
+
+//printf("  AxisMerging: axes pair (%d, %d): axisAngel = %.3f, RelPAngle = %.3f, dis = %d \n", iax, jax, m_axis->getAxis().Angle(p_axis->getAxis()), minRelAngle, relDis);
+
 
       if( sin( m_axis->getAxis().Angle(p_axis->getAxis()) ) < sin(settings.map_floatPars["axis_Angle"]) &&
           sin(minRelAngle) < sin(settings.map_floatPars["relP_Angle"]) &&
-          skipLayer <= settings.map_floatPars["skipLayer"] ){
+          relDis <= settings.map_floatPars["relP_Dis"] && relDis>=0 ){
+//cout<<"    Merge! "<<endl;
 
         m_axisCol[iax]->mergeHalfCluster( m_axisCol[jax] );
-        m_axisCol[iax]->setType(4);
+        if(m_axisCol[iax]->getType()==1 || m_axisCol[jax]->getType()==1) m_axisCol[iax]->setType(5);
+        else if(m_axisCol[iax]->getType()==3 || m_axisCol[jax]->getType()==3) m_axisCol[iax]->setType(6);
+        else if(m_axisCol[iax]->getType()==4 || m_axisCol[jax]->getType()==4) m_axisCol[iax]->setType(4);
+        else m_axisCol[iax]->setType(7);
+
         delete m_axisCol[jax]; m_axisCol[jax]=NULL;
         m_axisCol.erase(m_axisCol.begin()+jax);
         jax--;
@@ -322,6 +343,7 @@ StatusCode AxisMergingAlg::ConeMerging( std::vector<PandoraPlus::CaloHalfCluster
     m_axis = nullptr;
   }
 
+//cout<<"Iteration merge"<<endl;
 
   //iterate
   for(int iax=0; iax<m_axisCol.size(); iax++){
@@ -329,18 +351,35 @@ StatusCode AxisMergingAlg::ConeMerging( std::vector<PandoraPlus::CaloHalfCluster
     for(int jax=iax+1; jax<m_axisCol.size(); jax++){
       const PandoraPlus::CaloHalfCluster* p_axis = m_axisCol[jax];
 
-      double relDis = (m_axis->getEnergyCenter()-p_axis->getEnergyCenter()).Mag();
+      TVector3 m_beginPoint = m_axis->getClusterInLayer( m_axis->getBeginningDlayer() )[0]->getPos();
+      TVector3 m_endPoint   = m_axis->getClusterInLayer( m_axis->getEndDlayer() )[0]->getPos();
+      TVector3 p_beginPoint = p_axis->getClusterInLayer( p_axis->getBeginningDlayer() )[0]->getPos();
+      TVector3 p_endPoint   = p_axis->getClusterInLayer( p_axis->getEndDlayer() )[0]->getPos();
+      double relDis = -1.;
+      if( m_endPoint.Mag()<p_beginPoint.Mag() )      relDis = p_beginPoint.Mag() - m_endPoint.Mag();
+      else if( p_endPoint.Mag()<m_beginPoint.Mag() ) relDis = m_beginPoint.Mag() - p_endPoint.Mag();
+      else if( m_beginPoint.Mag()>p_beginPoint.Mag() && m_endPoint.Mag()>p_endPoint.Mag() )  relDis = p_endPoint.Mag() - m_beginPoint.Mag();
+      else if( p_beginPoint.Mag()>m_beginPoint.Mag() && p_endPoint.Mag()>m_endPoint.Mag() )  relDis = m_endPoint.Mag() - p_beginPoint.Mag();
+      else if( (m_beginPoint.Mag()>p_beginPoint.Mag() && m_endPoint.Mag()<p_endPoint.Mag()) ||
+               (m_beginPoint.Mag()<p_beginPoint.Mag() && m_endPoint.Mag()>p_endPoint.Mag()) ) relDis = 9999.;
       double minRelAngle = min( sin( (m_axis->getEnergyCenter()-p_axis->getEnergyCenter()).Angle(m_axis->getAxis())),
                                 sin( (m_axis->getEnergyCenter()-p_axis->getEnergyCenter()).Angle(p_axis->getAxis())) );
-      int skipLayer = m_axis->getBeginningDlayer()<p_axis->getBeginningDlayer() ?
-                      (p_axis->getBeginningDlayer()-m_axis->getEndDlayer()) : (m_axis->getBeginningDlayer()-p_axis->getEndDlayer());
+      //int skipLayer = m_axis->getBeginningDlayer()<p_axis->getBeginningDlayer() ?
+      //                (p_axis->getBeginningDlayer()-m_axis->getEndDlayer()) : (m_axis->getBeginningDlayer()-p_axis->getEndDlayer());
+
+//printf("  AxisMerging: axes pair (%d, %d): axisAngel = %.3f, RelPAngle = %.3f, dis = %d \n", iax, jax, m_axis->getAxis().Angle(p_axis->getAxis()), minRelAngle, relDis);
+//printf("  Layer range: axis %d: [%d, %d], axis %d: [%d, %d] \n", iax, m_axis->getBeginningDlayer(), m_axis->getEndDlayer(), jax, p_axis->getBeginningDlayer(), p_axis->getEndDlayer());
 
       if( sin( m_axis->getAxis().Angle(p_axis->getAxis()) ) < sin(settings.map_floatPars["axis_Angle"]) &&
           ( sin(minRelAngle) < sin(settings.map_floatPars["relP_Angle"]) )&&
-          skipLayer <= settings.map_floatPars["skipLayer"] ){
+          relDis <= settings.map_floatPars["relP_Dis"] && relDis>=0 ){
 
         m_axisCol[iax]->mergeHalfCluster( m_axisCol[jax] );
-        m_axisCol[iax]->setType(2);
+        if(m_axisCol[iax]->getType()==1 || m_axisCol[jax]->getType()==1) m_axisCol[iax]->setType(5);
+        else if(m_axisCol[iax]->getType()==3 || m_axisCol[jax]->getType()==3) m_axisCol[iax]->setType(6);
+        else if(m_axisCol[iax]->getType()==4 || m_axisCol[jax]->getType()==4) m_axisCol[iax]->setType(4);
+        else m_axisCol[iax]->setType(7);
+
         delete m_axisCol[jax]; m_axisCol[jax]=NULL;
         m_axisCol.erase(m_axisCol.begin()+jax);
         jax--;

@@ -10,8 +10,8 @@ StatusCode TrackMatchingAlg::ReadSettings(PandoraPlus::Settings& m_settings){
   // Note: Bar half length is also geometry parameter, but obtained from the function GetBarHalfLength()
   if(settings.map_floatPars.find("localmax_area")==settings.map_floatPars.end())
     settings.map_floatPars["localmax_area"] = 10; // unit: mm
-  if(settings.map_intPars.find("Nmodule")==settings.map_intPars.end()) 
-    settings.map_intPars["Nmodule"] = 8;
+  //if(settings.map_intPars.find("Nmodule")==settings.map_intPars.end()) 
+  //  settings.map_intPars["Nmodule"] = 8;
   if(settings.map_stringPars.find("ReadinLocalMaxName")==settings.map_stringPars.end())
     settings.map_stringPars["ReadinLocalMaxName"] = "AllLocalMax";
   if(settings.map_stringPars.find("OutputLongiClusName")==settings.map_stringPars.end()) 
@@ -153,6 +153,7 @@ cout<<"Saved tmp cluster: size = "<<tmp_deleteClus.size()<<endl;
     }
   }
 
+/*
 printf("TrackMatch: After match cluster size [%d, %d] \n", p_HalfClusterU->size(), p_HalfClusterV->size());
 for(int i=0; i<p_HalfClusterV->size(); i++){
   cout<<"  In HalfClusterV #"<<i<<": axis size = "<<p_HalfClusterV->at(i)->getHalfClusterCol("TrackAxis").size()<<endl;
@@ -162,7 +163,7 @@ cout<<endl;
 }
 
 
-/*   // Program check
+   // Program check
    std::cout << "yyy: check TrackMatchingAlg." << std::endl;
    for(int ihc=0; ihc<p_HalfClusterV->size(); ihc++){
      std::vector<const CaloHalfCluster*> check_track_axis;
@@ -279,7 +280,8 @@ StatusCode TrackMatchingAlg::CreateTrackAxis(vector<TVector3>& extrapo_points, s
       // distance from the extrpolated point to the center of the local max bar
       TVector3 distance = extrapo_points[ipt] - localMaxCol[ilm]->getPos();
       if(TMath::Abs(distance.Z()) < (localMaxCol[ilm]->getBars()[0]->getBarLength())/2.
-         && TMath::Sqrt(distance.X()*distance.X() + distance.Y()*distance.Y()) < settings.map_floatPars["localmax_area"] ) { 
+         //&& TMath::Sqrt(distance.X()*distance.X() + distance.Y()*distance.Y()) < settings.map_floatPars["localmax_area"] ) { 
+         && TMath::Sqrt(distance.X()*distance.X() + distance.Y()*distance.Y()) < PandoraPlus::CaloUnit::barsize ) { 
         t_track_axis->addUnit(localMaxCol[ilm]);
       }
       else { continue; }
@@ -293,14 +295,15 @@ StatusCode TrackMatchingAlg::CreateTrackAxis(vector<TVector3>& extrapo_points, s
       // rotate the distance to module 6
       distance.RotateZ( TMath::Pi()/4.*(6-localMaxCol[ilm]->getTowerID()[0][0]) );
       if(TMath::Abs(distance.Y()) < (localMaxCol[ilm]->getBars()[0]->getBarLength())/2.
-         && TMath::Sqrt(distance.X()*distance.X() + distance.Z()*distance.Z()) < settings.map_floatPars["localmax_area"] ) { 
+         //&& TMath::Sqrt(distance.X()*distance.X() + distance.Z()*distance.Z()) < settings.map_floatPars["localmax_area"] ) { 
+         && TMath::Sqrt(distance.X()*distance.X() + distance.Z()*distance.Z()) < PandoraPlus::CaloUnit::barsize ) { 
         t_track_axis->addUnit(localMaxCol[ilm]);
       }
       else { continue; }
     }}
   }
 
-std::cout << "end calling CreateTrackAxis()" << std::endl;
+//std::cout << "end calling CreateTrackAxis()" << std::endl;
   return StatusCode::SUCCESS;
 }
 

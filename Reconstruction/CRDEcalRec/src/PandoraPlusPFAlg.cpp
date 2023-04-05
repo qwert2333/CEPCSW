@@ -3,9 +3,6 @@
 
 #include "PandoraPlusPFAlg.h"
 
-
-//#define C 299.79  // unit: mm/ns
-//#define PI 3.141592653
 using namespace std;
 using namespace dd4hep;
 
@@ -17,6 +14,8 @@ int PandoraPlus::CaloUnit::NbarPhi = 47;
 int PandoraPlus::CaloUnit::NbarZ = 60;
 int PandoraPlus::CaloUnit::over_module[28] = {13,15,16,18,19,21,22,24,25,26,28,29,30,32,33,35,36,38,39,41,42,43,45,46};
 int PandoraPlus::CaloUnit::over_module_set = 2;
+float PandoraPlus::CaloUnit::barsize = 10.; //mm
+float PandoraPlus::CaloUnit::ecal_innerR = 1860;  //mm
 
 DECLARE_COMPONENT( PandoraPlusPFAlg )
 
@@ -169,6 +168,7 @@ StatusCode PandoraPlusPFAlg::initialize()
     t_Layers->Branch("barShowerU_y", &m_barShowerU_y);
     t_Layers->Branch("barShowerU_z", &m_barShowerU_z);
     t_Layers->Branch("barShowerU_E", &m_barShowerU_E);
+    t_Layers->Branch("barShowerU_T", &m_barShowerU_T);
     //t_Layers->Branch("barShowerU_module", &m_barShowerU_module);
     //t_Layers->Branch("barShowerU_stave", &m_barShowerU_stave);
     //t_Layers->Branch("barShowerU_part", &m_barShowerU_part);
@@ -180,6 +180,7 @@ StatusCode PandoraPlusPFAlg::initialize()
     t_Layers->Branch("barShowerV_y", &m_barShowerV_y);
     t_Layers->Branch("barShowerV_z", &m_barShowerV_z);
     t_Layers->Branch("barShowerV_E", &m_barShowerV_E);
+    t_Layers->Branch("barShowerV_T", &m_barShowerV_T);
     //t_Layers->Branch("barShowerV_module", &m_barShowerV_module);
     //t_Layers->Branch("barShowerV_stave", &m_barShowerV_stave);
     //t_Layers->Branch("barShowerV_part", &m_barShowerV_part);
@@ -371,6 +372,7 @@ StatusCode PandoraPlusPFAlg::execute()
       m_barShowerU_y.push_back( tmp_shower[is]->getPos().y() );
       m_barShowerU_z.push_back( tmp_shower[is]->getPos().z() );
       m_barShowerU_E.push_back( tmp_shower[is]->getEnergy() );
+      m_barShowerU_T.push_back( (tmp_shower[is]->getT1()+tmp_shower[is]->getT2())/2. );
       //m_barShowerU_module.push_back( tmp_shower[is]->getSeeds().at(iseed)->getModule() );
       //m_barShowerU_stave.push_back( tmp_shower[is]->getSeeds().at(iseed)->getStave() );
       //m_barShowerU_part.push_back( tmp_shower[is]->getSeeds().at(iseed)->getPart() );
@@ -388,17 +390,18 @@ StatusCode PandoraPlusPFAlg::execute()
     m_NshowerV = tmp_shower.size(); 
     for(int is=0; is<m_NshowerV; is++)
     {
-        m_barShowerV_tag.push_back( ic );
-        m_barShowerV_x.push_back( tmp_shower[is]->getPos().x() );
-        m_barShowerV_y.push_back( tmp_shower[is]->getPos().y() );
-        m_barShowerV_z.push_back( tmp_shower[is]->getPos().z() );
-        m_barShowerV_E.push_back( tmp_shower[is]->getEnergy() );
-        //m_barShowerV_module.push_back( tmp_shower[is]->getSeeds().at(iseed)->getModule() );
-        //m_barShowerV_stave.push_back( tmp_shower[is]->getSeeds().at(iseed)->getStave() );
-        //m_barShowerV_part.push_back( tmp_shower[is]->getSeeds().at(iseed)->getPart() );
-        //m_barShowerV_dlayer.push_back( tmp_shower[is]->getSeeds().at(iseed)->getDlayer() );
-        //m_barShowerV_slayer.push_back( tmp_shower[is]->getSeeds().at(iseed)->getSlayer() );
-        //m_barShowerV_bar.push_back( tmp_shower[is]->getSeeds().at(iseed)->getBar() );
+      m_barShowerV_tag.push_back( ic );
+      m_barShowerV_x.push_back( tmp_shower[is]->getPos().x() );
+      m_barShowerV_y.push_back( tmp_shower[is]->getPos().y() );
+      m_barShowerV_z.push_back( tmp_shower[is]->getPos().z() );
+      m_barShowerV_E.push_back( tmp_shower[is]->getEnergy() );
+      m_barShowerV_T.push_back( (tmp_shower[is]->getT1()+tmp_shower[is]->getT2())/2. );
+      //m_barShowerV_module.push_back( tmp_shower[is]->getSeeds().at(iseed)->getModule() );
+      //m_barShowerV_stave.push_back( tmp_shower[is]->getSeeds().at(iseed)->getStave() );
+      //m_barShowerV_part.push_back( tmp_shower[is]->getSeeds().at(iseed)->getPart() );
+      //m_barShowerV_dlayer.push_back( tmp_shower[is]->getSeeds().at(iseed)->getDlayer() );
+      //m_barShowerV_slayer.push_back( tmp_shower[is]->getSeeds().at(iseed)->getSlayer() );
+      //m_barShowerV_bar.push_back( tmp_shower[is]->getSeeds().at(iseed)->getBar() );
     }
   }
   t_Layers->Fill();
@@ -542,6 +545,30 @@ StatusCode PandoraPlusPFAlg::execute()
   }
   t_axis->Fill();
 
+
+  // --------------------------------------------
+  // Save splitted half cluster info
+  std::vector<PandoraPlus::CaloHalfCluster*> vec_LongiU = m_DataCol.map_HalfCluster["ESHalfClusterU"]; 
+  std::vector<PandoraPlus::CaloHalfCluster*> vec_LongiV = m_DataCol.map_HalfCluster["ESHalfClusterV"]; 
+  
+  m_NHfClusU = vec_LongiU.size();
+  m_NHfClusV = vec_LongiV.size();
+  m_HfClusU_E.clear();
+  m_HfClusU_Nhit.clear();
+  m_HfClusV_E.clear();
+  m_HfClusV_Nhit.clear();
+  for(int ih=0; ih<m_NHfClusU; ih++){
+    m_HfClusU_E.push_back(vec_LongiU[ih]->getEnergy());
+    m_HfClusU_Nhit.push_back( vec_LongiU[ih]->getCluster().size() );
+  }
+  for(int ih=0; ih<m_NHfClusV; ih++){
+    m_HfClusV_E.push_back(vec_LongiV[ih]->getEnergy());
+    m_HfClusV_Nhit.push_back( vec_LongiV[ih]->getCluster().size() );
+  }  
+  t_LongiClus->Fill();
+
+
+
   // ---------------------------------------------
   //Save Cluster and MCP info
   ClearCluster();
@@ -620,8 +647,6 @@ StatusCode PandoraPlusPFAlg::execute()
   t_Track->Fill();
 
 
-  
-
 
 
   //Clean Events
@@ -641,7 +666,7 @@ StatusCode PandoraPlusPFAlg::finalize()
   t_Layers->Write();
   t_Hough->Write(); // yyy
   t_Match->Write(); // yyy
-  //t_LongiClus->Write(); 
+  t_LongiClus->Write(); 
   t_Shower->Write();
   t_Cluster->Write();
   t_Track->Write();
@@ -694,6 +719,7 @@ void PandoraPlusPFAlg::ClearLayer(){
   m_barShowerU_y.clear();
   m_barShowerU_z.clear();
   m_barShowerU_E.clear();
+  m_barShowerU_T.clear();
   m_barShowerU_module.clear();
   m_barShowerU_part.clear();
   m_barShowerU_stave.clear();
@@ -705,6 +731,7 @@ void PandoraPlusPFAlg::ClearLayer(){
   m_barShowerV_y.clear();
   m_barShowerV_z.clear();
   m_barShowerV_E.clear();
+  m_barShowerV_T.clear();
   m_barShowerV_module.clear();
   m_barShowerV_part.clear();
   m_barShowerV_stave.clear();

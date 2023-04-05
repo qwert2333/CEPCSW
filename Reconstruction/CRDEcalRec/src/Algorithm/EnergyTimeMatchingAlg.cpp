@@ -66,7 +66,7 @@ printf("  In Tower #%d: HalfCluster size (%d, %d), input total energy %.3f \n", 
     else if( NclusX==NclusY ){ 
       XYClusterMatchingL2(m_HFClusUCol, m_HFClusVCol, tmp_clusters);
     }
-    //Case 2.4
+    //Case 2.4 M*N
     else{ 
       XYClusterMatchingL3(m_HFClusUCol, m_HFClusVCol, tmp_clusters);
     }
@@ -393,7 +393,7 @@ StatusCode EnergyTimeMatchingAlg::XYClusterMatchingL2( std::vector<const Pandora
   //Get the chi2 map for N*N
 //cout<<"  XYClusterMatchingL2: Get chi2 maps"<<endl;
   const int Nclus = m_ClUCol.size();
-  double  **map_chi2[14] = {NULL};  //TODO: hardcoded layer number here! 
+  double  **map_chi2[PandoraPlus::CaloUnit::Nlayer] = {NULL};  
   double sumchi2[Nclus][Nclus] = {0};
 
   for(int il=0; il<layerindex.size(); il++){
@@ -414,6 +414,8 @@ StatusCode EnergyTimeMatchingAlg::XYClusterMatchingL2( std::vector<const Pandora
 
       if(m_ClUCol[ic]->getHalfClusterCol("CousinCluster").size()!=0 && m_ClUCol[jc]->getHalfClusterCol("CousinCluster").size()!=0) 
         sumchi2[ic][jc] = 0.;
+
+
       else sumchi2[ic][jc] += map_chi2[il][ic][jc];
     }
 //cout<<sumchi2[ic][jc]<<'\t';
@@ -468,10 +470,63 @@ StatusCode EnergyTimeMatchingAlg::XYClusterMatchingL3( std::vector<const Pandora
                                                        std::vector<const PandoraPlus::CaloHalfCluster*>& m_ClVCol, 
                                                        std::vector<PandoraPlus::Calo3DCluster*>& m_clusters )
 {
+  if( m_ClUCol.size()==0 || m_ClVCol.size()==0 ) return StatusCode::SUCCESS;
+/*
+  std::vector<int> layerindex; layerindex.clear();
+  std::map<int, std::vector<std::vector<const PandoraPlus::Calo1DCluster*>> > map_showersXinlayer; map_showersXinlayer.clear();
+  std::map<int, std::vector<std::vector<const PandoraPlus::Calo1DCluster*>> > map_showersYinlayer; map_showersYinlayer.clear();
 
+  //Find layers need to match.
+  for(int ic=0; ic<m_ClUCol.size(); ic++){
+  for(int is=0; is<m_ClUCol[ic]->getCluster().size(); is++){
+    int m_layer = m_ClUCol[ic]->getCluster()[is]->getDlayer();
+    if( find( layerindex.begin(), layerindex.end(), m_layer )==layerindex.end() ) layerindex.push_back(m_layer);
+  }}
+  for(int ic=0; ic<m_ClVCol.size(); ic++){
+  for(int is=0; is<m_ClVCol[ic]->getCluster().size(); is++){
+    int m_layer = m_ClVCol[ic]->getCluster()[is]->getDlayer();
+    if( find( layerindex.begin(), layerindex.end(), m_layer )==layerindex.end() ) layerindex.push_back(m_layer);
+  }}
+  sort(layerindex.begin(), layerindex.end());  
 
+  //Fill shower maps
+  for(int il=0; il<layerindex.size(); il++){
+    for(int ic=0; ic<m_ClUCol.size(); ic++)
+      map_showersXinlayer[layerindex[il]].push_back( m_ClUCol[ic]->getClusterInLayer(layerindex[il]) );
+    for(int ic=0; ic<m_ClVCol.size(); ic++)
+      map_showersYinlayer[layerindex[il]].push_back( m_ClVCol[ic]->getClusterInLayer(layerindex[il]) );
+  }
+cout<<"  XYClusterMatchingL3: map size X "<<map_showersXinlayer.size()<<", Y "<<map_showersYinlayer.size()<<endl;
 
+  //Get the chi2 map
+  const int NclusU = m_ClUCol.size();
+  const int NclusV = m_ClVCol.size();
+  double  **map_chi2[PandoraPlus::CaloUnit::Nlayer] = {NULL};
+  double sumchi2[NclusU][NclusV] = {0};
 
+  for(int il=0; il<layerindex.size(); il++){
+cout<<"  XYClusterMatchingL3: at layer #"<<layerindex[il]<<endl;
+    std::vector<std::vector<const PandoraPlus::Calo1DCluster*>> m_showerXcol = map_showersXinlayer[layerindex[il]];
+    std::vector<std::vector<const PandoraPlus::Calo1DCluster*>> m_showerYcol = map_showersYinlayer[layerindex[il]];
+
+    map_chi2[layerindex[il]-1] = GetClusterChi2Map(m_showerXcol, m_showerYcol);
+  }
+
+cout<<"  XYClusterMatchingL3: Print Sumchi2 matrix"<<endl;
+  for(int ic=0; ic<NclusU; ic++){
+  for(int jc=0; jc<NclusV; jc++){
+    for(int il=0; il<14; il++){
+      if(map_chi2[il]==nullptr) continue;
+
+      if(m_ClUCol[ic]->getHalfClusterCol("CousinCluster").size()!=0 && m_ClUCol[jc]->getHalfClusterCol("CousinCluster").size()!=0)
+        sumchi2[ic][jc] = 0.;
+      else sumchi2[ic][jc] += map_chi2[il][ic][jc];
+    }
+cout<<sumchi2[ic][jc]<<'\t';
+  }
+cout<<endl;
+  }
+*/
 
 
   return StatusCode::SUCCESS;

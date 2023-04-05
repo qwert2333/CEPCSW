@@ -11,8 +11,8 @@ StatusCode HoughClusteringAlg::ReadSettings(PandoraPlus::Settings& m_settings){
   settings = m_settings;
 
   // ECAL geometry settings
-  if(settings.map_floatPars.find("cell_size")==settings.map_floatPars.end())
-    settings.map_floatPars["cell_size"] = 10; // unit: mm
+  //if(settings.map_floatPars.find("cell_size")==settings.map_floatPars.end())
+  //  settings.map_floatPars["cell_size"] = 10; // unit: mm
   if(settings.map_floatPars.find("ecal_inner_radius")==settings.map_floatPars.end())
     settings.map_floatPars["ecal_inner_radius"] = 1860; // unit: mm
 
@@ -119,7 +119,7 @@ StatusCode HoughClusteringAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
     // cout<<"  HoughClusteringAlg: Creating m_HoughObjectsV"<<endl;
     std::vector<PandoraPlus::HoughObject> m_HoughObjectsV; m_HoughObjectsV.clear(); 
     for(int il=0; il<m_localMaxVCol.size(); il++){
-      PandoraPlus::HoughObject m_obj(m_localMaxVCol[il], settings.map_floatPars["cell_size"], settings.map_floatPars["ecal_inner_radius"]);
+      PandoraPlus::HoughObject m_obj(m_localMaxVCol[il], PandoraPlus::CaloUnit::barsize, PandoraPlus::CaloUnit::ecal_innerR);
       m_HoughObjectsV.push_back(m_obj);
     }
 
@@ -185,7 +185,7 @@ StatusCode HoughClusteringAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
 //cout << "  HoughClusteringAlg: Creating m_HoughObjectsU" << endl;
     std::vector<PandoraPlus::HoughObject> m_HoughObjectsU; m_HoughObjectsU.clear(); 
     for(int il=0; il<m_localMaxUCol.size(); il++){
-      PandoraPlus::HoughObject m_obj(m_localMaxUCol[il], settings.map_floatPars["cell_size"], settings.map_floatPars["ecal_inner_radius"]);
+      PandoraPlus::HoughObject m_obj(m_localMaxUCol[il], PandoraPlus::CaloUnit::barsize, PandoraPlus::CaloUnit::ecal_innerR);
       m_HoughObjectsU.push_back(m_obj);
     }
 

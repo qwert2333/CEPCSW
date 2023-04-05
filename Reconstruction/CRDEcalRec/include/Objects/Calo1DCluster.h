@@ -20,6 +20,7 @@ namespace PandoraPlus{
     void Clear();
     void Clean();
     void Check();
+    PandoraPlus::Calo1DCluster* Clone() const; 
 
     inline bool operator == (const Calo1DCluster &x) const{
       return ( Bars == x.getBars()  );
@@ -46,9 +47,6 @@ namespace PandoraPlus{
     int  getLeftEdge();
     int  getRightEdge();
 
-    void PrintBars() const;
-    void PrintSeeds() const;
-	
 	  void addUnit(const PandoraPlus::CaloUnit* _bar );
     void addSeed(const PandoraPlus::CaloUnit* _seed ) { Seeds.push_back(_seed); }
     void setBars( std::vector<const PandoraPlus::CaloUnit*> _bars ) { Bars = _bars; }

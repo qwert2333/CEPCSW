@@ -24,8 +24,8 @@ from Configurables import k4DataSvc
 podioevent = k4DataSvc("EventDataSvc")
 podioevent.inputs = [
 #"SimSample/CRDFull_Pi-10GeV.root"
-"SimSample/CRDFull_e-10GeV_Theta90_Phi0-90.root"
-#"SimSample/CRDFull_Mu10GeV_Theta90_Phi22-27.root"
+#"SimSample/CRDFull_GamGam_5cm.root"
+"SimSample/CRDFull_GamPi_3deg.root"
 ]
 ##########################################
 
@@ -54,7 +54,7 @@ EcalDigi.TimeResolution = 0.5        #unit: ns
 EcalDigi.EnergyThreshold = 0.0001   #0.1 MeV
 EcalDigi.ChargeThresholdFrac = 0.05
 EcalDigi.Debug=1
-EcalDigi.OutFileName = "testTree_e-10GeV_Phi0-90_merge.root"
+EcalDigi.OutFileName = "testTree_GamPi_5cm.root"
 #########################################
 
 ##HCAL##
@@ -80,7 +80,7 @@ PandoraPlusPFAlg.BField = 3.
 PandoraPlusPFAlg.Debug = 0
 PandoraPlusPFAlg.SkipEvt = Nskip
 PandoraPlusPFAlg.WriteAna = 1
-PandoraPlusPFAlg.AnaFileName = "testRec_e-10GeV_Phi0-90_merge.root"
+PandoraPlusPFAlg.AnaFileName = "testRec_GamPi_5cm.root"
 ##----Readin collections----
 PandoraPlusPFAlg.MCParticleCollection = "MCParticle"
 PandoraPlusPFAlg.TrackCollections = ["MarlinTrkTracks"]
@@ -97,36 +97,36 @@ PandoraPlusPFAlg.AlgList = ["ExampleAlg",
                             "TrackMatchingAlg" ,
                             "HoughClusteringAlg", 
                             "ConeClustering2DAlg",
-                            "AxisMergingAlg" ]
-#                            "EnergySplittingAlg",
-#                            "EnergyTimeMatchingAlg"]
+                            "AxisMergingAlg",
+                            "EnergySplittingAlg",
+                            "EnergyTimeMatchingAlg"]
 PandoraPlusPFAlg.AlgParNames = [ ["Par1", "Par2"], 
                                  ["Par1"], 
                                  ["Eth_localMax", "Eth_MaxWithNeigh"], 
                                  [""],
                                  ["th_Layers"],
                                  ["ReadinLocalMaxName", "th_Nshowers"],
-                                 ["axis_Angle", "relP_Angle"] ]
-#                                 [""], 
-#                                 [""] ]
+                                 ["axis_Angle", "relP_Angle"],
+                                 [""], 
+                                 [""] ]
 PandoraPlusPFAlg.AlgParTypes = [ ["double", "double"],
                                  ["double"],
                                  ["double", "double"],
                                  [""],
                                  ["double"],
                                  ["string", "double"],
-                                 ["double", "double"] ]
-#                                 [""],
-#                                 [""]  ]
+                                 ["double", "double"],
+                                 [""],
+                                 [""]  ]
 PandoraPlusPFAlg.AlgParValues = [ ["1.", "3.14"], 
                                   ["1."], 
                                   ["0.005", "0."],
                                   [""],
                                   ["10"],
-                                  ["LeftLocalMax", "3"],
-                                  ["1.05", "1.05"] ]  #Pi/3
-#                                  [""],
-#                                  [""]  ]
+                                  ["LeftLocalMax", "4"],
+                                  ["0.78", "0.78"],  #Pi/4
+                                  [""],
+                                  [""]  ]
 
 ########################################
 

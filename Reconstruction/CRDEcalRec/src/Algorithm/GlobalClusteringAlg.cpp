@@ -65,11 +65,11 @@ cout<<"  GlobalClusteringAlg: Readin Bar size: "<<m_bars.size()<<endl;
       m_HalfClusterV.push_back(m_halfclusters[i]);
   }
 
-printf("  GlobalClustering: HalfCluster size (%d, %d) \n", m_HalfClusterU.size(), m_HalfClusterV.size());
-for(int ic=0; ic<m_HalfClusterU.size(); ic++) cout<<m_HalfClusterU[ic]->getEnergy()<<'\t';
-cout<<endl;
-for(int ic=0; ic<m_HalfClusterV.size(); ic++) cout<<m_HalfClusterV[ic]->getEnergy()<<'\t';
-cout<<endl;
+//printf("  GlobalClustering: HalfCluster size (%d, %d) \n", m_HalfClusterU.size(), m_HalfClusterV.size());
+//for(int ic=0; ic<m_HalfClusterU.size(); ic++) cout<<m_HalfClusterU[ic]->getEnergy()<<'\t';
+//cout<<endl;
+//for(int ic=0; ic<m_HalfClusterV.size(); ic++) cout<<m_HalfClusterV[ic]->getEnergy()<<'\t';
+//cout<<endl;
 
 
   //Write results into DataCol.
