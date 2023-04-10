@@ -11,7 +11,7 @@ StatusCode ConeClustering2DAlg::ReadSettings(Settings& m_settings){
   if(settings.map_floatPars.find("th_stopLayer")==settings.map_floatPars.end())    settings.map_floatPars["th_stopLayer"] = 15;
   if(settings.map_floatPars.find("th_ConeTheta")==settings.map_floatPars.end())    settings.map_floatPars["th_ConeTheta"] = TMath::Pi()/4.;
   if(settings.map_floatPars.find("th_ConeR")==settings.map_floatPars.end())        settings.map_floatPars["th_ConeR"] = 50;
-  if(settings.map_floatPars.find("th_Nshowers")==settings.map_floatPars.end())     settings.map_floatPars["th_Nshowers"] = 4;
+  if(settings.map_intPars.find("th_Nshowers")==settings.map_intPars.end())       settings.map_intPars["th_Nshowers"] = 4;
   if(settings.map_stringPars.find("ReadinLocalMaxName")==settings.map_stringPars.end()) settings.map_stringPars["ReadinLocalMaxName"] = "LeftLocalMax";
   if(settings.map_stringPars.find("OutputLongiClusName")==settings.map_stringPars.end()) settings.map_stringPars["OutputLongiClusName"] = "ConeAxis";
 
@@ -64,7 +64,7 @@ StatusCode ConeClustering2DAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
     const_longiClusUCol.clear();
     for(int ic=0; ic<tmp_longiClusCol.size(); ic++){
       tmp_longiClusCol[ic]->Check();
-      if(tmp_longiClusCol[ic]->getCluster().size()>=settings.map_floatPars["th_Nshowers"]) const_longiClusUCol.push_back(tmp_longiClusCol[ic]);
+      if(tmp_longiClusCol[ic]->getCluster().size()>=settings.map_intPars["th_Nshowers"]) const_longiClusUCol.push_back(tmp_longiClusCol[ic]);
     }
 //cout<<"    Cluster size after requiring Nhit: "<<const_longiClusUCol.size()<<endl;
     for(int ic=0; ic<tmp_longiClusCol.size(); ic++) m_datacol.bk_ClusterHalfCol.push_back( tmp_longiClusCol[ic] );
@@ -89,7 +89,7 @@ StatusCode ConeClustering2DAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
     const_longiClusVCol.clear();
     for(int ic=0; ic<tmp_longiClusCol.size(); ic++){
       tmp_longiClusCol[ic]->Check();
-      if(tmp_longiClusCol[ic]->getCluster().size()>=settings.map_floatPars["th_Nshowers"]) const_longiClusVCol.push_back(tmp_longiClusCol[ic]);
+      if(tmp_longiClusCol[ic]->getCluster().size()>=settings.map_intPars["th_Nshowers"]) const_longiClusVCol.push_back(tmp_longiClusCol[ic]);
     }
     for(int ic=0; ic<tmp_longiClusCol.size(); ic++) m_datacol.bk_ClusterHalfCol.push_back( tmp_longiClusCol[ic] );
 
@@ -138,16 +138,16 @@ StatusCode ConeClustering2DAlg::LongiConeLinking(  std::map<int, std::vector<con
     std::vector<const PandoraPlus::Calo1DCluster*> ShowersinLayer = iter->second;
 //cout<<"  In Layer "<<iter->first<<": hit size "<<ShowersinLayer.size()<<endl;
 
-    for(int is=0; is<ShowersinLayer.size(); is++){
+/*    for(int is=0; is<ShowersinLayer.size(); is++){
       for(int ic=0; ic<ClusterCol.size(); ic++ ){
         const PandoraPlus::Calo1DCluster* shower_in_clus = ClusterCol[ic]->getCluster().back();
         if(!shower_in_clus) continue; 
 
         TVector2 relR = GetProjectedRelR(shower_in_clus, ShowersinLayer[is]);  //Return vec: 1->2. 
         TVector2 clusaxis = GetProjectedAxis( ClusterCol[ic] );
-//printf("    Cluster axis (%.3f, %.3f), last hit (%.3f, %.3f, %.3f), coming hit (%.3f, %.3f, %.3f), projected relR (%.3f, %.3f) \n", 
-//clusaxis.Px(), clusaxis.Py(), shower_in_clus->getPos().x(),  shower_in_clus->getPos().y(),  shower_in_clus->getPos().z(),
-//ShowersinLayer[is]->getPos().x(), ShowersinLayer[is]->getPos().y(), ShowersinLayer[is]->getPos().z(), relR.Px(), relR.Py() );
+printf("    Cluster axis (%.3f, %.3f), last hit (%.3f, %.3f, %.3f), coming hit (%.3f, %.3f, %.3f), projected relR (%.3f, %.3f) \n", 
+clusaxis.Px(), clusaxis.Py(), shower_in_clus->getPos().x(),  shower_in_clus->getPos().y(),  shower_in_clus->getPos().z(),
+ShowersinLayer[is]->getPos().x(), ShowersinLayer[is]->getPos().y(), ShowersinLayer[is]->getPos().z(), relR.Px(), relR.Py() );
 
         if( relR.DeltaPhi(clusaxis)<settings.map_floatPars["th_ConeTheta"] && relR.Mod()<settings.map_floatPars["th_ConeR"] ){
           ClusterCol[ic]->addUnit(ShowersinLayer[is]);
@@ -157,6 +157,25 @@ StatusCode ConeClustering2DAlg::LongiConeLinking(  std::map<int, std::vector<con
         } 
       }
     }//end loop showers in layer.
+*/
+    for(int ic=0; ic<ClusterCol.size(); ic++){
+      const PandoraPlus::Calo1DCluster* shower_in_clus = ClusterCol[ic]->getCluster().back();
+      if(!shower_in_clus) continue;
+      for(int is=0; is<ShowersinLayer.size(); is++){
+        TVector2 relR = GetProjectedRelR(shower_in_clus, ShowersinLayer[is]);  //Return vec: 1->2.
+        TVector2 clusaxis = GetProjectedAxis( ClusterCol[ic] );
+//printf("    Cluster axis (%.3f, %.3f), last hit (%.3f, %.3f, %.3f), coming hit (%.3f, %.3f, %.3f), projected relR (%.3f, %.3f) \n",
+//clusaxis.Px(), clusaxis.Py(), shower_in_clus->getPos().x(),  shower_in_clus->getPos().y(),  shower_in_clus->getPos().z(),
+//ShowersinLayer[is]->getPos().x(), ShowersinLayer[is]->getPos().y(), ShowersinLayer[is]->getPos().z(), relR.Px(), relR.Py() );
+
+        if( relR.DeltaPhi(clusaxis)<settings.map_floatPars["th_ConeTheta"] && relR.Mod()<settings.map_floatPars["th_ConeR"] ){
+          ClusterCol[ic]->addUnit(ShowersinLayer[is]);
+          ShowersinLayer.erase(ShowersinLayer.begin()+is);
+          is--;
+        }
+      }
+    }//end loop showers in layer.
+
     if(ShowersinLayer.size()>0){
       for(int i=0;i<ShowersinLayer.size(); i++){
         PandoraPlus::CaloHalfCluster* m_clus = new PandoraPlus::CaloHalfCluster();
@@ -168,6 +187,8 @@ StatusCode ConeClustering2DAlg::LongiConeLinking(  std::map<int, std::vector<con
 
   return StatusCode::SUCCESS;
 }
+
+
 
 TVector2 ConeClustering2DAlg::GetProjectedAxis( const PandoraPlus::CaloHalfCluster* m_shower ){
   TVector2 axis(0., 0.);
@@ -186,8 +207,15 @@ TVector2 ConeClustering2DAlg::GetProjectedRelR( const PandoraPlus::Calo1DCluster
     paxis2.Set(m_shower2->getPos().x(), m_shower2->getPos().y());
   }
   else{
-    paxis1.Set( sqrt(m_shower1->getPos().x()*m_shower1->getPos().x()+m_shower1->getPos().y()*m_shower1->getPos().y()), m_shower1->getPos().z());
-    paxis2.Set( sqrt(m_shower2->getPos().x()*m_shower2->getPos().x()+m_shower2->getPos().y()*m_shower2->getPos().y()), m_shower2->getPos().z());
+    float rotAngle = -m_shower1->getTowerID()[0][0]*PI/4.;
+    TVector3 raw_pos1 = m_shower1->getPos(); 
+    TVector3 raw_pos2 = m_shower2->getPos(); 
+    raw_pos1.RotateZ(rotAngle); raw_pos2.RotateZ(rotAngle);
+    paxis1.Set(raw_pos1.y(), raw_pos1.z());
+    paxis2.Set(raw_pos2.y(), raw_pos2.z());
+
+    //paxis1.Set( sqrt(m_shower1->getPos().x()*m_shower1->getPos().x()+m_shower1->getPos().y()*m_shower1->getPos().y()), m_shower1->getPos().z());
+    //paxis2.Set( sqrt(m_shower2->getPos().x()*m_shower2->getPos().x()+m_shower2->getPos().y()*m_shower2->getPos().y()), m_shower2->getPos().z());
   }
 
   return paxis2 - paxis1;

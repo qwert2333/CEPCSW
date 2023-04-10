@@ -47,17 +47,17 @@ from Configurables import HepMCRdr
 from Configurables import GenPrinter
 
 gun = GtGunTool("GtGunTool")
-gun.Particles = ["gamma","pi-"]
+gun.Particles = ["gamma"]
 #gun.Particles = ["nu_e"]
-gun.PositionXs = [0., 0.]
-gun.PositionYs = [0., 0.]
-gun.PositionZs = [0. ,0.]
-gun.EnergyMins = [10, 10 ] # GeV
-gun.EnergyMaxs = [10, 10 ] # GeV
-gun.ThetaMins  = [88, 92 ]   # deg
-gun.ThetaMaxs  = [88, 92 ]   # deg
-gun.PhiMins    = [0., 0. ]   # deg
-gun.PhiMaxs    = [0., 0. ]   # deg
+gun.PositionXs = [1860.]
+gun.PositionYs = [0.]
+gun.PositionZs = [0.]
+gun.EnergyMins = [5. ] # GeV
+gun.EnergyMaxs = [5. ] # GeV
+gun.ThetaMins  = [90. ]   # deg
+gun.ThetaMaxs  = [90. ]   # deg
+gun.PhiMins    = [0. ]   # deg
+gun.PhiMaxs    = [0. ]   # deg
 
 
 # stdheprdr = StdHepRdr("StdHepRdr")
@@ -272,7 +272,7 @@ elif dedxoption == "BetheBlochEquationDedxSimTool":
 # output
 from Configurables import PodioOutput
 out = PodioOutput("outputalg")
-out.filename = "SimSample/CRDFull_GamPi_4deg.root"
+out.filename = "SimSample/CRDFull_Gam10GeV_ECALSurface.root"
 out.outputCommands = ["keep *"]
 
 # ApplicationMgr

@@ -199,7 +199,8 @@ namespace PandoraPlus{
     for(int i=0; i<Bars.size(); ++i){
       if(Bars[i]->getEnergy()>maxE) { maxE = Bars[i]->getEnergy(); index = i; }
     }
-    if(Seeds.size()==0 && index>=0 && maxE>0.005 ) Seeds.push_back( Bars[index] );
+    //if(Seeds.size()==0 && index>=0 && maxE>0.005 ) Seeds.push_back( Bars[index] );
+    if(Seeds.size()==0 && index>=0 ) Seeds.push_back( Bars[index] );
   }
 
 };

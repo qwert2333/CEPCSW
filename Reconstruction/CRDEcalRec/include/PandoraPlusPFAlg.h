@@ -171,6 +171,7 @@ protected:
 
   TTree *t_Cluster;
   int m_Nclus, m_Nmc;
+  IntVec m_Clus_Ntrk;
   FloatVec m_Clus_x, m_Clus_y, m_Clus_z, m_Clus_E;
   IntVec m_mcPdgid, m_mcStatus, m_Nhit;
   FloatVec m_mcPx, m_mcPy, m_mcPz, m_mcEn;
