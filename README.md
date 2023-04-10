@@ -14,7 +14,7 @@ Before run following commands, please make sure you setup the CVMFS:
 ```
 $ git clone git@github.com:cepc/CEPCSW.git
 $ cd CEPCSW
-$ git checkout dev-EcalRec-v1.1 # branch name
+$ git checkout EcalRec-2.1.0.alpha # branch name
 $ source setup.sh
 $ ./build.sh
 $ ./run.sh Examples/options/helloalg.py
@@ -44,6 +44,6 @@ Keep the collection names compatible between the prototype and the existing CEPC
 * TPCCollection
 * SETCollection
 
-## Update in branch : EcalRec-2.0.6.1.alpha
-* Full reconstruction chain with EDM HalfCluster
-* WIP: Check ConeClustering2DAlg performance, debug for covering towers & modules.
+## Update in branch : EcalRec-2.1.0.alpha
+* New version: add HCAL into the reconstruction
+** Geo: move the magnet out of HCAL, tune HCAL size.
