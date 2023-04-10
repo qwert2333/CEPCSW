@@ -75,7 +75,7 @@ StatusCode EnergySplittingAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
         }
       }
 //cout<<"  In 1DCluster #"<<icl<<": matched seed size "<<m_1dclusCol[icl]->getNseeds()<<endl;
-      if(m_1dclusCol[icl]->getNseeds()==0) const_cast<PandoraPlus::Calo1DCluster*>(m_1dclusCol[icl])->setSeed();   
+      //if(m_1dclusCol[icl]->getNseeds()==0) const_cast<PandoraPlus::Calo1DCluster*>(m_1dclusCol[icl])->setSeed();   
 
       //Split cluster to showers
       std::vector<PandoraPlus::Calo1DCluster*> tmp_showers; tmp_showers.clear();
@@ -134,7 +134,7 @@ StatusCode EnergySplittingAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
         }
       }
 //cout<<"  In 1DCluster #"<<icl<<": matched seed size "<<m_1dclusCol[icl]->getNseeds()<<endl;
-      if(m_1dclusCol[icl]->getNseeds()==0) const_cast<PandoraPlus::Calo1DCluster*>(m_1dclusCol[icl])->setSeed();   
+      //if(m_1dclusCol[icl]->getNseeds()==0) const_cast<PandoraPlus::Calo1DCluster*>(m_1dclusCol[icl])->setSeed();   
 
       //Split cluster to showers
       std::vector<PandoraPlus::Calo1DCluster*> tmp_showers; tmp_showers.clear();
@@ -170,7 +170,7 @@ StatusCode EnergySplittingAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
   m_datacol.map_HalfCluster[settings.map_stringPars["OutputClusName"]+"U"] = m_newClusUCol; 
   m_datacol.map_HalfCluster[settings.map_stringPars["OutputClusName"]+"V"] = m_newClusVCol; 
 
-/*
+
 cout<<"  After splitting: HalfCluster U size "<<m_newClusUCol.size()<<", print check"<<endl;
 for(int icl=0; icl<m_newClusUCol.size(); icl++){
   cout<<"      In HFClusU #"<<icl<<": shower size = "<<m_newClusUCol[icl]->getCluster().size()<<endl;
@@ -189,7 +189,7 @@ for(int icl=0; icl<m_newClusVCol.size(); icl++){
     cout<<endl;
   }
 }
-*/
+
 
   //Make tower 
   m_towerCol.clear(); 

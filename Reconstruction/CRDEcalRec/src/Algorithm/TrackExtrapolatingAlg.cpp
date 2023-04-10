@@ -18,7 +18,7 @@ StatusCode TrackExtrapolatingAlg::ReadSettings(Settings& m_settings){
   if(settings.map_floatPars.find("innermost_distance")==settings.map_floatPars.end()) 
     settings.map_floatPars["innermost_distance"] = 1860;
   if(settings.map_floatPars.find("outermost_distance")==settings.map_floatPars.end()) 
-    settings.map_floatPars["outermost_distance"] = 2140;
+    settings.map_floatPars["outermost_distance"] = 3230;
   if(settings.map_intPars.find("Nlayers")==settings.map_intPars.end()) 
     settings.map_intPars["Nlayers"] = 28;
   if(settings.map_floatPars.find("layer_width")==settings.map_floatPars.end())
