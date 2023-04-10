@@ -26,6 +26,8 @@ public:
   StatusCode TrkMatchedMerging( std::vector<PandoraPlus::CaloHalfCluster*>& m_axisCol );
   StatusCode OverlapMerging( std::vector<PandoraPlus::CaloHalfCluster*>& m_axisCol );
   StatusCode ConeMerging( std::vector<PandoraPlus::CaloHalfCluster*>& m_axisCol );
+  StatusCode FragmentsMerging( std::vector<PandoraPlus::CaloHalfCluster*>& m_axisCol );
+  StatusCode MergeToClosestCluster( PandoraPlus::CaloHalfCluster* m_badaxis, std::vector<PandoraPlus::CaloHalfCluster*>& m_axisCol );
 
 private: 
 

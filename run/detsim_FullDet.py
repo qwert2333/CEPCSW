@@ -49,15 +49,15 @@ from Configurables import GenPrinter
 gun = GtGunTool("GtGunTool")
 gun.Particles = ["pi-"]
 #gun.Particles = ["nu_e"]
-gun.PositionXs = [0. ]
-gun.PositionYs = [0. ]
-gun.PositionZs = [0. ]
-gun.EnergyMins = [10 ] # GeV
-gun.EnergyMaxs = [10 ] # GeV
-gun.ThetaMins  = [90 ]    # deg
-gun.ThetaMaxs  = [90,]  # deg
-gun.PhiMins    = [0. ]    # deg
-gun.PhiMaxs    = [0. ]  # deg
+gun.PositionXs = [1860.]
+gun.PositionYs = [0.]
+gun.PositionZs = [0.]
+gun.EnergyMins = [5. ] # GeV
+gun.EnergyMaxs = [5. ] # GeV
+gun.ThetaMins  = [90. ]   # deg
+gun.ThetaMaxs  = [90. ]   # deg
+gun.PhiMins    = [0. ]   # deg
+gun.PhiMaxs    = [0. ]   # deg
 
 
 # stdheprdr = StdHepRdr("StdHepRdr")
@@ -281,7 +281,7 @@ ApplicationMgr(
     #TopAlg = [genalg, detsimalg, digiVXD, digiSIT, digiSET, digiFTD, spSET, digiDC, tracking, forward, subset, full, out],
     TopAlg = [genalg, detsimalg, digiVXD, digiSIT, digiSET, digiFTD, spSET, digiDC, tracking, forward, subset, full, out],
     EvtSel = 'NONE',
-    EvtMax = 30,
+    EvtMax = 100,
     ExtSvc = [rndmengine, rndmgensvc, dsvc, evtseeder, geosvc, gearsvc, tracksystemsvc],
     #ExtSvc = [rndmengine, rndmgensvc, dsvc, geosvc],
     OutputLevel=INFO

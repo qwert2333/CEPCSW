@@ -27,13 +27,13 @@ public:
   StatusCode ClearAlgorithm(); 
 
 
-  StatusCode LongitudinalLinking( std::vector<const PandoraPlus::Calo1DCluster*>& m_showers, std::vector<const PandoraPlus::CaloHalfCluster*>& m_oldClusCol, std::vector<const PandoraPlus::CaloHalfCluster*>& m_newClusCol );
+  StatusCode LongitudinalLinking( std::vector<PandoraPlus::Calo1DCluster*>& m_showers, std::vector<const PandoraPlus::CaloHalfCluster*>& m_oldClusCol, std::vector<PandoraPlus::CaloHalfCluster*>& m_newClusCol );
 
-  StatusCode HalfClusterToTowers( std::vector<const PandoraPlus::CaloHalfCluster*>& m_halfClusU, 
-                                  std::vector<const PandoraPlus::CaloHalfCluster*>& m_halfClusV, 
-                                  std::vector<const PandoraPlus::Calo3DCluster*>& m_towers ); 
+  StatusCode HalfClusterToTowers( std::vector<PandoraPlus::CaloHalfCluster*>& m_halfClusU, 
+                                  std::vector<PandoraPlus::CaloHalfCluster*>& m_halfClusV, 
+                                  std::vector<PandoraPlus::Calo3DCluster*>& m_towers ); 
 
-  StatusCode ClusterSplitting( const PandoraPlus::Calo1DCluster* m_cluster, std::vector<const PandoraPlus::Calo1DCluster*>& outshCol );
+  StatusCode ClusterSplitting( const PandoraPlus::Calo1DCluster* m_cluster, std::vector<PandoraPlus::Calo1DCluster*>& outshCol );
 
   StatusCode MergeToClosestCluster( PandoraPlus::Calo1DCluster* iclus, std::vector<PandoraPlus::Calo1DCluster*>& clusvec );
 
@@ -49,14 +49,12 @@ private:
   std::vector<PandoraPlus::CaloHalfCluster*>* p_HalfClustersV = NULL; 
   std::vector<const PandoraPlus::CaloHalfCluster*> m_axisUCol; 
   std::vector<const PandoraPlus::CaloHalfCluster*> m_axisVCol; 
-  std::vector<const PandoraPlus::CaloHalfCluster*> m_newClusUCol; 
-  std::vector<const PandoraPlus::CaloHalfCluster*> m_newClusVCol; 
-  std::vector<const PandoraPlus::Calo1DCluster*> m_1dclusCol;
 
-  std::vector<const PandoraPlus::Calo1DCluster*> m_1dShowerUCol; 
-  std::vector<const PandoraPlus::Calo1DCluster*> m_1dShowerVCol; 
-
-  std::vector<const PandoraPlus::Calo3DCluster*> m_towerCol;
+  std::vector<PandoraPlus::CaloHalfCluster*> m_newClusUCol; 
+  std::vector<PandoraPlus::CaloHalfCluster*> m_newClusVCol; 
+  std::vector<PandoraPlus::Calo1DCluster*> m_1dShowerUCol; 
+  std::vector<PandoraPlus::Calo1DCluster*> m_1dShowerVCol; 
+  std::vector<PandoraPlus::Calo3DCluster*> m_towerCol;
 
   //static bool compBar( const PandoraPlus::CaloUnit* bar1, const PandoraPlus::CaloUnit* bar2 )
   //  { return bar1->getBar() < bar2->getBar(); }

@@ -130,6 +130,49 @@ namespace PandoraPlus{
   void Calo3DCluster::mergeCluster( const PandoraPlus::Calo3DCluster* _clus ){
     for(int i=0; i<_clus->getCluster().size(); i++)
       addUnit( _clus->getCluster()[i] );
+
+    for(int i=0; i<_clus->getTowers().size(); i++)
+      addTower( _clus->getTowers()[i] );
+
+    for(int itrk=0; itrk<_clus->getAssociatedTracks().size(); itrk++){
+      if( find(m_TrackCol.begin(), m_TrackCol.end(), _clus->getAssociatedTracks()[itrk])==m_TrackCol.end() ) 
+        m_TrackCol.push_back( _clus->getAssociatedTracks()[itrk] );
+    }
+    
+    for(auto iter:_clus->getLocalMaxUMap() ){
+      if(map_localMaxU.find(iter.first)==map_localMaxU.end()) map_localMaxU[iter.first] = iter.second;
+      else{
+        for(int il=0; il<iter.second.size(); il++)
+          if( find(map_localMaxU[iter.first].begin(), map_localMaxU[iter.first].end(), iter.second[il])==map_localMaxU[iter.first].end() )
+            map_localMaxU[iter.first].push_back( iter.second[il] );
+      }
+    }
+    for(auto iter:_clus->getLocalMaxVMap() ){
+      if(map_localMaxV.find(iter.first)==map_localMaxV.end()) map_localMaxV[iter.first] = iter.second;
+      else{
+        for(int il=0; il<iter.second.size(); il++)
+          if( find(map_localMaxV[iter.first].begin(), map_localMaxV[iter.first].end(), iter.second[il])==map_localMaxV[iter.first].end() )
+            map_localMaxV[iter.first].push_back( iter.second[il] );
+      }
+    }
+
+    for(auto iter:_clus->getHalfClusterUMap() ){
+      if(map_halfClusUCol.find(iter.first)==map_halfClusUCol.end()) map_halfClusUCol[iter.first] = iter.second;
+      else{
+        for(int il=0; il<iter.second.size(); il++)
+          if( find(map_halfClusUCol[iter.first].begin(), map_halfClusUCol[iter.first].end(), iter.second[il])==map_halfClusUCol[iter.first].end() )
+            map_halfClusUCol[iter.first].push_back( iter.second[il] );
+      }
+    }
+    for(auto iter:_clus->getHalfClusterVMap() ){
+      if(map_halfClusVCol.find(iter.first)==map_halfClusVCol.end()) map_halfClusVCol[iter.first] = iter.second;
+      else{
+        for(int il=0; il<iter.second.size(); il++)
+          if( find(map_halfClusVCol[iter.first].begin(), map_halfClusVCol[iter.first].end(), iter.second[il])==map_halfClusVCol[iter.first].end() )
+            map_halfClusVCol[iter.first].push_back( iter.second[il] );
+      }
+    }
+
   }
 
 
@@ -177,13 +220,13 @@ namespace PandoraPlus{
 
   std::vector<const PandoraPlus::CaloHalfCluster*> Calo3DCluster::getHalfClusterUCol(std::string name) const {
     std::vector<const CaloHalfCluster*> emptyCol; emptyCol.clear(); 
-    if(map_longiClusUCol.find(name)!=map_longiClusUCol.end()) emptyCol = map_longiClusUCol.at(name);
+    if(map_halfClusUCol.find(name)!=map_halfClusUCol.end()) emptyCol = map_halfClusUCol.at(name);
     return emptyCol;
   }
 
   std::vector<const PandoraPlus::CaloHalfCluster*> Calo3DCluster::getHalfClusterVCol(std::string name) const {
     std::vector<const CaloHalfCluster*> emptyCol; emptyCol.clear(); 
-    if(map_longiClusVCol.find(name)!=map_longiClusVCol.end()) emptyCol = map_longiClusVCol.at(name);
+    if(map_halfClusVCol.find(name)!=map_halfClusVCol.end()) emptyCol = map_halfClusVCol.at(name);
     return emptyCol;
   }
 

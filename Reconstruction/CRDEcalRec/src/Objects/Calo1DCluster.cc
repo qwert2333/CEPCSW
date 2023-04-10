@@ -33,6 +33,18 @@ namespace PandoraPlus{
       if(!Seeds[i]) { Seeds.erase(Seeds.begin()+i); i--; }
   }
 
+  PandoraPlus::Calo1DCluster* Calo1DCluster::Clone() const{
+    PandoraPlus::Calo1DCluster* p_cluster = new PandoraPlus::Calo1DCluster();
+    p_cluster->setBars( Bars );
+    p_cluster->setSeeds( Seeds );
+    p_cluster->setIDInfo();
+    for(int i=0; i<CousinClusters.size(); i++) p_cluster->addCousinCluster( CousinClusters[i] );
+    for(int i=0; i<ChildClusters.size(); i++) p_cluster->addChildCluster( ChildClusters[i] );
+   
+    return p_cluster;
+  }
+
+
   bool Calo1DCluster::isNeighbor(const PandoraPlus::CaloUnit* m_bar) const
   {
     for(int i1d = 0; i1d<Bars.size(); i1d++){
@@ -153,23 +165,6 @@ namespace PandoraPlus{
     return edge;
   }
 
-
-  void Calo1DCluster::PrintBars() const{
-    if(Bars.size()!=0){
-      std::cout<<"BarCluster::PrintBars"<<std::endl;
-      printf("#bar \t x \t y \t z \t E \t cellID \n");
-      for(int i=0;i<Bars.size();i++) printf("%d \t %f \t %f \t %f \t %f \t (%d, %d, %d, %d, %d) \n",i, Bars[i]->getPosition().x(), Bars[i]->getPosition().y(), Bars[i]->getPosition().z(), Bars[i]->getEnergy(), Bars[i]->getModule(), Bars[i]->getStave(), Bars[i]->getDlayer(), Bars[i]->getPart(),  Bars[i]->getSlayer() );
-    }
-  }
-
-  void Calo1DCluster::PrintSeeds() const{
-    if(Seeds.size()>0){
-      std::cout<<"BarCluster::PrintSeeds"<<std::endl;
-      printf("#Seed \t x \t y \t z \t E \n");
-      for(int i=0;i<Seeds.size();i++) printf("%d \t %f \t %f \t %f \t %f \n",i, Seeds[i]->getPosition().x(), Seeds[i]->getPosition().y(), Seeds[i]->getPosition().z(), Seeds[i]->getEnergy() );
-    }
-  }
-
   void Calo1DCluster::addUnit(const PandoraPlus::CaloUnit* _bar ) 
   {
     Bars.push_back(_bar);
@@ -204,7 +199,8 @@ namespace PandoraPlus{
     for(int i=0; i<Bars.size(); ++i){
       if(Bars[i]->getEnergy()>maxE) { maxE = Bars[i]->getEnergy(); index = i; }
     }
-    if(Seeds.size()==0 && index>=0 && maxE>0.005 ) Seeds.push_back( Bars[index] );
+    //if(Seeds.size()==0 && index>=0 && maxE>0.005 ) Seeds.push_back( Bars[index] );
+    if(Seeds.size()==0 && index>=0 ) Seeds.push_back( Bars[index] );
   }
 
 };

@@ -56,6 +56,7 @@ public:
   /** Called after data processing for clean up.
    */
   virtual StatusCode finalize() ;
+  
 
 protected:
 
@@ -64,7 +65,6 @@ protected:
 
   SmartIF<IGeomSvc> m_geosvc;
   std::map<std::string, dd4hep::DDSegmentation::BitFieldCoder*> map_readout_decoder;
-
 
   //DataCollection
   PandoraPlusDataCol     m_DataCol; 
@@ -146,8 +146,8 @@ protected:
 
   TTree *t_Layers;
   int m_NshowerU, m_NshowerV;
-  FloatVec m_barShowerU_tag, m_barShowerU_x, m_barShowerU_y, m_barShowerU_z, m_barShowerU_E, m_barShowerU_module, m_barShowerU_part, m_barShowerU_stave, m_barShowerU_dlayer, m_barShowerU_slayer, m_barShowerU_bar;
-  FloatVec m_barShowerV_tag, m_barShowerV_x, m_barShowerV_y, m_barShowerV_z, m_barShowerV_E, m_barShowerV_module, m_barShowerV_part, m_barShowerV_stave, m_barShowerV_dlayer, m_barShowerV_slayer, m_barShowerV_bar;
+  FloatVec m_barShowerU_tag, m_barShowerU_x, m_barShowerU_y, m_barShowerU_z, m_barShowerU_E, m_barShowerU_T, m_barShowerU_module, m_barShowerU_part, m_barShowerU_stave, m_barShowerU_dlayer, m_barShowerU_slayer, m_barShowerU_bar;
+  FloatVec m_barShowerV_tag, m_barShowerV_x, m_barShowerV_y, m_barShowerV_z, m_barShowerV_E, m_barShowerV_T, m_barShowerV_module, m_barShowerV_part, m_barShowerV_stave, m_barShowerV_dlayer, m_barShowerV_slayer, m_barShowerV_bar;
 
   // yyy: check Hough Algorithm
   TTree *t_Hough;
@@ -171,6 +171,7 @@ protected:
 
   TTree *t_Cluster;
   int m_Nclus, m_Nmc;
+  IntVec m_Clus_Ntrk;
   FloatVec m_Clus_x, m_Clus_y, m_Clus_z, m_Clus_E;
   IntVec m_mcPdgid, m_mcStatus, m_Nhit;
   FloatVec m_mcPx, m_mcPy, m_mcPz, m_mcEn;

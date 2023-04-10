@@ -67,6 +67,8 @@ namespace PandoraPlus{
     static int NbarZ;
     static int over_module[28];
     static int over_module_set;
+    static float barsize;
+    static float ecal_innerR;
     
   private:
 		unsigned long long cellID;
