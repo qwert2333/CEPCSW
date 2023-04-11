@@ -16,7 +16,7 @@ rndmgensvc = RndmGenSvc("RndmGenSvc")
 rndmgensvc.Engine = rndmengine.name()
 
 #geometry_option = "CRD_o1_v01/CRD_o1_v01.xml"
-geometry_option = "CRD_o1_v01/CRD_o1_v01.xml"
+geometry_option = "CRD_o1_v01/CRD_o1_v02.xml"
 #...
 
 if not os.getenv("DETCRDROOT"):
@@ -47,17 +47,17 @@ from Configurables import HepMCRdr
 from Configurables import GenPrinter
 
 gun = GtGunTool("GtGunTool")
-gun.Particles = ["pi-"]
+gun.Particles = ["mu-"]
 #gun.Particles = ["nu_e"]
-gun.PositionXs = [1860.]
+gun.PositionXs = [0.]
 gun.PositionYs = [0.]
 gun.PositionZs = [0.]
-gun.EnergyMins = [5. ] # GeV
-gun.EnergyMaxs = [5. ] # GeV
-gun.ThetaMins  = [90. ]   # deg
-gun.ThetaMaxs  = [90. ]   # deg
-gun.PhiMins    = [0. ]   # deg
-gun.PhiMaxs    = [0. ]   # deg
+gun.EnergyMins = [20] # GeV
+gun.EnergyMaxs = [20] # GeV
+gun.ThetaMins  = [90]   # deg
+gun.ThetaMaxs  = [90]   # deg
+gun.PhiMins    = [0.]   # deg
+gun.PhiMaxs    = [0.]   # deg
 
 
 # stdheprdr = StdHepRdr("StdHepRdr")
@@ -272,7 +272,7 @@ elif dedxoption == "BetheBlochEquationDedxSimTool":
 # output
 from Configurables import PodioOutput
 out = PodioOutput("outputalg")
-out.filename = "CRDFull_Pi-10GeV.root"
+out.filename = "SimSample/CRDFull_Mu20GeV.root"
 out.outputCommands = ["keep *"]
 
 # ApplicationMgr

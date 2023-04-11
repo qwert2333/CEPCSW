@@ -143,6 +143,8 @@ protected:
   TTree* t_SimBar;
   FloatVec m_simBar_x, m_simBar_y, m_simBar_z, m_simBar_T1, m_simBar_T2, m_simBar_Q1, m_simBar_Q2; 
   FloatVec m_simBar_dlayer, m_simBar_part, m_simBar_stave, m_simBar_slayer, m_simBar_module, m_simBar_bar;
+  FloatVec m_HcalHit_x, m_HcalHit_y, m_HcalHit_z, m_HcalHit_E;
+  IntVec   m_HcalHit_layer;
 
   TTree *t_Layers;
   int m_NshowerU, m_NshowerV;

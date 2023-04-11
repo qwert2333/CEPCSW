@@ -160,7 +160,13 @@ StatusCode PandoraPlusPFAlg::initialize()
     t_SimBar->Branch("simBar_stave", &m_simBar_stave);
     t_SimBar->Branch("simBar_slayer", &m_simBar_slayer);
     t_SimBar->Branch("simBar_bar", &m_simBar_bar);
-   
+    t_SimBar->Branch("HcalHit_x", &m_HcalHit_x); 
+    t_SimBar->Branch("HcalHit_y", &m_HcalHit_y); 
+    t_SimBar->Branch("HcalHit_z", &m_HcalHit_z); 
+    t_SimBar->Branch("HcalHit_E", &m_HcalHit_E); 
+    t_SimBar->Branch("HcalHit_layer", &m_HcalHit_layer); 
+
+  
     //BarShowers
     t_Layers->Branch("NshowerU", &m_NshowerU);
     t_Layers->Branch("NshowerV", &m_NshowerV);
@@ -358,6 +364,15 @@ cout<<"  Write raw bars"<<endl;
     m_simBar_stave.push_back(p_hitbar->getStave());
     m_simBar_slayer.push_back(p_hitbar->getSlayer());
     m_simBar_bar.push_back(p_hitbar->getBar());
+  }
+
+  std::vector<PandoraPlus::CaloHit*> m_hcalHitsCol = m_DataCol.map_CaloHit["HCALBarrel"];
+  for(int ihit=0; ihit<m_hcalHitsCol.size(); ihit++){
+    m_HcalHit_x.push_back( m_hcalHitsCol[ihit]->getPosition().x() );
+    m_HcalHit_y.push_back( m_hcalHitsCol[ihit]->getPosition().y() );
+    m_HcalHit_z.push_back( m_hcalHitsCol[ihit]->getPosition().z() );
+    m_HcalHit_E.push_back( m_hcalHitsCol[ihit]->getEnergy() );
+    m_HcalHit_layer.push_back( m_hcalHitsCol[ihit]->getLayer() );
   }
   t_SimBar->Fill();
   // ------------------------------------
@@ -718,6 +733,12 @@ void PandoraPlusPFAlg::ClearBar(){
   m_simBar_stave.clear();
   m_simBar_slayer.clear();
   m_simBar_bar.clear();
+
+  m_HcalHit_x.clear();
+  m_HcalHit_y.clear();
+  m_HcalHit_z.clear();
+  m_HcalHit_E.clear();
+  m_HcalHit_layer.clear();
 }
 
 void PandoraPlusPFAlg::ClearLayer(){

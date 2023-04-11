@@ -1,7 +1,7 @@
 from Gaudi.Configuration import *
 Nskip = 0
-Nevt = 30
-Name_suffix = 'Pi_10GeV'
+Nevt = 10
+Name_suffix = 'Mip_20GeV_hcal'
 
 ############## GeomSvc #################
 geometry_option = "CRD_o1_v01/CRD_o1_v01.xml"
@@ -24,10 +24,10 @@ geomsvc.compact = geometry_path
 from Configurables import k4DataSvc
 podioevent = k4DataSvc("EventDataSvc")
 podioevent.inputs = [
+#"/publicfs/atlas/atlasnew/higgs/hgg/guofy/CEPCSW_v207/run/SimSample/CRDFull_Pi-10GeV.root"
 #"SimSample/CRDFull_Gam10GeV_ECALSurface.root"
 #"SimSample/CRDFull_GamGam_5cm_ECALSurface.root"
-"SimSample/CRDFullv2_Pi-10GeV_sym8.root"
-#"/publicfs/atlas/atlasnew/higgs/hgg/guofy/CEPCSW_v207/run/SimSample/CRDFull_Pi-10GeV.root"
+"SimSample/CRDFull_Mu20GeV.root"
 #"/publicfs/atlas/atlasnew/higgs/hgg/guofy/CEPCSW_v207/run/SimSample/CRDFull_GamPi_2deg.root"
 #"/publicfs/atlas/atlasnew/higgs/hgg/guofy/CEPCSW_v207/run/SimSample/CRDFull_GamPi_3deg.root"
 ]
@@ -94,7 +94,11 @@ PandoraPlusPFAlg.HCalCaloHitCollections = ["HCALBarrel"]
 PandoraPlusPFAlg.HCalReadOutNames = ["HcalBarrelCollection"]
 
 #----Algorithms----
-
+PandoraPlusPFAlg.AlgList = ["ExampleAlg"]
+PandoraPlusPFAlg.AlgParNames = [ ["Par1", "Par2"] ]
+PandoraPlusPFAlg.AlgParTypes = [ ["double", "double"] ]
+PandoraPlusPFAlg.AlgParValues = [ ["1.", "3.14"] ]
+'''
 PandoraPlusPFAlg.AlgList = ["ExampleAlg", 
                             "GlobalClusteringAlg", 
                             "LocalMaxFindingAlg",
@@ -131,6 +135,7 @@ PandoraPlusPFAlg.AlgParValues = [ ["1.", "3.14"],
                                   ["1.57", "1.57", "70."],  #Pi/3
                                   [""], 
                                   [""]  ]
+'''
 
 ########################################
 
