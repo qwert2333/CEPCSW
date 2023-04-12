@@ -54,22 +54,14 @@ std::cout<<"  Track size: "<<p_tracks->size()<<std::endl;
   GetLayerPoints(normal_vectors, layer_points);
 
   for(int itrk=0; itrk<p_tracks->size(); itrk++){
-// std::cout<<"    --------------------Processing track "<<itrk<<"--------------------"<<std::endl;
     // Only tracks that reach ECAL should be processed.
     if(!IsReachECAL(p_tracks->at(itrk))) continue;
 
     // get track state at calorimeter
     PandoraPlus::TrackState ECAL_trk_state;
-    GetECALTrackState(p_tracks->at(itrk), ECAL_trk_state);
+    GetTrackStateAtCalo(p_tracks->at(itrk), ECAL_trk_state);
     
-// std::cout<<"      track location: "<<ECAL_trk_state.location<<std::endl;
-// std::cout<<"      track reference point: ("<<ECAL_trk_state.referencePoint.X()<<", "
-//                                          <<ECAL_trk_state.referencePoint.Y()<<", "
-//                                          <<ECAL_trk_state.referencePoint.Z()<<")"<<std::endl;
-
     ExtrapolateByLayer(normal_vectors, layer_points, ECAL_trk_state, p_tracks->at(itrk));
-    // The folowing function GetTrackPoints() is not needed in Reconstruction. It is only used for event displaying
-    // GetTrackPoints(ECAL_trk_state, p_tracks->at(itrk));
   } // end loop tracks
 
   // std::cout<<"  Run SelfAlg1"<<std::endl;
@@ -129,12 +121,13 @@ StatusCode TrackExtrapolatingAlg::GetLayerPoints(const std::vector<TVector2> & n
 
 // ...oooOO0OOooo......oooOO0OOooo......oooOO0OOooo...
 bool TrackExtrapolatingAlg::IsReachECAL(PandoraPlus::Track * track){
+  std::vector<TrackState> input_trackstates = track->getTrackStates("Input");
   int count=0;
   TVector3 t_vec;
-  for(int i=0; i<track->trackStates_size(); i++){
-    if(track->getTrackStates()[i].location==PandoraPlus::TrackState::AtCalorimeter){
+  for(int i=0; i<input_trackstates.size(); i++){
+    if(input_trackstates[i].location==PandoraPlus::TrackState::AtCalorimeter){
       count++;
-      t_vec = track->getTrackStates()[i].referencePoint;
+      t_vec = input_trackstates[i].referencePoint;
       break;
     }
   }
@@ -152,15 +145,18 @@ std::cout<<"      the track escape from endcap"<<std::endl;
 
 
 // ...oooOO0OOooo......oooOO0OOooo......oooOO0OOooo...
-StatusCode TrackExtrapolatingAlg::GetECALTrackState(PandoraPlus::Track * track, 
-                             PandoraPlus::TrackState & ECAL_trk_state){
-  for(int its=0; its<track->trackStates_size();its++){
-      if(track->getTrackStates(its).location==PandoraPlus::TrackState::AtCalorimeter){
-        ECAL_trk_state=track->getTrackStates(its);
+StatusCode TrackExtrapolatingAlg::GetTrackStateAtCalo(PandoraPlus::Track * track, 
+                                                PandoraPlus::TrackState & trk_state_at_calo){
+  std::vector<TrackState> input_trackstates = track->getTrackStates("Input");
+
+  for(int its=0; its<input_trackstates.size(); its++){
+      if(input_trackstates[its].location==PandoraPlus::TrackState::AtCalorimeter){
+        trk_state_at_calo=input_trackstates[its];
         break;
       }
   }
   return StatusCode::SUCCESS;
+  
 }
 
 
@@ -172,7 +168,7 @@ StatusCode TrackExtrapolatingAlg::ExtrapolateByLayer(const std::vector<TVector2>
     float rho = GetRho(ECAL_trk_state);
     TVector2 center = GetCenterOfCircle(ECAL_trk_state, rho);
     float alpha0 = GetRefAlpha0(ECAL_trk_state, center); 
-    bool is_rtbk = IsReturn(rho, center);
+    // bool is_rtbk = IsReturn(rho, center);
     // Evaluate delta_phi
     std::vector<std::vector<float>> delta_phi;
     for(int im=0; im<normal_vectors.size(); im++){  // for each module
@@ -193,15 +189,15 @@ StatusCode TrackExtrapolatingAlg::ExtrapolateByLayer(const std::vector<TVector2>
         float t_dphi2 = Pi()-t_as - t_ab;
         if(ECAL_trk_state.Kappa < 0){ 
           t_delta_phi.push_back(t_dphi1); 
-          if(is_rtbk){
-            t_delta_phi.push_back(t_dphi2);
-          }
+          // if(is_rtbk){
+          //   t_delta_phi.push_back(t_dphi2);
+          // }
         }
         else{
           t_delta_phi.push_back(-t_dphi1); 
-          if(is_rtbk){
-            t_delta_phi.push_back(-t_dphi2);
-          }
+          // if(is_rtbk){
+          //   t_delta_phi.push_back(-t_dphi2);
+          // }
         }
         
       }
@@ -248,9 +244,7 @@ StatusCode TrackExtrapolatingAlg::ExtrapolateByLayer(const std::vector<TVector2>
       t_states.push_back(t_state);
     }
     std::sort(t_states.begin(), t_states.end(), SortByPhi0);
-    for(int ip=0; ip<t_states.size(); ip++){
-      p_track->AddTrackState(t_states[ip]);
-    }
+    p_track->setTrackStates("Ecal", t_states);
     
     return StatusCode::SUCCESS;
 }
@@ -292,63 +286,6 @@ bool TrackExtrapolatingAlg::IsReturn(float rho, TVector2 & center){
   else{return false;}
 }
 
-// ...oooOO0OOooo......oooOO0OOooo......oooOO0OOooo...
-StatusCode TrackExtrapolatingAlg::GetTrackPoints(const PandoraPlus::TrackState & ECAL_trk_state, 
-                                                 PandoraPlus::Track* p_track){
-  float rho = GetRho(ECAL_trk_state);
-  TVector2 center = GetCenterOfCircle(ECAL_trk_state, rho);
-  float alpha0 = GetRefAlpha0(ECAL_trk_state, center); 
-
-  // the angle from center point(x_C, y_c) of the helix circle to IP(0, 0)
-  float IP_angle = ATan2( -center.Y(), -center.X() );
-
-  vector<float> delta_phi;
-
-  // negative charged particle
-  // IP_angle should be < alpha0
-  if(ECAL_trk_state.Kappa < 0){
-    while ( IP_angle > alpha0 ){
-      IP_angle = IP_angle - 2*Pi();
-    }
-  }
-  // positive charged particle
-  // IP_angle should be > alpha0
-  else{
-    while (IP_angle < alpha0){
-      IP_angle = IP_angle + 2*Pi();
-    }
-  }
-
-  for(int i = 0; i <= 100; i++){
-    float t_phi = (IP_angle - alpha0) / 100. * i;
-    delta_phi.push_back(t_phi);
-  }
-
-  std::vector<TVector3> ext_points;
-  for(int ip=0; ip<delta_phi.size(); ip++){
-    float x = center.X() + (rho*Cos(alpha0+delta_phi[ip]));
-    float y = center.Y() + (rho*Sin(alpha0+delta_phi[ip]));
-    float z;
-    if(ECAL_trk_state.Kappa > 0){
-      z = ECAL_trk_state.referencePoint.Z() + ECAL_trk_state.Z0 - 
-              (delta_phi[ip]*rho*ECAL_trk_state.tanLambda);
-    }else{
-      z = ECAL_trk_state.referencePoint.Z() + ECAL_trk_state.Z0 + 
-              (delta_phi[ip]*rho*ECAL_trk_state.tanLambda);
-    }
-    TVector3 t_vec3(x,y,z);
-    ext_points.push_back(t_vec3);
-  }
-
-  for(int ip=0; ip<ext_points.size(); ip++){
-    TrackState t_state = ECAL_trk_state;
-    t_state.location = PandoraPlus::TrackState::AtOther;
-    t_state.referencePoint = ext_points[ip];
-    p_track->AddTrackState(t_state);
-  }
-
-  return StatusCode::SUCCESS;
-}
 
 // ...oooOO0OOooo......oooOO0OOooo......oooOO0OOooo...
 float TrackExtrapolatingAlg::GetExtrapolatedPhi0(float Kappa, float ECAL_phi0, TVector2 center, TVector3 ext_point){

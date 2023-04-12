@@ -34,6 +34,7 @@ namespace PandoraPlus{
     auto const_TrkCol = iter.second; 
     for(int itrk=0; itrk<const_TrkCol.size(); itrk++){
       PandoraPlus::Track* m_trk = new PandoraPlus::Track();
+      std::vector<PandoraPlus::TrackState> m_trkstates;
 
       for(int its=0; its<const_TrkCol[itrk].trackStates_size(); its++){
         PandoraPlus::TrackState m_trkst;
@@ -48,9 +49,10 @@ namespace PandoraPlus{
                                        const_TrkCol[itrk].getTrackStates(its).referencePoint[1],
                                        const_TrkCol[itrk].getTrackStates(its).referencePoint[2] );
 
-        m_trk->AddTrackState( m_trkst );
-        m_trk->setType(const_TrkCol[itrk].getType());
+        m_trkstates.push_back(m_trkst);        
       }
+      m_trk->setTrackStates("Input", m_trkstates);
+      m_trk->setType(const_TrkCol[itrk].getType());
       m_trkCol.push_back(m_trk);
       m_DataCol.bk_TrackCol.push_back( m_trk );
     }}

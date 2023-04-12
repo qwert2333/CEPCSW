@@ -655,17 +655,18 @@ cout<<"  Write 3DClusters and MCP "<<endl;
   m_Ntrk = m_trkCol.size();
   for(int itrk=0; itrk<m_Ntrk; itrk++){
     m_type.push_back(m_trkCol[itrk]->getType());
-    for(int istate=0; istate<m_trkCol[itrk]->trackStates_size(); istate++){
-      m_trkstate_d0.push_back( m_trkCol[itrk]->getTrackStates(istate).D0 );
-      m_trkstate_z0.push_back( m_trkCol[itrk]->getTrackStates(istate).Z0 );
-      m_trkstate_phi.push_back( m_trkCol[itrk]->getTrackStates(istate).phi0 );
-      m_trkstate_tanL.push_back( m_trkCol[itrk]->getTrackStates(istate).tanLambda );
-      m_trkstate_kappa.push_back( m_trkCol[itrk]->getTrackStates(istate).Kappa);
-      m_trkstate_omega.push_back( m_trkCol[itrk]->getTrackStates(istate).Omega );
-      m_trkstate_refx.push_back( m_trkCol[itrk]->getTrackStates(istate).referencePoint.X() );
-      m_trkstate_refy.push_back( m_trkCol[itrk]->getTrackStates(istate).referencePoint.Y() );
-      m_trkstate_refz.push_back( m_trkCol[itrk]->getTrackStates(istate).referencePoint.Z() );
-      m_trkstate_location.push_back( m_trkCol[itrk]->getTrackStates(istate).location );
+    std::vector<TrackState> AllTrackStates = m_trkCol[itrk]->getAllTrackStates();
+    for(int istate=0; istate<AllTrackStates.size(); istate++){
+      m_trkstate_d0.push_back( AllTrackStates[istate].D0 );
+      m_trkstate_z0.push_back( AllTrackStates[istate].Z0 );
+      m_trkstate_phi.push_back( AllTrackStates[istate].phi0 );
+      m_trkstate_tanL.push_back( AllTrackStates[istate].tanLambda );
+      m_trkstate_kappa.push_back( AllTrackStates[istate].Kappa);
+      m_trkstate_omega.push_back( AllTrackStates[istate].Omega );
+      m_trkstate_refx.push_back( AllTrackStates[istate].referencePoint.X() );
+      m_trkstate_refy.push_back( AllTrackStates[istate].referencePoint.Y() );
+      m_trkstate_refz.push_back( AllTrackStates[istate].referencePoint.Z() );
+      m_trkstate_location.push_back( AllTrackStates[istate].location );
       m_trkstate_tag.push_back(itrk);
   }}
   t_Track->Fill();

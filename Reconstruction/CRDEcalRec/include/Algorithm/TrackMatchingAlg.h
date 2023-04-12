@@ -24,7 +24,7 @@ public:
   StatusCode ClearAlgorithm();
 
 
-  StatusCode GetExtrpoPoints(const PandoraPlus::Track* track, std::vector<TVector3>& extrapo_points);
+  StatusCode GetExtrpoECALPoints(const PandoraPlus::Track* track, std::vector<TVector3>& extrapo_points);
   StatusCode CreateTrackAxis(vector<TVector3>& extrapo_points, std::vector<const PandoraPlus::Calo1DCluster*>& localMaxVCol,
                              PandoraPlus::CaloHalfCluster* t_track_axis);
 

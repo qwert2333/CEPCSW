@@ -51,7 +51,7 @@ StatusCode TrackMatchingAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
     for(int itrk=0; itrk<m_TrackCol.size(); itrk++){  // loop tracks
       // Get extrapolated points of the track. These points are sorted by the track
       std::vector<TVector3> extrapo_points;
-      GetExtrpoPoints(m_TrackCol[itrk], extrapo_points);
+      GetExtrpoECALPoints(m_TrackCol[itrk], extrapo_points);
 
       // Track axis candidate.
       PandoraPlus::CaloHalfCluster* t_track_axis = new PandoraPlus::CaloHalfCluster();
@@ -83,7 +83,7 @@ StatusCode TrackMatchingAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
     for(int itrk=0; itrk<m_TrackCol.size(); itrk++){  // loop tracks
       // Get extrapolated points of the track. These points are sorted by the track
       std::vector<TVector3> extrapo_points;
-      GetExtrpoPoints(m_TrackCol[itrk], extrapo_points);
+      GetExtrpoECALPoints(m_TrackCol[itrk], extrapo_points);
 
       // Track axis candidate.
       PandoraPlus::CaloHalfCluster* t_track_axis = new PandoraPlus::CaloHalfCluster();
@@ -258,10 +258,10 @@ StatusCode TrackMatchingAlg::ClearAlgorithm(){
 }
 
 
-StatusCode TrackMatchingAlg::GetExtrpoPoints(const PandoraPlus::Track* track, std::vector<TVector3>& extrapo_points){
-  for(int its=0; its<track->trackStates_size(); its++){
-    if(track->getTrackStates(its).location==PandoraPlus::TrackState::AtOther)
-      extrapo_points.push_back(track->getTrackStates(its).referencePoint);
+StatusCode TrackMatchingAlg::GetExtrpoECALPoints(const PandoraPlus::Track* track, std::vector<TVector3>& extrapo_points){
+  std::vector<PandoraPlus::TrackState> ecal_track_states = track->getTrackStates("Ecal");
+  for(int its=0; its<ecal_track_states.size(); its++){
+    extrapo_points.push_back(ecal_track_states[its].referencePoint);
   }
 
   return StatusCode::SUCCESS;
