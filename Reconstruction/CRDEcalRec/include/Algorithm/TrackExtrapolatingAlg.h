@@ -31,7 +31,8 @@ public:
   StatusCode GetPlaneNormalVector(std::vector<TVector2> & normal_vectors);
   // Get points in each plane of layer
   StatusCode GetLayerPoints(const std::vector<TVector2> & normal_vectors, 
-                          std::vector<std::vector<TVector2>> & layer_points);
+                            std::vector<std::vector<TVector2>> & ECAL_layer_points,
+                            std::vector<std::vector<TVector2>> & HCAL_layer_points);
   // If the track reach barrel ECAL
   bool IsReachECAL(PandoraPlus::Track * track);
   // Get track state at calorimeter
@@ -39,7 +40,8 @@ public:
                            PandoraPlus::TrackState & trk_state_at_calo);
   // get extrapolated points
   StatusCode ExtrapolateByLayer(const std::vector<TVector2> & normal_vectors,
-                              const std::vector<std::vector<TVector2>> & layer_points, 
+                              const std::vector<std::vector<TVector2>> & ECAL_layer_points,
+                              const std::vector<std::vector<TVector2>> & HCAL_layer_points,
                               const PandoraPlus::TrackState & ECAL_trk_state, 
                               PandoraPlus::Track* p_track);
   // Get the radius rho 
@@ -50,6 +52,15 @@ public:
   float GetRefAlpha0(const PandoraPlus::TrackState & trk_state, const TVector2 & center);
   // If the charged particle return back 
   bool IsReturn(float rho, TVector2 & center);
+
+  std::vector<std::vector<float>> GetDeltaPhi(float rho, TVector2 center, float alpha0,
+                                              const std::vector<TVector2> & normal_vectors,
+                                              const std::vector<std::vector<TVector2>> & layer_points, 
+                                              const PandoraPlus::TrackState & CALO_trk_state);
+  std::vector<TVector3> GetExtrapoPoints(std::string calo_name, 
+                                         float rho, TVector2 center, float alpha0, 
+                                         const PandoraPlus::TrackState & CALO_trk_state,
+                                         const std::vector<std::vector<float>>& delta_phi);
 
     // Get phi0 of extrapolated points. Note that this phi0 is not same as the definition of the phi0 in TrackState, but will be stored in TrackState
   float GetExtrapolatedPhi0(float Kappa, float ECAL_phi0, TVector2 center, TVector3 ext_point);

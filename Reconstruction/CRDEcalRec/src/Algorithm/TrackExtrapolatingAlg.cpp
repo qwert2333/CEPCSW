@@ -14,17 +14,31 @@ StatusCode TrackExtrapolatingAlg::ReadSettings(Settings& m_settings){
   settings = m_settings;
 
   //Initialize parameters
-  // if(settings.map_floatPars.find("Par1")==settings.map_floatPars.end()) settings.map_floatPars["Par1"] = 0;
-  if(settings.map_floatPars.find("innermost_distance")==settings.map_floatPars.end()) 
-    settings.map_floatPars["innermost_distance"] = 1860;
-  if(settings.map_floatPars.find("outermost_distance")==settings.map_floatPars.end()) 
-    settings.map_floatPars["outermost_distance"] = 3230;
-  if(settings.map_intPars.find("Nlayers")==settings.map_intPars.end()) 
-    settings.map_intPars["Nlayers"] = 28;
-  if(settings.map_floatPars.find("layer_width")==settings.map_floatPars.end())
-    settings.map_floatPars["layer_width"] = 10;
+  // ECAL parameters
+  if(settings.map_floatPars.find("ECAL_innermost_distance")==settings.map_floatPars.end()) 
+    settings.map_floatPars["ECAL_innermost_distance"] = 1860;
+  if(settings.map_floatPars.find("ECAL_outermost_distance")==settings.map_floatPars.end()) 
+    settings.map_floatPars["ECAL_outermost_distance"] = 2140;
+  if(settings.map_intPars.find("ECAL_Nlayers")==settings.map_intPars.end()) 
+    settings.map_intPars["ECAL_Nlayers"] = 28;
+  if(settings.map_floatPars.find("ECAL_layer_width")==settings.map_floatPars.end())
+    settings.map_floatPars["ECAL_layer_width"] = 10;
   if(settings.map_floatPars.find("ECAL_half_length")==settings.map_floatPars.end())
-    settings.map_floatPars["ECAL_half_length"] = 2450;
+    settings.map_floatPars["ECAL_half_length"] = 3300;
+  // HCAL parameters
+  if(settings.map_floatPars.find("HCAL_innermost_distance")==settings.map_floatPars.end()) 
+    settings.map_floatPars["HCAL_innermost_distance"] = 2150;
+  if(settings.map_floatPars.find("HCAL_outermost_distance")==settings.map_floatPars.end()) 
+    settings.map_floatPars["HCAL_outermost_distance"] = 3230;
+  if(settings.map_intPars.find("HCAL_Nlayers")==settings.map_intPars.end()) 
+    settings.map_intPars["HCAL_Nlayers"] = 35;
+  if(settings.map_floatPars.find("HCAL_layer_width")==settings.map_floatPars.end())
+    settings.map_floatPars["HCAL_layer_width"] = 26.61;
+  if(settings.map_floatPars.find("HCAL_sensitive_distance")==settings.map_floatPars.end())
+    settings.map_floatPars["HCAL_sensitive_distance"] = 22.81;  // distance between sensitive material and front face of each layer
+  if(settings.map_floatPars.find("HCAL_half_length")==settings.map_floatPars.end())
+    settings.map_floatPars["HCAL_half_length"] = 4480;
+
   if(settings.map_intPars.find("Nmodule")==settings.map_intPars.end()) 
     settings.map_intPars["Nmodule"] = 8;
   if(settings.map_floatPars.find("B_field")==settings.map_floatPars.end())
@@ -47,21 +61,26 @@ std::cout<<"---oooOO0OOooo--- Excuting TrackExtrapolatingAlg ---oooOO0OOooo---"<
   std::vector<PandoraPlus::Track*>* p_tracks = &(m_datacol.TrackCol);
 std::cout<<"  Track size: "<<p_tracks->size()<<std::endl;
 
+std::cout<<"  GetPlaneNormalVector() "<<std::endl;
   std::vector<TVector2> normal_vectors;
   GetPlaneNormalVector(normal_vectors);
 
-  std::vector<std::vector<TVector2>> layer_points;    // 8 modules, 28 layer points in each modules
-  GetLayerPoints(normal_vectors, layer_points);
+std::cout<<"  GetLayerPoints() "<<std::endl;
+  std::vector<std::vector<TVector2>> ECAL_layer_points;    // 8 modules, 28 layer points in each modules
+  std::vector<std::vector<TVector2>> HCAL_layer_points;    // 8 modules, 35 layer points in each modules
+  GetLayerPoints(normal_vectors, ECAL_layer_points, HCAL_layer_points);
 
   for(int itrk=0; itrk<p_tracks->size(); itrk++){
     // Only tracks that reach ECAL should be processed.
     if(!IsReachECAL(p_tracks->at(itrk))) continue;
 
+std::cout<<"  GetTrackStateAtCalo() "<<std::endl;
     // get track state at calorimeter
-    PandoraPlus::TrackState ECAL_trk_state;
-    GetTrackStateAtCalo(p_tracks->at(itrk), ECAL_trk_state);
+    PandoraPlus::TrackState CALO_trk_state;
+    GetTrackStateAtCalo(p_tracks->at(itrk), CALO_trk_state);
     
-    ExtrapolateByLayer(normal_vectors, layer_points, ECAL_trk_state, p_tracks->at(itrk));
+std::cout<<"  ExtrapolateByLayer() "<<std::endl;
+    ExtrapolateByLayer(normal_vectors, ECAL_layer_points, HCAL_layer_points, CALO_trk_state, p_tracks->at(itrk));
   } // end loop tracks
 
   // std::cout<<"  Run SelfAlg1"<<std::endl;
@@ -100,19 +119,36 @@ StatusCode TrackExtrapolatingAlg::GetPlaneNormalVector(std::vector<TVector2> & n
 
 // ...oooOO0OOooo......oooOO0OOooo......oooOO0OOooo...
 StatusCode TrackExtrapolatingAlg::GetLayerPoints(const std::vector<TVector2> & normal_vectors, 
-                          std::vector<std::vector<TVector2>> & layer_points){
+                          std::vector<std::vector<TVector2>> & ECAL_layer_points,
+                          std::vector<std::vector<TVector2>> & HCAL_layer_points){
+  // ECAL
   for(int im=0; im< normal_vectors.size(); im++){
     std::vector<TVector2> t_points;
-    for(int il=0; il<settings.map_intPars["Nlayers"]; il++){
+    for(int il=0; il<settings.map_intPars["ECAL_Nlayers"]; il++){
       TVector2 t_p;
-      float dist = settings.map_floatPars["layer_width"]*il + settings.map_floatPars["innermost_distance"] + 
-                   settings.map_floatPars["layer_width"]/2;
+      float dist = settings.map_floatPars["ECAL_innermost_distance"] + 
+                   settings.map_floatPars["ECAL_layer_width"]*il + settings.map_floatPars["ECAL_layer_width"]/2;
       float xx = (normal_vectors[im].X()/normal_vectors[im].Mod()) * dist;
       float yy = (normal_vectors[im].Y()/normal_vectors[im].Mod()) * dist;
       t_p.SetX(xx); t_p.SetY(yy);
       t_points.push_back(t_p);
     }
-    layer_points.push_back(t_points);
+    ECAL_layer_points.push_back(t_points);
+  }
+
+  // HCAL
+  for(int im=0; im< normal_vectors.size(); im++){
+    std::vector<TVector2> t_points;
+    for(int il=0; il<settings.map_intPars["HCAL_Nlayers"]; il++){
+      TVector2 t_p;
+      float dist = settings.map_floatPars["HCAL_innermost_distance"] + 
+                   settings.map_floatPars["HCAL_layer_width"]*il + settings.map_floatPars["HCAL_sensitive_distance"];
+      float xx = (normal_vectors[im].X()/normal_vectors[im].Mod()) * dist;
+      float yy = (normal_vectors[im].Y()/normal_vectors[im].Mod()) * dist;
+      t_p.SetX(xx); t_p.SetY(yy);
+      t_points.push_back(t_p);
+    }
+    HCAL_layer_points.push_back(t_points);
   }
 
   return StatusCode::SUCCESS;
@@ -162,91 +198,51 @@ StatusCode TrackExtrapolatingAlg::GetTrackStateAtCalo(PandoraPlus::Track * track
 
 // ...oooOO0OOooo......oooOO0OOooo......oooOO0OOooo...
 StatusCode TrackExtrapolatingAlg::ExtrapolateByLayer(const std::vector<TVector2> & normal_vectors,
-                              const std::vector<std::vector<TVector2>> & layer_points, 
-                              const PandoraPlus::TrackState & ECAL_trk_state, 
+                              const std::vector<std::vector<TVector2>> & ECAL_layer_points, 
+                              const std::vector<std::vector<TVector2>> & HCAL_layer_points, 
+                              const PandoraPlus::TrackState & CALO_trk_state, 
                               PandoraPlus::Track* p_track){
-    float rho = GetRho(ECAL_trk_state);
-    TVector2 center = GetCenterOfCircle(ECAL_trk_state, rho);
-    float alpha0 = GetRefAlpha0(ECAL_trk_state, center); 
-    // bool is_rtbk = IsReturn(rho, center);
-    // Evaluate delta_phi
-    std::vector<std::vector<float>> delta_phi;
-    for(int im=0; im<normal_vectors.size(); im++){  // for each module
-      std::vector<float> t_delta_phi;
-      float beta = ATan2(normal_vectors[im].X(), normal_vectors[im].Y());
-      float denominator = rho * Sqrt( (normal_vectors[im].X()*normal_vectors[im].X()) +
-                                      (normal_vectors[im].Y()*normal_vectors[im].Y()) );
-      for(int il=0; il<layer_points[im].size(); il++){  // for each layer
-        float numerator = (layer_points[im][il].X()*normal_vectors[im].X()) -
-                          (center.X()*normal_vectors[im].X()) + 
-                          (layer_points[im][il].Y()*normal_vectors[im].Y()) -
-                          (center.Y()*normal_vectors[im].Y()) ;
-        if(Abs(numerator/denominator)>1) continue;
-        float t_as = ASin(numerator/denominator);
-        float t_ab = ASin(Sin(alpha0+beta));
+  float rho = GetRho(CALO_trk_state);
+  TVector2 center = GetCenterOfCircle(CALO_trk_state, rho);
+  float alpha0 = GetRefAlpha0(CALO_trk_state, center); 
+  // bool is_rtbk = IsReturn(rho, center);
+  // Evaluate delta_phi
+std::cout << "    yyy: GetDeltaPhi()" << std::endl;
+  std::vector<std::vector<float>> ECAL_delta_phi = GetDeltaPhi(rho, center, alpha0, normal_vectors, ECAL_layer_points, CALO_trk_state);
+  std::vector<std::vector<float>> HCAL_delta_phi = GetDeltaPhi(rho, center, alpha0, normal_vectors, HCAL_layer_points, CALO_trk_state);
+  
+  // extrpolated track points. Will be stored as reference point in TrackState
+std::cout << "    yyy: GetExtrapoPoints()" << std::endl;
+  std::vector<TVector3> ECAL_ext_points = GetExtrapoPoints("ECAL", rho, center, alpha0, CALO_trk_state, ECAL_delta_phi);
+  std::vector<TVector3> HCAL_ext_points = GetExtrapoPoints("HCAL", rho, center, alpha0, CALO_trk_state, HCAL_delta_phi);
+  
+  // Sort Extrapolated points
+std::cout << "    yyy: Sort" << std::endl;
+  std::vector<TrackState> t_ECAL_states;
+  for(int ip=0; ip<ECAL_ext_points.size(); ip++){
+    TrackState t_state = CALO_trk_state;
+    t_state.location = PandoraPlus::TrackState::AtOther;
+    t_state.referencePoint = ECAL_ext_points[ip];
+    // Note GetExtrapolatedPhi0 is not same as the definition of phi0 in TrackState
+    t_state.phi0 = GetExtrapolatedPhi0(CALO_trk_state.Kappa, CALO_trk_state.phi0, center, ECAL_ext_points[ip]);
+    t_ECAL_states.push_back(t_state);
+  }
+  std::sort(t_ECAL_states.begin(), t_ECAL_states.end(), SortByPhi0);
+  p_track->setTrackStates("Ecal", t_ECAL_states);
 
-        float t_dphi1 = t_as - t_ab;
-        float t_dphi2 = Pi()-t_as - t_ab;
-        if(ECAL_trk_state.Kappa < 0){ 
-          t_delta_phi.push_back(t_dphi1); 
-          // if(is_rtbk){
-          //   t_delta_phi.push_back(t_dphi2);
-          // }
-        }
-        else{
-          t_delta_phi.push_back(-t_dphi1); 
-          // if(is_rtbk){
-          //   t_delta_phi.push_back(-t_dphi2);
-          // }
-        }
-        
-      }
-      delta_phi.push_back(t_delta_phi);
-    }
-
-    // extrpolated track points. Will be stored as reference point in TrackState
-    std::vector<TVector3> ext_points;
-    for(int im=0; im<delta_phi.size(); im++){
-      for(int ip=0; ip<delta_phi[im].size(); ip++){
-        float x = center.X() + (rho*Cos(alpha0+delta_phi[im][ip]));
-        float y = center.Y() + (rho*Sin(alpha0+delta_phi[im][ip]));
-        float z;
-        if(ECAL_trk_state.Kappa > 0){
-          z = ECAL_trk_state.referencePoint.Z() + ECAL_trk_state.Z0 - 
-                  (delta_phi[im][ip]*rho*ECAL_trk_state.tanLambda);
-        }else{
-          z = ECAL_trk_state.referencePoint.Z() + ECAL_trk_state.Z0 + 
-                  (delta_phi[im][ip]*rho*ECAL_trk_state.tanLambda);
-        }
-
-        TVector3 t_vec3(x,y,z);
-        float rotate_angle = (6-im)*Pi()/4;
-        t_vec3.RotateZ(rotate_angle);
-
-        if(Sqrt(x*x+y*y) > settings.map_floatPars["outermost_distance"]/Cos(Pi()/settings.map_intPars["Nmodule"])+100) continue;
-        if(Sqrt(x*x+y*y) < settings.map_floatPars["innermost_distance"]) continue;
-        if(settings.map_floatPars["outermost_distance"]*Sqrt(2)-t_vec3.X() < t_vec3.Y()) continue;
-        if(t_vec3.X()-settings.map_floatPars["innermost_distance"]*Sqrt(2) > t_vec3.Y()) continue;
-        
-        TVector3 extp(x,y,z);
-        ext_points.push_back(extp);
-      }
-    }
-    
-    // Sort Extrapolated points
-    std::vector<TrackState> t_states;
-    for(int ip=0; ip<ext_points.size(); ip++){
-      TrackState t_state = ECAL_trk_state;
-      t_state.location = PandoraPlus::TrackState::AtOther;
-      t_state.referencePoint = ext_points[ip];
-      // Note GetExtrapolatedPhi0 is not same as the definition of phi0 in TrackState
-      t_state.phi0 = GetExtrapolatedPhi0(ECAL_trk_state.Kappa, ECAL_trk_state.phi0, center, ext_points[ip]);
-      t_states.push_back(t_state);
-    }
-    std::sort(t_states.begin(), t_states.end(), SortByPhi0);
-    p_track->setTrackStates("Ecal", t_states);
-    
-    return StatusCode::SUCCESS;
+  std::vector<TrackState> t_HCAL_states;
+  for(int ip=0; ip<HCAL_ext_points.size(); ip++){
+    TrackState t_state = CALO_trk_state;
+    t_state.location = PandoraPlus::TrackState::AtOther;
+    t_state.referencePoint = HCAL_ext_points[ip];
+    // Note GetExtrapolatedPhi0 is not same as the definition of phi0 in TrackState
+    t_state.phi0 = GetExtrapolatedPhi0(CALO_trk_state.Kappa, CALO_trk_state.phi0, center, HCAL_ext_points[ip]);
+    t_HCAL_states.push_back(t_state);
+  }
+  std::sort(t_HCAL_states.begin(), t_HCAL_states.end(), SortByPhi0);
+  p_track->setTrackStates("Hcal", t_HCAL_states);
+  
+  return StatusCode::SUCCESS;
 }
 
 
@@ -280,9 +276,98 @@ float TrackExtrapolatingAlg::GetRefAlpha0(const PandoraPlus::TrackState & trk_st
 
 
 // ...oooOO0OOooo......oooOO0OOooo......oooOO0OOooo...
+std::vector<std::vector<float>> TrackExtrapolatingAlg::GetDeltaPhi(float rho, TVector2 center, float alpha0,
+                              const std::vector<TVector2> & normal_vectors,
+                              const std::vector<std::vector<TVector2>> & layer_points, 
+                              const PandoraPlus::TrackState & CALO_trk_state){
+  std::vector<std::vector<float>> delta_phi;
+  for(int im=0; im<normal_vectors.size(); im++){  // for each module
+    std::vector<float> t_delta_phi;
+    float beta = ATan2(normal_vectors[im].X(), normal_vectors[im].Y());
+    float denominator = rho * Sqrt( (normal_vectors[im].X()*normal_vectors[im].X()) +
+                                    (normal_vectors[im].Y()*normal_vectors[im].Y()) );
+    for(int il=0; il<layer_points[im].size(); il++){  // for each layer
+      float numerator = (layer_points[im][il].X()*normal_vectors[im].X()) -
+                        (center.X()*normal_vectors[im].X()) + 
+                        (layer_points[im][il].Y()*normal_vectors[im].Y()) -
+                        (center.Y()*normal_vectors[im].Y()) ;
+      if(Abs(numerator/denominator)>1) continue;
+      float t_as = ASin(numerator/denominator);
+      float t_ab = ASin(Sin(alpha0+beta));
+
+      float t_dphi1 = t_as - t_ab;
+      // float t_dphi2 = Pi()-t_as - t_ab;
+      if(CALO_trk_state.Kappa < 0){ 
+        t_delta_phi.push_back(t_dphi1); 
+        // if(is_rtbk){
+        //   t_delta_phi.push_back(t_dphi2);
+        // }
+      }
+      else{
+        t_delta_phi.push_back(-t_dphi1); 
+        // if(is_rtbk){
+        //   t_delta_phi.push_back(-t_dphi2);
+        // }
+      }
+    }
+    delta_phi.push_back(t_delta_phi);
+  }
+
+  return delta_phi;
+}
+
+
+// ...oooOO0OOooo......oooOO0OOooo......oooOO0OOooo...
+std::vector<TVector3> TrackExtrapolatingAlg::GetExtrapoPoints(std::string calo_name, 
+                                         float rho, TVector2 center, float alpha0, 
+                                         const PandoraPlus::TrackState & CALO_trk_state,
+                                         const std::vector<std::vector<float>>& delta_phi){
+  std::vector<TVector3> ext_points;
+  for(int im=0; im<delta_phi.size(); im++){
+    for(int ip=0; ip<delta_phi[im].size(); ip++){
+      float x = center.X() + (rho*Cos(alpha0+delta_phi[im][ip]));
+      float y = center.Y() + (rho*Sin(alpha0+delta_phi[im][ip]));
+      float z;
+      if(CALO_trk_state.Kappa > 0){
+        z = CALO_trk_state.referencePoint.Z() + CALO_trk_state.Z0 - 
+                (delta_phi[im][ip]*rho*CALO_trk_state.tanLambda);
+      }else{
+        z = CALO_trk_state.referencePoint.Z() + CALO_trk_state.Z0 + 
+                (delta_phi[im][ip]*rho*CALO_trk_state.tanLambda);
+      }
+
+      TVector3 t_vec3(x,y,z);
+      float rotate_angle = (6-im)*Pi()/4;
+      t_vec3.RotateZ(rotate_angle);
+
+      if(calo_name=="ECAL"){
+        if(Abs(z)>settings.map_floatPars["ECAL_half_length"]) continue;
+        if(Sqrt(x*x+y*y) > settings.map_floatPars["ECAL_outermost_distance"]/Cos(Pi()/settings.map_intPars["Nmodule"])+100) continue;
+        if(Sqrt(x*x+y*y) < settings.map_floatPars["ECAL_innermost_distance"]) continue;
+        if(settings.map_floatPars["ECAL_outermost_distance"]*Sqrt(2)-t_vec3.X() < t_vec3.Y()) continue;
+        if(t_vec3.X()-settings.map_floatPars["ECAL_innermost_distance"]*Sqrt(2) > t_vec3.Y()) continue;
+      }
+      else if(calo_name=="HCAL"){
+        if(Abs(z)>settings.map_floatPars["HCAL_half_length"]) continue;
+        if(Sqrt(x*x+y*y) > settings.map_floatPars["HCAL_outermost_distance"]) continue;
+        if(Sqrt(x*x+y*y) < settings.map_floatPars["HCAL_innermost_distance"]) continue;
+        if(t_vec3.X()-settings.map_floatPars["HCAL_innermost_distance"]*Sqrt(2) > t_vec3.Y()) continue;
+      }
+      else continue;
+      
+      TVector3 extp(x,y,z);
+      ext_points.push_back(extp);
+    }
+  }          
+
+  return ext_points;
+}
+
+
+// ...oooOO0OOooo......oooOO0OOooo......oooOO0OOooo...
 bool TrackExtrapolatingAlg::IsReturn(float rho, TVector2 & center){
   float farest = rho + center.Mod();
-  if (farest < settings.map_floatPars["outermost_distance"]/Cos(Pi()/settings.map_intPars["Nmodule"])+100) {return true;}
+  if (farest < settings.map_floatPars["ECAL_outermost_distance"]/Cos(Pi()/settings.map_intPars["Nmodule"])+100) {return true;}
   else{return false;}
 }
 
