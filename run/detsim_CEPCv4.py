@@ -46,10 +46,14 @@ gun.ThetaMaxs = [90]
 gun.PhiMins = [0.]
 gun.PhiMaxs = [360.]
 
+stdheprdr = StdHepRdr("StdHepRdr")
+stdheprdr.Input = "/cefs/data/stdhep/CEPC240/higgs/Higgs_10M/data/E240.Pnnh_gg.e0.p0.whizard195/nnh_gg.e0.p0.00001.stdhep"
+
 genprinter = GenPrinter("GenPrinter")
 
 genalg = GenAlgo("GenAlgo")
-genalg.GenTools = ["GtGunTool"]
+#genalg.GenTools = ["GtGunTool"]
+genalg.GenTools = ["StdHepRdr"]
 
 from Configurables import DetSimSvc
 detsimsvc = DetSimSvc("DetSimSvc")
@@ -86,7 +90,7 @@ simHitMerge.OutputCollections=["EcalBarrelCollectionMerged", "EcalEndcapsCollect
 # write PODIO file
 from Configurables import PodioOutput
 write = PodioOutput("write")
-write.filename = "test.root"
+write.filename = "nnHgg.root"
 write.outputCommands = ["keep *"]
 
 # ApplicationMgr

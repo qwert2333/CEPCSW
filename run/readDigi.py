@@ -21,7 +21,8 @@ geomsvc.compact = geometry_path
 from Configurables import k4DataSvc
 podioevent = k4DataSvc("EventDataSvc")
 podioevent.inputs = [
-"test.root"
+"SimSample/E240_nnHgg_50.root"
+#"SimSample/GamPi_5GeV_2deg_1.root",
 ]
 ##########################################
 
@@ -58,13 +59,13 @@ caloDigi.DigiECALCollection = ["ECALBarrel", "ECALEndcap"]
 caloDigi.HCALCollections = ["HcalBarrelCollection", "HcalEndcapsCollection"]
 caloDigi.HCALReadOutNames= ["HcalBarrelCollection", "HcalEndcapsCollection"]
 caloDigi.DigiHCALCollection = ["HCALBarrel", "HCALEndcap"]
-caloDigi.EventReportEvery = 100
+caloDigi.EventReportEvery = 1000
 
 
 ########## Read Info ###################
 from Configurables import ReadDigiAlg
 readin = ReadDigiAlg("ReadDigiAlg")
-readin.OutFileName = "readDigi.root"
+readin.OutFileName = "Digi_nnHgg.root"
 #readin.OutputLevel = DEBUG
 #########################################
 
@@ -80,7 +81,7 @@ from Configurables import ApplicationMgr
 ApplicationMgr( 
     TopAlg=[inp, caloDigi, readin],
     EvtSel="NONE",
-    EvtMax=100,
+    EvtMax=-1,
     ExtSvc=[podioevent, geomsvc],
     #OutputLevel=DEBUG
 )
