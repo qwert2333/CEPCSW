@@ -38,7 +38,7 @@ podioevent.inputs = [
 ########## Podio Input ###################
 from Configurables import PodioInput
 inp = PodioInput("InputReader")
-inp.collections = ["EcalBarrelCollection", "HcalBarrelCollection", "MCParticle", "MarlinTrkTracks"]
+inp.collections = ["EcalBarrelCollection", "EcalBarrelContributionCollection", "HcalBarrelCollection", "HcalBarrelContributionCollection", "MCParticle", "MarlinTrkTracks"]
 ##########################################
 
 ########## Digitalization ################

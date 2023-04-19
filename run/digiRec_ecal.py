@@ -35,7 +35,7 @@ inp = PodioInput("InputReader")
 #inp.collections = ["EcalBarrelCollection", "EcalEndcapRingCollection", "EcalEndcapsCollection", "MCParticle"]
 #inp.collections = ["EcalBarrelCollection", "HcalBarrelCollection", "MCParticle", "MarlinTrkTracks"]
 # inp.collections = ["EcalBarrelCollection", "MCParticleG4"]
-inp.collections = ["EcalBarrelCollection", "MCParticle", "MarlinTrkTracks"]
+inp.collections = ["EcalBarrelCollection", "EcalBarrelContributionCollection", "MCParticle", "MarlinTrkTracks"]
 ##########################################
 
 ########## Digitalization ################
