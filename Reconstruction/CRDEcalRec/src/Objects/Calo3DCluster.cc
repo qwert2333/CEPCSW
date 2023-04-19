@@ -217,6 +217,26 @@ namespace PandoraPlus{
     return spos;
   }
 
+  int Calo3DCluster::getBeginningDlayer() const{
+    int re_dlayer = -99;
+    std::vector<int> dlayers; dlayers.clear();
+    if(hits.size()!=0)  for(int ih=0; ih<hits.size(); ih++) dlayers.push_back(hits[ih]->getLayer());
+    else                for(int ish=0; ish<m_2dclusters.size(); ish++) dlayers.push_back(m_2dclusters[ish]->getDlayer());
+    re_dlayer = *std::min_element(dlayers.begin(), dlayers.end());
+
+    return re_dlayer;
+  }
+
+  int Calo3DCluster::getEndDlayer() const{
+    int re_dlayer = -99;
+    std::vector<int> dlayers; dlayers.clear();
+    if(hits.size()!=0)  for(int ih=0; ih<hits.size(); ih++) dlayers.push_back(hits[ih]->getLayer());
+    else                for(int ish=0; ish<m_2dclusters.size(); ish++) dlayers.push_back(m_2dclusters[ish]->getDlayer());
+    re_dlayer = *std::max_element(dlayers.begin(), dlayers.end());
+
+    return re_dlayer;
+  }
+
 
   std::vector<const PandoraPlus::CaloHalfCluster*> Calo3DCluster::getHalfClusterUCol(std::string name) const {
     std::vector<const CaloHalfCluster*> emptyCol; emptyCol.clear(); 
@@ -284,7 +304,6 @@ namespace PandoraPlus{
       axis.SetTheta(fitTheta);
       axis.SetMag(1.);
     }
-
   }
 
   void Calo3DCluster::FitAxisHit(){

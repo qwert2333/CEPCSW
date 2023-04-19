@@ -25,9 +25,10 @@ namespace PandoraPlus{
    
     StatusCode RegisterAlgorithmFactory(const std::string& algorithmName, AlgorithmFactory *const algorithmFactory)
     {
-      if(!m_algorithmFactoryMap.insert(AlgorithmFactoryMap::value_type(algorithmName, algorithmFactory)).second )
+      if(!m_algorithmFactoryMap.insert(AlgorithmFactoryMap::value_type(algorithmName, algorithmFactory)).second ){
+        std::cout<<"ERROR in Register AlgorithmFactory: can not register "<<algorithmName<<std::endl;
         return StatusCode::FAILURE; 
-   
+      }
       return StatusCode::SUCCESS;
     }
    

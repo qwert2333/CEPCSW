@@ -1,7 +1,7 @@
 from Gaudi.Configuration import *
 Nskip = 0
-Nevt = 30
-Name_suffix = 'Pi_10GeV'
+Nevt = 100
+Name_suffix = 'GamPi_3deg_allmerge'
 
 ############## GeomSvc #################
 geometry_option = "CRD_o1_v01/CRD_o1_v01.xml"
@@ -26,10 +26,10 @@ podioevent = k4DataSvc("EventDataSvc")
 podioevent.inputs = [
 #"SimSample/CRDFull_Gam10GeV_ECALSurface.root"
 #"SimSample/CRDFull_GamGam_5cm_ECALSurface.root"
-"SimSample/CRDFullv2_Pi-10GeV_sym8.root"
+#"SimSample/CRDFullv2_Pi-10GeV_sym8.root"
 #"/publicfs/atlas/atlasnew/higgs/hgg/guofy/CEPCSW_v207/run/SimSample/CRDFull_Pi-10GeV.root"
 #"/publicfs/atlas/atlasnew/higgs/hgg/guofy/CEPCSW_v207/run/SimSample/CRDFull_GamPi_2deg.root"
-#"/publicfs/atlas/atlasnew/higgs/hgg/guofy/CEPCSW_v207/run/SimSample/CRDFull_GamPi_3deg.root"
+"/publicfs/atlas/atlasnew/higgs/hgg/guofy/CEPCSW_v207/run/SimSample/CRDFull_GamPi_3deg.root"
 ]
 ##########################################
 
@@ -109,7 +109,7 @@ PandoraPlusPFAlg.AlgParNames = [ ["Par1", "Par2"],
                                  ["Eth_localMax", "Eth_MaxWithNeigh"], 
                                  [""],
                                  ["th_Layers","th_peak"],
-                                 ["ReadinLocalMaxName", "th_Nshowers"],
+                                 ["ReadinLocalMaxName", "th_Nshowers"], 
                                  ["axis_Angle", "relP_Angle", "relP_Dis"],
                                  [""],
                                  [""] ]
@@ -119,16 +119,16 @@ PandoraPlusPFAlg.AlgParTypes = [ ["double", "double"],
                                  [""],
                                  ["int", "int"],
                                  ["string", "int"],
-                                 ["double","double", "double"],
-                                 [""],
-                                 [""]  ]
+                                ["double","double", "double"],
+                                [""],
+                                [""]  ]
 PandoraPlusPFAlg.AlgParValues = [ ["1.", "3.14"], 
                                   ["1."], 
                                   ["0.005", "0."],
                                   [""],
                                   ["10","3"],
                                   ["LeftLocalMax", "3"],
-                                  ["1.57", "1.57", "70."],  #Pi/3
+                                  ["1.57", "1.57", "70"],  #Pi/2, Pi/2, 70.
                                   [""], 
                                   [""]  ]
 

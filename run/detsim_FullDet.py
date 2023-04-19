@@ -47,17 +47,17 @@ from Configurables import HepMCRdr
 from Configurables import GenPrinter
 
 gun = GtGunTool("GtGunTool")
-gun.Particles = ["mu-"]
+gun.Particles = ["pi-"]
 #gun.Particles = ["nu_e"]
 gun.PositionXs = [0.]
 gun.PositionYs = [0.]
 gun.PositionZs = [0.]
-gun.EnergyMins = [20] # GeV
-gun.EnergyMaxs = [20] # GeV
-gun.ThetaMins  = [90]   # deg
-gun.ThetaMaxs  = [90]   # deg
+gun.EnergyMins = [10] # GeV
+gun.EnergyMaxs = [10] # GeV
+gun.ThetaMins  = [60]   # deg
+gun.ThetaMaxs  = [120]   # deg
 gun.PhiMins    = [0.]   # deg
-gun.PhiMaxs    = [0.]   # deg
+gun.PhiMaxs    = [360.]   # deg
 
 
 # stdheprdr = StdHepRdr("StdHepRdr")
@@ -272,7 +272,7 @@ elif dedxoption == "BetheBlochEquationDedxSimTool":
 # output
 from Configurables import PodioOutput
 out = PodioOutput("outputalg")
-out.filename = "SimSample/CRDFull_Mu20GeV.root"
+out.filename = "SimSample/CRDFullv2_Pi-10GeV_sym8.root"
 out.outputCommands = ["keep *"]
 
 # ApplicationMgr
@@ -281,7 +281,7 @@ ApplicationMgr(
     #TopAlg = [genalg, detsimalg, digiVXD, digiSIT, digiSET, digiFTD, spSET, digiDC, tracking, forward, subset, full, out],
     TopAlg = [genalg, detsimalg, digiVXD, digiSIT, digiSET, digiFTD, spSET, digiDC, tracking, forward, subset, full, out],
     EvtSel = 'NONE',
-    EvtMax = 100,
+    EvtMax = 300,
     ExtSvc = [rndmengine, rndmgensvc, dsvc, evtseeder, geosvc, gearsvc, tracksystemsvc],
     #ExtSvc = [rndmengine, rndmgensvc, dsvc, geosvc],
     OutputLevel=INFO

@@ -43,6 +43,7 @@ gaudi_add_module(CRDEcalRec
                          src/Algorithm/AxisMergingAlg.cpp
                          src/Algorithm/EnergySplittingAlg.cpp
                          src/Algorithm/EnergyTimeMatchingAlg.cpp
+                         src/Algorithm/ConeClusteringAlg.cpp
                  LINK    CRDEcalRecLib
 )
 target_include_directories(CRDEcalRec PUBLIC

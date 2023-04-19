@@ -82,19 +82,19 @@ cout<<endl;
 //}
     //Case1: Merge axes associated to the same track. 
     TrkMatchedMerging(m_newAxisUCol);    
-printf("  In HalfClusterU #%d: After Step1: axis size %d \n", ih, m_newAxisUCol.size());
+//printf("  In HalfClusterU #%d: After Step1: axis size %d \n", ih, m_newAxisUCol.size());
 
     //Case2: Merge axes that share same localMax.
     OverlapMerging(m_newAxisUCol);
-printf("  In HalfClusterU #%d: After Step2: axis size %d \n", ih, m_newAxisUCol.size());
+//printf("  In HalfClusterU #%d: After Step2: axis size %d \n", ih, m_newAxisUCol.size());
 
     //Case3: Merge fragments to core axes. 
     FragmentsMerging(m_newAxisUCol);
-printf("  In HalfClusterU #%d: After Step3: axis size %d \n", ih, m_newAxisUCol.size());
+//printf("  In HalfClusterU #%d: After Step3: axis size %d \n", ih, m_newAxisUCol.size());
 
     //Case4: Merge nearby axes. 
-    ConeMerging(m_newAxisUCol);
-printf("  In HalfClusterU #%d: After Step4: axis size %d \n", ih, m_newAxisUCol.size());
+    //ConeMerging(m_newAxisUCol);
+//printf("  In HalfClusterU #%d: After Step4: axis size %d \n", ih, m_newAxisUCol.size());
 
 /*
 cout<<"  After merging: axis size "<<m_newAxisUCol.size()<<", Check the overlap"<<endl;
@@ -118,7 +118,10 @@ cout<<endl;
     std::vector<PandoraPlus::CaloHalfCluster*> tmp_goodAxis; tmp_goodAxis.clear(); 
     std::vector<PandoraPlus::CaloHalfCluster*> tmp_badAxis; tmp_badAxis.clear();
     for(int ic=0; ic<m_newAxisUCol.size(); ic++){
-      if(m_newAxisUCol[ic]->getCluster().size() >= settings.map_intPars["th_Nhit"]) tmp_goodAxis.push_back( m_newAxisUCol[ic] );
+      if( (m_newAxisUCol[ic]->getType()==1 && m_newAxisUCol[ic]->getCluster().size()>=settings.map_intPars["th_CoreNhit"] ) ||
+          m_newAxisUCol[ic]->getType()==3 || m_newAxisUCol[ic]->getType()==4 )
+        tmp_goodAxis.push_back( m_newAxisUCol[ic] );
+
       else tmp_badAxis.push_back( m_newAxisUCol[ic] );
     }  
 printf("  In HalfClusterU: Good axis %d, bad axis %d \n",tmp_goodAxis.size(), tmp_badAxis.size() );
@@ -164,19 +167,19 @@ cout<<endl;
 */
     //Case1: Merge axes associated to the same track. 
     TrkMatchedMerging(m_newAxisVCol);
-printf("  In HalfClusterV #%d: After Step1: axis size %d \n", ih, m_newAxisVCol.size());
+//printf("  In HalfClusterV #%d: After Step1: axis size %d \n", ih, m_newAxisVCol.size());
 
     //Case2: Merge axes that share same localMax.
     OverlapMerging(m_newAxisVCol);
-printf("  In HalfClusterV #%d: After Step2: axis size %d \n", ih, m_newAxisVCol.size());
+//printf("  In HalfClusterV #%d: After Step2: axis size %d \n", ih, m_newAxisVCol.size());
 
     //Case3: Merge fragments to core axes. 
     FragmentsMerging(m_newAxisVCol);
-printf("  In HalfClusterV #%d: After Step3: axis size %d \n", ih, m_newAxisVCol.size());
+//printf("  In HalfClusterV #%d: After Step3: axis size %d \n", ih, m_newAxisVCol.size());
 
     //Case4: Merge nearby axes.
-    ConeMerging(m_newAxisVCol);
-printf("  In HalfClusterV #%d: After Step4: axis size %d \n", ih, m_newAxisVCol.size());
+    //ConeMerging(m_newAxisVCol);
+//printf("  In HalfClusterV #%d: After Step4: axis size %d \n", ih, m_newAxisVCol.size());
 
 /*
 cout<<"  After merging: axis size "<<m_newAxisVCol.size()<<", Check the overlap"<<endl;
@@ -193,10 +196,12 @@ cout<<endl;
     std::vector<PandoraPlus::CaloHalfCluster*> tmp_goodAxis; tmp_goodAxis.clear();
     std::vector<PandoraPlus::CaloHalfCluster*> tmp_badAxis; tmp_badAxis.clear();
     for(int ic=0; ic<m_newAxisVCol.size(); ic++){
-      if(m_newAxisVCol[ic]->getCluster().size() >= settings.map_intPars["th_Nhit"]) tmp_goodAxis.push_back( m_newAxisVCol[ic] );
+      if( (m_newAxisVCol[ic]->getType()==1 && m_newAxisVCol[ic]->getCluster().size()>=settings.map_intPars["th_CoreNhit"] ) ||
+          m_newAxisVCol[ic]->getType()==3 || m_newAxisVCol[ic]->getType()==4 )
+        tmp_goodAxis.push_back( m_newAxisVCol[ic] );
+
       else tmp_badAxis.push_back( m_newAxisVCol[ic] );
     }
-printf("  In HalfClusterV: Good axis %d, bad axis %d \n",tmp_goodAxis.size(), tmp_badAxis.size() );
     for(int ic=0; ic<tmp_badAxis.size(); ic++)
       MergeToClosestCluster( tmp_badAxis[ic], tmp_goodAxis );
 

@@ -45,6 +45,9 @@ namespace PandoraPlus {
     //double getShowerE() const { return getEnergy(); }
     TVector3 getHitCenter() const;
     TVector3 getShowerCenter() const; 
+    TVector3 getAxis() const { return axis; }
+    int getBeginningDlayer() const;
+    int getEndDlayer() const;
 
     void setCaloHits( std::vector<const PandoraPlus::CaloHit*> _hits ) { hits = _hits; }
     void setTowers(std::vector<const Calo3DCluster*> _t) { m_towers = _t; }

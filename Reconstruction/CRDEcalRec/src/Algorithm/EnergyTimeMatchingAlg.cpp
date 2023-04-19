@@ -44,10 +44,10 @@ StatusCode EnergyTimeMatchingAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
  
     m_HFClusUCol = m_towerCol.at(it)->getHalfClusterUCol(settings.map_stringPars["ReadinHFClusterName"]+"U");
     m_HFClusVCol = m_towerCol.at(it)->getHalfClusterVCol(settings.map_stringPars["ReadinHFClusterName"]+"V");
-printf("  In Tower #%d: HalfCluster size (%d, %d), input total energy %.3f \n", it, m_HFClusUCol.size(), m_HFClusVCol.size(), m_towerCol[it]->getEnergy());
-cout<<"  Check track association: "<<endl;
-for(int icl=0; icl<m_HFClusUCol.size(); icl++) printf("    In HFClusU #%d: track size = %d \n", icl, m_HFClusUCol[icl]->getAssociatedTracks().size() );
-for(int icl=0; icl<m_HFClusVCol.size(); icl++) printf("    In HFClusV #%d: track size = %d \n", icl, m_HFClusVCol[icl]->getAssociatedTracks().size() );
+//printf("  In Tower #%d: HalfCluster size (%d, %d), input total energy %.3f \n", it, m_HFClusUCol.size(), m_HFClusVCol.size(), m_towerCol[it]->getEnergy());
+//cout<<"  Check track association: "<<endl;
+//for(int icl=0; icl<m_HFClusUCol.size(); icl++) printf("    In HFClusU #%d: track size = %d \n", icl, m_HFClusUCol[icl]->getAssociatedTracks().size() );
+//for(int icl=0; icl<m_HFClusVCol.size(); icl++) printf("    In HFClusV #%d: track size = %d \n", icl, m_HFClusVCol[icl]->getAssociatedTracks().size() );
 
     const int NclusX = m_HFClusUCol.size(); 
     const int NclusY = m_HFClusVCol.size(); 
@@ -188,7 +188,7 @@ for(int i=0; i<m_clusterCol.size(); i++) cout<<"En = "<<m_clusterCol[i]->getEner
     }
   }
 
-cout<<"    After merge: cluster size "<<m_clusterCol.size()<<endl;
+//cout<<"    After merge: cluster size "<<m_clusterCol.size()<<endl;
 
 
 
@@ -209,13 +209,13 @@ StatusCode EnergyTimeMatchingAlg::XYClusterMatchingL0( const PandoraPlus::CaloHa
                                                        const PandoraPlus::CaloHalfCluster* m_longiClV, 
                                                        PandoraPlus::Calo3DCluster* m_clus )
 {
-cout<<"  Cluster matching for case: 1 * 1. Input HalfCluster En: "<<m_longiClU->getEnergy()<<", "<<m_longiClV->getEnergy()<<endl;
-cout<<"  Print 1DShower En in HalfClusterU: "<<endl;
-for(int i=0; i<m_longiClU->getCluster().size(); i++) 
-  cout<<m_longiClU->getCluster()[i]->getDlayer()<<'\t'<<m_longiClU->getCluster()[i]->getEnergy()<<endl;
-cout<<"  Print 1DShower En in HalfClusterV: "<<endl;
-for(int i=0; i<m_longiClV->getCluster().size(); i++) 
-  cout<<m_longiClV->getCluster()[i]->getDlayer()<<'\t'<<m_longiClV->getCluster()[i]->getEnergy()<<endl;
+//cout<<"  Cluster matching for case: 1 * 1. Input HalfCluster En: "<<m_longiClU->getEnergy()<<", "<<m_longiClV->getEnergy()<<endl;
+//cout<<"  Print 1DShower En in HalfClusterU: "<<endl;
+//for(int i=0; i<m_longiClU->getCluster().size(); i++) 
+//  cout<<m_longiClU->getCluster()[i]->getDlayer()<<'\t'<<m_longiClU->getCluster()[i]->getEnergy()<<endl;
+//cout<<"  Print 1DShower En in HalfClusterV: "<<endl;
+//for(int i=0; i<m_longiClV->getCluster().size(); i++) 
+//  cout<<m_longiClV->getCluster()[i]->getDlayer()<<'\t'<<m_longiClV->getCluster()[i]->getEnergy()<<endl;
 
 
   std::vector<int> layerindex; layerindex.clear(); 
@@ -237,7 +237,7 @@ for(int i=0; i<m_longiClV->getCluster().size(); i++)
     std::vector<const PandoraPlus::Calo1DCluster*> m_showerXcol = map_showersXinlayer[layerindex[il]];
     std::vector<const PandoraPlus::Calo1DCluster*> m_showerYcol = map_showersYinlayer[layerindex[il]];
 
-printf("  In Layer %d: shower size (%d, %d) \n", layerindex[il], m_showerXcol.size(), m_showerYcol.size());
+//printf("  In Layer %d: shower size (%d, %d) \n", layerindex[il], m_showerXcol.size(), m_showerYcol.size());
 
     std::vector<PandoraPlus::Calo2DCluster*> m_showerinlayer; m_showerinlayer.clear();
 
@@ -252,9 +252,9 @@ printf("  In Layer %d: shower size (%d, %d) \n", layerindex[il], m_showerXcol.si
     else if(m_showerXcol.size()== m_showerYcol.size()) GetMatchedShowersL2(m_showerXcol, m_showerYcol, m_showerinlayer );
     //else GetFullMatchedShowers(m_showerXcol, m_showerYcol, m_showerinlayer);
     else GetMatchedShowersL3(m_showerXcol, m_showerYcol, m_showerinlayer);
-cout<<"    After matching: shower size = "<<m_showerinlayer.size()<<endl;
-for(int is=0; is<m_showerinlayer.size(); is++) cout<<m_showerinlayer[is]->getEnergy()<<'\t';
-cout<<endl;
+//cout<<"    After matching: shower size = "<<m_showerinlayer.size()<<endl;
+//for(int is=0; is<m_showerinlayer.size(); is++) cout<<m_showerinlayer[is]->getEnergy()<<'\t';
+//cout<<endl;
 
     for(int is=0; is<m_showerinlayer.size(); is++) m_clus->addUnit(m_showerinlayer[is]);
   }
@@ -282,7 +282,6 @@ StatusCode EnergyTimeMatchingAlg::XYClusterMatchingL1( const PandoraPlus::CaloHa
   m_clusters.resize(m_longiClN.size());
 
   int slayer = m_longiCl1->getSlayer(); 
-cout<<slayer<<endl;
   std::vector<int> layerindex; layerindex.clear();
   std::map<int, std::vector<const PandoraPlus::Calo1DCluster*> > map_showersXinlayer; map_showersXinlayer.clear();
   std::map<int, std::vector<const PandoraPlus::Calo1DCluster*> > map_showersYinlayer; map_showersYinlayer.clear();

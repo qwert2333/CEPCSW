@@ -170,7 +170,7 @@ StatusCode EnergySplittingAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
   m_datacol.map_HalfCluster[settings.map_stringPars["OutputClusName"]+"U"] = m_newClusUCol; 
   m_datacol.map_HalfCluster[settings.map_stringPars["OutputClusName"]+"V"] = m_newClusVCol; 
 
-
+/*
 cout<<"  After splitting: HalfCluster U size "<<m_newClusUCol.size()<<", print check"<<endl;
 for(int icl=0; icl<m_newClusUCol.size(); icl++){
   cout<<"      In HFClusU #"<<icl<<": shower size = "<<m_newClusUCol[icl]->getCluster().size()<<endl;
@@ -189,7 +189,7 @@ for(int icl=0; icl<m_newClusVCol.size(); icl++){
     cout<<endl;
   }
 }
-
+*/
 
   //Make tower 
   m_towerCol.clear(); 

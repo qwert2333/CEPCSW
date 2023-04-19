@@ -24,7 +24,7 @@
 #include "Algorithm/AxisMergingAlg.h"
 #include "Algorithm/EnergySplittingAlg.h"
 #include "Algorithm/EnergyTimeMatchingAlg.h"
-//#include "Algorithm/ConeClusteringAlg.h"
+#include "Algorithm/ConeClusteringAlg.h"
 #include "Algorithm/TrackExtrapolatingAlg.h"
 
 #include "TVector3.h"
@@ -160,7 +160,7 @@ protected:
   TTree *t_axis;
   int m_NaxisU, m_NaxisV;
   IntVec m_axisU_Nhit, m_axisU_type, m_axisV_Nhit, m_axisV_type;
-  FloatVec m_axisU_E, m_axisV_E;
+  FloatVec m_axisU_x, m_axisU_y, m_axisU_z, m_axisU_E, m_axisV_x, m_axisV_y, m_axisV_z, m_axisV_E;
   FloatVec m_axisUhit_tag, m_axisUhit_type, m_axisUhit_x, m_axisUhit_y, m_axisUhit_z, m_axisUhit_E;
   FloatVec m_axisVhit_tag, m_axisVhit_type, m_axisVhit_x, m_axisVhit_y, m_axisVhit_z, m_axisVhit_E;
 
@@ -175,8 +175,9 @@ protected:
   int m_Nclus, m_Nmc;
   IntVec m_Clus_Ntrk;
   FloatVec m_Clus_x, m_Clus_y, m_Clus_z, m_Clus_E;
-  IntVec m_mcPdgid, m_mcStatus, m_Nhit;
-  FloatVec m_mcPx, m_mcPy, m_mcPz, m_mcEn;
+  FloatVec m_Clus_hitx, m_Clus_hity, m_Clus_hitz, m_Clus_hitE, m_Clus_hittag;
+  IntVec m_mcPdgid, m_mcStatus, m_Clus_Nhit;
+  FloatVec m_mcPx, m_mcPy, m_mcPz, m_mcEn, m_mcEPr;
 
   TTree *t_Shower;
   int m_Nshowers;
@@ -186,7 +187,8 @@ protected:
 
   TTree *t_LongiClus; 
   int m_NHfClusU, m_NHfClusV;
-  FloatVec m_HfClusU_E, m_HfClusU_Nhit, m_HfClusV_E, m_HfClusV_Nhit;
+  FloatVec m_HfClusU_x, m_HfClusU_y, m_HfClusU_z, m_HfClusU_E, m_HfClusU_Nhit, m_HfClusU_Ntrk; 
+  FloatVec m_HfClusV_x, m_HfClusV_y, m_HfClusV_z, m_HfClusV_E, m_HfClusV_Nhit, m_HfClusV_Ntrk;
 
 
   TTree *t_Track;

@@ -18,16 +18,16 @@ public:
   };
 
   StatusCode ReadSettings(PandoraPlus::Settings& m_settings);
-  StatusCode Initialize();
+  StatusCode Initialize( PandoraPlusDataCol& m_datacol );
   StatusCode RunAlgorithm( PandoraPlusDataCol& m_datacol);
   StatusCode ClearAlgorithm(); 
 
-  StatusCode LongiConeLinking( const std::map<int, std::vector<PandoraPlus::CaloHit*> >& orderedShower, std::vector<PandoraPlus::CaloCluster*>& ClusterCol );
-  StatusCode MergeGoodClusters( std::vector<PandoraPlus::CaloCluster*>& m_clusCol); 
-  StatusCode MergeBadToGoodCluster( std::vector<PandoraPlus::CaloCluster*>& m_goodClusCol, PandoraPlus::CaloCluster* m_badClus );
-  PandoraPlus::CaloCluster* GetClosestGoodCluster( std::vector< PandoraPlus::CaloCluster* >& m_goodClusCol, PandoraPlus::CaloCluster* m_badClus );
+  StatusCode LongiConeLinking( const std::map<int, std::vector<PandoraPlus::CaloHit*> >& orderedShower, std::vector<PandoraPlus::Calo3DCluster*>& ClusterCol );
+  StatusCode MergeGoodClusters( std::vector<PandoraPlus::Calo3DCluster*>& m_clusCol); 
+  StatusCode MergeBadToGoodCluster( std::vector<PandoraPlus::Calo3DCluster*>& m_goodClusCol, PandoraPlus::Calo3DCluster* m_badClus );
+  PandoraPlus::Calo3DCluster* GetClosestGoodCluster( std::vector< PandoraPlus::Calo3DCluster* >& m_goodClusCol, PandoraPlus::Calo3DCluster* m_badClus );
 
-  static bool compBegin( PandoraPlus::CaloCluster* clus1, PandoraPlus::CaloCluster* clus2 ) { return clus1->getBeginningDlayer() < clus2->getBeginningDlayer(); }
+  static bool compBegin( PandoraPlus::Calo3DCluster* clus1, PandoraPlus::Calo3DCluster* clus2 ) { return clus1->getBeginningDlayer() < clus2->getBeginningDlayer(); }
 
 private: 
 
