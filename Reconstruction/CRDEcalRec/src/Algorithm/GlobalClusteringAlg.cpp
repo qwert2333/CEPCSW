@@ -45,19 +45,18 @@ cout<<"  GlobalClusteringAlg: Readin Bar size: "<<m_bars.size()<<endl;
     }
   }
 
-
   //Clustering
   Clustering(m_processbars, m_1dclusters);
   Clustering(m_1dclusters, m_halfclusters);
 
   //Store created objects to backup col. 
-  for(int irest=0; irest<m_restbars.size(); irest++)       m_datacol.bk_BarCol.push_back(m_restbars.at(irest));
-  for(int i1d=0; i1d<m_1dclusters.size(); i1d++)           m_datacol.bk_Cluster1DCol.push_back(m_1dclusters.at(i1d));
-  for(int ihalf=0; ihalf<m_halfclusters.size(); ihalf++)   m_datacol.bk_ClusterHalfCol.push_back(m_halfclusters.at(ihalf));
+  //for(int irest=0; irest<m_restbars.size(); irest++)       m_datacol.bk_BarCol.push_back(m_restbars.at(irest));
+  //for(int i1d=0; i1d<m_1dclusters.size(); i1d++)           m_datacol.bk_Cluster1DCol.push_back(m_1dclusters.at(i1d));
+  //for(int ihalf=0; ihalf<m_halfclusters.size(); ihalf++)   m_datacol.bk_ClusterHalfCol.push_back(m_halfclusters.at(ihalf));
 
 
-  std::vector<PandoraPlus::CaloHalfCluster*> m_HalfClusterV; m_HalfClusterV.clear();
-  std::vector<PandoraPlus::CaloHalfCluster*> m_HalfClusterU; m_HalfClusterU.clear();
+  std::vector<std::shared_ptr<PandoraPlus::CaloHalfCluster>> m_HalfClusterV; m_HalfClusterV.clear();
+  std::vector<std::shared_ptr<PandoraPlus::CaloHalfCluster>> m_HalfClusterU; m_HalfClusterU.clear();
   for(int i=0; i<m_halfclusters.size() && m_halfclusters[i]; i++){
     if(m_halfclusters[i]->getSlayer()==0)
       m_HalfClusterU.push_back(m_halfclusters[i]);
@@ -65,7 +64,7 @@ cout<<"  GlobalClusteringAlg: Readin Bar size: "<<m_bars.size()<<endl;
       m_HalfClusterV.push_back(m_halfclusters[i]);
   }
 
-//printf("  GlobalClustering: HalfCluster size (%d, %d) \n", m_HalfClusterU.size(), m_HalfClusterV.size());
+printf("  GlobalClustering: RestBarCol size %d, 1DCluster size %d, HalfCluster size (%d, %d) \n", m_restbars.size(), m_1dclusters.size(), m_HalfClusterU.size(), m_HalfClusterV.size());
 //for(int ic=0; ic<m_HalfClusterU.size(); ic++) cout<<m_HalfClusterU[ic]->getEnergy()<<'\t';
 //cout<<endl;
 //for(int ic=0; ic<m_HalfClusterV.size(); ic++) cout<<m_HalfClusterV[ic]->getEnergy()<<'\t';
@@ -73,7 +72,7 @@ cout<<"  GlobalClusteringAlg: Readin Bar size: "<<m_bars.size()<<endl;
 
 
   //Write results into DataCol.
-  m_datacol.map_BarCol["RestBarCol"] = m_restbars;
+  //m_datacol.map_BarCol["RestBarCol"] = m_restbars;
   m_datacol.map_1DCluster["Cluster1DCol"] = m_1dclusters;
   m_datacol.map_HalfCluster["HalfClusterColU"] = m_HalfClusterU;
   m_datacol.map_HalfCluster["HalfClusterColV"] = m_HalfClusterV;
@@ -97,43 +96,44 @@ StatusCode GlobalClusteringAlg::ClearAlgorithm(){
   return StatusCode::SUCCESS;
 };
 
-template<typename T1, typename T2> StatusCode GlobalClusteringAlg::Clustering(std::vector<T1*> &m_input, std::vector<T2*> &m_output) 
+template<typename T1, typename T2> StatusCode GlobalClusteringAlg::Clustering(std::vector<std::shared_ptr<T1>> &m_input, std::vector<std::shared_ptr<T2>> &m_output) 
 {
-  std::vector<T2*> record;
+  std::vector<std::shared_ptr<T2>> record;
   record.clear();
+
   for(int i=0; i<m_input.size(); i++)
   {
-    T1* lowlevelcluster = m_input.at(i);
+    T1* lowlevelcluster = m_input.at(i).get();
     for(int j=0; j<m_output.size(); j++)
     {
-      if(m_output.at(j)->isNeighbor(lowlevelcluster)) // //m_output.at(j).isNeighbor(lowlevelcluster)
+      if(m_output.at(j).get()->isNeighbor(lowlevelcluster)) // //m_output.at(j).isNeighbor(lowlevelcluster)
         record.push_back(m_output.at(j));
 
     }
     if(record.size()>0)
     {
-      record.at(0)->addUnit(lowlevelcluster);
+      record.at(0).get()->addUnit(lowlevelcluster);
       for(int k=1; k<record.size(); k++)
       {
-        for(int l=0; l<record.at(k)->getCluster().size(); l++)
+        for(int l=0; l<record.at(k).get()->getCluster().size(); l++)
         {
-          record.at(0)->addUnit(record.at(k)->getCluster().at(l));
+          record.at(0).get()->addUnit(record.at(k).get()->getCluster().at(l));
         }
       }
       for(int m=1; m<record.size(); m++)
       {
         m_output.erase(find(m_output.begin(),m_output.end(),record.at(m)));
-        delete record.at(m); 
+        //delete record.at(m); 
         record.at(m) = nullptr;
       }
       record.clear();
       lowlevelcluster = nullptr;
       continue;
     }
-  
-    T2* highlevelcluster = new T2(); //first new
-    highlevelcluster->addUnit(lowlevelcluster);
-    lowlevelcluster = nullptr;
+    //T2* highlevelcluster = new T2(); //first new
+    std::shared_ptr<T2> highlevelcluster = std::make_shared<T2>();
+
+    highlevelcluster.get()->addUnit(lowlevelcluster);
     m_output.push_back(highlevelcluster);
   }
 	return StatusCode::SUCCESS;
@@ -142,4 +142,3 @@ template<typename T1, typename T2> StatusCode GlobalClusteringAlg::Clustering(st
 
 
 #endif
-

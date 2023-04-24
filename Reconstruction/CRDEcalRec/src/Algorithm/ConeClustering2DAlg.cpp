@@ -24,8 +24,10 @@ StatusCode ConeClustering2DAlg::Initialize( PandoraPlusDataCol& m_datacol ){
   p_HalfClusterV.clear();
 
 
-  p_HalfClusterU = m_datacol.map_HalfCluster["HalfClusterColU"];
-  p_HalfClusterV = m_datacol.map_HalfCluster["HalfClusterColV"];
+  for(int ih=0; ih<m_datacol.map_HalfCluster["HalfClusterColU"].size(); ih++)
+    p_HalfClusterU.push_back( m_datacol.map_HalfCluster["HalfClusterColU"][ih].get() );
+  for(int ih=0; ih<m_datacol.map_HalfCluster["HalfClusterColV"].size(); ih++)
+    p_HalfClusterV.push_back( m_datacol.map_HalfCluster["HalfClusterColV"][ih].get() );
 
   return StatusCode::SUCCESS;
 }
@@ -56,7 +58,7 @@ StatusCode ConeClustering2DAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
       m_orderedLocalMax[m_localMaxUCol[is]->getDlayer()].push_back(m_localMaxUCol[is]);
 
     tmp_longiClusCol.clear();
-    LongiConeLinking( m_orderedLocalMax, tmp_longiClusCol );
+    LongiConeLinking( m_orderedLocalMax, tmp_longiClusCol, m_datacol.map_HalfCluster["bkHalfCluster"] );
 
 //cout<<"    Cluster size after ConeLinking: "<<tmp_longiClusCol.size()<<endl;
 
@@ -67,7 +69,6 @@ StatusCode ConeClustering2DAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
       if(tmp_longiClusCol[ic]->getCluster().size()>=settings.map_intPars["th_Nshowers"]) const_longiClusUCol.push_back(tmp_longiClusCol[ic]);
     }
 //cout<<"    Cluster size after requiring Nhit: "<<const_longiClusUCol.size()<<endl;
-    for(int ic=0; ic<tmp_longiClusCol.size(); ic++) m_datacol.bk_ClusterHalfCol.push_back( tmp_longiClusCol[ic] );
 
     p_HalfClusterU[ic]->setHalfClusters(settings.map_stringPars["OutputLongiClusName"], const_longiClusUCol);    
   }
@@ -82,7 +83,7 @@ StatusCode ConeClustering2DAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
       m_orderedLocalMax[m_localMaxVCol[is]->getDlayer()].push_back(m_localMaxVCol[is]);
 
     tmp_longiClusCol.clear();
-    LongiConeLinking(m_orderedLocalMax, tmp_longiClusCol);
+    LongiConeLinking(m_orderedLocalMax, tmp_longiClusCol, m_datacol.map_HalfCluster["bkHalfCluster"]);
 
 
     //Convert LongiClusters to const object.
@@ -91,7 +92,6 @@ StatusCode ConeClustering2DAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
       tmp_longiClusCol[ic]->Check();
       if(tmp_longiClusCol[ic]->getCluster().size()>=settings.map_intPars["th_Nshowers"]) const_longiClusVCol.push_back(tmp_longiClusCol[ic]);
     }
-    for(int ic=0; ic<tmp_longiClusCol.size(); ic++) m_datacol.bk_ClusterHalfCol.push_back( tmp_longiClusCol[ic] );
 
     p_HalfClusterV[ic]->setHalfClusters(settings.map_stringPars["OutputLongiClusName"], const_longiClusVCol);
   }
@@ -114,10 +114,12 @@ StatusCode ConeClustering2DAlg::ClearAlgorithm(){
 
 
 StatusCode ConeClustering2DAlg::LongiConeLinking(  std::map<int, std::vector<const PandoraPlus::Calo1DCluster*> >& orderedShower,
-                                                   std::vector<PandoraPlus::CaloHalfCluster*>& ClusterCol)
+                                                   std::vector<PandoraPlus::CaloHalfCluster*>& ClusterCol, 
+                                                   std::vector<std::shared_ptr<PandoraPlus::CaloHalfCluster>>& bk_HFclus )
 {
   if(orderedShower.size()==0) return StatusCode::SUCCESS;
  
+  vector<std::shared_ptr<PandoraPlus::CaloHalfCluster>> m_clusCol; m_clusCol.clear();
   std::map<int, std::vector<const PandoraPlus::Calo1DCluster*>>::iterator iter = orderedShower.begin();
   //In first layer: initial clusters. All showers in the first layer are regarded as cluster seed.
   //cluster initial direction = R.
@@ -125,10 +127,10 @@ StatusCode ConeClustering2DAlg::LongiConeLinking(  std::map<int, std::vector<con
   ShowersinFirstLayer = iter->second;
   for(int i=0;i<ShowersinFirstLayer.size(); i++){
     if(iter->first < settings.map_floatPars["th_beginLayer"] || iter->first > settings.map_floatPars["th_stopLayer"] ) continue; 
-    PandoraPlus::CaloHalfCluster* m_clus = new  PandoraPlus::CaloHalfCluster();
+    std::shared_ptr<PandoraPlus::CaloHalfCluster> m_clus = std::make_shared<PandoraPlus::CaloHalfCluster>();
     m_clus->addUnit(ShowersinFirstLayer[i]);
     m_clus->setType(2);
-    ClusterCol.push_back(m_clus);
+    m_clusCol.push_back(m_clus);
   }
   iter++;
 
@@ -138,38 +140,18 @@ StatusCode ConeClustering2DAlg::LongiConeLinking(  std::map<int, std::vector<con
     std::vector<const PandoraPlus::Calo1DCluster*> ShowersinLayer = iter->second;
 //cout<<"  In Layer "<<iter->first<<": hit size "<<ShowersinLayer.size()<<endl;
 
-/*    for(int is=0; is<ShowersinLayer.size(); is++){
-      for(int ic=0; ic<ClusterCol.size(); ic++ ){
-        const PandoraPlus::Calo1DCluster* shower_in_clus = ClusterCol[ic]->getCluster().back();
-        if(!shower_in_clus) continue; 
-
-        TVector2 relR = GetProjectedRelR(shower_in_clus, ShowersinLayer[is]);  //Return vec: 1->2. 
-        TVector2 clusaxis = GetProjectedAxis( ClusterCol[ic] );
-printf("    Cluster axis (%.3f, %.3f), last hit (%.3f, %.3f, %.3f), coming hit (%.3f, %.3f, %.3f), projected relR (%.3f, %.3f) \n", 
-clusaxis.Px(), clusaxis.Py(), shower_in_clus->getPos().x(),  shower_in_clus->getPos().y(),  shower_in_clus->getPos().z(),
-ShowersinLayer[is]->getPos().x(), ShowersinLayer[is]->getPos().y(), ShowersinLayer[is]->getPos().z(), relR.Px(), relR.Py() );
-
-        if( relR.DeltaPhi(clusaxis)<settings.map_floatPars["th_ConeTheta"] && relR.Mod()<settings.map_floatPars["th_ConeR"] ){
-          ClusterCol[ic]->addUnit(ShowersinLayer[is]);
-          ShowersinLayer.erase(ShowersinLayer.begin()+is);
-          is--;
-          break;  
-        } 
-      }
-    }//end loop showers in layer.
-*/
-    for(int ic=0; ic<ClusterCol.size(); ic++){
-      const PandoraPlus::Calo1DCluster* shower_in_clus = ClusterCol[ic]->getCluster().back();
+    for(int ic=0; ic<m_clusCol.size(); ic++){
+      const PandoraPlus::Calo1DCluster* shower_in_clus = m_clusCol[ic].get()->getCluster().back();
       if(!shower_in_clus) continue;
       for(int is=0; is<ShowersinLayer.size(); is++){
         TVector2 relR = GetProjectedRelR(shower_in_clus, ShowersinLayer[is]);  //Return vec: 1->2.
-        TVector2 clusaxis = GetProjectedAxis( ClusterCol[ic] );
+        TVector2 clusaxis = GetProjectedAxis( m_clusCol[ic].get() );
 //printf("    Cluster axis (%.3f, %.3f), last hit (%.3f, %.3f, %.3f), coming hit (%.3f, %.3f, %.3f), projected relR (%.3f, %.3f) \n",
 //clusaxis.Px(), clusaxis.Py(), shower_in_clus->getPos().x(),  shower_in_clus->getPos().y(),  shower_in_clus->getPos().z(),
 //ShowersinLayer[is]->getPos().x(), ShowersinLayer[is]->getPos().y(), ShowersinLayer[is]->getPos().z(), relR.Px(), relR.Py() );
 
         if( relR.DeltaPhi(clusaxis)<settings.map_floatPars["th_ConeTheta"] && relR.Mod()<settings.map_floatPars["th_ConeR"] ){
-          ClusterCol[ic]->addUnit(ShowersinLayer[is]);
+          m_clusCol[ic].get()->addUnit(ShowersinLayer[is]);
           ShowersinLayer.erase(ShowersinLayer.begin()+is);
           is--;
         }
@@ -178,12 +160,16 @@ ShowersinLayer[is]->getPos().x(), ShowersinLayer[is]->getPos().y(), ShowersinLay
 
     if(ShowersinLayer.size()>0){
       for(int i=0;i<ShowersinLayer.size(); i++){
-        PandoraPlus::CaloHalfCluster* m_clus = new PandoraPlus::CaloHalfCluster();
+        std::shared_ptr<PandoraPlus::CaloHalfCluster> m_clus = std::make_shared<PandoraPlus::CaloHalfCluster>();
         m_clus->addUnit(ShowersinLayer[i]);
         m_clus->setType(2);
-        ClusterCol.push_back(m_clus);
+        m_clusCol.push_back(m_clus);
     }}//end new cluster
   }//end loop layers.
+
+  bk_HFclus.insert(bk_HFclus.end(), m_clusCol.begin(), m_clusCol.end());
+  for(int icl=0; icl<m_clusCol.size(); icl++)
+    ClusterCol.push_back( m_clusCol[icl].get() );  
 
   return StatusCode::SUCCESS;
 }

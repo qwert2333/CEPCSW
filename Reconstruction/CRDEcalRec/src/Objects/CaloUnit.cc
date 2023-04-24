@@ -100,8 +100,8 @@ namespace PandoraPlus{
   }
 
 
-  CaloUnit* CaloUnit::Clone() const{
-    CaloUnit* m_bar = new CaloUnit();
+  std::shared_ptr<CaloUnit> CaloUnit::Clone() const{
+    std::shared_ptr<CaloUnit> m_bar = std::make_shared<CaloUnit>();
     m_bar->setcellID(cellID);
     m_bar->setcellID( system, module, stave, dlayer, part, slayer, bar );
     m_bar->setPosition(position);

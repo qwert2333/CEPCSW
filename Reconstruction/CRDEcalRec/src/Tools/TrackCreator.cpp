@@ -28,12 +28,13 @@ namespace PandoraPlus{
 
 
     //Convert to local objects
-    std::vector<PandoraPlus::Track*> m_trkCol; m_trkCol.clear();
+    std::vector<std::shared_ptr<PandoraPlus::Track>> m_trkCol; m_trkCol.clear();
 
     for(auto iter : m_DataCol.collectionMap_Track){
     auto const_TrkCol = iter.second; 
     for(int itrk=0; itrk<const_TrkCol.size(); itrk++){
-      PandoraPlus::Track* m_trk = new PandoraPlus::Track();
+      //PandoraPlus::Track* m_trk = new PandoraPlus::Track();
+      std::shared_ptr<PandoraPlus::Track> m_trk = std::make_shared<PandoraPlus::Track>();
       std::vector<PandoraPlus::TrackState> m_trkstates;
 
       for(int its=0; its<const_TrkCol[itrk].trackStates_size(); its++){
@@ -54,7 +55,6 @@ namespace PandoraPlus{
       m_trk->setTrackStates("Input", m_trkstates);
       m_trk->setType(const_TrkCol[itrk].getType());
       m_trkCol.push_back(m_trk);
-      m_DataCol.bk_TrackCol.push_back( m_trk );
     }}
     m_DataCol.TrackCol = m_trkCol;
 
@@ -67,6 +67,8 @@ namespace PandoraPlus{
     m_TrkExtraAlg->Initialize( m_DataCol );
     m_TrkExtraAlg->RunAlgorithm( m_DataCol );
     m_TrkExtraAlg->ClearAlgorithm();
+    delete m_TrkExtraAlg;
+    m_TrkExtraAlg = nullptr;
 
     return StatusCode::SUCCESS;
   }

@@ -18,8 +18,8 @@ namespace PandoraPlus{
   }
 
   void Calo1DCluster::Clean() {
-    for(int i=0; i<Bars.size(); i++) { delete Bars[i]; Bars[i]=NULL; }
-    for(int i=0; i<Seeds.size(); i++) { delete Seeds[i]; Seeds[i]=NULL; }
+    //for(int i=0; i<Bars.size(); i++) { delete Bars[i]; Bars[i]=NULL; }
+    //for(int i=0; i<Seeds.size(); i++) { delete Seeds[i]; Seeds[i]=NULL; }
     //std::vector<int>().swap(m_modules);
     //std::vector<int>().swap(m_parts);
     //std::vector<int>().swap(m_staves);
@@ -33,8 +33,8 @@ namespace PandoraPlus{
       if(!Seeds[i]) { Seeds.erase(Seeds.begin()+i); i--; }
   }
 
-  PandoraPlus::Calo1DCluster* Calo1DCluster::Clone() const{
-    PandoraPlus::Calo1DCluster* p_cluster = new PandoraPlus::Calo1DCluster();
+  std::shared_ptr<PandoraPlus::Calo1DCluster> Calo1DCluster::Clone() const{
+    std::shared_ptr<PandoraPlus::Calo1DCluster> p_cluster = std::make_shared<PandoraPlus::Calo1DCluster>();
     p_cluster->setBars( Bars );
     p_cluster->setSeeds( Seeds );
     p_cluster->setIDInfo();

@@ -17,7 +17,7 @@ namespace PandoraPlus{
   }
 
   void Calo3DCluster::Clean(){
-    for(int i=0; i<m_2dclusters.size(); i++) { delete m_2dclusters[i]; m_2dclusters[i]=NULL; }
+    //for(int i=0; i<m_2dclusters.size(); i++) { delete m_2dclusters[i]; m_2dclusters[i]=NULL; }
     //for(int i=0; i<m_towers.size(); i++) { delete m_towers[i]; m_towers[i]=NULL; }
     //std::vector<int>().swap(m_modules);
     //std::vector<int>().swap(m_parts);

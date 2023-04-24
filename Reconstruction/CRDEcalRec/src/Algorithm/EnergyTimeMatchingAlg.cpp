@@ -12,7 +12,6 @@ StatusCode EnergyTimeMatchingAlg::ReadSettings(Settings& m_settings){
   if(settings.map_floatPars.find("sigmaPos")==settings.map_floatPars.end())          settings.map_floatPars["sigmaPos"] = 34.89;
   if(settings.map_floatPars.find("nMat")==settings.map_floatPars.end())              settings.map_floatPars["nMat"] = 2.15;
   if(settings.map_floatPars.find("fl_UseChi2")==settings.map_floatPars.end())        settings.map_floatPars["fl_UseChi2"] = 1;
-  if(settings.map_boolPars.find("fl_WriteCluster")==settings.map_boolPars.end())     settings.map_boolPars["fl_WriteCluster"] = 1;
   if(settings.map_floatPars.find("Debug")==settings.map_floatPars.end())             settings.map_floatPars["Debug"] = 0;
   if(settings.map_stringPars.find("ReadinHFClusterName")==settings.map_stringPars.end()) settings.map_stringPars["ReadinHFClusterName"] = "ESHalfCluster";
   if(settings.map_stringPars.find("ReadinTowerName")==settings.map_stringPars.end()) settings.map_stringPars["ReadinTowerName"] = "ESTower";
@@ -25,11 +24,14 @@ StatusCode EnergyTimeMatchingAlg::ReadSettings(Settings& m_settings){
 StatusCode EnergyTimeMatchingAlg::Initialize( PandoraPlusDataCol& m_datacol ){
   m_HFClusUCol.clear();
   m_HFClusVCol.clear();
-  m_transhowerCol.clear();
   m_clusterCol.clear();
   m_towerCol.clear();
+  m_bkCol.Clear();
 
-  m_towerCol = m_datacol.map_CaloCluster[settings.map_stringPars["ReadinTowerName"]];
+  int ntower = m_datacol.map_CaloCluster[settings.map_stringPars["ReadinTowerName"]].size(); 
+  for(int it=0; it<ntower; it++)
+    m_towerCol.push_back( m_datacol.map_CaloCluster[settings.map_stringPars["ReadinTowerName"]][it].get() );
+
 cout<<"  EnergyTimeMatchingAlg: Readin tower size: "<<m_towerCol.size()<<endl;
 	return StatusCode::SUCCESS;
 };
@@ -53,11 +55,11 @@ StatusCode EnergyTimeMatchingAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
     const int NclusY = m_HFClusVCol.size(); 
 
     if(NclusX==0 || NclusY==0) continue;    
-    std::vector<PandoraPlus::Calo3DCluster*> tmp_clusters; tmp_clusters.clear(); 
+    std::vector<std::shared_ptr<PandoraPlus::Calo3DCluster>> tmp_clusters; tmp_clusters.clear(); 
     
     //Case 2.1: 1*1
     if(NclusX==1 && NclusY==1){
-      PandoraPlus::Calo3DCluster* tmp_clus = new PandoraPlus::Calo3DCluster();
+      std::shared_ptr<PandoraPlus::Calo3DCluster> tmp_clus = std::make_shared<PandoraPlus::Calo3DCluster>();
       XYClusterMatchingL0(m_HFClusUCol[0], m_HFClusVCol[0], tmp_clus); 
       tmp_clusters.push_back(tmp_clus);
       //continue;
@@ -76,27 +78,26 @@ StatusCode EnergyTimeMatchingAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
 
     //Clean empty Calo3DClusters
     for(int ic=0; ic<tmp_clusters.size(); ic++){
-      if(!tmp_clusters[ic]){
-        delete tmp_clusters[ic]; tmp_clusters[ic]=NULL;
+      if( !tmp_clusters[ic].get() ){
         tmp_clusters.erase(tmp_clusters.begin()+ic);
         ic--;
     }}
 
     //Save Calo3DClusters and Calo2DClusters into dataCol backupCol.
-    for(int ic=0; ic<tmp_clusters.size(); ic++){
-      m_clusterCol.push_back( tmp_clusters[ic] );
-      std::vector<const PandoraPlus::Calo2DCluster*> m_showersinclus = tmp_clusters[ic]->getCluster();
-      for(int is=0; is<m_showersinclus.size(); is++){
-        m_transhowerCol.push_back( const_cast<PandoraPlus::Calo2DCluster *>(m_showersinclus[is]) );
-        m_datacol.bk_Cluster2DCol.push_back( const_cast<PandoraPlus::Calo2DCluster *>(m_showersinclus[is]) );
-      }
-      m_datacol.bk_Cluster3DCol.push_back( tmp_clusters[ic] );
-    }   
+    m_clusterCol.insert( m_clusterCol.end(), tmp_clusters.begin(), tmp_clusters.end() );
+
+    //for(int ic=0; ic<tmp_clusters.size(); ic++){
+    //  m_clusterCol.push_back( tmp_clusters[ic] );
+    //  std::vector<const PandoraPlus::Calo2DCluster*> m_showersinclus = tmp_clusters[ic]->getCluster();
+    //  for(int is=0; is<m_showersinclus.size(); is++){
+    //    m_transhowerCol.push_back( const_cast<PandoraPlus::Calo2DCluster *>(m_showersinclus[is]) );
+    //  }
+    //}   
 
   }//End loop towers
 
 cout<<"  Print reconstructed cluster energy and trk: "<<endl;
-for(int i=0; i<m_clusterCol.size(); i++) cout<<"En = "<<m_clusterCol[i]->getEnergy()<<", trk size "<<m_clusterCol[i]->getAssociatedTracks().size()<<endl;
+for(int i=0; i<m_clusterCol.size(); i++) cout<<"En = "<<m_clusterCol[i].get()->getEnergy()<<", trk size "<<m_clusterCol[i].get()->getAssociatedTracks().size()<<endl;
 
 
 //cout<<"Cluster Merge Type1: from 1DShower aspect"<<endl;
@@ -111,18 +112,18 @@ for(int i=0; i<m_clusterCol.size(); i++) cout<<"En = "<<m_clusterCol[i]->getEner
       //Save out BarShowers(Calo1DCluster) in Cluster[jc]
       std::vector<const Calo1DCluster*> m_1DshowerUCol; m_1DshowerUCol.clear();
       std::vector<const Calo1DCluster*> m_1DshowerVCol; m_1DshowerVCol.clear();
-      for(int is=0; is<m_clusterCol[jc]->getCluster().size(); is++){
-        for(int js=0; js<m_clusterCol[jc]->getCluster()[is]->getShowerUCol().size(); js++)
-          m_1DshowerUCol.push_back( m_clusterCol[jc]->getCluster()[is]->getShowerUCol()[js] );
-        for(int js=0; js<m_clusterCol[jc]->getCluster()[is]->getShowerVCol().size(); js++)
-          m_1DshowerVCol.push_back( m_clusterCol[jc]->getCluster()[is]->getShowerVCol()[js] );
+      for(int is=0; is<m_clusterCol[jc].get()->getCluster().size(); is++){
+        for(int js=0; js<m_clusterCol[jc].get()->getCluster()[is]->getShowerUCol().size(); js++)
+          m_1DshowerUCol.push_back( m_clusterCol[jc].get()->getCluster()[is]->getShowerUCol()[js] );
+        for(int js=0; js<m_clusterCol[jc].get()->getCluster()[is]->getShowerVCol().size(); js++)
+          m_1DshowerVCol.push_back( m_clusterCol[jc].get()->getCluster()[is]->getShowerVCol()[js] );
       }
 
 //printf("  1DShower size in Cl #%d: [%d, %d] \n", jc, m_1DshowerUCol.size(), m_1DshowerVCol.size());
 //cout<<"  Check for cousins: "<<endl;
       //Loop in Cluster[ic], count the linked showers
-      for(int is=0; is<m_clusterCol[ic]->getCluster().size(); is++){
-        const Calo2DCluster* p_shower = m_clusterCol[ic]->getCluster()[is];
+      for(int is=0; is<m_clusterCol[ic].get()->getCluster().size(); is++){
+        const Calo2DCluster* p_shower = m_clusterCol[ic].get()->getCluster()[is];
 
 //printf("    In 3D Cluster %d 2DShower %d: CousinU size %d, CousinV size %d \n", ic, is, p_shower->getShowerUCol()[0]->getCousinClusters().size(), p_shower->getShowerVCol()[0]->getCousinClusters().size());
 
@@ -136,8 +137,8 @@ for(int i=0; i<m_clusterCol.size(); i++) cout<<"En = "<<m_clusterCol[i]->getEner
       }
 
 //cout<<"  Found linked shower: "<<NlinkedU<<", "<<NlinkedV<<endl;
-      if(NlinkedU/(float)m_clusterCol[ic]->getCluster().size()>0.7 || NlinkedV/(float)m_clusterCol[ic]->getCluster().size()>0.7){
-        m_clusterCol[ic]->mergeCluster( m_clusterCol[jc] );
+      if(NlinkedU/(float)m_clusterCol[ic].get()->getCluster().size()>0.7 || NlinkedV/(float)m_clusterCol[ic].get()->getCluster().size()>0.7){
+        m_clusterCol[ic].get()->mergeCluster( m_clusterCol[jc].get() );
         m_clusterCol.erase(m_clusterCol.begin()+jc);
         jc--;
         if(jc<ic) jc=ic;
@@ -149,19 +150,19 @@ for(int i=0; i<m_clusterCol.size(); i++) cout<<"En = "<<m_clusterCol[i]->getEner
 //cout<<"Cluster Merge Type2: from HalfCluster aspect"<<endl;
   //  Type2: from longiCluster aspect
   for(int ic=0; ic<m_clusterCol.size() && m_clusterCol.size()>1; ic++){
-    if( m_clusterCol[ic]->getHalfClusterUCol("LinkedLongiCluster")[0]->getHalfClusterCol("CousinCluster").size()==0 && 
-        m_clusterCol[ic]->getHalfClusterVCol("LinkedLongiCluster")[0]->getHalfClusterCol("CousinCluster").size()==0 ) continue;
+    if( m_clusterCol[ic].get()->getHalfClusterUCol("LinkedLongiCluster")[0]->getHalfClusterCol("CousinCluster").size()==0 && 
+        m_clusterCol[ic].get()->getHalfClusterVCol("LinkedLongiCluster")[0]->getHalfClusterCol("CousinCluster").size()==0 ) continue;
 //cout<<"  Cluster ic has cousin"<<endl;
     for(int jc=ic+1; jc<m_clusterCol.size(); jc++){
-      if( m_clusterCol[jc]->getHalfClusterUCol("LinkedLongiCluster")[0]->getHalfClusterCol("CousinCluster").size()==0 && 
-          m_clusterCol[jc]->getHalfClusterVCol("LinkedLongiCluster")[0]->getHalfClusterCol("CousinCluster").size()==0 ) continue;
+      if( m_clusterCol[jc].get()->getHalfClusterUCol("LinkedLongiCluster")[0]->getHalfClusterCol("CousinCluster").size()==0 && 
+          m_clusterCol[jc].get()->getHalfClusterVCol("LinkedLongiCluster")[0]->getHalfClusterCol("CousinCluster").size()==0 ) continue;
 //cout<<"  Cluster jc also has cousin, start check"<<endl;
 
-      std::vector<const PandoraPlus::CaloHalfCluster*> m_cousinU = m_clusterCol[ic]->getHalfClusterUCol("LinkedLongiCluster")[0]->getHalfClusterCol("CousinCluster"); 
-      std::vector<const PandoraPlus::CaloHalfCluster*> m_cousinV = m_clusterCol[ic]->getHalfClusterVCol("LinkedLongiCluster")[0]->getHalfClusterCol("CousinCluster"); 
-      if( find(m_cousinU.begin(), m_cousinU.end(), m_clusterCol[jc]->getHalfClusterUCol("LinkedLongiCluster")[0] )!=m_cousinU.end() ||
-          find(m_cousinV.begin(), m_cousinV.end(), m_clusterCol[jc]->getHalfClusterVCol("LinkedLongiCluster")[0] )!=m_cousinV.end() ){
-        m_clusterCol[ic]->mergeCluster( m_clusterCol[jc] );
+      std::vector<const PandoraPlus::CaloHalfCluster*> m_cousinU = m_clusterCol[ic].get()->getHalfClusterUCol("LinkedLongiCluster")[0]->getHalfClusterCol("CousinCluster"); 
+      std::vector<const PandoraPlus::CaloHalfCluster*> m_cousinV = m_clusterCol[ic].get()->getHalfClusterVCol("LinkedLongiCluster")[0]->getHalfClusterCol("CousinCluster"); 
+      if( find(m_cousinU.begin(), m_cousinU.end(), m_clusterCol[jc].get()->getHalfClusterUCol("LinkedLongiCluster")[0] )!=m_cousinU.end() ||
+          find(m_cousinV.begin(), m_cousinV.end(), m_clusterCol[jc].get()->getHalfClusterVCol("LinkedLongiCluster")[0] )!=m_cousinV.end() ){
+        m_clusterCol[ic].get()->mergeCluster( m_clusterCol[jc].get() );
         m_clusterCol.erase(m_clusterCol.begin()+jc);
         jc--;
         if(jc<ic) jc=ic;
@@ -171,15 +172,15 @@ for(int i=0; i<m_clusterCol.size(); i++) cout<<"En = "<<m_clusterCol[i]->getEner
 
   //  Type3: merge clusters linked to the same track. 
   for(int ic=0; ic<m_clusterCol.size() && m_clusterCol.size()>1; ic++){
-    if(m_clusterCol[ic]->getAssociatedTracks().size()==0) continue;
-    std::vector<const PandoraPlus::Track*> m_trkCol = m_clusterCol[ic]->getAssociatedTracks();
+    if(m_clusterCol[ic].get()->getAssociatedTracks().size()==0) continue;
+    std::vector<const PandoraPlus::Track*> m_trkCol = m_clusterCol[ic].get()->getAssociatedTracks();
 
     for(int jc=ic+1; jc<m_clusterCol.size(); jc++){
-      if(m_clusterCol[jc]->getAssociatedTracks().size()==0) continue;
+      if(m_clusterCol[jc].get()->getAssociatedTracks().size()==0) continue;
 
-      for(int itrk=0; itrk<m_clusterCol[jc]->getAssociatedTracks().size(); itrk++){
-        if( find(m_trkCol.begin(), m_trkCol.end(), m_clusterCol[jc]->getAssociatedTracks()[itrk])!= m_trkCol.end() ){
-          m_clusterCol[ic]->mergeCluster( m_clusterCol[jc] );
+      for(int itrk=0; itrk<m_clusterCol[jc].get()->getAssociatedTracks().size(); itrk++){
+        if( find(m_trkCol.begin(), m_trkCol.end(), m_clusterCol[jc].get()->getAssociatedTracks()[itrk])!= m_trkCol.end() ){
+          m_clusterCol[ic].get()->mergeCluster( m_clusterCol[jc].get() );
           m_clusterCol.erase(m_clusterCol.begin()+jc);
           jc--;
           if(jc<ic) jc=ic;
@@ -190,16 +191,25 @@ for(int i=0; i<m_clusterCol.size(); i++) cout<<"En = "<<m_clusterCol[i]->getEner
 
 //cout<<"    After merge: cluster size "<<m_clusterCol.size()<<endl;
 
+  m_datacol.map_CaloCluster["EcalCluster"] = m_clusterCol;
 
-
-  m_datacol.map_2DCluster["EcalShowerInLayer"] = m_transhowerCol;
-  if(settings.map_boolPars["fl_WriteCluster"]) m_datacol.map_CaloCluster["EcalCluster"] = m_clusterCol;
+  //Save backup collections in to main datacol. 
+  m_datacol.map_CaloHit["bkHit"].insert( m_datacol.map_CaloHit["bkHit"].end(), m_bkCol.map_CaloHit["bkHit"].begin(), m_bkCol.map_CaloHit["bkHit"].end() );
+  m_datacol.map_BarCol["bkBar"].insert( m_datacol.map_BarCol["bkBar"].end(), m_bkCol.map_BarCol["bkBar"].begin(), m_bkCol.map_BarCol["bkBar"].end() );
+  m_datacol.map_1DCluster["bk1DCluster"].insert( m_datacol.map_1DCluster["bk1DCluster"].end(), m_bkCol.map_1DCluster["bk1DCluster"].begin(), m_bkCol.map_1DCluster["bk1DCluster"].end() );
+  m_datacol.map_2DCluster["bk2DCluster"].insert( m_datacol.map_2DCluster["bk2DCluster"].end(), m_bkCol.map_2DCluster["bk2DCluster"].begin(), m_bkCol.map_2DCluster["bk2DCluster"].end() );
 
   return StatusCode::SUCCESS;
 }
 
 
 StatusCode EnergyTimeMatchingAlg::ClearAlgorithm(){
+  m_HFClusUCol.clear();
+  m_HFClusVCol.clear();
+  m_clusterCol.clear();
+  m_towerCol.clear();
+  m_bkCol.Clear();
+  
 
   return StatusCode::SUCCESS;
 }
@@ -207,7 +217,7 @@ StatusCode EnergyTimeMatchingAlg::ClearAlgorithm(){
 //Longitudinal cluster: 1*1
 StatusCode EnergyTimeMatchingAlg::XYClusterMatchingL0( const PandoraPlus::CaloHalfCluster* m_longiClU, 
                                                        const PandoraPlus::CaloHalfCluster* m_longiClV, 
-                                                       PandoraPlus::Calo3DCluster* m_clus )
+                                                       std::shared_ptr<PandoraPlus::Calo3DCluster>& m_clus )
 {
 //cout<<"  Cluster matching for case: 1 * 1. Input HalfCluster En: "<<m_longiClU->getEnergy()<<", "<<m_longiClV->getEnergy()<<endl;
 //cout<<"  Print 1DShower En in HalfClusterU: "<<endl;
@@ -243,9 +253,10 @@ StatusCode EnergyTimeMatchingAlg::XYClusterMatchingL0( const PandoraPlus::CaloHa
 
     if(m_showerXcol.size()==0 || m_showerYcol.size()==0) continue;
     else if(m_showerXcol.size()==1 && m_showerYcol.size()==1){ 
-      PandoraPlus::Calo2DCluster* tmp_shower = new PandoraPlus::Calo2DCluster();
-      GetMatchedShowersL0(m_showerXcol[0], m_showerYcol[0], tmp_shower); 
-      m_showerinlayer.push_back(tmp_shower); 
+      std::shared_ptr<PandoraPlus::Calo2DCluster> tmp_shower = std::make_shared<PandoraPlus::Calo2DCluster>();
+      GetMatchedShowersL0(m_showerXcol[0], m_showerYcol[0], tmp_shower.get()); 
+      m_showerinlayer.push_back(tmp_shower.get()); 
+      m_bkCol.map_2DCluster["bk2DCluster"].push_back(tmp_shower);
     }
     else if(m_showerXcol.size()==1) GetMatchedShowersL1(m_showerXcol[0], m_showerYcol, m_showerinlayer );
     else if(m_showerYcol.size()==1) GetMatchedShowersL1(m_showerYcol[0], m_showerXcol, m_showerinlayer );
@@ -258,6 +269,8 @@ StatusCode EnergyTimeMatchingAlg::XYClusterMatchingL0( const PandoraPlus::CaloHa
 
     for(int is=0; is<m_showerinlayer.size(); is++) m_clus->addUnit(m_showerinlayer[is]);
   }
+
+
   m_clus->addHalfClusterU( "LinkedLongiCluster", m_longiClU );
   m_clus->addHalfClusterV( "LinkedLongiCluster", m_longiClV );
   for(auto itrk : m_longiClU->getAssociatedTracks()){
@@ -276,7 +289,7 @@ StatusCode EnergyTimeMatchingAlg::XYClusterMatchingL0( const PandoraPlus::CaloHa
 //Longitudinal cluster: 1*N
 StatusCode EnergyTimeMatchingAlg::XYClusterMatchingL1( const PandoraPlus::CaloHalfCluster* m_longiCl1, 
                                                        std::vector<const PandoraPlus::CaloHalfCluster*>& m_longiClN, 
-                                                       std::vector<PandoraPlus::Calo3DCluster*>& m_clusters )
+                                                       std::vector<std::shared_ptr<PandoraPlus::Calo3DCluster>>& m_clusters )
 {
   m_clusters.clear(); 
   m_clusters.resize(m_longiClN.size());
@@ -316,9 +329,10 @@ StatusCode EnergyTimeMatchingAlg::XYClusterMatchingL1( const PandoraPlus::CaloHa
 
     if(m_showerXcol.size()==0 || m_showerYcol.size()==0) continue;
     else if(m_showerXcol.size()==1 && m_showerYcol.size()==1){ 
-      PandoraPlus::Calo2DCluster* tmp_shower = new PandoraPlus::Calo2DCluster();
-      GetMatchedShowersL0(m_showerXcol[0], m_showerYcol[0], tmp_shower); 
-      m_showerinlayer.push_back(tmp_shower); 
+      std::shared_ptr<PandoraPlus::Calo2DCluster> tmp_shower = std::make_shared<PandoraPlus::Calo2DCluster>();
+      GetMatchedShowersL0(m_showerXcol[0], m_showerYcol[0], tmp_shower.get()); 
+      m_showerinlayer.push_back(tmp_shower.get()); 
+      m_bkCol.map_2DCluster["bk2DCluster"].push_back(tmp_shower);
     }
     else if(m_showerXcol.size()==1) GetMatchedShowersL1(m_showerXcol[0], m_showerYcol, m_showerinlayer );
     else if(m_showerYcol.size()==1) GetMatchedShowersL1(m_showerYcol[0], m_showerXcol, m_showerinlayer );
@@ -360,40 +374,40 @@ StatusCode EnergyTimeMatchingAlg::XYClusterMatchingL1( const PandoraPlus::CaloHa
 
     if(index_longiclus<0){ std::cout<<"WARNING: did not find properate longitudinal cluster! "<<std::endl; continue; }
 
-    if( !m_clusters[index_longiclus] ){
-      PandoraPlus::Calo3DCluster* p_newclus = new PandoraPlus::Calo3DCluster();
+    if( !m_clusters[index_longiclus].get() ){
+      std::shared_ptr<PandoraPlus::Calo3DCluster> p_newclus = std::make_shared<PandoraPlus::Calo3DCluster>();
       p_newclus->addUnit(map_2Dshowersinlayer[layerindex[il]][is]);
       m_clusters[index_longiclus] = p_newclus;
     }
-    else m_clusters[index_longiclus]->addUnit(map_2Dshowersinlayer[layerindex[il]][is]);
+    else m_clusters[index_longiclus].get()->addUnit(map_2Dshowersinlayer[layerindex[il]][is]);
   }}
 
   for(int ic=0; ic<m_clusters.size(); ic++){
-    if(!m_clusters[ic]) continue;
+    if(!m_clusters[ic].get() ) continue;
     if(slayer==0){ 
-      m_clusters[ic]->addHalfClusterU( "LinkedLongiCluster", m_longiCl1 );
-      m_clusters[ic]->addHalfClusterV( "LinkedLongiCluster", m_longiClN[ic] );
+      m_clusters[ic].get()->addHalfClusterU( "LinkedLongiCluster", m_longiCl1 );
+      m_clusters[ic].get()->addHalfClusterV( "LinkedLongiCluster", m_longiClN[ic] );
 
       for(auto itrk : m_longiCl1->getAssociatedTracks()){
-        if( find(m_clusters[ic]->getAssociatedTracks().begin(), m_clusters[ic]->getAssociatedTracks().end(), itrk)==m_clusters[ic]->getAssociatedTracks().end() )
-          m_clusters[ic]->addAssociatedTrack(itrk);
+        if( find(m_clusters[ic].get()->getAssociatedTracks().begin(), m_clusters[ic].get()->getAssociatedTracks().end(), itrk)==m_clusters[ic].get()->getAssociatedTracks().end() )
+          m_clusters[ic].get()->addAssociatedTrack(itrk);
       }
       for(auto itrk : m_longiClN[ic]->getAssociatedTracks()){
-        if( find(m_clusters[ic]->getAssociatedTracks().begin(), m_clusters[ic]->getAssociatedTracks().end(), itrk)==m_clusters[ic]->getAssociatedTracks().end() )
-          m_clusters[ic]->addAssociatedTrack(itrk);
+        if( find(m_clusters[ic].get()->getAssociatedTracks().begin(), m_clusters[ic].get()->getAssociatedTracks().end(), itrk)==m_clusters[ic].get()->getAssociatedTracks().end() )
+          m_clusters[ic].get()->addAssociatedTrack(itrk);
       }
     }
     else{          
-      m_clusters[ic]->addHalfClusterU( "LinkedLongiCluster", m_longiClN[ic] );
-      m_clusters[ic]->addHalfClusterV( "LinkedLongiCluster", m_longiCl1 );
+      m_clusters[ic].get()->addHalfClusterU( "LinkedLongiCluster", m_longiClN[ic] );
+      m_clusters[ic].get()->addHalfClusterV( "LinkedLongiCluster", m_longiCl1 );
 
       for(auto itrk : m_longiCl1->getAssociatedTracks()){
-        if( find(m_clusters[ic]->getAssociatedTracks().begin(), m_clusters[ic]->getAssociatedTracks().end(), itrk)==m_clusters[ic]->getAssociatedTracks().end() )
-          m_clusters[ic]->addAssociatedTrack(itrk);
+        if( find(m_clusters[ic].get()->getAssociatedTracks().begin(), m_clusters[ic].get()->getAssociatedTracks().end(), itrk)==m_clusters[ic].get()->getAssociatedTracks().end() )
+          m_clusters[ic].get()->addAssociatedTrack(itrk);
       }
       for(auto itrk : m_longiClN[ic]->getAssociatedTracks()){
-        if( find(m_clusters[ic]->getAssociatedTracks().begin(), m_clusters[ic]->getAssociatedTracks().end(), itrk)==m_clusters[ic]->getAssociatedTracks().end() )
-          m_clusters[ic]->addAssociatedTrack(itrk);
+        if( find(m_clusters[ic].get()->getAssociatedTracks().begin(), m_clusters[ic].get()->getAssociatedTracks().end(), itrk)==m_clusters[ic].get()->getAssociatedTracks().end() )
+          m_clusters[ic].get()->addAssociatedTrack(itrk);
       }
     }
   }
@@ -405,7 +419,7 @@ StatusCode EnergyTimeMatchingAlg::XYClusterMatchingL1( const PandoraPlus::CaloHa
 //Longitudinal cluster: N*N
 StatusCode EnergyTimeMatchingAlg::XYClusterMatchingL2( std::vector<const PandoraPlus::CaloHalfCluster*>& m_ClUCol, 
                                                        std::vector<const PandoraPlus::CaloHalfCluster*>& m_ClVCol, 
-                                                       std::vector<PandoraPlus::Calo3DCluster*>& m_clusters  )
+                                                       std::vector<std::shared_ptr<PandoraPlus::Calo3DCluster>>& m_clusters  )
 {
   if(m_ClUCol.size()==0 || m_ClVCol.size()==0 || m_ClUCol.size()!=m_ClVCol.size()) return StatusCode::SUCCESS;
 
@@ -501,12 +515,13 @@ StatusCode EnergyTimeMatchingAlg::XYClusterMatchingL2( std::vector<const Pandora
 //cout<<"  XYClusterMatchingL2: Selected combination: "<<Index[ii].first<<", "<<Index[ii].second<<endl;
     const PandoraPlus::CaloHalfCluster* m_clusX = m_ClUCol[Index[ii].first];
     const PandoraPlus::CaloHalfCluster* m_clusY = m_ClVCol[Index[ii].second];
-    PandoraPlus::Calo3DCluster* tmp_clus = new PandoraPlus::Calo3DCluster();
+    std::shared_ptr<PandoraPlus::Calo3DCluster> tmp_clus = std::make_shared<PandoraPlus::Calo3DCluster>();
 
     XYClusterMatchingL0(m_clusX, m_clusY, tmp_clus);
     m_clusters.push_back(tmp_clus);
   }
 
+  for(int il=0; il<PandoraPlus::CaloUnit::Nlayer; il++) delete map_chi2[il];
   return StatusCode::SUCCESS;
 }
 
@@ -514,7 +529,7 @@ StatusCode EnergyTimeMatchingAlg::XYClusterMatchingL2( std::vector<const Pandora
 //Longitudinal cluster: M*N
 StatusCode EnergyTimeMatchingAlg::XYClusterMatchingL3( std::vector<const PandoraPlus::CaloHalfCluster*>& m_ClUCol, 
                                                        std::vector<const PandoraPlus::CaloHalfCluster*>& m_ClVCol, 
-                                                       std::vector<PandoraPlus::Calo3DCluster*>& m_clusters )
+                                                       std::vector<std::shared_ptr<PandoraPlus::Calo3DCluster>>& m_clusters )
 {
   if( m_ClUCol.size()==0 || m_ClVCol.size()==0 ) return StatusCode::SUCCESS;
 //cout<<"  XYClusterMatchingL3: HalfCluster size "<<m_ClUCol.size()<<", "<<m_ClVCol.size()<<endl;
@@ -579,7 +594,7 @@ for(int icl=0; icl<m_ClVCol.size(); icl++){
   map<double, pair<int, int> > m_chi2Map; m_chi2Map.clear();
   for(int ic=0; ic<NclusU; ic++){
   for(int jc=0; jc<NclusV; jc++){
-    for(int il=0; il<14; il++){
+    for(int il=0; il<PandoraPlus::CaloUnit::Nlayer; il++){
       if(map_chi2[il]==nullptr) continue;
 
       if(m_ClUCol[ic]->getHalfClusterCol("CousinCluster").size()!=0 && m_ClVCol[jc]->getHalfClusterCol("CousinCluster").size()!=0)
@@ -634,7 +649,8 @@ for(int icl=0; icl<m_ClVCol.size(); icl++){
   //Match the pairs in the indexVec: 
 //cout<<"  XYClusterMatchingL3: Match the pairs in the indexVec"<<endl;
   for(int ip=0; ip<indexVec.size(); ip++){
-    PandoraPlus::Calo3DCluster* tmp_clus = new PandoraPlus::Calo3DCluster();
+    std::shared_ptr<PandoraPlus::Calo3DCluster> tmp_clus = std::make_shared<PandoraPlus::Calo3DCluster>();
+
     XYClusterMatchingL0(m_ClUCol[indexVec[ip].first], m_ClVCol[indexVec[ip].second], tmp_clus);
     m_clusters.push_back(tmp_clus);
   }
@@ -642,7 +658,7 @@ for(int icl=0; icl<m_ClVCol.size(); icl++){
 //cout<<"  Last pair: "<<lastpair.first<<" "<<lastpair.second<<endl;
   //Match the left 1*N: 
 //cout<<"  XYClusterMatchingL3: Match the left 1*N"<<endl;
-  std::vector<PandoraPlus::Calo3DCluster*> tmp_3dclus; tmp_3dclus.clear();
+  std::vector<std::shared_ptr<PandoraPlus::Calo3DCluster>> tmp_3dclus; tmp_3dclus.clear();
   int ilast = NclusU<NclusV ? lastpair.first : lastpair.second;
   const PandoraPlus::CaloHalfCluster* m_clus = NclusU<NclusV ? m_ClUCol[ilast] : m_ClVCol[ilast];
   XYClusterMatchingL1(m_clus, leftHFClusCol, tmp_3dclus );
@@ -650,6 +666,7 @@ for(int icl=0; icl<m_ClVCol.size(); icl++){
   m_clusters.insert(m_clusters.end(), tmp_3dclus.begin(), tmp_3dclus.end());
   m_clus = nullptr; 
 
+  for(int il=0; il<PandoraPlus::CaloUnit::Nlayer; il++) delete map_chi2[il];
   return StatusCode::SUCCESS;
 }
 
@@ -664,9 +681,10 @@ StatusCode EnergyTimeMatchingAlg::GetFullMatchedShowers(  std::vector<const Pand
   for(int is=0;is<barShowerUCol.size();is++){
   for(int js=0;js<barShowerVCol.size();js++){
     if(barShowerUCol[is]->getBars().size()==0 || barShowerVCol[js]->getBars().size()==0) continue;
-    PandoraPlus::Calo2DCluster* tmp_shower = new PandoraPlus::Calo2DCluster();
-    GetMatchedShowersL0(barShowerUCol[is], barShowerVCol[js], tmp_shower);
-    outshCol.push_back(tmp_shower);
+    std::shared_ptr<PandoraPlus::Calo2DCluster> tmp_shower = std::make_shared<PandoraPlus::Calo2DCluster>();
+    GetMatchedShowersL0(barShowerUCol[is], barShowerVCol[js], tmp_shower.get());
+    outshCol.push_back(tmp_shower.get());
+    m_bkCol.map_2DCluster["bk2DCluster"].push_back( tmp_shower );
   }}
 
   return StatusCode::SUCCESS;
@@ -707,11 +725,12 @@ StatusCode EnergyTimeMatchingAlg::GetMatchedShowersL0( const PandoraPlus::Calo1D
       p_hit.RotateZ(-rotAngle);
       double m_Ehit = En_x*En_y/barShowerV->getEnergy() + En_x*En_y/barShowerU->getEnergy();
       //Create new CaloHit
-      PandoraPlus::CaloHit* hit = new PandoraPlus::CaloHit();
+      std::shared_ptr<PandoraPlus::CaloHit> hit = std::make_shared<PandoraPlus::CaloHit>();
       //hit.setCellID(0);
       hit->setPosition(p_hit);
       hit->setEnergy(m_Ehit);
-      m_digiCol.push_back(hit);
+      m_digiCol.push_back(hit.get());
+      m_bkCol.map_CaloHit["bkHit"].push_back( hit );
     }
   }
 
@@ -739,9 +758,10 @@ StatusCode EnergyTimeMatchingAlg::GetMatchedShowersL1( const PandoraPlus::Calo1D
   for(int is=0;is<NshY;is++){ EshY[is] = showerNCol[is]->getEnergy(); totE_shY += EshY[is]; }
   for(int is=0;is<NshY;is++){
     double wi_E = EshY[is]/totE_shY;
-    PandoraPlus::Calo1DCluster* m_splitshower1 = new PandoraPlus::Calo1DCluster();
+    std::shared_ptr<PandoraPlus::Calo1DCluster> m_splitshower1 = std::make_shared<PandoraPlus::Calo1DCluster>();
+    m_bkCol.map_1DCluster["bk1DCluster"].push_back( m_splitshower1 );
 
-    PandoraPlus::CaloUnit* m_wiseed = nullptr; 
+    std::shared_ptr<PandoraPlus::CaloUnit> m_wiseed = nullptr; 
     if(shower1->getSeeds().size()>0) m_wiseed = shower1->getSeeds()[0]->Clone();
     else{ cout<<"ERROR: Input shower has no seed! Check! Use the most energitic bar as seed. bar size: "<<shower1->getBars().size()<<endl; 
       double m_maxE = -99;
@@ -752,20 +772,24 @@ StatusCode EnergyTimeMatchingAlg::GetMatchedShowersL1( const PandoraPlus::Calo1D
       if(index>=0) m_wiseed = shower1->getBars()[index]->Clone(); 
     }
     m_wiseed->setQ( wi_E*m_wiseed->getQ1(), wi_E*m_wiseed->getQ2() );
+    m_bkCol.map_BarCol["bkBar"].push_back( m_wiseed );
 
     std::vector<const PandoraPlus::CaloUnit*> m_wibars; m_wibars.clear(); 
     for(int ib=0;ib<shower1->getBars().size();ib++){
-      PandoraPlus::CaloUnit* m_wibar = shower1->getBars()[ib]->Clone();
+      std::shared_ptr<PandoraPlus::CaloUnit> m_wibar = shower1->getBars()[ib]->Clone();
       m_wibar->setQ(wi_E*m_wibar->getQ1(), wi_E*m_wibar->getQ2());
-      m_wibars.push_back(m_wibar);
+      m_wibars.push_back(m_wibar.get());
+      m_bkCol.map_BarCol["bkBar"].push_back( m_wibar );
     }
     m_splitshower1->setBars( m_wibars );
-    m_splitshower1->addSeed( m_wiseed );
+    m_splitshower1->addSeed( m_wiseed.get() );
     m_splitshower1->setIDInfo();
-    PandoraPlus::Calo2DCluster* m_shower = new PandoraPlus::Calo2DCluster();
-    if(_slayer==0 ) GetMatchedShowersL0( m_splitshower1, showerNCol[is], m_shower);
-    else            GetMatchedShowersL0( showerNCol[is], m_splitshower1, m_shower);
-    outshCol.push_back( m_shower );
+    std::shared_ptr<PandoraPlus::Calo2DCluster> m_shower = std::make_shared<PandoraPlus::Calo2DCluster>();
+    if(_slayer==0 ) GetMatchedShowersL0( m_splitshower1.get(), showerNCol[is], m_shower.get() );
+    else            GetMatchedShowersL0( showerNCol[is], m_splitshower1.get(), m_shower.get() );
+
+    outshCol.push_back( m_shower.get() );
+    m_bkCol.map_2DCluster["bk2DCluster"].push_back( m_shower );
   }
   return StatusCode::SUCCESS;
 }
@@ -843,9 +867,10 @@ StatusCode EnergyTimeMatchingAlg::GetMatchedShowersL2( std::vector<const Pandora
     const PandoraPlus::Calo1DCluster* showerX = barShowerUCol[Index[i].first];
     const PandoraPlus::Calo1DCluster* showerY = barShowerVCol[Index[i].second];
 
-    PandoraPlus::Calo2DCluster* tmp_shower = new PandoraPlus::Calo2DCluster();
-    GetMatchedShowersL0(showerX, showerY, tmp_shower);
-    outshCol.push_back(tmp_shower);
+    std::shared_ptr<PandoraPlus::Calo2DCluster> tmp_shower = std::make_shared<PandoraPlus::Calo2DCluster>();
+    GetMatchedShowersL0(showerX, showerY, tmp_shower.get());
+    outshCol.push_back(tmp_shower.get());
+    m_bkCol.map_2DCluster["bk2DCluster"].push_back( tmp_shower );
   }
 
   return StatusCode::SUCCESS;
@@ -936,9 +961,10 @@ StatusCode EnergyTimeMatchingAlg::GetMatchedShowersL3(  std::vector<const Pandor
     const PandoraPlus::Calo1DCluster* showerX = barShowerUCol[indexVec[ip].first];
     const PandoraPlus::Calo1DCluster* showerY = barShowerVCol[indexVec[ip].second];
 
-    PandoraPlus::Calo2DCluster* tmp_shower = new PandoraPlus::Calo2DCluster();
-    GetMatchedShowersL0(showerX, showerY, tmp_shower);
-    outshCol.push_back(tmp_shower);
+    std::shared_ptr<PandoraPlus::Calo2DCluster> tmp_shower = std::make_shared<PandoraPlus::Calo2DCluster>();
+    GetMatchedShowersL0(showerX, showerY, tmp_shower.get());
+    outshCol.push_back(tmp_shower.get());
+    m_bkCol.map_2DCluster["bk2DCluster"].push_back( tmp_shower );
   }
 
 

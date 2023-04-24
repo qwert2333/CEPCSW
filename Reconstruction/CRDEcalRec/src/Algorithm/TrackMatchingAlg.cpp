@@ -28,7 +28,7 @@ StatusCode TrackMatchingAlg::Initialize( PandoraPlusDataCol& m_datacol ){
   m_trackAxisVCol.clear();
   m_trackAxisUCol.clear();
 
-  m_TrackCol = m_datacol.TrackCol;
+  for(int itrk=0; itrk<m_datacol.TrackCol.size(); itrk++ ) m_TrackCol.push_back(m_datacol.TrackCol[itrk].get());
   p_HalfClusterU = &(m_datacol.map_HalfCluster["HalfClusterColU"]);
   p_HalfClusterV = &(m_datacol.map_HalfCluster["HalfClusterColV"]);
 
@@ -46,7 +46,7 @@ StatusCode TrackMatchingAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
     m_trackAxisVCol.clear();
 
     // Get local max of the HalfCluster
-    std::vector<const PandoraPlus::Calo1DCluster*> localMaxColV = p_HalfClusterV->at(ihc)->getLocalMaxCol(settings.map_stringPars["ReadinLocalMaxName"]);
+    std::vector<const PandoraPlus::Calo1DCluster*> localMaxColV = p_HalfClusterV->at(ihc).get()->getLocalMaxCol(settings.map_stringPars["ReadinLocalMaxName"]);
 
     for(int itrk=0; itrk<m_TrackCol.size(); itrk++){  // loop tracks
       // Get extrapolated points of the track. These points are sorted by the track
@@ -54,23 +54,21 @@ StatusCode TrackMatchingAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
       GetExtrpoECALPoints(m_TrackCol[itrk], extrapo_points);
 
       // Track axis candidate.
-      PandoraPlus::CaloHalfCluster* t_track_axis = new PandoraPlus::CaloHalfCluster();
-      CreateTrackAxis(extrapo_points, localMaxColV, t_track_axis);
+      std::shared_ptr<PandoraPlus::CaloHalfCluster> t_track_axis = std::make_shared<PandoraPlus::CaloHalfCluster>();
+      CreateTrackAxis(extrapo_points, localMaxColV, t_track_axis.get());
 
       // If the track does not match the Halfcluster, the track axis candidate will have no 1DCluster
-      if(t_track_axis->getCluster().size()==0){
-        delete t_track_axis;
+      if(t_track_axis->getCluster().size()==0)
         continue;
-      }
       
       t_track_axis->addAssociatedTrack(m_TrackCol[itrk]);
       t_track_axis->setType(0); //Track-type axis. 
-      m_TrackCol[itrk]->addAssociatedHalfClusterV( p_HalfClusterV->at(ihc) );
-      m_trackAxisVCol.push_back(t_track_axis);
-
+      m_TrackCol[itrk]->addAssociatedHalfClusterV( p_HalfClusterV->at(ihc).get() );
+      m_trackAxisVCol.push_back(t_track_axis.get());
+      m_datacol.map_HalfCluster["bkHalfCluster"].push_back(t_track_axis);
     }  // end loop tracks
 
-    p_HalfClusterV->at(ihc)->setHalfClusters(settings.map_stringPars["OutputLongiClusName"], m_trackAxisVCol);
+    p_HalfClusterV->at(ihc).get()->setHalfClusters(settings.map_stringPars["OutputLongiClusName"], m_trackAxisVCol);
 
   }  // end loop HalfClusterV
 
@@ -78,7 +76,7 @@ StatusCode TrackMatchingAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
     m_trackAxisUCol.clear();
 
     // Get local max of the HalfCluster
-    std::vector<const PandoraPlus::Calo1DCluster*> localMaxColU = p_HalfClusterU->at(ihc)->getLocalMaxCol(settings.map_stringPars["ReadinLocalMaxName"]);
+    std::vector<const PandoraPlus::Calo1DCluster*> localMaxColU = p_HalfClusterU->at(ihc).get()->getLocalMaxCol(settings.map_stringPars["ReadinLocalMaxName"]);
 
     for(int itrk=0; itrk<m_TrackCol.size(); itrk++){  // loop tracks
       // Get extrapolated points of the track. These points are sorted by the track
@@ -86,28 +84,27 @@ StatusCode TrackMatchingAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
       GetExtrpoECALPoints(m_TrackCol[itrk], extrapo_points);
 
       // Track axis candidate.
-      PandoraPlus::CaloHalfCluster* t_track_axis = new PandoraPlus::CaloHalfCluster();
-      CreateTrackAxis(extrapo_points, localMaxColU, t_track_axis);
+      std::shared_ptr<PandoraPlus::CaloHalfCluster> t_track_axis = std::make_shared<PandoraPlus::CaloHalfCluster>();
+      CreateTrackAxis(extrapo_points, localMaxColU, t_track_axis.get());
 
       // If the track do not match the Halfcluster, the track axis candidate will have no 1DCluster
-      if(t_track_axis->getCluster().size()==0){
-        delete t_track_axis;
+      if(t_track_axis->getCluster().size()==0)
         continue;
-      }
 
       t_track_axis->addAssociatedTrack(m_TrackCol[itrk]);
       t_track_axis->setType(0); //Track-type axis. 
-      m_TrackCol[itrk]->addAssociatedHalfClusterU( p_HalfClusterU->at(ihc) );
-      m_trackAxisUCol.push_back(t_track_axis);
+      m_TrackCol[itrk]->addAssociatedHalfClusterU( p_HalfClusterU->at(ihc).get() );
+      m_trackAxisUCol.push_back(t_track_axis.get());
+      m_datacol.map_HalfCluster["bkHalfCluster"].push_back(t_track_axis);
 
     }  // end loop tracks
 
-    p_HalfClusterU->at(ihc)->setHalfClusters(settings.map_stringPars["OutputLongiClusName"], m_trackAxisUCol);
+    p_HalfClusterU->at(ihc).get()->setHalfClusters(settings.map_stringPars["OutputLongiClusName"], m_trackAxisUCol);
 
   }
 
 
-printf("TrackMatch: Readin cluster size [%d, %d] \n", p_HalfClusterU->size(), p_HalfClusterV->size());
+//printf("TrackMatch: Readin cluster size [%d, %d] \n", p_HalfClusterU->size(), p_HalfClusterV->size());
   //Loop track to check the associated cluster: merge clusters if they are associated to the same track.
   std::vector<PandoraPlus::CaloHalfCluster*> tmp_deleteClus; tmp_deleteClus.clear();
   for(auto &itrk : m_TrackCol){
@@ -133,13 +130,13 @@ printf("TrackMatch: Readin cluster size [%d, %d] \n", p_HalfClusterU->size(), p_
       }
     }
   }
-cout<<"Saved tmp cluster: size = "<<tmp_deleteClus.size()<<endl;
+//cout<<"Saved tmp cluster: size = "<<tmp_deleteClus.size()<<endl;
 //for(int i=0; i<tmp_deleteClus.size(); i++) printf("  address %p \n", tmp_deleteClus[i] );
 
   //Check vector: clean the merged clusters
   for(int ihc=0; ihc<p_HalfClusterU->size(); ihc++){
 //printf("  Readin HalfClusU address: %p \n", p_HalfClusterU->at(ihc));
-    if( find(tmp_deleteClus.begin(), tmp_deleteClus.end(), p_HalfClusterU->at(ihc))!=tmp_deleteClus.end() ){
+    if( find(tmp_deleteClus.begin(), tmp_deleteClus.end(), p_HalfClusterU->at(ihc).get())!=tmp_deleteClus.end() ){
       p_HalfClusterU->erase(p_HalfClusterU->begin()+ihc);
       ihc--;
     }
@@ -147,7 +144,7 @@ cout<<"Saved tmp cluster: size = "<<tmp_deleteClus.size()<<endl;
 
   for(int ihc=0; ihc<p_HalfClusterV->size(); ihc++){
 //printf("  Readin HalfClusV address: %p \n", p_HalfClusterV->at(ihc));
-    if( find(tmp_deleteClus.begin(), tmp_deleteClus.end(), p_HalfClusterV->at(ihc))!=tmp_deleteClus.end() ){
+    if( find(tmp_deleteClus.begin(), tmp_deleteClus.end(), p_HalfClusterV->at(ihc).get())!=tmp_deleteClus.end() ){
       p_HalfClusterV->erase(p_HalfClusterV->begin()+ihc);
       ihc--;
     }
@@ -159,6 +156,13 @@ for(int i=0; i<p_HalfClusterV->size(); i++){
   cout<<"  In HalfClusterV #"<<i<<": axis size = "<<p_HalfClusterV->at(i)->getHalfClusterCol("TrackAxis").size()<<endl;
   for(int iax=0; iax<p_HalfClusterV->at(i)->getHalfClusterCol("TrackAxis").size(); iax++)
     cout<<"  Axis #"<<iax<<" associated track size: "<<p_HalfClusterV->at(i)->getHalfClusterCol("TrackAxis")[iax]->getAssociatedTracks().size()<<endl;
+cout<<endl;
+}
+
+for(int i=0; i<p_HalfClusterU->size(); i++){
+  cout<<"  In HalfClusterU #"<<i<<": axis size = "<<p_HalfClusterU->at(i)->getHalfClusterCol("TrackAxis").size()<<endl;
+  for(int iax=0; iax<p_HalfClusterU->at(i)->getHalfClusterCol("TrackAxis").size(); iax++)
+    cout<<"  Axis #"<<iax<<" associated track size: "<<p_HalfClusterU->at(i)->getHalfClusterCol("TrackAxis")[iax]->getAssociatedTracks().size()<<endl;
 cout<<endl;
 }
 

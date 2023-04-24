@@ -34,10 +34,10 @@ namespace PandoraPlus{
   	}
 
   void Calo2DCluster::Clean(){
-    for(int i=0; i<barUCol.size(); i++) { delete barUCol[i]; barUCol[i]=NULL; }
-    for(int i=0; i<barVCol.size(); i++) { delete barVCol[i]; barVCol[i]=NULL; }
-    for(int i=0; i<barShowerUCol.size(); i++) { delete barShowerUCol[i]; barShowerUCol[i]=NULL; }
-    for(int i=0; i<barShowerVCol.size(); i++) { delete barShowerVCol[i]; barShowerVCol[i]=NULL; }
+    //for(int i=0; i<barUCol.size(); i++) { delete barUCol[i]; barUCol[i]=NULL; }
+    //for(int i=0; i<barVCol.size(); i++) { delete barVCol[i]; barVCol[i]=NULL; }
+    //for(int i=0; i<barShowerUCol.size(); i++) { delete barShowerUCol[i]; barShowerUCol[i]=NULL; }
+    //for(int i=0; i<barShowerVCol.size(); i++) { delete barShowerVCol[i]; barShowerVCol[i]=NULL; }
     //std::vector<int>().swap(m_modules);
     //std::vector<int>().swap(m_parts);
     //std::vector<int>().swap(m_staves);

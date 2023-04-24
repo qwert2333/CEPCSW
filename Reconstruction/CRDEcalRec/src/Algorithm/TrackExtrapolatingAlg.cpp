@@ -58,7 +58,7 @@ StatusCode TrackExtrapolatingAlg::Initialize( PandoraPlusDataCol& m_datacol ){
 StatusCode TrackExtrapolatingAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
 std::cout<<"---oooOO0OOooo--- Excuting TrackExtrapolatingAlg ---oooOO0OOooo---"<<std::endl;
 
-  std::vector<PandoraPlus::Track*>* p_tracks = &(m_datacol.TrackCol);
+  std::vector<std::shared_ptr<PandoraPlus::Track>>* p_tracks = &(m_datacol.TrackCol);
 std::cout<<"  Track size: "<<p_tracks->size()<<std::endl;
 
 std::cout<<"  GetPlaneNormalVector() "<<std::endl;
@@ -72,20 +72,19 @@ std::cout<<"  GetLayerPoints() "<<std::endl;
 
   for(int itrk=0; itrk<p_tracks->size(); itrk++){
     // Only tracks that reach ECAL should be processed.
-    if(!IsReachECAL(p_tracks->at(itrk))) continue;
+    if(!IsReachECAL( p_tracks->at(itrk).get() )) continue;
 
 std::cout<<"  GetTrackStateAtCalo() "<<std::endl;
     // get track state at calorimeter
     PandoraPlus::TrackState CALO_trk_state;
-    GetTrackStateAtCalo(p_tracks->at(itrk), CALO_trk_state);
+    GetTrackStateAtCalo(p_tracks->at(itrk).get(), CALO_trk_state);
     
 std::cout<<"  ExtrapolateByLayer() "<<std::endl;
-    ExtrapolateByLayer(normal_vectors, ECAL_layer_points, HCAL_layer_points, CALO_trk_state, p_tracks->at(itrk));
+    ExtrapolateByLayer(normal_vectors, ECAL_layer_points, HCAL_layer_points, CALO_trk_state, p_tracks->at(itrk).get());
   } // end loop tracks
 
-  // std::cout<<"  Run SelfAlg1"<<std::endl;
-  // SelfAlg1();
 
+  p_tracks = nullptr;
   return StatusCode::SUCCESS;
 }; // RunAlgorithm end
 

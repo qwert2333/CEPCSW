@@ -98,7 +98,6 @@ StatusCode CRDEcalDigiAlg::execute()
 	std::cout<<"Processing event: "<<_nEvt<<std::endl;
    if(_nEvt<_Nskip){ _nEvt++; return StatusCode::SUCCESS; }
 
-  //m_edmsvc->ClearSystem(); 
 	Clear();
 
  	const edm4hep::SimCalorimeterHitCollection* SimHitCol =  r_SimCaloCol.get();

@@ -22,14 +22,14 @@ public:
   StatusCode RunAlgorithm( PandoraPlusDataCol& m_datacol );
   StatusCode ClearAlgorithm();
 
-  StatusCode GetLocalMax( const PandoraPlus::Calo1DCluster* m_1dClus, std::vector<const PandoraPlus::Calo1DCluster*>& m_output);
+  StatusCode GetLocalMax( const PandoraPlus::Calo1DCluster* m_1dClus, std::vector<std::shared_ptr<PandoraPlus::Calo1DCluster>>& m_output);
   StatusCode GetLocalMaxBar( std::vector<const PandoraPlus::CaloUnit*>& barCol, std::vector<const PandoraPlus::CaloUnit*>& localMaxCol );
   std::vector<const PandoraPlus::CaloUnit*>  getNeighbors(const PandoraPlus::CaloUnit* seed, std::vector<const PandoraPlus::CaloUnit*>& barCol);
 
 private: 
 
-  std::vector<PandoraPlus::CaloHalfCluster*>* p_HalfClusU = NULL;
-  std::vector<PandoraPlus::CaloHalfCluster*>* p_HalfClusV = NULL;
+  std::vector<std::shared_ptr<PandoraPlus::CaloHalfCluster>>* p_HalfClusU = nullptr;
+  std::vector<std::shared_ptr<PandoraPlus::CaloHalfCluster>>* p_HalfClusV = nullptr;
 
   static bool compBar( const PandoraPlus::CaloUnit* bar1, const PandoraPlus::CaloUnit* bar2 )
       { return bar1->getBar() < bar2->getBar(); }

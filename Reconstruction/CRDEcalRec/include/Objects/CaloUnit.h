@@ -57,7 +57,7 @@ namespace PandoraPlus{
     void setQ(double _q1, double _q2) { Q1=_q1; Q2=_q2; }
     void setT(double _t1, double _t2) { T1=_t1; T2=_t2; }
     void setBarLength(double _barLength) { barLength=_barLength; }
-    CaloUnit* Clone() const;
+    std::shared_ptr<CaloUnit> Clone() const;
 
     static int Nmodule;
     static int Npart;

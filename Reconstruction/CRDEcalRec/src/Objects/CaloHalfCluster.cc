@@ -20,7 +20,7 @@ namespace PandoraPlus{
   }
 
   void CaloHalfCluster::Clean(){
-    for(int i=0; i<m_1dclusters.size(); i++){ delete m_1dclusters[i]; m_1dclusters[i]=NULL; }
+    //for(int i=0; i<m_1dclusters.size(); i++){ delete m_1dclusters[i]; m_1dclusters[i]=NULL; }
     for(auto it: map_localMax) { 
       //for(auto iter: it.second){ delete it.second[iter]; it.second[iter]=NULL; }
       it.second.clear();
@@ -32,8 +32,8 @@ namespace PandoraPlus{
     Clear();
   }
 
-  CaloHalfCluster* CaloHalfCluster::Clone() const{
-    PandoraPlus::CaloHalfCluster* m_clus = new PandoraPlus::CaloHalfCluster();
+  std::shared_ptr<PandoraPlus::CaloHalfCluster> CaloHalfCluster::Clone() const{
+    std::shared_ptr<PandoraPlus::CaloHalfCluster> m_clus = std::make_shared<PandoraPlus::CaloHalfCluster>();
     for(int i1d=0; i1d<m_1dclusters.size(); i1d++)  m_clus->addUnit(m_1dclusters[i1d]);
     for(int itrk=0; itrk<m_TrackCol.size(); itrk++) m_clus->addAssociatedTrack(m_TrackCol[itrk]);
     for(auto iter:map_localMax)     m_clus->setLocalMax( iter.first, iter.second );

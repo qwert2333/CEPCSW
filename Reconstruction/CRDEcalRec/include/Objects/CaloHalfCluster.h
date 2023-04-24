@@ -21,7 +21,7 @@ namespace PandoraPlus {
     inline bool operator == (const CaloHalfCluster &x) const{
       return m_1dclusters==x.getCluster();
     }
-    CaloHalfCluster* Clone() const; 
+    std::shared_ptr<PandoraPlus::CaloHalfCluster> Clone() const; 
 
     bool isNeighbor(const PandoraPlus::Calo1DCluster* m_1dcluster) const; 
 

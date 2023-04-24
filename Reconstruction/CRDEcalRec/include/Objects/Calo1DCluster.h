@@ -20,7 +20,7 @@ namespace PandoraPlus{
     void Clear();
     void Clean();
     void Check();
-    PandoraPlus::Calo1DCluster* Clone() const; 
+    std::shared_ptr<PandoraPlus::Calo1DCluster> Clone() const; 
 
     inline bool operator == (const Calo1DCluster &x) const{
       return ( Bars == x.getBars()  );

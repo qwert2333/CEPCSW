@@ -24,15 +24,15 @@ public:
 
   //Self defined algorithms
   StatusCode TrkMatchedMerging( std::vector<PandoraPlus::CaloHalfCluster*>& m_axisCol );
-  StatusCode OverlapMerging( std::vector<PandoraPlus::CaloHalfCluster*>& m_axisCol );
-  StatusCode ConeMerging( std::vector<PandoraPlus::CaloHalfCluster*>& m_axisCol );
-  StatusCode FragmentsMerging( std::vector<PandoraPlus::CaloHalfCluster*>& m_axisCol );
+  StatusCode OverlapMerging   ( std::vector<PandoraPlus::CaloHalfCluster*>& m_axisCol );
+  StatusCode ConeMerging      ( std::vector<PandoraPlus::CaloHalfCluster*>& m_axisCol );
+  StatusCode FragmentsMerging ( std::vector<PandoraPlus::CaloHalfCluster*>& m_axisCol );
   StatusCode MergeToClosestCluster( PandoraPlus::CaloHalfCluster* m_badaxis, std::vector<PandoraPlus::CaloHalfCluster*>& m_axisCol );
 
 private: 
 
-  std::vector<PandoraPlus::CaloHalfCluster*>* p_HalfClustersU = NULL;
-  std::vector<PandoraPlus::CaloHalfCluster*>* p_HalfClustersV = NULL;
+  std::vector<PandoraPlus::CaloHalfCluster*> p_HalfClusterU;
+  std::vector<PandoraPlus::CaloHalfCluster*> p_HalfClusterV;
   std::vector<const PandoraPlus::CaloHalfCluster*> m_axisUCol;
   std::vector<const PandoraPlus::CaloHalfCluster*> m_axisVCol;
   std::vector<PandoraPlus::CaloHalfCluster*> m_newAxisUCol;

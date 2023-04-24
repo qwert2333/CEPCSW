@@ -2,10 +2,10 @@
 #define CALO_HIT_H
 
 #include "TVector3.h"
-#include "Objects/TransShower.h"
+#include "Objects/Calo2DCluster.h"
 
 namespace PandoraPlus{
-  class TransShower; 
+  class Calo2DCluster; 
 
   class CaloHit{
   public:
@@ -22,14 +22,14 @@ namespace PandoraPlus{
     void setEnergy(double _en) { energy=_en; }
     void setPosition( TVector3 _vec ) { position=_vec; }
     void setLayer(int _l) { layer = _l; }
-    void setParentShower( PandoraPlus::TransShower* _p ) { ParentShower=_p; }
+    void setParentShower( PandoraPlus::Calo2DCluster* _p ) { ParentShower=_p; }
 
   private: 
     int layer; 
     unsigned long long cellID; 
     TVector3 position;
     double   energy; 
-    PandoraPlus::TransShower* ParentShower; 
+    PandoraPlus::Calo2DCluster* ParentShower; 
   };
 
 };

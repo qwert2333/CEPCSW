@@ -18,13 +18,13 @@
 #include "Algorithm/ExampleAlg.h"
 #include "Algorithm/GlobalClusteringAlg.h"
 #include "Algorithm/LocalMaxFindingAlg.h"
-#include "Algorithm/HoughClusteringAlg.h"
 #include "Algorithm/TrackMatchingAlg.h"
+#include "Algorithm/HoughClusteringAlg.h"
 #include "Algorithm/ConeClustering2DAlg.h"
 #include "Algorithm/AxisMergingAlg.h"
 #include "Algorithm/EnergySplittingAlg.h"
 #include "Algorithm/EnergyTimeMatchingAlg.h"
-#include "Algorithm/ConeClusteringAlg.h"
+//#include "Algorithm/ConeClusteringAlg.h"
 #include "Algorithm/TrackExtrapolatingAlg.h"
 
 #include "TVector3.h"
@@ -66,8 +66,8 @@ protected:
   SmartIF<IGeomSvc> m_geosvc;
   std::map<std::string, dd4hep::DDSegmentation::BitFieldCoder*> map_readout_decoder;
 
-  //DataCollection
-  PandoraPlusDataCol     m_DataCol; 
+  //DataCollection: moved into execute() to ensure everything can be cleand after one event. 
+  //PandoraPlusDataCol     m_DataCol; 
 
 
   //Creators and their setting
@@ -142,7 +142,7 @@ protected:
   TFile* m_wfile;
   TTree* t_SimBar;
   FloatVec m_simBar_x, m_simBar_y, m_simBar_z, m_simBar_T1, m_simBar_T2, m_simBar_Q1, m_simBar_Q2; 
-  FloatVec m_simBar_dlayer, m_simBar_part, m_simBar_stave, m_simBar_slayer, m_simBar_module, m_simBar_bar;
+  IntVec m_simBar_dlayer, m_simBar_part, m_simBar_stave, m_simBar_slayer, m_simBar_module, m_simBar_bar;
   FloatVec m_HcalHit_x, m_HcalHit_y, m_HcalHit_z, m_HcalHit_E;
   IntVec   m_HcalHit_layer;
 
@@ -169,7 +169,6 @@ protected:
   TTree * t_Match;
   FloatVec matchV_track_axis_tag, matchV_track_axis_x, matchV_track_axis_y, matchV_track_axis_z; 
   FloatVec matchU_track_axis_tag, matchU_track_axis_x, matchU_track_axis_y, matchU_track_axis_z; 
-
 
   TTree *t_Cluster;
   int m_Nclus, m_Nmc;
@@ -206,6 +205,8 @@ protected:
   void ClearCluster();
   void ClearTrack();
   void ClearAxis();
+
+
 
 };
 #endif

@@ -33,10 +33,12 @@ namespace PandoraPlus{
     for(auto iter : m_DataCol.collectionMap_CaloHit){
       if( settings.map_stringPars.at("EcalType")=="BarEcal" && iter.first == "ECALBarrel") continue; 
       
-      std::vector<PandoraPlus::CaloHit*> m_hitCol; m_hitCol.clear();
+      std::vector<std::shared_ptr<PandoraPlus::CaloHit>> m_hitCol; m_hitCol.clear();
 
       for(int ihit=0; ihit<iter.second.size(); ihit++){
-        PandoraPlus::CaloHit* m_hit = new PandoraPlus::CaloHit();
+        //PandoraPlus::CaloHit* m_hit = new PandoraPlus::CaloHit();
+        std::shared_ptr<PandoraPlus::CaloHit> m_hit = std::make_shared<PandoraPlus::CaloHit>();
+
         m_hit->setcellID( iter.second[ihit].getCellID() );
         m_hit->setLayer( map_decoder[iter.first]->get(iter.second[ihit].getCellID(), "layer") );
 
@@ -45,7 +47,7 @@ namespace PandoraPlus{
         m_hit->setEnergy( iter.second[ihit].getEnergy() );
 
         m_hitCol.push_back( m_hit );
-        m_DataCol.bk_HitCol.push_back( m_hit );
+        //m_DataCol.bk_HitCol.push_back( m_hit );
       }
       m_DataCol.map_CaloHit[iter.first] = m_hitCol;
     }
@@ -53,7 +55,7 @@ namespace PandoraPlus{
 
     //Convert to local objects: CalorimeterHit to CaloUnit (For ECALBarrel only)
     if(settings.map_stringPars.at("EcalType")=="BarEcal"){
-      std::vector<PandoraPlus::CaloUnit*> m_barCol; m_barCol.clear(); 
+      std::vector<std::shared_ptr<PandoraPlus::CaloUnit>> m_barCol; m_barCol.clear(); 
    
       auto CaloHits = m_DataCol.collectionMap_CaloHit["ECALBarrel"]; 
       std::map<std::uint64_t, std::vector<PandoraPlus::CaloUnit> > map_cellID_hits; map_cellID_hits.clear();
@@ -69,7 +71,8 @@ namespace PandoraPlus{
       for(auto& hit : map_cellID_hits){
         if(hit.second.size()!=2){ std::cout<<"WARNING: didn't find correct hit pairs! "<<std::endl; continue; }
    
-        PandoraPlus::CaloUnit* m_bar = new PandoraPlus::CaloUnit(); 
+        //PandoraPlus::CaloUnit* m_bar = new PandoraPlus::CaloUnit(); 
+        std::shared_ptr<PandoraPlus::CaloUnit> m_bar = std::make_shared<PandoraPlus::CaloUnit>();
    
         unsigned long long id = hit.first; 
         m_bar->setcellID( id );
@@ -93,8 +96,8 @@ namespace PandoraPlus{
         //---oooOOO000OOOooo---set bar length---oooOOO000OOOooo---
 
         m_barCol.push_back(m_bar);  //Save for later use in algorithms
-        m_DataCol.bk_BarCol.push_back(m_bar);  //For every new object: save it into DataCol.backupCol. 
       }
+
    
       m_DataCol.map_BarCol["BarCol"] = m_barCol; 
       //Group bars to Blocks

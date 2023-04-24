@@ -1,6 +1,6 @@
 from Gaudi.Configuration import *
 Nskip = 0
-Nevt = 100
+Nevt = 30
 Name_suffix = 'GamPi_3deg_allmerge'
 
 ############## GeomSvc #################
@@ -24,11 +24,6 @@ geomsvc.compact = geometry_path
 from Configurables import k4DataSvc
 podioevent = k4DataSvc("EventDataSvc")
 podioevent.inputs = [
-#"SimSample/CRDFull_Gam10GeV_ECALSurface.root"
-#"SimSample/CRDFull_GamGam_5cm_ECALSurface.root"
-#"SimSample/CRDFullv2_Pi-10GeV_sym8.root"
-#"/publicfs/atlas/atlasnew/higgs/hgg/guofy/CEPCSW_v207/run/SimSample/CRDFull_Pi-10GeV.root"
-#"/publicfs/atlas/atlasnew/higgs/hgg/guofy/CEPCSW_v207/run/SimSample/CRDFull_GamPi_2deg.root"
 "/publicfs/atlas/atlasnew/higgs/hgg/guofy/CEPCSW_v207/run/SimSample/CRDFull_GamPi_3deg.root"
 ]
 ##########################################
@@ -95,8 +90,8 @@ PandoraPlusPFAlg.HCalReadOutNames = ["HcalBarrelCollection"]
 
 #----Algorithms----
 
-PandoraPlusPFAlg.AlgList = ["ExampleAlg", 
-                            "GlobalClusteringAlg", 
+PandoraPlusPFAlg.AlgList = ["ExampleAlg",
+                            "GlobalClusteringAlg",
                             "LocalMaxFindingAlg",
                             "TrackMatchingAlg" ,
                             "HoughClusteringAlg",
@@ -104,12 +99,12 @@ PandoraPlusPFAlg.AlgList = ["ExampleAlg",
                             "AxisMergingAlg",
                             "EnergySplittingAlg",
                             "EnergyTimeMatchingAlg"]
-PandoraPlusPFAlg.AlgParNames = [ ["Par1", "Par2"], 
-                                 ["Par1"], 
-                                 ["Eth_localMax", "Eth_MaxWithNeigh"], 
+PandoraPlusPFAlg.AlgParNames = [ ["Par1", "Par2"],
+                                 ["Par1"],
+                                 ["Eth_localMax", "Eth_MaxWithNeigh"],
                                  [""],
                                  ["th_Layers","th_peak"],
-                                 ["ReadinLocalMaxName", "th_Nshowers"], 
+                                 ["ReadinLocalMaxName", "th_Nshowers"],
                                  ["axis_Angle", "relP_Angle", "relP_Dis"],
                                  [""],
                                  [""] ]
@@ -117,20 +112,21 @@ PandoraPlusPFAlg.AlgParTypes = [ ["double", "double"],
                                  ["double"],
                                  ["double", "double"],
                                  [""],
-                                 ["int", "int"],
-                                 ["string", "int"],
-                                ["double","double", "double"],
-                                [""],
-                                [""]  ]
-PandoraPlusPFAlg.AlgParValues = [ ["1.", "3.14"], 
-                                  ["1."], 
+                                 ["int", "int"], 
+                                 ["string", "int"], 
+                                 ["double","double", "double"],
+                                 [""],
+                                 [""]  ]
+PandoraPlusPFAlg.AlgParValues = [ ["1.", "3.14"],
+                                  ["1."],
                                   ["0.005", "0."],
                                   [""],
-                                  ["10","3"],
-                                  ["LeftLocalMax", "3"],
+                                  ["10","3"], 
+                                  ["LeftLocalMax", "3"], 
                                   ["1.57", "1.57", "70"],  #Pi/2, Pi/2, 70.
-                                  [""], 
+                                  [""],
                                   [""]  ]
+
 
 ########################################
 
@@ -148,6 +144,7 @@ out.outputCommands = ["keep *"]
 from Configurables import ApplicationMgr
 ApplicationMgr( 
     TopAlg=[inp, EcalDigi,caloDigi, PandoraPlusPFAlg ],
+    #TopAlg=[inp, EcalDigi,caloDigi],
     EvtSel="NONE",
     EvtMax=Nevt,
     ExtSvc=[podioevent, geomsvc],

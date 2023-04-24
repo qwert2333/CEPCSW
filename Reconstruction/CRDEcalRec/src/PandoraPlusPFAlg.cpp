@@ -95,7 +95,7 @@ StatusCode PandoraPlusPFAlg::initialize()
   m_algorithmManager.RegisterAlgorithmFactory("EnergySplittingAlg",     new EnergySplittingAlg::Factory);
   m_algorithmManager.RegisterAlgorithmFactory("EnergyTimeMatchingAlg",  new EnergyTimeMatchingAlg::Factory);
   //m_algorithmManager.RegisterAlgorithmFactory("ConeClusteringAlg",      new ConeClusteringAlg::Factory);
-  m_algorithmManager.RegisterAlgorithmFactory("ConeClusteringAlgHCAL",  new ConeClusteringAlg::Factory);
+  //m_algorithmManager.RegisterAlgorithmFactory("ConeClusteringAlgHCAL",  new ConeClusteringAlg::Factory);
 
 
   //--- Create algorithm from readin settings ---
@@ -342,6 +342,7 @@ StatusCode PandoraPlusPFAlg::execute()
   if(_nEvt<m_Nskip){ _nEvt++;  return GaudiAlgorithm::initialize(); }
 
   //InitializeForNewEvent(); 
+  PandoraPlusDataCol     m_DataCol;
   m_DataCol.Clear();
 
   //Readin collections 
@@ -351,6 +352,7 @@ cout<<"Readin Tracks"<<endl;
   m_pTrackCreator->CreateTracks( m_DataCol, r_TrackCols );
 cout<<"Readin CaloHits"<<endl;
   m_pCaloHitsCreator->CreateCaloHits( m_DataCol, r_CaloHitCols, map_readout_decoder );
+
 
   //Perform PFA algorithm
 cout<<"Run Algorithms"<<endl;
@@ -368,9 +370,9 @@ cout<<"Write tuples"<<endl;
 cout<<"  Write raw bars"<<endl;
   //Save Raw bars information
   ClearBar();
-  std::vector<PandoraPlus::CaloUnit*> m_barcol = m_DataCol.map_BarCol["BarCol"];
-  for(int ibar=0;ibar<m_barcol.size();ibar++){
-    const PandoraPlus::CaloUnit* p_hitbar = m_barcol[ibar];
+
+  for(int ibar=0;ibar<m_DataCol.map_BarCol["BarCol"].size();ibar++){
+    auto p_hitbar = m_DataCol.map_BarCol["BarCol"][ibar].get();
     m_simBar_x.push_back(p_hitbar->getPosition().x());
     m_simBar_y.push_back(p_hitbar->getPosition().y());
     m_simBar_z.push_back(p_hitbar->getPosition().z());
@@ -386,7 +388,10 @@ cout<<"  Write raw bars"<<endl;
     m_simBar_bar.push_back(p_hitbar->getBar());
   }
 
-  std::vector<PandoraPlus::CaloHit*> m_hcalHitsCol = m_DataCol.map_CaloHit["HCALBarrel"];
+  std::vector<PandoraPlus::CaloHit*> m_hcalHitsCol; m_hcalHitsCol.clear();
+  for(int ih=0; ih<m_DataCol.map_CaloHit["HCALBarrel"].size(); ih++)
+    m_hcalHitsCol.push_back( m_DataCol.map_CaloHit["HCALBarrel"][ih].get() );
+
   for(int ihit=0; ihit<m_hcalHitsCol.size(); ihit++){
     m_HcalHit_x.push_back( m_hcalHitsCol[ihit]->getPosition().x() );
     m_HcalHit_y.push_back( m_hcalHitsCol[ihit]->getPosition().y() );
@@ -394,13 +399,17 @@ cout<<"  Write raw bars"<<endl;
     m_HcalHit_E.push_back( m_hcalHitsCol[ihit]->getEnergy() );
     m_HcalHit_layer.push_back( m_hcalHitsCol[ihit]->getLayer() );
   }
+
   t_SimBar->Fill();
   // ------------------------------------
 
 cout<<"  Write localMax"<<endl;
   //Save Layer info (local Max)
   ClearLayer();
-  std::vector<PandoraPlus::CaloHalfCluster*> m_halfclusters = m_DataCol.map_HalfCluster["HalfClusterColU"];
+  std::vector<PandoraPlus::CaloHalfCluster*> m_halfclusters; m_halfclusters.clear();
+  for(int i=0; i<m_DataCol.map_HalfCluster["HalfClusterColU"].size(); i++)
+    m_halfclusters.push_back( m_DataCol.map_HalfCluster["HalfClusterColU"][i].get() );
+
   for(int ic=0;ic<m_halfclusters.size(); ic++){
     std::vector<const Calo1DCluster*> tmp_shower = m_halfclusters[ic]->getLocalMaxCol("AllLocalMax");
     m_NshowerU = tmp_shower.size(); 
@@ -423,7 +432,9 @@ cout<<"  Write localMax"<<endl;
   }
 
   m_halfclusters.clear();
-  m_halfclusters = m_DataCol.map_HalfCluster["HalfClusterColV"];
+  for(int i=0; i<m_DataCol.map_HalfCluster["HalfClusterColV"].size(); i++)
+    m_halfclusters.push_back( m_DataCol.map_HalfCluster["HalfClusterColV"][i].get() );
+
   for(int ic=0;ic<m_halfclusters.size();ic++){
     std::vector<const Calo1DCluster*> tmp_shower = m_halfclusters[ic]->getLocalMaxCol("AllLocalMax");
     m_NshowerV = tmp_shower.size(); 
@@ -450,34 +461,37 @@ cout<<"  Write Hough info"<<endl;
   // ------------------------------------
   // yyy: check Hough cluster
   ClearHough();
-  std::vector<PandoraPlus::CaloHalfCluster*> m_halfclusterV = m_DataCol.map_HalfCluster["HalfClusterColV"];
-  std::vector<PandoraPlus::CaloHalfCluster*> m_halfclusterU = m_DataCol.map_HalfCluster["HalfClusterColU"];
+  std::vector<PandoraPlus::CaloHalfCluster*> m_halfclusterV; m_halfclusterV.clear();
+  std::vector<PandoraPlus::CaloHalfCluster*> m_halfclusterU; m_halfclusterU.clear();
   std::vector<const PandoraPlus::CaloHalfCluster*> m_houghaxisU; m_houghaxisU.clear(); 
   std::vector<const PandoraPlus::CaloHalfCluster*> m_houghaxisV; m_houghaxisV.clear(); 
-  for(int i=0; i<m_halfclusterU.size(); i++){
-    std::vector<const PandoraPlus::CaloHalfCluster*> tmp_clus = m_halfclusterU[i]->getHalfClusterCol("HoughAxis"); 
+  for(int i=0; i<m_DataCol.map_HalfCluster["HalfClusterColU"].size(); i++){
+    m_halfclusterU.push_back( m_DataCol.map_HalfCluster["HalfClusterColU"][i].get() );
+    std::vector<const PandoraPlus::CaloHalfCluster*> tmp_clus = m_DataCol.map_HalfCluster["HalfClusterColU"][i].get()->getHalfClusterCol("HoughAxis"); 
     m_houghaxisU.insert( m_houghaxisU.end(), tmp_clus.begin(), tmp_clus.end() );
   }
   for(int i=0; i<m_halfclusterV.size(); i++){
-    std::vector<const PandoraPlus::CaloHalfCluster*> tmp_clus = m_halfclusterV[i]->getHalfClusterCol("HoughAxis");
+    m_halfclusterV.push_back( m_DataCol.map_HalfCluster["HalfClusterColV"][i].get() );
+    std::vector<const PandoraPlus::CaloHalfCluster*> tmp_clus = m_DataCol.map_HalfCluster["HalfClusterColV"][i].get()->getHalfClusterCol("HoughAxis");
     m_houghaxisV.insert( m_houghaxisV.end(), tmp_clus.begin(), tmp_clus.end() );
   }
 
   m_NHoughAxisU = m_houghaxisU.size();
   m_NHoughAxisV = m_houghaxisV.size();
-/*  for(int ihc=0; ihc<m_houghaxisV.size(); ihc++){
-    m_houghV_x.push_back( m_houghaxisV[ihc]->getPos().x() );
-    m_houghV_y.push_back( m_houghaxisV[ihc]->getPos().y() );
-    m_houghV_z.push_back( m_houghaxisV[ihc]->getPos().z() );
-    m_houghV_E.push_back( m_houghaxisV[ihc]->getEnergy()  );
-  }
-  for(int ihc=0; ihc<m_houghaxisU.size(); ihc++){
-    m_houghU_x.push_back( m_houghaxisU[ihc]->getPos().x() );
-    m_houghU_y.push_back( m_houghaxisU[ihc]->getPos().y() );
-    m_houghU_z.push_back( m_houghaxisU[ihc]->getPos().z() );
-    m_houghU_E.push_back( m_houghaxisU[ihc]->getEnergy()  );
-  }
-*/
+//  for(int ihc=0; ihc<m_houghaxisV.size(); ihc++){
+//    m_houghV_x.push_back( m_houghaxisV[ihc]->getPos().x() );
+//    m_houghV_y.push_back( m_houghaxisV[ihc]->getPos().y() );
+//    m_houghV_z.push_back( m_houghaxisV[ihc]->getPos().z() );
+//    m_houghV_E.push_back( m_houghaxisV[ihc]->getEnergy()  );
+//  }
+//  for(int ihc=0; ihc<m_houghaxisU.size(); ihc++){
+//    m_houghU_x.push_back( m_houghaxisU[ihc]->getPos().x() );
+//    m_houghU_y.push_back( m_houghaxisU[ihc]->getPos().y() );
+//    m_houghU_z.push_back( m_houghaxisU[ihc]->getPos().z() );
+//    m_houghU_E.push_back( m_houghaxisU[ihc]->getEnergy()  );
+//  }
+
+
   for(int ilc=0; ilc<m_houghaxisV.size(); ilc++){
     for(int ilm=0; ilm<m_houghaxisV[ilc]->getCluster().size(); ilm++){
       m_halfclusV_tag.push_back( m_houghaxisV[ilc]->getEnergy() );
@@ -596,8 +610,13 @@ cout<<"  Write track matching"<<endl;
 cout<<"  Write splitted cluster"<<endl;
   // --------------------------------------------
   // Save splitted half cluster info
-  std::vector<PandoraPlus::CaloHalfCluster*> vec_LongiU = m_DataCol.map_HalfCluster["ESHalfClusterU"]; 
-  std::vector<PandoraPlus::CaloHalfCluster*> vec_LongiV = m_DataCol.map_HalfCluster["ESHalfClusterV"]; 
+  std::vector<PandoraPlus::CaloHalfCluster*> vec_LongiU;
+  std::vector<PandoraPlus::CaloHalfCluster*> vec_LongiV;
+  for(int i=0; i<m_DataCol.map_HalfCluster["ESHalfClusterU"].size(); i++)
+    vec_LongiU.push_back( m_DataCol.map_HalfCluster["ESHalfClusterU"][i].get() );
+  for(int i=0; i<m_DataCol.map_HalfCluster["ESHalfClusterV"].size(); i++)
+    vec_LongiV.push_back( m_DataCol.map_HalfCluster["ESHalfClusterV"][i].get() );
+
   
   m_NHfClusU = vec_LongiU.size();
   m_NHfClusV = vec_LongiV.size();
@@ -637,8 +656,11 @@ cout<<"  Write 3DClusters and MCP "<<endl;
   // ---------------------------------------------
   //Save Cluster and MCP info
   ClearCluster();
-  std::vector<PandoraPlus::Calo3DCluster*> m_clusvec = m_DataCol.map_CaloCluster["EcalCluster"];
+  std::vector<PandoraPlus::Calo3DCluster*> m_clusvec;
   //std::vector<PandoraPlus::Calo3DCluster*> m_clusvec = m_DataCol.map_CaloCluster["HCALCluster"];
+  for(int i=0; i<m_DataCol.map_CaloCluster["EcalCluster"].size(); i++)
+    m_clusvec.push_back( m_DataCol.map_CaloCluster["EcalCluster"][i].get() );
+
   m_Nclus = m_clusvec.size();
   for(int ic=0; ic<m_clusvec.size(); ic++){
     //For ECAL cluster
@@ -650,19 +672,19 @@ cout<<"  Write 3DClusters and MCP "<<endl;
     m_Clus_Ntrk.push_back( m_clusvec[ic]->getAssociatedTracks().size() );
 
     //For HCAL cluster
-/*    m_Clus_x.push_back( m_clusvec[ic]->getHitCenter().x() );
-    m_Clus_y.push_back( m_clusvec[ic]->getHitCenter().y() );
-    m_Clus_z.push_back( m_clusvec[ic]->getHitCenter().z() );
-    m_Clus_E.push_back( m_clusvec[ic]->getHitsE() );
-    m_Clus_Nhit.push_back( m_clusvec[ic]->getCaloHits().size() );
-    for(int ihit=0; ihit<m_clusvec[ic]->getCaloHits().size(); ihit++){
-      m_Clus_hitx.push_back( m_clusvec[ic]->getCaloHits()[ihit]->getPosition().x() );
-      m_Clus_hity.push_back( m_clusvec[ic]->getCaloHits()[ihit]->getPosition().y() );
-      m_Clus_hitz.push_back( m_clusvec[ic]->getCaloHits()[ihit]->getPosition().z() );
-      m_Clus_hitE.push_back( m_clusvec[ic]->getCaloHits()[ihit]->getEnergy() );
-      m_Clus_hittag.push_back( m_clusvec[ic]->getHitsE() );
-    }
-*/
+//    m_Clus_x.push_back( m_clusvec[ic]->getHitCenter().x() );
+//  m_Clus_y.push_back( m_clusvec[ic]->getHitCenter().y() );
+//  m_Clus_z.push_back( m_clusvec[ic]->getHitCenter().z() );
+//  m_Clus_E.push_back( m_clusvec[ic]->getHitsE() );
+//  m_Clus_Nhit.push_back( m_clusvec[ic]->getCaloHits().size() );
+//  for(int ihit=0; ihit<m_clusvec[ic]->getCaloHits().size(); ihit++){
+//    m_Clus_hitx.push_back( m_clusvec[ic]->getCaloHits()[ihit]->getPosition().x() );
+//    m_Clus_hity.push_back( m_clusvec[ic]->getCaloHits()[ihit]->getPosition().y() );
+//    m_Clus_hitz.push_back( m_clusvec[ic]->getCaloHits()[ihit]->getPosition().z() );
+//    m_Clus_hitE.push_back( m_clusvec[ic]->getCaloHits()[ihit]->getEnergy() );
+//    m_Clus_hittag.push_back( m_clusvec[ic]->getHitsE() );
+//  }
+
   }
 
   std::vector<edm4hep::MCParticle> m_MCPCol = m_DataCol.collectionMap_MC[name_MCParticleCol.value()];  
@@ -679,39 +701,14 @@ cout<<"  Write 3DClusters and MCP "<<endl;
   t_Cluster->Fill();
 
 
-  // ---------------------------------------------
-/*
-  //Showers in cluster: 
-  //ClearShower();
-  for(int ic=0; ic<m_clusvec.size(); ic++){
-    ClearShower();
-    PandoraPlus::Calo3DCluster* p_cluster = m_clusvec[ic];
-
-    m_Nshowers = p_cluster->getCluster().size();
-    m_Eclus = p_cluster->getShowerE();
-    for(int is=0; is<m_Nshowers; is++){
-      m_shower2D_x.push_back( p_cluster->getCluster()[is]->getPos().x() );
-      m_shower2D_y.push_back( p_cluster->getCluster()[is]->getPos().y() );
-      m_shower2D_z.push_back( p_cluster->getCluster()[is]->getPos().z() );
-      m_shower2D_E.push_back( p_cluster->getCluster()[is]->getShowerE() );
-      m_shower2D_Module.push_back( p_cluster->getCluster()[is]->getModule() );
-      m_shower2D_Part.push_back( p_cluster->getCluster()[is]->getPart() );
-      m_shower2D_Stave.push_back( p_cluster->getCluster()[is]->getStave() );
-      m_shower2D_Dlayer.push_back( p_cluster->getCluster()[is]->getDlayer() );
-    }
-
-    p_cluster = nullptr;
-    t_Shower->Fill();
-  }
-  //t_Shower->Fill();
-
-
-*/
 
   // ---------------------------------------------
   // Save Track info
   ClearTrack();
-  std::vector<PandoraPlus::Track*> m_trkCol = m_DataCol.TrackCol;
+  std::vector<PandoraPlus::Track*> m_trkCol; 
+  for(int it=0; it<m_DataCol.TrackCol.size(); it++)
+    m_trkCol.push_back( m_DataCol.TrackCol[it].get() );
+
   m_Ntrk = m_trkCol.size();
   for(int itrk=0; itrk<m_Ntrk; itrk++){
     m_type.push_back(m_trkCol[itrk]->getType());
@@ -733,10 +730,9 @@ cout<<"  Write 3DClusters and MCP "<<endl;
 
 
 
-
   //Clean Events
   //system("/cefs/higgs/songwz/winter22/CEPCSW/workarea/memory/memory_test.sh before_clean");
-  m_DataCol.Clean();
+  m_DataCol.Clear();
   //system("/cefs/higgs/songwz/winter22/CEPCSW/workarea/memory/memory_test.sh event_end");
 
   std::cout<<"Event: "<<_nEvt<<" is done"<<std::endl;
@@ -746,6 +742,7 @@ cout<<"  Write 3DClusters and MCP "<<endl;
 
 StatusCode PandoraPlusPFAlg::finalize()
 {
+cout<<"Write in file"<<endl;
   m_wfile->cd();
   t_SimBar->Write();
   t_Layers->Write();
@@ -757,14 +754,16 @@ StatusCode PandoraPlusPFAlg::finalize()
   t_Track->Write();
   t_axis->Write();
   m_wfile->Close();
+cout<<"Delete trees and file"<<endl;
   delete m_wfile, t_SimBar, t_Layers, t_Hough, t_Match, t_LongiClus, t_Cluster, t_Track, t_axis;
 
-
+cout<<"Delete Creators"<<endl;
   delete m_pMCParticleCreator;
   delete m_pTrackCreator; 
   delete m_pCaloHitsCreator;
   delete m_pOutputCreator;
 
+cout<<"Delete edm4hep Collections"<<endl;
   delete r_MCParticleCol;
   for(auto iter : r_TrackCols) delete iter; 
   for(auto iter : r_ECalHitCols) delete iter; 

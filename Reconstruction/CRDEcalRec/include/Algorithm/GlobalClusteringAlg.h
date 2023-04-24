@@ -29,7 +29,7 @@ public:
   StatusCode RunAlgorithm( PandoraPlusDataCol& m_datacol );
   StatusCode ClearAlgorithm();
 
-  template<typename T1, typename T2> StatusCode Clustering(std::vector<T1*>& m_input, std::vector<T2*>& m_output);
+  template<typename T1, typename T2> StatusCode Clustering(std::vector<std::shared_ptr<T1>>& m_input, std::vector<std::shared_ptr<T2>>& m_output);
   
   //geometry construction
 /*   int m_module = settings.map_intPars["m_module"];
@@ -43,13 +43,11 @@ public:
 
 private:
 
-  std::vector<PandoraPlus::CaloUnit*> m_bars; 
-  std::vector<PandoraPlus::CaloUnit*> m_processbars;        
-  std::vector<PandoraPlus::CaloUnit*> m_restbars;           
-  std::vector<PandoraPlus::Calo1DCluster*> m_1dclusters;    
-  std::vector<PandoraPlus::CaloHalfCluster*> m_halfclusters; 
-  //std::vector<PandoraPlus::Calo2DCluster*> m_2dclusters;     m_2dclusters.clear();
-  //std::vector<PandoraPlus::Calo3DCluster*> m_3dclusters;     m_3dclusters.clear();
+  std::vector<std::shared_ptr<PandoraPlus::CaloUnit>> m_bars; 
+  std::vector<std::shared_ptr<PandoraPlus::CaloUnit>> m_processbars;        
+  std::vector<std::shared_ptr<PandoraPlus::CaloUnit>> m_restbars;           
+  std::vector<std::shared_ptr<PandoraPlus::Calo1DCluster>> m_1dclusters;    
+  std::vector<std::shared_ptr<PandoraPlus::CaloHalfCluster>> m_halfclusters; 
   
 };
 #endif

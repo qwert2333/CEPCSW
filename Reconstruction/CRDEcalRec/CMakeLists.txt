@@ -3,11 +3,8 @@ gaudi_add_library(CRDEcalRecLib
                   SOURCES src/Objects/CaloUnit.cc
                           src/Objects/Calo1DCluster.cc
                           src/Objects/Calo2DCluster.cc
-                          src/Objects/CaloHalfCluster.cc
                           src/Objects/Calo3DCluster.cc
-                          src/Objects/CaloTower.cc
-                          src/Objects/TransShower.cc
-                          src/Objects/CaloCluster.cc 
+                          src/Objects/CaloHalfCluster.cc
                           src/Objects/Track.cc
                           src/Objects/HoughSpace.cc
                           src/Objects/HoughObject.cc
@@ -37,13 +34,12 @@ gaudi_add_module(CRDEcalRec
                          src/Algorithm/TrackExtrapolatingAlg.cpp
                          src/Algorithm/GlobalClusteringAlg.cpp
                          src/Algorithm/LocalMaxFindingAlg.cpp
-                         src/Algorithm/HoughClusteringAlg.cpp
                          src/Algorithm/TrackMatchingAlg.cpp
+                         src/Algorithm/HoughClusteringAlg.cpp
                          src/Algorithm/ConeClustering2DAlg.cpp
                          src/Algorithm/AxisMergingAlg.cpp
                          src/Algorithm/EnergySplittingAlg.cpp
                          src/Algorithm/EnergyTimeMatchingAlg.cpp
-                         src/Algorithm/ConeClusteringAlg.cpp
                  LINK    CRDEcalRecLib
 )
 target_include_directories(CRDEcalRec PUBLIC

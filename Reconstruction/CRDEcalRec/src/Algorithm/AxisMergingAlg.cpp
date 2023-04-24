@@ -24,37 +24,46 @@ StatusCode AxisMergingAlg::Initialize( PandoraPlusDataCol& m_datacol ){
   m_newAxisUCol.clear();
   m_newAxisVCol.clear();
 
-  p_HalfClustersU = &(m_datacol.map_HalfCluster["HalfClusterColU"]);
-  p_HalfClustersV = &(m_datacol.map_HalfCluster["HalfClusterColV"]);
+  p_HalfClusterU.clear();
+  p_HalfClusterV.clear();
+
+  for(int ih=0; ih<m_datacol.map_HalfCluster["HalfClusterColU"].size(); ih++)
+    p_HalfClusterU.push_back( m_datacol.map_HalfCluster["HalfClusterColU"][ih].get() );
+  for(int ih=0; ih<m_datacol.map_HalfCluster["HalfClusterColV"].size(); ih++)
+    p_HalfClusterV.push_back( m_datacol.map_HalfCluster["HalfClusterColV"][ih].get() );
 
   return StatusCode::SUCCESS;
 };
 
 StatusCode AxisMergingAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
 
-  if( !p_HalfClustersU || !p_HalfClustersV ){
-    std::cout<<"AxisMergingAlg: Input HalfCluster is NULL! "<<std::endl;
-    return StatusCode::SUCCESS;
-  }
-  if( p_HalfClustersU->size() + p_HalfClustersV->size()==0 ) {
+  //if( !p_HalfClusterU || !p_HalfClusterV ){
+  //  std::cout<<"AxisMergingAlg: Input HalfCluster is NULL! "<<std::endl;
+  //  return StatusCode::SUCCESS;
+  //}
+  if( p_HalfClusterU.size() + p_HalfClusterV.size()==0 ) {
     std::cout<<"AxisMergingAlg: No HalfCluster input"<<std::endl;
     return StatusCode::SUCCESS;
   }
 
-cout<<"AxisMergingAlg: Readin halfcluster size: "<<p_HalfClustersU->size()<<", "<<p_HalfClustersV->size()<<endl;
+cout<<"AxisMergingAlg: Readin halfcluster size: "<<p_HalfClusterU.size()<<", "<<p_HalfClusterV.size()<<endl;
 
 
   //Merge axis in HalfClusterU: 
-  for(int ih=0; ih<p_HalfClustersU->size(); ih++){
+  for(int ih=0; ih<p_HalfClusterU.size(); ih++){
     m_axisUCol.clear(); m_newAxisUCol.clear();
-    m_axisUCol = p_HalfClustersU->at(ih)->getAllHalfClusterCol();
+    m_axisUCol = p_HalfClusterU[ih]->getAllHalfClusterCol();
 
-    for(int ic=0; ic<m_axisUCol.size(); ic++) m_newAxisUCol.push_back( m_axisUCol[ic]->Clone() );
+    for(int ic=0; ic<m_axisUCol.size(); ic++){ 
+      std::shared_ptr<CaloHalfCluster> ptr_cloned = m_axisUCol[ic]->Clone();
+      m_datacol.map_HalfCluster["bkHalfCluster"].push_back(ptr_cloned);
+      m_newAxisUCol.push_back( ptr_cloned.get() );
+    }
 
     if(m_newAxisUCol.size()<2){ //No need to merge, save into OutputAxis. 
       std::vector<const PandoraPlus::CaloHalfCluster*> tmp_axisCol; tmp_axisCol.clear();
       for(int ic=0; ic<m_newAxisUCol.size(); ic++) tmp_axisCol.push_back(m_newAxisUCol[ic]);
-      p_HalfClustersU->at(ih)->setHalfClusters(settings.map_stringPars["OutputAxisName"], tmp_axisCol);
+      p_HalfClusterU[ih]->setHalfClusters(settings.map_stringPars["OutputAxisName"], tmp_axisCol);
       continue; 
     }
 
@@ -62,7 +71,7 @@ cout<<"AxisMergingAlg: Readin halfcluster size: "<<p_HalfClustersU->size()<<", "
     std::sort( m_newAxisUCol.begin(), m_newAxisUCol.end(), compLayer );
 /*
 printf("  In HalfClusterU #%d: readin axis size %d \n", ih, m_newAxisUCol.size());
-std::map<std::string, std::vector<const PandoraPlus::CaloHalfCluster*> > tmp_HClusMap =  p_HalfClustersU->at(ih)->getHalfClusterMap();
+std::map<std::string, std::vector<const PandoraPlus::CaloHalfCluster*> > tmp_HClusMap =  p_HalfClusterU->at(ih)->getHalfClusterMap();
 cout<<"Print Readin AxisU: "<<endl;
 for(auto iter : tmp_HClusMap){
   cout<<"  Axis name: "<<iter.first<<endl;
@@ -132,28 +141,33 @@ printf("  In HalfClusterU: Good axis %d, bad axis %d \n",tmp_goodAxis.size(), tm
     //convert to constant object and save in HalfCluster: 
     std::vector<const PandoraPlus::CaloHalfCluster*> tmp_axisCol; tmp_axisCol.clear();
     for(int ic=0; ic<tmp_goodAxis.size(); ic++) tmp_axisCol.push_back(tmp_goodAxis[ic]);
-    p_HalfClustersU->at(ih)->setHalfClusters(settings.map_stringPars["OutputAxisName"], tmp_axisCol);
+    p_HalfClusterU[ih]->setHalfClusters(settings.map_stringPars["OutputAxisName"], tmp_axisCol);
 
   }
 
 
   //Merge axis in HalfClusterV:
-  for(int ih=0; ih<p_HalfClustersV->size(); ih++){
+  for(int ih=0; ih<p_HalfClusterV.size(); ih++){
     m_axisVCol.clear(); m_newAxisVCol.clear();
-    m_axisVCol = p_HalfClustersV->at(ih)->getAllHalfClusterCol();
+    m_axisVCol = p_HalfClusterV[ih]->getAllHalfClusterCol();
 
-    for(int ic=0; ic<m_axisVCol.size(); ic++) m_newAxisVCol.push_back( m_axisVCol[ic]->Clone() );
+    for(int ic=0; ic<m_axisVCol.size(); ic++){
+      std::shared_ptr<CaloHalfCluster> ptr_cloned = m_axisVCol[ic]->Clone();
+      m_datacol.map_HalfCluster["bkHalfCluster"].push_back(ptr_cloned);
+      m_newAxisVCol.push_back( ptr_cloned.get() );
+    }
+
 
     if(m_newAxisVCol.size()<2){
       std::vector<const PandoraPlus::CaloHalfCluster*> tmp_axisCol; tmp_axisCol.clear();
       for(int ic=0; ic<m_newAxisVCol.size(); ic++) tmp_axisCol.push_back(m_newAxisVCol[ic]);
-      p_HalfClustersV->at(ih)->setHalfClusters(settings.map_stringPars["OutputAxisName"], tmp_axisCol);
+      p_HalfClusterV[ih]->setHalfClusters(settings.map_stringPars["OutputAxisName"], tmp_axisCol);
       continue;
     }
     std::sort( m_newAxisVCol.begin(), m_newAxisVCol.end(), compLayer );
 /*
 printf("  In HalfClusterV #%d: readin axis size %d \n", ih, m_newAxisVCol.size());
-std::map<std::string, std::vector<const PandoraPlus::CaloHalfCluster*> > tmp_HClusMap =  p_HalfClustersV->at(ih)->getHalfClusterMap();
+std::map<std::string, std::vector<const PandoraPlus::CaloHalfCluster*> > tmp_HClusMap =  p_HalfClusterV->at(ih)->getHalfClusterMap();
 cout<<"Print Readin AxisV: "<<endl;
 for(auto iter : tmp_HClusMap){
   cout<<"  Axis name: "<<iter.first<<endl;
@@ -208,7 +222,7 @@ cout<<endl;
     //convert to constant object and save in HalfCluster:
     std::vector<const PandoraPlus::CaloHalfCluster*> tmp_axisCol; tmp_axisCol.clear();
     for(int ic=0; ic<tmp_goodAxis.size(); ic++) tmp_axisCol.push_back(tmp_goodAxis[ic]);
-    p_HalfClustersV->at(ih)->setHalfClusters(settings.map_stringPars["OutputAxisName"], tmp_axisCol);
+    p_HalfClusterV[ih]->setHalfClusters(settings.map_stringPars["OutputAxisName"], tmp_axisCol);
 
   }
 
@@ -216,8 +230,8 @@ cout<<endl;
 };
 
 StatusCode AxisMergingAlg::ClearAlgorithm(){
-  p_HalfClustersU = nullptr;
-  p_HalfClustersV = nullptr;
+  p_HalfClusterU.clear();
+  p_HalfClusterV.clear();
   m_axisUCol.clear();
   m_axisVCol.clear();
   m_newAxisUCol.clear();
@@ -247,7 +261,7 @@ StatusCode AxisMergingAlg::TrkMatchedMerging( std::vector<PandoraPlus::CaloHalfC
 
       if(fl_match){
         m_axisCol[iax]->mergeHalfCluster( m_axisCol[jax] );
-        delete m_axisCol[jax]; m_axisCol[jax]=nullptr;
+        //delete m_axisCol[jax]; m_axisCol[jax]=nullptr;
         m_axisCol.erase(m_axisCol.begin()+jax);
         jax--;
         if(iax>jax+1) iax--;
@@ -282,7 +296,7 @@ StatusCode AxisMergingAlg::OverlapMerging( std::vector<PandoraPlus::CaloHalfClus
         if(m_axisCol[iax]->getType()==1 || m_axisCol[jax]->getType()==1)  m_axisCol[iax]->setType(3);
         else m_axisCol[iax]->setType(4);
 
-        delete m_axisCol[jax]; m_axisCol[jax]=nullptr;
+        //delete m_axisCol[jax]; m_axisCol[jax]=nullptr;
         m_axisCol.erase(m_axisCol.begin()+jax);
         jax--;
         if(iax>jax+1) iax--;
@@ -316,7 +330,7 @@ StatusCode AxisMergingAlg::OverlapMerging( std::vector<PandoraPlus::CaloHalfClus
         if(m_axisCol[iax]->getType()==1 || m_axisCol[jax]->getType()==1 || m_axisCol[iax]->getType()==3 || m_axisCol[jax]->getType()==3)  m_axisCol[iax]->setType(3);
         else m_axisCol[iax]->setType(4);
 
-        delete m_axisCol[jax]; m_axisCol[jax]=nullptr;
+        //delete m_axisCol[jax]; m_axisCol[jax]=nullptr;
         m_axisCol.erase(m_axisCol.begin()+jax);
         jax--;
         if(iax>jax+1) iax--;
@@ -389,7 +403,7 @@ cout<<endl;
 //cout<<"      Merge!"<<endl;
  
         m_axisCol[iax]->mergeHalfCluster( m_axisCol[jax] );
-        delete m_axisCol[jax]; m_axisCol[jax]=nullptr;
+        //delete m_axisCol[jax]; m_axisCol[jax]=nullptr;
         m_axisCol.erase(m_axisCol.begin()+jax);
         jax--;
         if(iax>jax+1) iax--;
@@ -447,7 +461,7 @@ StatusCode AxisMergingAlg::ConeMerging( std::vector<PandoraPlus::CaloHalfCluster
         else if(m_axisCol[iax]->getType()==4 || m_axisCol[jax]->getType()==4) m_axisCol[iax]->setType(4);
         else m_axisCol[iax]->setType(7);
 
-        delete m_axisCol[jax]; m_axisCol[jax]=nullptr;
+        //delete m_axisCol[jax]; m_axisCol[jax]=nullptr;
         m_axisCol.erase(m_axisCol.begin()+jax);
         jax--;
         if(iax>jax+1) iax--;
@@ -494,7 +508,7 @@ StatusCode AxisMergingAlg::ConeMerging( std::vector<PandoraPlus::CaloHalfCluster
         else if(m_axisCol[iax]->getType()==4 || m_axisCol[jax]->getType()==4) m_axisCol[iax]->setType(4);
         else m_axisCol[iax]->setType(7);
 
-        delete m_axisCol[jax]; m_axisCol[jax]=nullptr;
+        //delete m_axisCol[jax]; m_axisCol[jax]=nullptr;
         m_axisCol.erase(m_axisCol.begin()+jax);
         jax--;
         if(iax>jax+1) iax--;
@@ -525,7 +539,7 @@ StatusCode AxisMergingAlg::MergeToClosestCluster( PandoraPlus::CaloHalfCluster* 
   }
   if(index>=0) m_axisCol[index]->mergeHalfCluster(m_badaxis);
 
-  delete m_badaxis; m_badaxis=nullptr;
+  //delete m_badaxis; m_badaxis=nullptr;
   return StatusCode::SUCCESS;
 };
 

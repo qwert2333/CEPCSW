@@ -31,8 +31,9 @@ public:
                             PandoraPlus::HoughSpace& Hspace);
   StatusCode ClusterFinding(std::vector<PandoraPlus::HoughObject>& Hobjects, 
                             PandoraPlus::HoughSpace& Hspace, 
-                            std::vector<const PandoraPlus::CaloHalfCluster*>& longiClusCol);
-  StatusCode CleanClusters(vector<PandoraPlus::CaloHalfCluster*>& m_longiClusCol);
+                            std::vector<const PandoraPlus::CaloHalfCluster*>& longiClusCol, 
+                            std::vector<std::shared_ptr<PandoraPlus::CaloHalfCluster>>& bk_HFclus );
+  StatusCode CleanClusters(std::vector<std::shared_ptr<PandoraPlus::CaloHalfCluster>>& m_longiClusCol);
   
 
 private:

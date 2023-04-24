@@ -7,6 +7,7 @@
 
 namespace PandoraPlus {
 
+  class CaloHit;
   class Calo2DCluster {
   public: 
     Calo2DCluster() {};

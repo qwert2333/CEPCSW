@@ -86,7 +86,7 @@ bool TrackFitInEcal::fit2D(){
 		  grXY->SetPointError(iPointXY, m_depthErr[i], m_uzPosErr[i]);
 		  iPointXY++;
 	 }
-    TF1 *func1 = new TF1("func1", "pol1", 1800, 2100);
+   TF1 *func1 = new TF1("func1", "pol1", 1800, 2100);
 	 grXY->Fit("func1", "Q");
 	 double a0 = func1->GetParameter(0);
 	 double a1 = func1->GetParameter(1);
@@ -115,8 +115,8 @@ bool TrackFitInEcal::fit2D(){
 		  // cout << "iPointWZ " << setw(5) << iPointWZ << setw(15) << w << setw(15) << m_uzPos[i] << endl;
 		  iPointWZ++;
 	 }
-    TF1 *func2 = new TF1("func2", "pol1", 1800, 2100);
-    if(m_FixIP) func2->FixParameter(0, m_IPvar[1]); //fix dz.
+   TF1 *func2 = new TF1("func2", "pol1", 1800, 2100);
+   if(m_FixIP) func2->FixParameter(0, m_IPvar[1]); //fix dz.
 	 grWZ->Fit("func2", "Q");
 	 a0 = func2->GetParameter(0);
 	 a1 = func2->GetParameter(1);
@@ -129,59 +129,61 @@ bool TrackFitInEcal::fit2D(){
 
 	 delete grXY;
 	 delete grWZ;
-    delete func1;
-    delete func2;
+   delete func1;
+   delete func2;
 	 return true;
 }
 
 bool TrackFitInEcal::mnFit3D(){
-     Int_t ierflg;
-     Int_t istat;
-     Int_t nvpar;
-     Int_t nparx;
-     Double_t fmin;
-     Double_t edm;
-     Double_t errdef;
-     Double_t arglist[10];
+    Int_t ierflg;
+    Int_t istat;
+    Int_t nvpar;
+    Int_t nparx;
+    Double_t fmin;
+    Double_t edm;
+    Double_t errdef;
+    Double_t arglist[10];
 
-	 TMinuit* mnTrk = new TMinuit(NTRKPAR);
-	 mnTrk->SetPrintLevel(-1);
-	 mnTrk->SetFCN(fcnTrk);
-	 mnTrk->SetErrorDef(1.0);
-	 mnTrk->mnparm(0, "dr", m_IPvar[0], 0.1, 0, 0, ierflg);
-	 mnTrk->mnparm(1, "dz", m_IPvar[1], 0.1, 0, 0, ierflg);
-	 mnTrk->mnparm(2, "phi", 0, 0.1, 0, 0, ierflg);
-	 mnTrk->mnparm(3, "theta", 0, 0.1, 0, 0, ierflg);
-	 arglist[0] = 0;
+    TMinuit* mnTrk = new TMinuit(NTRKPAR);
+    mnTrk->SetPrintLevel(-1);
+    mnTrk->SetFCN(fcnTrk);
+    mnTrk->SetErrorDef(1.0);
+    mnTrk->mnparm(0, "dr", m_IPvar[0], 0.1, 0, 0, ierflg);
+    mnTrk->mnparm(1, "dz", m_IPvar[1], 0.1, 0, 0, ierflg);
+    mnTrk->mnparm(2, "phi", 0, 0.1, 0, 0, ierflg);
+    mnTrk->mnparm(3, "theta", 0, 0.1, 0, 0, ierflg);
+	  arglist[0] = 0;
     if(m_FixIP){ mnTrk->FixParameter(0); mnTrk->FixParameter(1); }
 
-	 mnTrk->mnexcm("SET NOW", arglist, 0, ierflg);
-
-	 for(int i=0; i<NTRKPAR; i++){
-		  arglist[0] = i + 1;
-		  arglist[1] = m_trkPar[i];
-		  mnTrk->mnexcm("SET PARameter", arglist, 2, ierflg);
-	 }
-
-	 arglist[0] = 1000;
-	 arglist[1] = 0.1;
-	 mnTrk->mnexcm("MIGRAD", arglist, 2, ierflg);
-	 mnTrk->mnstat(fmin, edm, errdef, nvpar, nparx, istat);
-
-     if( (0==ierflg) && (3==istat) ){
-          for(int i=0; i<5; i++){
-               mnTrk->GetParameter(i, m_trkPar[i], m_trkParErr[i]);
-          }
-
-          mnTrk->mnemat(*m_covariance, 4);
-          m_chisq = fmin;
-
-          return true;
-     } else{
+    mnTrk->mnexcm("SET NOW", arglist, 0, ierflg);
+    
+    for(int i=0; i<NTRKPAR; i++){
+       arglist[0] = i + 1;
+       arglist[1] = m_trkPar[i];
+       mnTrk->mnexcm("SET PARameter", arglist, 2, ierflg);
+    }
+    
+    arglist[0] = 1000;
+    arglist[1] = 0.1;
+    mnTrk->mnexcm("MIGRAD", arglist, 2, ierflg);
+    mnTrk->mnstat(fmin, edm, errdef, nvpar, nparx, istat);
+    
+    if( (0==ierflg) && (3==istat) ){
+      for(int i=0; i<5; i++)
+        mnTrk->GetParameter(i, m_trkPar[i], m_trkParErr[i]);
+           
+    
+      mnTrk->mnemat(*m_covariance, 4);
+      m_chisq = fmin;
+      delete mnTrk;
+      return true;
+    } 
+    else{
 //	 	  cout << "ERROR in fit with minuit! ";
 //      cout <<"ierflg = "<<ierflg<<" , stat = "<<istat<<endl;
-		  return false;
-	 }
+      delete mnTrk;
+      return false;
+    }
 }
 
 void TrackFitInEcal::clear(){
