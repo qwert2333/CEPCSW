@@ -274,13 +274,15 @@ StatusCode EnergyTimeMatchingAlg::XYClusterMatchingL0( const PandoraPlus::CaloHa
   m_clus->addHalfClusterU( "LinkedLongiCluster", m_longiClU );
   m_clus->addHalfClusterV( "LinkedLongiCluster", m_longiClV );
   for(auto itrk : m_longiClU->getAssociatedTracks()){
-    if( find(m_clus->getAssociatedTracks().begin(), m_clus->getAssociatedTracks().end(), itrk)==m_clus->getAssociatedTracks().end() )
-      m_clus->addAssociatedTrack(itrk);
-  }
-  for(auto itrk : m_longiClU->getAssociatedTracks()){
-    if( find(m_clus->getAssociatedTracks().begin(), m_clus->getAssociatedTracks().end(), itrk)==m_clus->getAssociatedTracks().end() )
-      m_clus->addAssociatedTrack(itrk);
-  }
+    for(auto jtrk : m_longiClV->getAssociatedTracks()){
+      if(itrk!=jtrk) continue;
+      if( find(m_clus->getAssociatedTracks().begin(), m_clus->getAssociatedTracks().end(), itrk)==m_clus->getAssociatedTracks().end() )
+        m_clus->addAssociatedTrack(itrk);
+  }}
+  //for(auto itrk : m_longiClU->getAssociatedTracks()){
+  //  if( find(m_clus->getAssociatedTracks().begin(), m_clus->getAssociatedTracks().end(), itrk)==m_clus->getAssociatedTracks().end() )
+  //    m_clus->addAssociatedTrack(itrk);
+  //}
 
   return StatusCode::SUCCESS;
 }
@@ -389,26 +391,33 @@ StatusCode EnergyTimeMatchingAlg::XYClusterMatchingL1( const PandoraPlus::CaloHa
       m_clusters[ic].get()->addHalfClusterV( "LinkedLongiCluster", m_longiClN[ic] );
 
       for(auto itrk : m_longiCl1->getAssociatedTracks()){
-        if( find(m_clusters[ic].get()->getAssociatedTracks().begin(), m_clusters[ic].get()->getAssociatedTracks().end(), itrk)==m_clusters[ic].get()->getAssociatedTracks().end() )
-          m_clusters[ic].get()->addAssociatedTrack(itrk);
-      }
-      for(auto itrk : m_longiClN[ic]->getAssociatedTracks()){
-        if( find(m_clusters[ic].get()->getAssociatedTracks().begin(), m_clusters[ic].get()->getAssociatedTracks().end(), itrk)==m_clusters[ic].get()->getAssociatedTracks().end() )
-          m_clusters[ic].get()->addAssociatedTrack(itrk);
-      }
+        for(auto jtrk : m_longiClN[ic]->getAssociatedTracks()){
+          if(itrk!=jtrk) continue; 
+
+          if( find(m_clusters[ic].get()->getAssociatedTracks().begin(), m_clusters[ic].get()->getAssociatedTracks().end(), itrk)==m_clusters[ic].get()->getAssociatedTracks().end() )
+            m_clusters[ic].get()->addAssociatedTrack(itrk);
+      }}
+
+      //for(auto itrk : m_longiClN[ic]->getAssociatedTracks()){
+      //  if( find(m_clusters[ic].get()->getAssociatedTracks().begin(), m_clusters[ic].get()->getAssociatedTracks().end(), itrk)==m_clusters[ic].get()->getAssociatedTracks().end() )
+      //    m_clusters[ic].get()->addAssociatedTrack(itrk);
+      //}
     }
     else{          
       m_clusters[ic].get()->addHalfClusterU( "LinkedLongiCluster", m_longiClN[ic] );
       m_clusters[ic].get()->addHalfClusterV( "LinkedLongiCluster", m_longiCl1 );
 
       for(auto itrk : m_longiCl1->getAssociatedTracks()){
-        if( find(m_clusters[ic].get()->getAssociatedTracks().begin(), m_clusters[ic].get()->getAssociatedTracks().end(), itrk)==m_clusters[ic].get()->getAssociatedTracks().end() )
-          m_clusters[ic].get()->addAssociatedTrack(itrk);
-      }
-      for(auto itrk : m_longiClN[ic]->getAssociatedTracks()){
-        if( find(m_clusters[ic].get()->getAssociatedTracks().begin(), m_clusters[ic].get()->getAssociatedTracks().end(), itrk)==m_clusters[ic].get()->getAssociatedTracks().end() )
-          m_clusters[ic].get()->addAssociatedTrack(itrk);
-      }
+        for(auto jtrk : m_longiClN[ic]->getAssociatedTracks()){
+          if(itrk!=jtrk) continue; 
+
+          if( find(m_clusters[ic].get()->getAssociatedTracks().begin(), m_clusters[ic].get()->getAssociatedTracks().end(), itrk)==m_clusters[ic].get()->getAssociatedTracks().end() )
+            m_clusters[ic].get()->addAssociatedTrack(itrk);
+      }}
+      //for(auto itrk : m_longiClN[ic]->getAssociatedTracks()){
+      //  if( find(m_clusters[ic].get()->getAssociatedTracks().begin(), m_clusters[ic].get()->getAssociatedTracks().end(), itrk)==m_clusters[ic].get()->getAssociatedTracks().end() )
+      //    m_clusters[ic].get()->addAssociatedTrack(itrk);
+      //}
     }
   }
 
