@@ -384,6 +384,7 @@ StatusCode EnergyTimeMatchingAlg::XYClusterMatchingL1( const PandoraPlus::CaloHa
     else m_clusters[index_longiclus].get()->addUnit(map_2Dshowersinlayer[layerindex[il]][is]);
   }}
 
+  //Match tracks 
   for(int ic=0; ic<m_clusters.size(); ic++){
     if(!m_clusters[ic].get() ) continue;
     if(slayer==0){ 
@@ -398,10 +399,6 @@ StatusCode EnergyTimeMatchingAlg::XYClusterMatchingL1( const PandoraPlus::CaloHa
             m_clusters[ic].get()->addAssociatedTrack(itrk);
       }}
 
-      //for(auto itrk : m_longiClN[ic]->getAssociatedTracks()){
-      //  if( find(m_clusters[ic].get()->getAssociatedTracks().begin(), m_clusters[ic].get()->getAssociatedTracks().end(), itrk)==m_clusters[ic].get()->getAssociatedTracks().end() )
-      //    m_clusters[ic].get()->addAssociatedTrack(itrk);
-      //}
     }
     else{          
       m_clusters[ic].get()->addHalfClusterU( "LinkedLongiCluster", m_longiClN[ic] );
@@ -414,10 +411,6 @@ StatusCode EnergyTimeMatchingAlg::XYClusterMatchingL1( const PandoraPlus::CaloHa
           if( find(m_clusters[ic].get()->getAssociatedTracks().begin(), m_clusters[ic].get()->getAssociatedTracks().end(), itrk)==m_clusters[ic].get()->getAssociatedTracks().end() )
             m_clusters[ic].get()->addAssociatedTrack(itrk);
       }}
-      //for(auto itrk : m_longiClN[ic]->getAssociatedTracks()){
-      //  if( find(m_clusters[ic].get()->getAssociatedTracks().begin(), m_clusters[ic].get()->getAssociatedTracks().end(), itrk)==m_clusters[ic].get()->getAssociatedTracks().end() )
-      //    m_clusters[ic].get()->addAssociatedTrack(itrk);
-      //}
     }
   }
 

@@ -312,5 +312,26 @@ namespace PandoraPlus{
   }
 
 
+  void CaloHalfCluster::mergeClusterInLayer(){
+    std::map<int, std::vector<const Calo1DCluster*>> showersinlayer; showersinlayer.clear();
+    for(int is=0; is<m_1dclusters.size(); is++)
+      showersinlayer[m_1dclusters[is]->getDlayer()].push_back( m_1dclusters[is] );
+
+    m_1dclusters.clear();    
+    for(auto &iter : showersinlayer){
+      std::vector<const Calo1DCluster*> tmp_shower = iter.second; 
+      if(tmp_shower.size()>1){
+        //Merge following showers into the first: 
+        for(int is=1; is<tmp_shower.size(); is++){
+          for(int icl=0; icl<tmp_shower[is]->getBars().size(); icl++)  const_cast<PandoraPlus::Calo1DCluster*>(tmp_shower[0])->addUnit(tmp_shower[is]->getBars()[icl]);
+          tmp_shower.erase(tmp_shower.begin()+is);
+          is--;
+        }
+      }
+      addUnit(tmp_shower[0]);
+    }
+
+  }
+
 };
 #endif

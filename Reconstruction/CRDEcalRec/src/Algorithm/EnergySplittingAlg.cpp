@@ -10,6 +10,7 @@ StatusCode EnergySplittingAlg::ReadSettings(Settings& m_settings){
   if(settings.map_floatPars.find("Eth_Seed")==settings.map_floatPars.end()) settings.map_floatPars["Eth_Seed"] = 0.005;
   if(settings.map_floatPars.find("Eth_ShowerAbs")==settings.map_floatPars.end()) settings.map_floatPars["Eth_Shower"] = 0.005;
   if(settings.map_intPars.find("th_Nhit")==settings.map_intPars.end()) settings.map_intPars["th_Nhit"] = 3;
+  if(settings.map_boolPars.find("CompactHFCluster")==settings.map_boolPars.end()) settings.map_boolPars["CompactHFCluster"] = true;
   if(settings.map_stringPars.find("ReadinAxisName")==settings.map_stringPars.end()) settings.map_stringPars["ReadinAxisName"] = "MergedAxis";
   if(settings.map_stringPars.find("OutputClusName")==settings.map_stringPars.end()) settings.map_stringPars["OutputClusName"] = "ESHalfCluster";
   if(settings.map_stringPars.find("OutputTowerName")==settings.map_stringPars.end()) settings.map_stringPars["OutputTowerName"] = "ESTower";
@@ -307,6 +308,7 @@ StatusCode EnergySplittingAlg::HalfClusterToTowers( std::vector<PandoraPlus::Cal
     //HalfCluster does not cover tower: 
     if( m_halfClusU[il]->getTowerID().size()==1 && m_halfClusU[il]->getCluster().size()>=settings.map_intPars["th_Nhit"]){
       std::vector<int> cl_towerID =  m_halfClusU[il]->getTowerID()[0]; 
+      if(settings.map_boolPars["CompactHFCluster"]) m_halfClusU[il]->mergeClusterInLayer();
       map_HalfClusterU[cl_towerID].push_back(m_halfClusU[il]);
       continue; 
     }
@@ -377,12 +379,6 @@ StatusCode EnergySplittingAlg::HalfClusterToTowers( std::vector<PandoraPlus::Cal
 
     //Connect cousins
     if(tmp_LongiClusMaps.size()>1){
-      //std::map<std::vector<int>, PandoraPlus::CaloHalfCluster* >::iterator iter = tmp_LongiClusMaps.begin();
-      //for(iter; iter!=tmp_LongiClusMaps.end(); iter++){
-      //  std::map<std::vector<int>, PandoraPlus::CaloHalfCluster* >::iterator iter1 = tmp_LongiClusMaps.begin();
-      //  for(iter1; iter1!=tmp_LongiClusMaps.end(); iter1++)
-      //    if(iter!=iter1) iter->second->addCousinCluster(iter1->second);
-      //}
       for(auto &iter : tmp_LongiClusMaps){
         for(auto &iter1 : tmp_LongiClusMaps){
           if(iter!= iter1) iter.second->addCousinCluster(iter1.second);
@@ -392,8 +388,10 @@ StatusCode EnergySplittingAlg::HalfClusterToTowers( std::vector<PandoraPlus::Cal
     for(auto &iter : tmp_LongiClusMaps){
       for(int itrk=0; itrk<m_halfClusU[il]->getAssociatedTracks().size(); itrk++) 
         iter.second->addAssociatedTrack( m_halfClusU[il]->getAssociatedTracks()[itrk] );
-      if(iter.second->getCluster().size()>=settings.map_intPars["th_Nhit"])
+      if(iter.second->getCluster().size()>=settings.map_intPars["th_Nhit"]){
+        if(settings.map_boolPars["CompactHFCluster"]) iter.second->mergeClusterInLayer();
         map_HalfClusterU[iter.first].push_back(iter.second);
+      }
     }
   }
 
@@ -404,6 +402,7 @@ StatusCode EnergySplittingAlg::HalfClusterToTowers( std::vector<PandoraPlus::Cal
     //HalfCluster does not cover tower:
     if( m_halfClusV[il]->getTowerID().size()==1 ){
       std::vector<int> cl_towerID =  m_halfClusV[il]->getTowerID()[0];
+      if(settings.map_boolPars["CompactHFCluster"]) m_halfClusV[il]->mergeClusterInLayer();
       map_HalfClusterV[cl_towerID].push_back(m_halfClusV[il]);
       continue;
     }
@@ -472,12 +471,6 @@ StatusCode EnergySplittingAlg::HalfClusterToTowers( std::vector<PandoraPlus::Cal
 
     //Connect cousins
     if(tmp_LongiClusMaps.size()>1){
-      //std::map<std::vector<int>, PandoraPlus::CaloHalfCluster* >::iterator iter = tmp_LongiClusMaps.begin();
-      //for(iter; iter!=tmp_LongiClusMaps.end(); iter++){
-      //  std::map<std::vector<int>, PandoraPlus::CaloHalfCluster* >::iterator iter1 = tmp_LongiClusMaps.begin();
-      //  for(iter1; iter1!=tmp_LongiClusMaps.end(); iter1++)
-      //    if(iter!=iter1) iter->second->addCousinCluster(iter1->second);
-      //}
       for(auto &iter : tmp_LongiClusMaps){
         for(auto &iter1 : tmp_LongiClusMaps){
           if(iter!= iter1) iter.second->addCousinCluster(iter1.second);
@@ -487,8 +480,10 @@ StatusCode EnergySplittingAlg::HalfClusterToTowers( std::vector<PandoraPlus::Cal
     for(auto &iter : tmp_LongiClusMaps){
       for(int itrk=0; itrk<m_halfClusV[il]->getAssociatedTracks().size(); itrk++)
         iter.second->addAssociatedTrack( m_halfClusV[il]->getAssociatedTracks()[itrk] );
-      if(iter.second->getCluster().size()>=settings.map_intPars["th_Nhit"])
+      if(iter.second->getCluster().size()>=settings.map_intPars["th_Nhit"]){
+        if(settings.map_boolPars["CompactHFCluster"]) iter.second->mergeClusterInLayer();
         map_HalfClusterV[iter.first].push_back(iter.second);
+      }
     }
 
   }

@@ -67,6 +67,8 @@ namespace PandoraPlus {
     void addTowerID(int _m, int _p, int _s) { std::vector<int> id(3); id[0] = _m; id[1] = _p; id[2] = _s; towerID.push_back(id); }
     void addTowerID(std::vector<int> id) { towerID.push_back(id); }
     void addAssociatedTrack(const PandoraPlus::Track* _track){ m_TrackCol.push_back(_track); }
+    void mergeClusterInLayer(); 
+
 
   private:
     int type; //0: Track cluster. 1: EM cluster. 2: Hadronic cluster. 3: Other cluster. 
