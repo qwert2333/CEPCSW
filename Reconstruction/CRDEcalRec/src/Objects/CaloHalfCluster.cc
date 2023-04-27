@@ -67,15 +67,19 @@ namespace PandoraPlus{
  
   void CaloHalfCluster::addUnit(const Calo1DCluster* _1dcluster)
   {
-    if(_1dcluster->getSlayer()==0) slayer=0;
-    if(_1dcluster->getSlayer()==1) slayer=1;
-    m_1dclusters.push_back(_1dcluster);
-
-    std::vector< std::vector<int> > id = _1dcluster->getTowerID();
-    for(int ii=0; ii<id.size(); ii++)
-      if( find(towerID.begin(), towerID.end(), id[ii])==towerID.end() ) towerID.push_back(id[ii]);    
-
-    fitAxis("");
+    if( find( m_1dclusters.begin(), m_1dclusters.end(), _1dcluster)!=m_1dclusters.end() )
+      std::cout<<"ERROR: attempt to add an existing 1DCluster into HalfCluster! Skip it "<<std::endl;
+    else{
+      if(_1dcluster->getSlayer()==0) slayer=0;
+      if(_1dcluster->getSlayer()==1) slayer=1;
+      m_1dclusters.push_back(_1dcluster);
+   
+      std::vector< std::vector<int> > id = _1dcluster->getTowerID();
+      for(int ii=0; ii<id.size(); ii++)
+        if( find(towerID.begin(), towerID.end(), id[ii])==towerID.end() ) towerID.push_back(id[ii]);    
+   
+      fitAxis("");
+    }
   }
   
   std::vector<const CaloUnit*> CaloHalfCluster::getBars() const
@@ -323,7 +327,9 @@ namespace PandoraPlus{
       if(tmp_shower.size()>1){
         //Merge following showers into the first: 
         for(int is=1; is<tmp_shower.size(); is++){
-          for(int icl=0; icl<tmp_shower[is]->getBars().size(); icl++)  const_cast<PandoraPlus::Calo1DCluster*>(tmp_shower[0])->addUnit(tmp_shower[is]->getBars()[icl]);
+          for(int icl=0; icl<tmp_shower[is]->getBars().size(); icl++){
+            const_cast<PandoraPlus::Calo1DCluster*>(tmp_shower[0])->addUnit(tmp_shower[is]->getBars()[icl]);
+          }
           tmp_shower.erase(tmp_shower.begin()+is);
           is--;
         }

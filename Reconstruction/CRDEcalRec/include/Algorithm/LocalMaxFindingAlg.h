@@ -1,6 +1,7 @@
 #ifndef _LOCALMAXFINDING_ALG_H
 #define _LOCALMAXFINDING_ALG_H
 
+#include <set>
 #include "Tools/Algorithm.h"
 using namespace PandoraPlus;
 

@@ -91,6 +91,7 @@ StatusCode EnergySplittingAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
       tmp_showers.clear();
     }
 
+//cout<<"Clean showers"<<endl;
     //Clean showers without seed.
     for(int ic=0; ic<m_1dShowerUCol.size(); ic++){
       if(m_1dShowerUCol[ic]->getNseeds()==0){
@@ -103,7 +104,7 @@ StatusCode EnergySplittingAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
 
     m_datacol.map_1DCluster["bk1DCluster"].insert( m_datacol.map_1DCluster["bk1DCluster"].end(), m_1dShowerUCol.begin(), m_1dShowerUCol.end() );
 
-
+//cout<<"Longitudinal linking: "<<endl;
     //  Longitudinal linking: update clusters' energy.
     std::vector<std::shared_ptr<PandoraPlus::CaloHalfCluster>> tmp_newClus; tmp_newClus.clear();
     LongitudinalLinking(m_1dShowerUCol, m_axisUCol, tmp_newClus);
@@ -196,7 +197,7 @@ for(int icl=0; icl<m_newClusVCol.size(); icl++){
 
   //Make tower 
   m_towerCol.clear(); 
-
+//cout<<"Make tower: "<<endl;
   std::vector<PandoraPlus::CaloHalfCluster*> tmp_newClusUCol, tmp_newClusVCol;
   tmp_newClusUCol.clear(); tmp_newClusVCol.clear();
   for(int icl=0; icl<m_newClusUCol.size(); icl++) tmp_newClusUCol.push_back( m_newClusUCol[icl].get() );
@@ -809,6 +810,7 @@ void EnergySplittingAlg::CalculateInitialEseed( const std::vector<const PandoraP
     vecE[i] = Seeds[i]->getEnergy();
     for(int j=0;j<Nele;j++) matrixR[i][j] = GetShowerProfile(Seeds[i]->getPosition(), pos[j]);
   }
+
 
   matrixR.Invert();
   TVector sol = matrixR*vecE;
