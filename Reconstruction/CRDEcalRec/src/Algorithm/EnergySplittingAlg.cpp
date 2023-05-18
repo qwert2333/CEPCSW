@@ -120,12 +120,13 @@ StatusCode EnergySplittingAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
     if( settings.map_stringPars["ReadinAxisName"] == "AllAxis" ) m_axisVCol = p_HalfClusterV[ih]->getAllHalfClusterCol(); 
     else m_axisVCol = p_HalfClusterV[ih]->getHalfClusterCol(settings.map_stringPars["ReadinAxisName"]);
 
+    m_1dShowerVCol.clear();
     std::vector<const PandoraPlus::Calo1DCluster*> m_1dclusCol = p_HalfClusterV[ih]->getCluster();
 
 //cout<<"1D Cluster size: "<<m_1dclusCol.size()<<", axis size: "<<m_axisVCol.size()<<endl;
     for(int icl=0; icl<m_1dclusCol.size(); icl++){
       std::vector<const PandoraPlus::CaloUnit*> m_bars = m_1dclusCol[icl]->getBars();
-//cout<<"  In 1DCluster #"<<icl<<": layer = "<<m_1dclusCol[icl]->getDlayer()<<endl;   
+//cout<<"  In 1DCluster #"<<icl<<": layer = "<<m_1dclusCol[icl]->getDlayer();   
     
       //Find the seed with axis in 1DCluster:
       for(auto iaxis: m_axisVCol){
@@ -138,13 +139,18 @@ StatusCode EnergySplittingAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
             const_cast<PandoraPlus::Calo1DCluster*>(m_1dclusCol[icl])->addSeed( iseed->getBars()[0] );
         }
       }
-//cout<<"  In 1DCluster #"<<icl<<": matched seed size "<<m_1dclusCol[icl]->getNseeds()<<endl;
+//cout<<", matched seed size "<<m_1dclusCol[icl]->getNseeds()<<endl;
       //if(m_1dclusCol[icl]->getNseeds()==0) const_cast<PandoraPlus::Calo1DCluster*>(m_1dclusCol[icl])->setSeed();   
 
       //Split cluster to showers
       std::vector<std::shared_ptr<PandoraPlus::Calo1DCluster>> tmp_showers; tmp_showers.clear();
       ClusterSplitting( m_1dclusCol[icl], tmp_showers, m_datacol.map_BarCol["bkBars"] );
-//cout<<"  In 1DCluster #"<<icl<<": splitted into "<<tmp_showers.size ()<<" showers"<<endl;
+//cout<<"  In 1DCluster #"<<icl<<": splitted into "<<tmp_showers.size ()<<" showers: ";
+//for(int is=0; is<tmp_showers.size(); is++){
+//  printf(" (%.3f, %.3f, %.3f, %.3f) \t", tmp_showers[is].get()->getPos().x(), tmp_showers[is].get()->getPos().y(), tmp_showers[is].get()->getPos().z(), tmp_showers[is].get()->getEnergy());
+//}
+//cout<<endl;
+//cout<<endl;
       //if(tmp_showers.size()==0) continue;
       m_1dShowerVCol.insert( m_1dShowerVCol.end(), tmp_showers.begin(), tmp_showers.end() );
       tmp_showers.clear();
@@ -159,6 +165,13 @@ StatusCode EnergySplittingAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
         ic--;
       }
     }
+
+//cout<<"After splitting: print all 1D showers"<<endl;
+//for(int is=0; is<m_1dShowerVCol.size(); is++){
+//printf("  Shower layer %d, Pos+E (%.3f, %.3f, %.3f, %.3f), Nbars %d, NSeed %d, address %p \n", m_1dShowerVCol[is].get()->getDlayer(), m_1dShowerVCol[is].get()->getPos().x(), m_1dShowerVCol[is].get()->getPos().y(), m_1dShowerVCol[is].get()->getPos().z(), m_1dShowerVCol[is].get()->getEnergy(), m_1dShowerVCol[is].get()->getBars().size(), m_1dShowerVCol[is].get()->getNseeds(), m_1dShowerVCol[is].get() );
+//}
+//cout<<endl;
+
 
     m_datacol.map_1DCluster["bk1DCluster"].insert( m_datacol.map_1DCluster["bk1DCluster"].end(), m_1dShowerVCol.begin(), m_1dShowerVCol.end() );
 
@@ -180,7 +193,6 @@ for(int icl=0; icl<m_newClusUCol.size(); icl++){
   cout<<"      In HFClusU #"<<icl<<": shower size = "<<m_newClusUCol[icl]->getCluster().size()<<endl;
   for(auto ish : m_newClusUCol[icl]->getCluster()){
     printf("          Shower layer %d, Pos+E (%.3f, %.3f, %.3f, %.3f), Nbars %d, NSeed %d \n ", ish->getDlayer(), ish->getPos().x(), ish->getPos().y(), ish->getPos().z(), ish->getEnergy(), ish->getBars().size(),  ish->getNseeds() );
-    cout<<endl;
   }
 }
 cout<<endl;
@@ -190,7 +202,6 @@ for(int icl=0; icl<m_newClusVCol.size(); icl++){
   cout<<"      In HFClusV #"<<icl<<": shower size = "<<m_newClusVCol[icl]->getCluster().size()<<endl;
   for(auto ish : m_newClusVCol[icl]->getCluster()){
     printf("          Shower layer %d, Pos+E (%.3f, %.3f, %.3f, %.3f), Nbars %d, NSeed %d \n ", ish->getDlayer(), ish->getPos().x(), ish->getPos().y(), ish->getPos().z(), ish->getEnergy(), ish->getBars().size(),  ish->getNseeds() );
-    cout<<endl;
   }
 }
 */
@@ -537,6 +548,7 @@ StatusCode EnergySplittingAlg::HalfClusterToTowers( std::vector<PandoraPlus::Cal
                               settings.map_stringPars["OutputClusName"]+"V", map_HalfClusterV[m_towerID] );
     m_towers.push_back(m_tower);
   }
+
 /*
 cout<<"  After splitting: tower size "<<m_towerCol.size()<<". Print Tower: "<<endl;
 for(auto it : m_towerCol){
@@ -547,20 +559,20 @@ for(auto it : m_towerCol){
   printf("    HalfCluster size: (%d, %d) \n", m_HFClusUInTower.size(), m_HFClusVInTower.size() );
   cout<<"    Loop print HalfClusterU: "<<endl;
   for(int icl=0; icl<m_HFClusUInTower.size(); icl++){
-    cout<<"      In HFClusU #"<<icl<<": shower size = "<<m_HFClusUInTower[icl]->getCluster().size()<<endl;
+    cout<<"      In HFClusU #"<<icl<<": shower size = "<<m_HFClusUInTower[icl]->getCluster().size();
+    printf(", address %p \n", m_HFClusUInTower[icl]);
     for(auto ish : m_HFClusUInTower[icl]->getCluster()){
       printf("          Shower layer %d, Pos+E (%.3f, %.3f, %.3f, %.3f), Nbars %d, NSeed %d \n ", ish->getDlayer(), ish->getPos().x(), ish->getPos().y(), ish->getPos().z(), ish->getEnergy(), ish->getBars().size(),  ish->getNseeds() );
-      cout<<endl;
     }
   }
   cout<<endl;
 
   cout<<"    Loop print HalfClusterV: "<<endl;
   for(int icl=0; icl<m_HFClusVInTower.size(); icl++){
-    cout<<"      In HFClusV #"<<icl<<": shower size = "<<m_HFClusVInTower[icl]->getCluster().size()<<endl;
+    cout<<"      In HFClusV #"<<icl<<": shower size = "<<m_HFClusVInTower[icl]->getCluster().size();
+    printf(", address %p \n", m_HFClusVInTower[icl]);
     for(auto ish : m_HFClusVInTower[icl]->getCluster()){
       printf("          Shower layer %d, Pos+E (%.3f, %.3f, %.3f, %.3f), Nbars %d, NSeed %d \n ", ish->getDlayer(), ish->getPos().x(), ish->getPos().y(), ish->getPos().z(), ish->getEnergy(), ish->getBars().size(), ish->getNseeds() );
-      cout<<endl;
     }
   }
   cout<<endl;

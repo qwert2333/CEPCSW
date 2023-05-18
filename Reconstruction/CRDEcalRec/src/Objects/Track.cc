@@ -33,6 +33,30 @@ namespace PandoraPlus{
     return emptyCol;
   }
 
+  float Track::getPt() const{
+    std::vector<TrackState> trkStates = getTrackStates("Input");
+    float pt = -99.;
+    for(auto it: trkStates){
+      if(it.location==4){
+        pt = 1./it.Kappa;
+      }
+    }
+
+    return pt;
+  }
+
+  float Track::getPz() const{
+    std::vector<TrackState> trkStates = getTrackStates("Input");
+    float pz = -99.;
+    for(auto it: trkStates){
+      if(it.location==4){
+        pz = it.tanLambda*it.Kappa;
+      }
+    }
+
+    return pz;
+  }
+
 
 };
 #endif

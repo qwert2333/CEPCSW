@@ -21,6 +21,9 @@ namespace PandoraPlus {
   std::map<std::string, std::vector<TrackState> > getTrackStatesMap() const { return m_trackStates; }
   std::vector<PandoraPlus::CaloHalfCluster*> getAssociatedHalfClustersU() const { return m_halfClusterUCol; }  
   std::vector<PandoraPlus::CaloHalfCluster*> getAssociatedHalfClustersV() const { return m_halfClusterVCol; }  
+  float getPt() const;
+  float getPz() const;
+  float getMomentum() const { return sqrt( getPt()*getPt() + getPz()*getPz() ); } 
 
   void setTrackStates( std::string name, std::vector<TrackState>& _states ) { m_trackStates[name]=_states; }
   void addAssociatedHalfClusterU( PandoraPlus::CaloHalfCluster* _cl ) { m_halfClusterUCol.push_back(_cl); }

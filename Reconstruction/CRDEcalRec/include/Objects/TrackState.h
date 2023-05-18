@@ -14,9 +14,9 @@ namespace PandoraPlus{
     float D0;
     float Z0; 
     float phi0; 
-    float Kappa;  
+    float Kappa;  //Kappa = omega*1000/(0.3*B[T]) = 1/pT
     float tanLambda; 
-    float Omega;   //Kappa = omega*1000/(0.3*B[T])
+    float Omega;  
     TVector3 referencePoint; 
 
     static const int AtOther = 0 ; // any location other than the ones defined below

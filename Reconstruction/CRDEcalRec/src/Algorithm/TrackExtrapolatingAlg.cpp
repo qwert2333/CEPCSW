@@ -56,16 +56,16 @@ StatusCode TrackExtrapolatingAlg::Initialize( PandoraPlusDataCol& m_datacol ){
 
 
 StatusCode TrackExtrapolatingAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
-std::cout<<"---oooOO0OOooo--- Excuting TrackExtrapolatingAlg ---oooOO0OOooo---"<<std::endl;
+//std::cout<<"---oooOO0OOooo--- Excuting TrackExtrapolatingAlg ---oooOO0OOooo---"<<std::endl;
 
   std::vector<std::shared_ptr<PandoraPlus::Track>>* p_tracks = &(m_datacol.TrackCol);
-std::cout<<"  Track size: "<<p_tracks->size()<<std::endl;
+//std::cout<<"  Track size: "<<p_tracks->size()<<std::endl;
 
-std::cout<<"  GetPlaneNormalVector() "<<std::endl;
+//std::cout<<"  GetPlaneNormalVector() "<<std::endl;
   std::vector<TVector2> normal_vectors;
   GetPlaneNormalVector(normal_vectors);
 
-std::cout<<"  GetLayerPoints() "<<std::endl;
+//std::cout<<"  GetLayerPoints() "<<std::endl;
   std::vector<std::vector<TVector2>> ECAL_layer_points;    // 8 modules, 28 layer points in each modules
   std::vector<std::vector<TVector2>> HCAL_layer_points;    // 8 modules, 35 layer points in each modules
   GetLayerPoints(normal_vectors, ECAL_layer_points, HCAL_layer_points);
@@ -74,12 +74,12 @@ std::cout<<"  GetLayerPoints() "<<std::endl;
     // Only tracks that reach ECAL should be processed.
     if(!IsReachECAL( p_tracks->at(itrk).get() )) continue;
 
-std::cout<<"  GetTrackStateAtCalo() "<<std::endl;
+//std::cout<<"  GetTrackStateAtCalo() "<<std::endl;
     // get track state at calorimeter
     PandoraPlus::TrackState CALO_trk_state;
     GetTrackStateAtCalo(p_tracks->at(itrk).get(), CALO_trk_state);
     
-std::cout<<"  ExtrapolateByLayer() "<<std::endl;
+//std::cout<<"  ExtrapolateByLayer() "<<std::endl;
     ExtrapolateByLayer(normal_vectors, ECAL_layer_points, HCAL_layer_points, CALO_trk_state, p_tracks->at(itrk).get());
   } // end loop tracks
 
@@ -206,17 +206,17 @@ StatusCode TrackExtrapolatingAlg::ExtrapolateByLayer(const std::vector<TVector2>
   float alpha0 = GetRefAlpha0(CALO_trk_state, center); 
   // bool is_rtbk = IsReturn(rho, center);
   // Evaluate delta_phi
-std::cout << "    yyy: GetDeltaPhi()" << std::endl;
+//std::cout << "    yyy: GetDeltaPhi()" << std::endl;
   std::vector<std::vector<float>> ECAL_delta_phi = GetDeltaPhi(rho, center, alpha0, normal_vectors, ECAL_layer_points, CALO_trk_state);
   std::vector<std::vector<float>> HCAL_delta_phi = GetDeltaPhi(rho, center, alpha0, normal_vectors, HCAL_layer_points, CALO_trk_state);
   
   // extrpolated track points. Will be stored as reference point in TrackState
-std::cout << "    yyy: GetExtrapoPoints()" << std::endl;
+//std::cout << "    yyy: GetExtrapoPoints()" << std::endl;
   std::vector<TVector3> ECAL_ext_points = GetExtrapoPoints("ECAL", rho, center, alpha0, CALO_trk_state, ECAL_delta_phi);
   std::vector<TVector3> HCAL_ext_points = GetExtrapoPoints("HCAL", rho, center, alpha0, CALO_trk_state, HCAL_delta_phi);
   
   // Sort Extrapolated points
-std::cout << "    yyy: Sort" << std::endl;
+//std::cout << "    yyy: Sort" << std::endl;
   std::vector<TrackState> t_ECAL_states;
   for(int ip=0; ip<ECAL_ext_points.size(); ip++){
     TrackState t_state = CALO_trk_state;

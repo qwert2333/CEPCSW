@@ -69,9 +69,10 @@ cout<<"AxisMergingAlg: Readin halfcluster size: "<<p_HalfClusterU.size()<<", "<<
 
 
     std::sort( m_newAxisUCol.begin(), m_newAxisUCol.end(), compLayer );
+
 /*
 printf("  In HalfClusterU #%d: readin axis size %d \n", ih, m_newAxisUCol.size());
-std::map<std::string, std::vector<const PandoraPlus::CaloHalfCluster*> > tmp_HClusMap =  p_HalfClusterU->at(ih)->getHalfClusterMap();
+std::map<std::string, std::vector<const PandoraPlus::CaloHalfCluster*> > tmp_HClusMap =  p_HalfClusterU.at(ih)->getHalfClusterMap();
 cout<<"Print Readin AxisU: "<<endl;
 for(auto iter : tmp_HClusMap){
   cout<<"  Axis name: "<<iter.first<<endl;
@@ -83,6 +84,7 @@ for(auto iter : tmp_HClusMap){
 cout<<endl;
 }
 */
+
 //for(int ia=0; ia<m_newAxisUCol.size(); ia++){
 //cout<<"  Axis #"<<ia<<endl;
 //for(int il=0 ;il<m_newAxisUCol[ia]->getCluster().size(); il++)
@@ -167,7 +169,7 @@ printf("  In HalfClusterU: Good axis %d, bad axis %d \n",tmp_goodAxis.size(), tm
     std::sort( m_newAxisVCol.begin(), m_newAxisVCol.end(), compLayer );
 /*
 printf("  In HalfClusterV #%d: readin axis size %d \n", ih, m_newAxisVCol.size());
-std::map<std::string, std::vector<const PandoraPlus::CaloHalfCluster*> > tmp_HClusMap =  p_HalfClusterV->at(ih)->getHalfClusterMap();
+std::map<std::string, std::vector<const PandoraPlus::CaloHalfCluster*> > tmp_HClusMap =  p_HalfClusterV.at(ih)->getHalfClusterMap();
 cout<<"Print Readin AxisV: "<<endl;
 for(auto iter : tmp_HClusMap){
   cout<<"  Axis name: "<<iter.first<<endl;

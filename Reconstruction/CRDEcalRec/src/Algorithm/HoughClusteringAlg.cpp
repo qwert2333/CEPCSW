@@ -118,7 +118,7 @@ StatusCode HoughClusteringAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
       continue; 
     } 
 
-    cout<<"  HoughClusteringAlg: Local maximum size V = "<<m_localMaxVCol.size()<<endl;
+    //cout<<"  HoughClusteringAlg: Local maximum size V = "<<m_localMaxVCol.size()<<endl;
     
     // cout<<"  HoughClusteringAlg: Creating m_HoughObjectsV"<<endl;
     std::vector<PandoraPlus::HoughObject> m_HoughObjectsV; m_HoughObjectsV.clear(); 
@@ -146,7 +146,7 @@ StatusCode HoughClusteringAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
     m_longiClusVCol.clear(); 
     ClusterFinding(m_HoughObjectsV, hough_spaceV, m_longiClusVCol, m_datacol.map_HalfCluster["bkHalfCluster"]);
 
-    cout << "  HoughClusteringAlg: final output m_longiClusVCol.size() = " << m_longiClusVCol.size() << endl;
+    //cout << "  HoughClusteringAlg: final output m_longiClusVCol.size() = " << m_longiClusVCol.size() << endl;
 
     std::vector<const PandoraPlus::Calo1DCluster*> left_localMaxVCol; left_localMaxVCol.clear();
     std::vector<const PandoraPlus::Calo1DCluster*> m_houghMax; m_houghMax.clear(); 
@@ -182,7 +182,7 @@ StatusCode HoughClusteringAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
 //std::cout << "    yyy: m_localMaxUCol.size()<th_peak, continue" << std::endl;
       continue; 
     } 
-cout << "  HoughClusteringAlg: Local maximum size U = " << m_localMaxUCol.size() << endl;
+//cout << "  HoughClusteringAlg: Local maximum size U = " << m_localMaxUCol.size() << endl;
 
 // cout << "  HoughClusteringAlg: Creating m_HoughObjectsU" << endl;
     std::vector<PandoraPlus::HoughObject> m_HoughObjectsU; m_HoughObjectsU.clear(); 
@@ -230,7 +230,7 @@ cout << "  HoughClusteringAlg: Local maximum size U = " << m_localMaxUCol.size()
       ClusterFinding(m_HoughObjectsU_modules[ih], hough_spacesU[ih], m_longiClusUCol, m_datacol.map_HalfCluster["bkHalfCluster"]);
     }
 
-cout << "  HoughClusteringAlg: final output m_longiClusUCol.size() = " << m_longiClusUCol.size() << endl;
+//cout << "  HoughClusteringAlg: final output m_longiClusUCol.size() = " << m_longiClusUCol.size() << endl;
     
     std::vector<const PandoraPlus::Calo1DCluster*> left_localMaxUCol; left_localMaxUCol.clear();
     std::vector<const PandoraPlus::Calo1DCluster*> m_houghMax; m_houghMax.clear();

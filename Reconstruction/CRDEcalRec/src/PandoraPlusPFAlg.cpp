@@ -267,7 +267,11 @@ StatusCode PandoraPlusPFAlg::initialize()
     t_Cluster->Branch("Clus_x", &m_Clus_x);
     t_Cluster->Branch("Clus_y", &m_Clus_y);
     t_Cluster->Branch("Clus_z", &m_Clus_z);
+    t_Cluster->Branch("Clus_Px", &m_Clus_Px);
+    t_Cluster->Branch("Clus_Py", &m_Clus_Py);
+    t_Cluster->Branch("Clus_Pz", &m_Clus_Pz);
     t_Cluster->Branch("Clus_E", &m_Clus_E);
+    t_Cluster->Branch("Clus_Ptrk", &m_Clus_Ptrk);
     t_Cluster->Branch("Clus_Ntrk", &m_Clus_Ntrk);
     t_Cluster->Branch("Clus_Nhit", &m_Clus_Nhit);
     t_Cluster->Branch("Clus_hitx", &m_Clus_hitx);
@@ -275,6 +279,7 @@ StatusCode PandoraPlusPFAlg::initialize()
     t_Cluster->Branch("Clus_hitz", &m_Clus_hitz);
     t_Cluster->Branch("Clus_hitE", &m_Clus_hitE);
     t_Cluster->Branch("Clus_hittag", &m_Clus_hittag);
+    t_Cluster->Branch("Clus_hittag_trk", &m_Clus_hittag_trk);
     t_Cluster->Branch("Nmc", &m_Nmc);
     t_Cluster->Branch("mcPdgid",     &m_mcPdgid);
     t_Cluster->Branch("mcStatus",    &m_mcStatus);
@@ -367,7 +372,6 @@ cout<<"Create output"<<endl;
 
 cout<<"Write tuples"<<endl;
   //---------------------Write Ana tuples-------------------------
-cout<<"  Write raw bars"<<endl;
   //Save Raw bars information
   ClearBar();
 
@@ -403,7 +407,6 @@ cout<<"  Write raw bars"<<endl;
   t_SimBar->Fill();
   // ------------------------------------
 
-cout<<"  Write localMax"<<endl;
   //Save Layer info (local Max)
   ClearLayer();
   std::vector<PandoraPlus::CaloHalfCluster*> m_halfclusters; m_halfclusters.clear();
@@ -457,7 +460,6 @@ cout<<"  Write localMax"<<endl;
   t_Layers->Fill();
 
 
-cout<<"  Write Hough info"<<endl;
   // ------------------------------------
   // yyy: check Hough cluster
   ClearHough();
@@ -524,7 +526,6 @@ cout<<"  Write Hough info"<<endl;
   t_Hough->Fill();
 
 
-cout<<"  Write track matching"<<endl;
   // ------------------------------------
   // yyy: TrackMatchingAlg
   ClearMatch();
@@ -554,11 +555,25 @@ cout<<"  Write track matching"<<endl;
 
 
   // ---------------------------------------------
-  // Save axis info
+  // Save axis info (Splitted showers in tower)
   ClearAxis();
   std::vector<const PandoraPlus::CaloHalfCluster*> m_allaxisU; m_allaxisU.clear();
   std::vector<const PandoraPlus::CaloHalfCluster*> m_allaxisV; m_allaxisV.clear();
-  for(int i=0; i<m_halfclusterU.size(); i++){
+
+  std::vector<PandoraPlus::Calo3DCluster*> m_towerCol;
+  int ntower = m_DataCol.map_CaloCluster["ESTower"].size();
+  for(int it=0; it<ntower; it++)
+    m_towerCol.push_back( m_DataCol.map_CaloCluster["ESTower"][it].get() );
+
+  for(int it=0; it<m_towerCol.size(); it++){
+    std::vector<const PandoraPlus::CaloHalfCluster*> m_HFClusUCol = m_towerCol.at(it)->getHalfClusterUCol("ESHalfClusterU");
+    std::vector<const PandoraPlus::CaloHalfCluster*> m_HFClusVCol = m_towerCol.at(it)->getHalfClusterVCol("ESHalfClusterV");
+
+    m_allaxisU.insert(m_allaxisU.end(), m_HFClusUCol.begin(), m_HFClusUCol.end());
+    m_allaxisV.insert(m_allaxisV.end(), m_HFClusVCol.begin(), m_HFClusVCol.end());
+  }
+
+/*  for(int i=0; i<m_halfclusterU.size(); i++){
     std::vector<const PandoraPlus::CaloHalfCluster*> tmp_clus = m_halfclusterU[i]->getHalfClusterCol("MergedAxis");
     //std::vector<const PandoraPlus::CaloHalfCluster*> tmp_clus = m_halfclusterU[i]->getAllHalfClusterCol();
     m_allaxisU.insert( m_allaxisU.end(), tmp_clus.begin(), tmp_clus.end() );
@@ -568,7 +583,7 @@ cout<<"  Write track matching"<<endl;
     //std::vector<const PandoraPlus::CaloHalfCluster*> tmp_clus = m_halfclusterV[i]->getAllHalfClusterCol();
     m_allaxisV.insert( m_allaxisV.end(), tmp_clus.begin(), tmp_clus.end() );
   }
-
+*/
   m_NaxisU = m_allaxisU.size();
   m_NaxisV = m_allaxisV.size();
   for(int iax=0; iax<m_allaxisU.size(); iax++){
@@ -607,7 +622,6 @@ cout<<"  Write track matching"<<endl;
   t_axis->Fill();
 
 
-cout<<"  Write splitted cluster"<<endl;
   // --------------------------------------------
   // Save splitted half cluster info
   std::vector<PandoraPlus::CaloHalfCluster*> vec_LongiU;
@@ -668,8 +682,22 @@ cout<<"  Write 3DClusters and MCP "<<endl;
     m_Clus_y.push_back( m_clusvec[ic]->getShowerCenter().y() );
     m_Clus_z.push_back( m_clusvec[ic]->getShowerCenter().z() );
     m_Clus_E.push_back( m_clusvec[ic]->getEnergy() );
+    m_Clus_Px.push_back( m_clusvec[ic]->getAxis().x() );
+    m_Clus_Py.push_back( m_clusvec[ic]->getAxis().y() );
+    m_Clus_Pz.push_back( m_clusvec[ic]->getAxis().z() );
     m_Clus_Nhit.push_back( m_clusvec[ic]->getCluster().size() );
     m_Clus_Ntrk.push_back( m_clusvec[ic]->getAssociatedTracks().size() );
+    if( m_clusvec[ic]->getAssociatedTracks().size()>=1 ) m_Clus_Ptrk.push_back( m_clusvec[ic]->getAssociatedTracks()[0]->getMomentum() );
+    else m_Clus_Ptrk.push_back(-99.);
+
+    for(int ihit=0; ihit<m_clusvec[ic]->getCluster().size(); ihit++){
+      m_Clus_hitx.push_back( m_clusvec[ic]->getCluster()[ihit]->getPos().x() );
+      m_Clus_hity.push_back( m_clusvec[ic]->getCluster()[ihit]->getPos().y() );
+      m_Clus_hitz.push_back( m_clusvec[ic]->getCluster()[ihit]->getPos().z() );
+      m_Clus_hitE.push_back( m_clusvec[ic]->getCluster()[ihit]->getEnergy() );
+      m_Clus_hittag.push_back( m_clusvec[ic]->getEnergy() );
+      m_Clus_hittag_trk.push_back( m_clusvec[ic]->getAssociatedTracks().size() );
+    }
 
     //For HCAL cluster
 //    m_Clus_x.push_back( m_clusvec[ic]->getHitCenter().x() );
@@ -712,7 +740,7 @@ cout<<"  Write 3DClusters and MCP "<<endl;
   m_Ntrk = m_trkCol.size();
   for(int itrk=0; itrk<m_Ntrk; itrk++){
     m_type.push_back(m_trkCol[itrk]->getType());
-    std::vector<TrackState> AllTrackStates = m_trkCol[itrk]->getAllTrackStates();
+    std::vector<TrackState> AllTrackStates = m_trkCol[itrk]->getTrackStates("Input");
     for(int istate=0; istate<AllTrackStates.size(); istate++){
       m_trkstate_d0.push_back( AllTrackStates[istate].D0 );
       m_trkstate_z0.push_back( AllTrackStates[istate].Z0 );
@@ -742,7 +770,6 @@ cout<<"  Write 3DClusters and MCP "<<endl;
 
 StatusCode PandoraPlusPFAlg::finalize()
 {
-cout<<"Write in file"<<endl;
   m_wfile->cd();
   t_SimBar->Write();
   t_Layers->Write();
@@ -754,16 +781,13 @@ cout<<"Write in file"<<endl;
   t_Track->Write();
   t_axis->Write();
   m_wfile->Close();
-cout<<"Delete trees and file"<<endl;
   delete m_wfile, t_SimBar, t_Layers, t_Hough, t_Match, t_LongiClus, t_Cluster, t_Track, t_axis;
 
-cout<<"Delete Creators"<<endl;
   delete m_pMCParticleCreator;
   delete m_pTrackCreator; 
   delete m_pCaloHitsCreator;
   delete m_pOutputCreator;
 
-cout<<"Delete edm4hep Collections"<<endl;
   delete r_MCParticleCol;
   for(auto iter : r_TrackCols) delete iter; 
   for(auto iter : r_ECalHitCols) delete iter; 
@@ -882,6 +906,10 @@ void PandoraPlusPFAlg::ClearCluster(){
   m_Clus_y.clear();
   m_Clus_z.clear();
   m_Clus_E.clear();
+  m_Clus_Px.clear();
+  m_Clus_Py.clear();
+  m_Clus_Pz.clear();
+  m_Clus_Ptrk.clear();
   m_Clus_Ntrk.clear();
   m_Clus_Nhit.clear();
   m_Clus_hitx.clear();
@@ -889,6 +917,7 @@ void PandoraPlusPFAlg::ClearCluster(){
   m_Clus_hitz.clear();
   m_Clus_hitE.clear();
   m_Clus_hittag.clear();
+  m_Clus_hittag_trk.clear();
   m_mcPdgid.clear();
   m_mcStatus.clear();
   m_mcPx.clear();

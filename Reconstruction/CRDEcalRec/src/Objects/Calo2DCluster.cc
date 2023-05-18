@@ -112,7 +112,7 @@ namespace PandoraPlus{
     TVector3 m_pos(0, 0, 0); 
     if(towerID.size()==0) return m_pos; 
 
-    float rotAngle = towerID[0][0]*TMath::Pi()/4.;
+    float rotAngle = -towerID[0][0]*TMath::Pi()/4.;
     TVector3 m_vecX(0., 0., 0.);  
     TVector3 m_vecY(0., 0., 0.);
     for(int m=0; m<barShowerUCol.size(); m++) m_vecX += barShowerUCol[m]->getPos();
