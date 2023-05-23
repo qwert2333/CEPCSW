@@ -207,6 +207,7 @@ tracking.FTDRawHitCollection = ftdhitname
 tracking.UseSIT = True
 tracking.SmoothOn = False
 tracking.DumpTime = False
+tracking.NDivisionsInTheta = 10
 #tracking.OutputLevel = DEBUG
 
 from Configurables import ForwardTrackingAlg
@@ -256,8 +257,9 @@ full.TPCTracks = "ClupatraTracks" # add standalone TPC or DC track here
 full.SiTracks  = "SubsetTracks"
 full.OutputTracks  = "MarlinTrkTracks"
 full.DumpTime = False
-#full.SITHitToTrackDistance = 3.
-#full.SETHitToTrackDistance = 5.
+full.SITHitToTrackDistance = 3.
+full.SETHitToTrackDistance = 5.
+full.MinChi2ProbForSiliconTracks = 0
 #full.OutputLevel = DEBUG
 
 dedxoption = "BetheBlochEquationDedxSimTool"
