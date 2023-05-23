@@ -287,6 +287,8 @@ StatusCode PandoraPlusPFAlg::initialize()
     t_Cluster->Branch("mcPy", &m_mcPy);
     t_Cluster->Branch("mcPz", &m_mcPz);
     t_Cluster->Branch("mcEn", &m_mcEn);
+    t_Cluster->Branch("mcMass", &m_mcMass);
+    t_Cluster->Branch("mcCharge", &m_mcCharge);
     t_Cluster->Branch("mcEPr", &m_mcEPr);
 
 
@@ -472,7 +474,7 @@ cout<<"Write tuples"<<endl;
     std::vector<const PandoraPlus::CaloHalfCluster*> tmp_clus = m_DataCol.map_HalfCluster["HalfClusterColU"][i].get()->getHalfClusterCol("HoughAxis"); 
     m_houghaxisU.insert( m_houghaxisU.end(), tmp_clus.begin(), tmp_clus.end() );
   }
-  for(int i=0; i<m_halfclusterV.size(); i++){
+  for(int i=0; i<m_DataCol.map_HalfCluster["HalfClusterColV"].size(); i++){
     m_halfclusterV.push_back( m_DataCol.map_HalfCluster["HalfClusterColV"][i].get() );
     std::vector<const PandoraPlus::CaloHalfCluster*> tmp_clus = m_DataCol.map_HalfCluster["HalfClusterColV"][i].get()->getHalfClusterCol("HoughAxis");
     m_houghaxisV.insert( m_houghaxisV.end(), tmp_clus.begin(), tmp_clus.end() );
@@ -724,6 +726,8 @@ cout<<"  Write 3DClusters and MCP "<<endl;
     m_mcPy.push_back( m_MCPCol[imc].getMomentum()[1] );
     m_mcPz.push_back( m_MCPCol[imc].getMomentum()[2] );
     m_mcEn.push_back( m_MCPCol[imc].getEnergy() );
+    m_mcMass.push_back( m_MCPCol[imc].getMass() );
+    m_mcCharge.push_back( m_MCPCol[imc].getCharge() );
     m_mcEPr.push_back( sqrt(m_MCPCol[imc].getEndpoint()[0]*m_MCPCol[imc].getEndpoint()[0]+m_MCPCol[imc].getEndpoint()[1]*m_MCPCol[imc].getEndpoint()[1]) );
   }
   t_Cluster->Fill();
@@ -924,6 +928,8 @@ void PandoraPlusPFAlg::ClearCluster(){
   m_mcPy.clear();
   m_mcPz.clear();
   m_mcEn.clear();
+  m_mcMass.clear();
+  m_mcCharge.clear();
   m_mcEPr.clear();
 }
 
