@@ -60,6 +60,7 @@ namespace PandoraPlus {
     void addUnit(const Calo1DCluster* _1dcluster);
     void setLocalMax( std::string name, std::vector<const Calo1DCluster*> _col) { map_localMax[name]=_col; }
     void setHalfClusters( std::string name, std::vector<const PandoraPlus::CaloHalfCluster*>& _cl) { map_halfClusCol[name]=_cl; }
+    void addHalfCluster(std::string name, const PandoraPlus::CaloHalfCluster* _cl) { map_halfClusCol[name].push_back(_cl); }
     void addCousinCluster( const PandoraPlus::CaloHalfCluster* _cl ) { map_halfClusCol["CousinCluster"].push_back(_cl); }
     void setHoughPars(double _a, double _r) { Hough_alpha=_a; Hough_rho=_r; }
     void setIntercept(double _in) { Hough_intercept=_in; }
