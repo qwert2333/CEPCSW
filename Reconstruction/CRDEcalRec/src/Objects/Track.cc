@@ -50,7 +50,7 @@ namespace PandoraPlus{
     float pz = -99.;
     for(auto it: trkStates){
       if(it.location==4){
-        pz = it.tanLambda*it.Kappa;
+        pz = it.tanLambda/it.Kappa;
       }
     }
 
