@@ -339,5 +339,11 @@ namespace PandoraPlus{
 
   }
 
+
+  void CaloHalfCluster::deleteCousinCluster( const PandoraPlus::CaloHalfCluster* _cl ){
+    auto iter = find( map_halfClusCol["CousinCluster"].begin(), map_halfClusCol["CousinCluster"].end(), _cl );
+    if(iter!=map_halfClusCol["CousinCluster"].end()) map_halfClusCol["CousinCluster"].erase( iter );
+  }
+
 };
 #endif

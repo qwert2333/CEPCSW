@@ -182,6 +182,11 @@ namespace PandoraPlus{
     //if( find( m_staves.begin(), m_staves.end(), _bar->getStave())==m_staves.end() )     m_staves.push_back(_bar->getStave());
   }
 
+  void Calo1DCluster::deleteCousinCluster( const PandoraPlus::Calo1DCluster* _cl ){
+    auto iter = find( CousinClusters.begin(), CousinClusters.end(), _cl );
+    if(iter!=CousinClusters.end()) CousinClusters.erase( iter );
+  }
+
 
   void Calo1DCluster::setIDInfo() {
     for(int i=0; i<Bars.size(); i++){

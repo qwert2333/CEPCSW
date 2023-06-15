@@ -176,7 +176,7 @@ protected:
   FloatVec m_Clus_x, m_Clus_y, m_Clus_z, m_Clus_E, m_Clus_Px, m_Clus_Py, m_Clus_Pz, m_Clus_Ptrk;
   FloatVec m_Clus_hitx, m_Clus_hity, m_Clus_hitz, m_Clus_hitE, m_Clus_hittag, m_Clus_hittag_trk;
   IntVec m_mcPdgid, m_mcStatus;
-  FloatVec m_mcPx, m_mcPy, m_mcPz, m_mcEn, m_mcMass, m_mcCharge, m_mcEPr;
+  FloatVec m_mcPx, m_mcPy, m_mcPz, m_mcEn, m_mcMass, m_mcCharge, m_mcEPx, m_mcEPy, m_mcEPz;
 
   TTree *t_Shower;
   int m_Nshowers;

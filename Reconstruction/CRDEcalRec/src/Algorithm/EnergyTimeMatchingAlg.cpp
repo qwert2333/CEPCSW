@@ -52,15 +52,15 @@ printf(" HalfCluster size (%d, %d), input total energy %.3f \n", m_HFClusUCol.si
 //for(int icl=0; icl<m_HFClusUCol.size(); icl++) printf("    In HFClusU #%d: track size = %d \n", icl, m_HFClusUCol[icl]->getAssociatedTracks().size() );
 //for(int icl=0; icl<m_HFClusVCol.size(); icl++) printf("    In HFClusV #%d: track size = %d \n", icl, m_HFClusVCol[icl]->getAssociatedTracks().size() );
 
-cout<<"  Print HFClusU"<<endl;
-for(int i=0; i<m_HFClusUCol.size(); i++)
-  printf("    Pos+E (%.3f, %.3f, %.3f, %.3f), address %p \n", m_HFClusUCol[i]->getPos().x(), m_HFClusUCol[i]->getPos().y(), m_HFClusUCol[i]->getPos().z(), m_HFClusUCol[i]->getEnergy(), m_HFClusUCol[i] );
-cout<<endl;
+//cout<<"  Print HFClusU"<<endl;
+//for(int i=0; i<m_HFClusUCol.size(); i++)
+//  printf("    Pos+E (%.3f, %.3f, %.3f, %.3f), address %p \n", m_HFClusUCol[i]->getPos().x(), m_HFClusUCol[i]->getPos().y(), m_HFClusUCol[i]->getPos().z(), m_HFClusUCol[i]->getEnergy(), m_HFClusUCol[i] );
+//cout<<endl;
 
-cout<<"  Print HFClusV"<<endl;
-for(int i=0; i<m_HFClusVCol.size(); i++)
-  printf("    Pos+E (%.3f, %.3f, %.3f, %.3f), address %p \n", m_HFClusVCol[i]->getPos().x(), m_HFClusVCol[i]->getPos().y(), m_HFClusVCol[i]->getPos().z(), m_HFClusVCol[i]->getEnergy(), m_HFClusVCol[i] );
-cout<<endl;
+//cout<<"  Print HFClusV"<<endl;
+//for(int i=0; i<m_HFClusVCol.size(); i++)
+//  printf("    Pos+E (%.3f, %.3f, %.3f, %.3f), address %p \n", m_HFClusVCol[i]->getPos().x(), m_HFClusVCol[i]->getPos().y(), m_HFClusVCol[i]->getPos().z(), m_HFClusVCol[i]->getEnergy(), m_HFClusVCol[i] );
+//cout<<endl;
 
 
     const int NclusX = m_HFClusUCol.size(); 
@@ -108,18 +108,18 @@ cout<<endl;
 
   }//End loop towers
 
-cout<<"  Print reconstructed cluster energy and trk: "<<endl;
+//cout<<"  Print reconstructed cluster energy and trk: "<<endl;
 //for(int i=0; i<m_clusterCol.size(); i++) cout<<"En = "<<m_clusterCol[i].get()->getEnergy()<<", trk size "<<m_clusterCol[i].get()->getAssociatedTracks().size()<<endl;
-for(int ic=0; ic<m_clusterCol.size(); ic++){
-  cout<<"    Cluster #"<<ic<<": En = "<<m_clusterCol[ic]->getEnergy()<<", Nhit = "<<m_clusterCol[ic]->getCluster().size()<<", Ntrk = "<<m_clusterCol[ic].get()->getAssociatedTracks().size();
-  printf(", pos (%.2f, %.2f, %.2f) \n", m_clusterCol[ic]->getShowerCenter().x(), m_clusterCol[ic]->getShowerCenter().y(), m_clusterCol[ic]->getShowerCenter().z());
+//for(int ic=0; ic<m_clusterCol.size(); ic++){
+//  cout<<"    Cluster #"<<ic<<": En = "<<m_clusterCol[ic]->getEnergy()<<", Nhit = "<<m_clusterCol[ic]->getCluster().size()<<", Ntrk = "<<m_clusterCol[ic].get()->getAssociatedTracks().size();
+//  printf(", pos (%.2f, %.2f, %.2f) \n", m_clusterCol[ic]->getShowerCenter().x(), m_clusterCol[ic]->getShowerCenter().y(), m_clusterCol[ic]->getShowerCenter().z());
 
-  cout<<"    Print hits: "<<endl;
-  for(int ihit=0; ihit<m_clusterCol[ic]->getCluster().size(); ihit++){
-    printf("      Pos+E (%.3f, %.3f, %.3f, %.3f), address %p \n", m_clusterCol[ic]->getCluster()[ihit]->getPos().x(), m_clusterCol[ic]->getCluster()[ihit]->getPos().y(), m_clusterCol[ic]->getCluster()[ihit]->getPos().z(), m_clusterCol[ic]->getCluster()[ihit]->getEnergy(), m_clusterCol[ic]->getCluster()[ihit]);
-  }
-  cout<<endl;
-}
+//  cout<<"    Print hits: "<<endl;
+//  for(int ihit=0; ihit<m_clusterCol[ic]->getCluster().size(); ihit++){
+//    printf("      Pos+E (%.3f, %.3f, %.3f, %.3f), address %p \n", m_clusterCol[ic]->getCluster()[ihit]->getPos().x(), m_clusterCol[ic]->getCluster()[ihit]->getPos().y(), m_clusterCol[ic]->getCluster()[ihit]->getPos().z(), m_clusterCol[ic]->getCluster()[ihit]->getEnergy(), m_clusterCol[ic]->getCluster()[ihit]);
+//  }
+//  cout<<endl;
+//}
 
 
 //cout<<"Cluster Merge Type1: from 1DShower aspect"<<endl;
@@ -167,10 +167,11 @@ for(int ic=0; ic<m_clusterCol.size(); ic++){
       }
 
   }}
+//cout<<"  After Type1 merge: size = "<<m_clusterCol.size()<<endl;
 //cout<<"  Print reconstructed cluster energy and trk: "<<endl;
 //for(int i=0; i<m_clusterCol.size(); i++) cout<<"En = "<<m_clusterCol[i].get()->getEnergy()<<", trk size "<<m_clusterCol[i].get()->getAssociatedTracks().size()<<endl;
 
-
+/*
 //cout<<"Cluster Merge Type2: from HalfCluster aspect"<<endl;
   //  Type2: from longiCluster aspect
   for(int ic=0; ic<m_clusterCol.size() && m_clusterCol.size()>1; ic++){
@@ -184,17 +185,19 @@ for(int ic=0; ic<m_clusterCol.size(); ic++){
 
       std::vector<const PandoraPlus::CaloHalfCluster*> m_cousinU = m_clusterCol[ic].get()->getHalfClusterUCol("LinkedLongiCluster")[0]->getHalfClusterCol("CousinCluster"); 
       std::vector<const PandoraPlus::CaloHalfCluster*> m_cousinV = m_clusterCol[ic].get()->getHalfClusterVCol("LinkedLongiCluster")[0]->getHalfClusterCol("CousinCluster"); 
-      if( find(m_cousinU.begin(), m_cousinU.end(), m_clusterCol[jc].get()->getHalfClusterUCol("LinkedLongiCluster")[0] )!=m_cousinU.end() ||
-          find(m_cousinV.begin(), m_cousinV.end(), m_clusterCol[jc].get()->getHalfClusterVCol("LinkedLongiCluster")[0] )!=m_cousinV.end() ){
+      if( find(m_cousinU.begin(), m_cousinU.end(), m_clusterCol[jc].get()->getHalfClusterUCol("LinkedLongiCluster")[0] )!=m_cousinU.end() &&
+          find(m_cousinV.begin(), m_cousinV.end(), m_clusterCol[jc].get()->getHalfClusterVCol("LinkedLongiCluster")[0] )!=m_cousinV.end() && 
+          m_clusterCol[ic].get()->getShowerCenter().Angle( m_clusterCol[jc].get()->getShowerCenter() )<0.05 ){ //3deg, ~10cm in ECAL. 
         m_clusterCol[ic].get()->mergeCluster( m_clusterCol[jc].get() );
         m_clusterCol.erase(m_clusterCol.begin()+jc);
         jc--;
         if(jc<ic) jc=ic;
       }        
   }}
-//cout<<"  Print reconstructed cluster energy and trk: "<<endl;
-//for(int i=0; i<m_clusterCol.size(); i++) cout<<"En = "<<m_clusterCol[i].get()->getEnergy()<<", trk size "<<m_clusterCol[i].get()->getAssociatedTracks().size()<<endl;
-
+cout<<"  After Type2 merge: size = "<<m_clusterCol.size()<<endl;
+cout<<"  Print reconstructed cluster energy and trk: "<<endl;
+for(int i=0; i<m_clusterCol.size(); i++) cout<<"En = "<<m_clusterCol[i].get()->getEnergy()<<", trk size "<<m_clusterCol[i].get()->getAssociatedTracks().size()<<endl;
+*/
 
 
 //cout<<"Cluster Merge Tyep3: merge clusters linked to the same track. Cluster size: "<<m_clusterCol.size()<<endl;
@@ -462,6 +465,7 @@ StatusCode EnergyTimeMatchingAlg::XYClusterMatchingL2( std::vector<const Pandora
   std::map<int, std::vector<std::vector<const PandoraPlus::Calo1DCluster*>> > map_showersXinlayer; map_showersXinlayer.clear();
   std::map<int, std::vector<std::vector<const PandoraPlus::Calo1DCluster*>> > map_showersYinlayer; map_showersYinlayer.clear();
 
+
   //Find layers need to match.
 //cout<<"  XYClusterMatchingL2: Find layers need to match "<<endl;
   for(int ic=0; ic<m_ClUCol.size(); ic++){
@@ -479,10 +483,12 @@ StatusCode EnergyTimeMatchingAlg::XYClusterMatchingL2( std::vector<const Pandora
   //Fill shower maps
 //cout<<"  XYClusterMatchingL2: Fill shower maps"<<endl;  
   for(int il=0; il<layerindex.size(); il++){
-    for(int ic=0; ic<m_ClUCol.size(); ic++)
+    for(int ic=0; ic<m_ClUCol.size(); ic++){
       map_showersXinlayer[layerindex[il]].push_back( m_ClUCol[ic]->getClusterInLayer(layerindex[il]) );
-    for(int ic=0; ic<m_ClVCol.size(); ic++)
+    }
+    for(int ic=0; ic<m_ClVCol.size(); ic++){
       map_showersYinlayer[layerindex[il]].push_back( m_ClVCol[ic]->getClusterInLayer(layerindex[il]) );
+    }
   }
 //cout<<"  XYClusterMatchingL2: map size X "<<map_showersXinlayer.size()<<", Y "<<map_showersYinlayer.size()<<endl;
 
@@ -510,8 +516,8 @@ StatusCode EnergyTimeMatchingAlg::XYClusterMatchingL2( std::vector<const Pandora
 
       if(m_ClUCol[ic]->getHalfClusterCol("CousinCluster").size()!=0 && m_ClVCol[jc]->getHalfClusterCol("CousinCluster").size()!=0) 
         sumchi2[ic][jc] = 0.;
-      if( m_ClUCol[ic]->getAssociatedTracks().size()==1 && m_ClVCol[jc]->getAssociatedTracks().size()==1 &&
-          m_ClUCol[ic]->getAssociatedTracks()[0]==m_ClVCol[jc]->getAssociatedTracks()[0] )
+      else if( m_ClUCol[ic]->getAssociatedTracks().size()==1 && m_ClVCol[jc]->getAssociatedTracks().size()==1 &&
+               m_ClUCol[ic]->getAssociatedTracks()[0]==m_ClVCol[jc]->getAssociatedTracks()[0] )
         sumchi2[ic][jc] = 0.;
       else sumchi2[ic][jc] += map_chi2[il][ic][jc];
     }
@@ -568,25 +574,25 @@ StatusCode EnergyTimeMatchingAlg::XYClusterMatchingL3( std::vector<const Pandora
 {
   if( m_ClUCol.size()==0 || m_ClVCol.size()==0 ) return StatusCode::SUCCESS;
 
-//cout<<"  XYClusterMatchingL3: HalfCluster size "<<m_ClUCol.size()<<", "<<m_ClVCol.size()<<endl;
-/*
+cout<<"  XYClusterMatchingL3: HalfCluster size "<<m_ClUCol.size()<<", "<<m_ClVCol.size()<<endl;
+
 for(int icl=0; icl<m_ClUCol.size(); icl++){
-  cout<<"      In HFClusU #"<<icl<<": shower size = "<<m_ClUCol[icl]->getCluster().size()<<endl;
-  for(auto ish : m_ClUCol[icl]->getCluster()){
-    printf("          Shower layer %d, Pos+E (%.3f, %.3f, %.3f, %.3f), Nbars %d, NSeed %d \n ", ish->getDlayer(), ish->getPos().x(), ish->getPos().y(), ish->getPos().z(), ish->getEnergy(), ish->getBars().size(),  ish->getNseeds() );
-    cout<<endl;
-  }
+  cout<<"      In HFClusU #"<<icl<<": shower size = "<<m_ClUCol[icl]->getCluster().size();
+  cout<<", cousin cluster size = "<<m_ClUCol[icl]->getHalfClusterCol("CousinCluster").size()<<endl;
+  //for(auto ish : m_ClUCol[icl]->getCluster()){
+  //  printf("          Shower layer %d, Pos+E (%.3f, %.3f, %.3f, %.3f), Nbars %d, NSeed %d \n ", ish->getDlayer(), ish->getPos().x(), ish->getPos().y(), ish->getPos().z(), ish->getEnergy(), ish->getBars().size(),  ish->getNseeds() );
+  //}
 }
 cout<<endl;
 
 for(int icl=0; icl<m_ClVCol.size(); icl++){
-  cout<<"      In HFClusV #"<<icl<<": shower size = "<<m_ClVCol[icl]->getCluster().size()<<endl;
-  for(auto ish : m_ClVCol[icl]->getCluster()){
-    printf("          Shower layer %d, Pos+E (%.3f, %.3f, %.3f, %.3f), Nbars %d, NSeed %d \n ", ish->getDlayer(), ish->getPos().x(), ish->getPos().y(), ish->getPos().z(), ish->getEnergy(), ish->getBars().size(),  ish->getNseeds() );
-    cout<<endl;
-  }
+  cout<<"      In HFClusV #"<<icl<<": shower size = "<<m_ClVCol[icl]->getCluster().size();
+  cout<<", cousin cluster size = "<<m_ClVCol[icl]->getHalfClusterCol("CousinCluster").size()<<endl;
+  //for(auto ish : m_ClVCol[icl]->getCluster()){
+  //  printf("          Shower layer %d, Pos+E (%.3f, %.3f, %.3f, %.3f), Nbars %d, NSeed %d \n ", ish->getDlayer(), ish->getPos().x(), ish->getPos().y(), ish->getPos().z(), ish->getEnergy(), ish->getBars().size(),  ish->getNseeds() );
+  //}
 }
-*/
+
 
   std::vector<int> layerindex; layerindex.clear();
   std::map<int, std::vector<std::vector<const PandoraPlus::Calo1DCluster*>> > map_showersXinlayer; map_showersXinlayer.clear();
@@ -626,7 +632,7 @@ for(int icl=0; icl<m_ClVCol.size(); icl++){
     map_chi2[layerindex[il]-1] = GetClusterChi2Map(m_showerXcol, m_showerYcol);
   }
 
-//cout<<"  XYClusterMatchingL3: Print Sumchi2 matrix"<<endl;
+cout<<"  XYClusterMatchingL3: Print Sumchi2 matrix"<<endl;
   map<double, pair<int, int> > m_chi2Map; m_chi2Map.clear();
   for(int ic=0; ic<NclusU; ic++){
   for(int jc=0; jc<NclusV; jc++){
@@ -635,16 +641,16 @@ for(int icl=0; icl<m_ClVCol.size(); icl++){
 
       if(m_ClUCol[ic]->getHalfClusterCol("CousinCluster").size()!=0 && m_ClVCol[jc]->getHalfClusterCol("CousinCluster").size()!=0)
         sumchi2[ic][jc] = 0.;
-      if( m_ClUCol[ic]->getAssociatedTracks().size()==1 && m_ClVCol[jc]->getAssociatedTracks().size()==1 &&
-          m_ClUCol[ic]->getAssociatedTracks()[0]==m_ClVCol[jc]->getAssociatedTracks()[0] )
+      else if( m_ClUCol[ic]->getAssociatedTracks().size()==1 && m_ClVCol[jc]->getAssociatedTracks().size()==1 &&
+               m_ClUCol[ic]->getAssociatedTracks()[0]==m_ClVCol[jc]->getAssociatedTracks()[0] )
         sumchi2[ic][jc] = 0.;
       else sumchi2[ic][jc] += map_chi2[il][ic][jc];
     }
     pair<int, int> p1(ic, jc);
     m_chi2Map[sumchi2[ic][jc]] = p1;
-//cout<<sumchi2[ic][jc]<<'\t';
+cout<<sumchi2[ic][jc]<<'\t';
   }
-//cout<<endl;
+cout<<endl;
   }
 
   //pickout pairs <indexVec> with smallest chi2:

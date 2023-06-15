@@ -289,7 +289,9 @@ StatusCode PandoraPlusPFAlg::initialize()
     t_Cluster->Branch("mcEn", &m_mcEn);
     t_Cluster->Branch("mcMass", &m_mcMass);
     t_Cluster->Branch("mcCharge", &m_mcCharge);
-    t_Cluster->Branch("mcEPr", &m_mcEPr);
+    t_Cluster->Branch("mcEPx", &m_mcEPx);
+    t_Cluster->Branch("mcEPy", &m_mcEPy);
+    t_Cluster->Branch("mcEPz", &m_mcEPz);
 
 
     // Tracks
@@ -728,7 +730,9 @@ cout<<"  Write 3DClusters and MCP "<<endl;
     m_mcEn.push_back( m_MCPCol[imc].getEnergy() );
     m_mcMass.push_back( m_MCPCol[imc].getMass() );
     m_mcCharge.push_back( m_MCPCol[imc].getCharge() );
-    m_mcEPr.push_back( sqrt(m_MCPCol[imc].getEndpoint()[0]*m_MCPCol[imc].getEndpoint()[0]+m_MCPCol[imc].getEndpoint()[1]*m_MCPCol[imc].getEndpoint()[1]) );
+    m_mcEPx.push_back( m_MCPCol[imc].getEndpoint()[0] );
+    m_mcEPy.push_back( m_MCPCol[imc].getEndpoint()[1] );
+    m_mcEPz.push_back( m_MCPCol[imc].getEndpoint()[2] );
   }
   t_Cluster->Fill();
 
@@ -930,7 +934,9 @@ void PandoraPlusPFAlg::ClearCluster(){
   m_mcEn.clear();
   m_mcMass.clear();
   m_mcCharge.clear();
-  m_mcEPr.clear();
+  m_mcEPx.clear();
+  m_mcEPy.clear();
+  m_mcEPz.clear();
 }
 
 

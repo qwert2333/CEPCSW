@@ -53,6 +53,7 @@ namespace PandoraPlus{
     void setSeeds( std::vector<const PandoraPlus::CaloUnit*> _seeds) { Seeds = _seeds; }
     void addCousinCluster( const PandoraPlus::Calo1DCluster* clus ) { CousinClusters.push_back(clus); }
     void addChildCluster( const PandoraPlus::Calo1DCluster* clus ) { ChildClusters.push_back(clus); }
+    void deleteCousinCluster( const PandoraPlus::Calo1DCluster* _cl );
     void setSeed();  //Set the most energitic unit as seed, Eseed>5 MeV (hardcoded). 
     void setIDInfo(); 
 
