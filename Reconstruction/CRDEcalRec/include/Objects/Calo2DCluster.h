@@ -48,7 +48,8 @@ namespace PandoraPlus {
     void addUnit(const Calo1DCluster* _1dcluster);
     void addTowerID(int _m, int _p, int _s) { std::vector<int> id(3); id[0] = _m; id[1] = _p; id[2] = _s; towerID.push_back(id); }
     void addTowerID(std::vector<int> id) { towerID.push_back(id); }
-	
+    void setTowerID(std::vector<int> id) { towerID.clear(); towerID.push_back(id); }
+
   private:
     std::vector< std::vector<int> > towerID; //[module, part, stave]
 

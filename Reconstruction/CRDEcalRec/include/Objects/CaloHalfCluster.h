@@ -46,6 +46,8 @@ namespace PandoraPlus {
     std::map<std::string, std::vector<const PandoraPlus::CaloHalfCluster*> > getHalfClusterMap() const {return map_halfClusCol; }
     std::map<std::string, std::vector<const PandoraPlus::Calo1DCluster*> > getLocalMaxMap() const {return map_localMax; }
     std::vector<const PandoraPlus::Track*> getAssociatedTracks() const { return m_TrackCol; }
+    std::vector< std::pair<edm4hep::MCParticle, float> > getLinkedMCP() const { return MCParticleWeight; }
+    std::vector< std::pair<edm4hep::MCParticle, float> > getLinkedMCPfromUnit();
 
     int getBeginningDlayer() const;
     int getEndDlayer() const;
@@ -68,7 +70,10 @@ namespace PandoraPlus {
     void mergeHalfCluster( const CaloHalfCluster* clus );
     void addTowerID(int _m, int _p, int _s) { std::vector<int> id(3); id[0] = _m; id[1] = _p; id[2] = _s; towerID.push_back(id); }
     void addTowerID(std::vector<int> id) { towerID.push_back(id); }
+    void setTowerID(std::vector<int> id) { towerID.clear(); towerID.push_back(id); }
     void addAssociatedTrack(const PandoraPlus::Track* _track){ m_TrackCol.push_back(_track); }
+    void addLinkedMCP( std::pair<edm4hep::MCParticle, float> _pair ) { MCParticleWeight.push_back(_pair); }
+    void setLinkedMCP( std::vector<std::pair<edm4hep::MCParticle, float>> _pairVec ) { MCParticleWeight.clear(); MCParticleWeight = _pairVec; }
     void mergeClusterInLayer(); 
 
 
@@ -86,6 +91,7 @@ namespace PandoraPlus {
     std::map<std::string, std::vector<const PandoraPlus::Calo1DCluster*> > map_localMax;
     std::map<std::string, std::vector<const PandoraPlus::CaloHalfCluster*> > map_halfClusCol;  
     std::vector<const PandoraPlus::Track*> m_TrackCol;
+    std::vector< std::pair<edm4hep::MCParticle, float> > MCParticleWeight;
 
     TrackFitInEcal* track = new TrackFitInEcal();
 

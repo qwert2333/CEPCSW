@@ -18,10 +18,14 @@ namespace PandoraPlus{
     ~CaloHitsCreator() {};
    
     StatusCode CreateCaloHits( PandoraPlusDataCol& m_DataCol,
-                               std::vector<DataHandle<edm4hep::CalorimeterHitCollection>*>& r_ECalHitCols, 
-                               std::map<std::string, dd4hep::DDSegmentation::BitFieldCoder*>& map_decoder  ); 
-   
-    StatusCode Clustering( PandoraPlusDataCol& m_DataCol ) { return StatusCode::SUCCESS; };
+                               std::vector<DataHandle<edm4hep::CalorimeterHitCollection>*>& r_CaloHitCols, 
+                               std::map<std::string, dd4hep::DDSegmentation::BitFieldCoder*>& map_decoder, 
+                               DataHandle<edm4hep::MCRecoCaloParticleAssociationCollection>* r_MCParticleRecoCaloCol ); 
+
+    //StatusCode CreateMCParticleCaloHitsAsso( std::vector<DataHandle<edm4hep::CalorimeterHitCollection>*>& r_CaloHitCols, 
+    //                                         DataHandle<edm4hep::MCRecoCaloParticleAssociationCollection>* r_MCParticleRecoCaloCol );
+
+    //StatusCode Clustering( PandoraPlusDataCol& m_DataCol ) { return StatusCode::SUCCESS; };
    
     StatusCode Reset() { return StatusCode::SUCCESS; };
 

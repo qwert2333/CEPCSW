@@ -10,7 +10,8 @@ namespace PandoraPlus{
 
   StatusCode CaloHitsCreator::CreateCaloHits( PandoraPlusDataCol& m_DataCol, 
                                               std::vector<DataHandle<edm4hep::CalorimeterHitCollection>*>& r_CaloHitCols, 
-                                              std::map<std::string, dd4hep::DDSegmentation::BitFieldCoder*>& map_decoder )
+                                              std::map<std::string, dd4hep::DDSegmentation::BitFieldCoder*>& map_decoder,
+                                              DataHandle<edm4hep::MCRecoCaloParticleAssociationCollection>* r_MCParticleRecoCaloCol )
   {
     if(r_CaloHitCols.size()==0 || settings.map_stringVecPars.at("CaloHitCollections").size()==0) StatusCode::SUCCESS;
 
@@ -56,7 +57,8 @@ namespace PandoraPlus{
     //Convert to local objects: CalorimeterHit to CaloUnit (For ECALBarrel only)
     if(settings.map_stringPars.at("EcalType")=="BarEcal"){
       std::vector<std::shared_ptr<PandoraPlus::CaloUnit>> m_barCol; m_barCol.clear(); 
-   
+
+      const edm4hep::MCRecoCaloParticleAssociationCollection* const_MCPCaloAssoCol = r_MCParticleRecoCaloCol->get();   
       auto CaloHits = m_DataCol.collectionMap_CaloHit["ECALBarrel"]; 
       std::map<std::uint64_t, std::vector<PandoraPlus::CaloUnit> > map_cellID_hits; map_cellID_hits.clear();
       for(auto& hit : CaloHits){ 
@@ -65,6 +67,9 @@ namespace PandoraPlus{
         m_bar.setPosition( TVector3(hit.getPosition().x, hit.getPosition().y, hit.getPosition().z) );
         m_bar.setQ(hit.getEnergy(), hit.getEnergy());
         m_bar.setT(hit.getTime(), hit.getTime());
+        for(int ilink=0; ilink<const_MCPCaloAssoCol->size(); ilink++){
+          if( hit == const_MCPCaloAssoCol->at(ilink).getRec() ) m_bar.addLinkedMCP( std::make_pair(const_MCPCaloAssoCol->at(ilink).getSim(), const_MCPCaloAssoCol->at(ilink).getWeight()) );
+        } 
         map_cellID_hits[hit.getCellID()].push_back(m_bar);
       }
    
@@ -95,6 +100,9 @@ namespace PandoraPlus{
         m_bar->setBarLength(t_bar_length);
         //---oooOOO000OOOooo---set bar length---oooOOO000OOOooo---
 
+        //add MCParticle link
+        for(int ilink=0; ilink<hit.second[0].getLinkedMCP().size(); ilink++) m_bar->addLinkedMCP( hit.second[0].getLinkedMCP()[ilink] );
+
         m_barCol.push_back(m_bar);  //Save for later use in algorithms
       }
 
@@ -104,6 +112,7 @@ namespace PandoraPlus{
     }
     return StatusCode::SUCCESS;
   };
+
 };
 
 #endif

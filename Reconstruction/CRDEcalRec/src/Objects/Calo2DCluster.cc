@@ -67,12 +67,6 @@ namespace PandoraPlus{
     for(int ii=0; ii<id.size(); ii++) 
       if( find(towerID.begin(), towerID.end(), id[ii])==towerID.end() ) towerID.push_back(id[ii]);
 
-    //std::vector<int> m_1dmodules = _1dcluster->getModules();
-    //std::vector<int> m_1dparts = _1dcluster->getParts();
-    //std::vector<int> m_1dstaves = _1dcluster->getStaves();
-    //m_modules.insert(m_modules.end(),m_1dmodules.begin(),m_1dmodules.end());
-    //m_parts.insert(m_parts.end(),m_1dparts.begin(),m_1dparts.end());
-    //m_staves.insert(m_staves.end(),m_1dstaves.begin(),m_1dstaves.end());
   }
 
   std::vector<const Calo1DCluster*> Calo2DCluster::getCluster() const{ 

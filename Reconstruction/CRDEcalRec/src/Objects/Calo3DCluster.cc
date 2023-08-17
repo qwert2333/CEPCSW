@@ -196,7 +196,6 @@ namespace PandoraPlus{
     double result = 0;
     for(int m=0; m<m_2dclusters.size(); m++)
       result += m_2dclusters[m]->getEnergy();
-	
     return result;
   }
 

@@ -38,6 +38,7 @@ namespace PandoraPlus{
     for(int itrk=0; itrk<m_TrackCol.size(); itrk++) m_clus->addAssociatedTrack(m_TrackCol[itrk]);
     for(auto iter:map_localMax)     m_clus->setLocalMax( iter.first, iter.second );
     for(auto iter:map_halfClusCol)  m_clus->setHalfClusters( iter.first, iter.second );
+    m_clus->setLinkedMCP( MCParticleWeight );
     m_clus->setHoughPars( Hough_alpha, Hough_rho );
     m_clus->setIntercept( Hough_intercept );
     m_clus->setType( type );
@@ -317,32 +318,89 @@ namespace PandoraPlus{
 
 
   void CaloHalfCluster::mergeClusterInLayer(){
-    std::map<int, std::vector<const Calo1DCluster*>> showersinlayer; showersinlayer.clear();
-    for(int is=0; is<m_1dclusters.size(); is++)
-      showersinlayer[m_1dclusters[is]->getDlayer()].push_back( m_1dclusters[is] );
+    //std::map<std::vector<int>, std::vector<const Calo1DCluster*>> map_showerinTowers; map_showerinTowers.clear();
+    //for(int is=0; is<m_1dclusters.size(); is++){
+    //  if(m_1dclusters[is]->getNseeds()==0) continue;
+    //  std::vector<int> m_seedID(3);
+    //  m_seedID[0] = m_1dclusters[is]->getSeeds()[0]->getModule();
+    //  m_seedID[1] = m_1dclusters[is]->getSeeds()[0]->getPart();
+    //  m_seedID[2] = m_1dclusters[is]->getSeeds()[0]->getStave();
+    //  map_showerinTowers[m_seedID].push_back( m_1dclusters[is] );
+    //}
 
-    m_1dclusters.clear();    
-    for(auto &iter : showersinlayer){
-      std::vector<const Calo1DCluster*> tmp_shower = iter.second; 
-      if(tmp_shower.size()>1){
-        //Merge following showers into the first: 
-        for(int is=1; is<tmp_shower.size(); is++){
-          for(int icl=0; icl<tmp_shower[is]->getBars().size(); icl++){
-            const_cast<PandoraPlus::Calo1DCluster*>(tmp_shower[0])->addUnit(tmp_shower[is]->getBars()[icl]);
+    //m_1dclusters.clear();    
+    //for(auto itower : map_showerinTowers){
+
+      std::map<int, std::vector<const Calo1DCluster*>> showersinlayer; showersinlayer.clear();
+      //for(int is=0; is<itower.second.size(); is++)
+        //showersinlayer[itower.second[is]->getDlayer()].push_back( itower.second[is] );
+      for(int is=0; is<m_1dclusters.size(); is++)
+        showersinlayer[m_1dclusters[is]->getDlayer()].push_back( m_1dclusters[is] );
+
+      m_1dclusters.clear();    
+      for(auto &iter : showersinlayer){
+        std::vector<const Calo1DCluster*> tmp_shower = iter.second; 
+        if(tmp_shower.size()>1){
+          //Merge following showers into the first: 
+   
+          PandoraPlus::CaloUnit* p_seed = nullptr;
+          float maxEseed = -99;
+          for(int is=0; is<tmp_shower[0]->getNseeds(); is++){
+            if(tmp_shower[0]->getSeeds()[is]->getEnergy()>maxEseed){
+              p_seed = const_cast<PandoraPlus::CaloUnit*>(tmp_shower[0]->getSeeds()[is]);
+              maxEseed=tmp_shower[0]->getSeeds()[is]->getEnergy();
+            }
           }
-          tmp_shower.erase(tmp_shower.begin()+is);
-          is--;
+          
+          for(int is=1; is<tmp_shower.size(); is++){
+            //Find maxE as seed
+            for(int iseed=0; iseed<tmp_shower[is]->getNseeds(); iseed++){
+              if(tmp_shower[is]->getSeeds()[iseed]->getEnergy()>maxEseed){ 
+                p_seed = const_cast<PandoraPlus::CaloUnit*>(tmp_shower[is]->getSeeds()[iseed]); 
+                maxEseed=tmp_shower[is]->getSeeds()[iseed]->getEnergy(); 
+              }
+            }
+            //Bars
+            for(int icl=0; icl<tmp_shower[is]->getBars().size(); icl++){
+              const_cast<PandoraPlus::Calo1DCluster*>(tmp_shower[0])->addUnit(tmp_shower[is]->getBars()[icl]);
+            }
+            tmp_shower.erase(tmp_shower.begin()+is);
+            is--;
+          }
+          if(p_seed){
+            std::vector<const PandoraPlus::CaloUnit*> tmp_seed; tmp_seed.clear();
+            tmp_seed.push_back(p_seed);
+            const_cast<PandoraPlus::Calo1DCluster*>(tmp_shower[0])->setSeeds( tmp_seed );
+          }
         }
+   
+        addUnit(tmp_shower[0]);
       }
-      addUnit(tmp_shower[0]);
-    }
-
+    //}
   }
 
 
   void CaloHalfCluster::deleteCousinCluster( const PandoraPlus::CaloHalfCluster* _cl ){
     auto iter = find( map_halfClusCol["CousinCluster"].begin(), map_halfClusCol["CousinCluster"].end(), _cl );
     if(iter!=map_halfClusCol["CousinCluster"].end()) map_halfClusCol["CousinCluster"].erase( iter );
+  }
+
+
+  std::vector< std::pair<edm4hep::MCParticle, float> > CaloHalfCluster::getLinkedMCPfromUnit(){
+    MCParticleWeight.clear();
+
+    std::map<edm4hep::MCParticle, float> map_truthP_totE; map_truthP_totE.clear();
+    for(auto ish : m_1dclusters ){
+      for(auto ibar : ish->getBars()){
+        for(auto ipair : ibar->getLinkedMCP()) map_truthP_totE[ipair.first] += ibar->getEnergy()*ipair.second;
+      }
+    }
+
+    for(auto imcp: map_truthP_totE){
+      MCParticleWeight.push_back( std::make_pair(imcp.first, imcp.second/getEnergy()) );
+    }
+
+    return MCParticleWeight;
   }
 
 };

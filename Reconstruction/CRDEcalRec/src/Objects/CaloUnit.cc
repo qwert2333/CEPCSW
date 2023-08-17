@@ -107,6 +107,7 @@ namespace PandoraPlus{
     m_bar->setPosition(position);
     m_bar->setQ(Q1, Q2);
     m_bar->setT(T1, T2);
+    for(auto ilink : MCParticleWeight) m_bar->addLinkedMCP(ilink);
     return m_bar;
   }
 
