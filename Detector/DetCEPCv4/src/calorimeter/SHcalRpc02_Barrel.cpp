@@ -84,7 +84,7 @@ static Ref_t create_detector(Detector& theDetector, xml_h element, SensitiveDete
   int    Hcal_barrel_number_modules   = theDetector.constant<int>("Hcal_barrel_number_modules");
   
   double hPrime   = Ecal_outer_radius + theDetector.constant<double>("Hcal_Ecal_gap");
-  Hcal_inner_radius = hPrime / cos(pi/Hcal_inner_symmetry);
+  // Hcal_inner_radius = hPrime / cos(pi/Hcal_inner_symmetry);
   
   double Hcal_normal_dim_z = (2*Hcal_half_length - (Hcal_barrel_number_modules-1)*Hcal_modules_gap)/Hcal_barrel_number_modules;
 
