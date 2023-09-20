@@ -29,6 +29,7 @@
 #include "edm4hep/MCRecoCaloAssociation.h"
 #include "edm4hep/MCRecoTrackerAssociation.h"
 #include "edm4hep/MCRecoParticleAssociationCollection.h"
+#include "edm4hep/MCRecoCaloParticleAssociationCollection.h"
 
 #define PI 3.141592653
 //#define C 299.79  // unit: mm/ns

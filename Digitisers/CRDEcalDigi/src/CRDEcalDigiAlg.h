@@ -10,6 +10,7 @@
 #include "edm4hep/CalorimeterHitCollection.h"
 #include "edm4hep/SimCalorimeterHitCollection.h"
 #include "edm4hep/MCRecoCaloAssociationCollection.h"
+#include "edm4hep/MCRecoCaloParticleAssociationCollection.h"
 #include "CaloBar.h"
 #include "HitStep.h"
 
@@ -65,6 +66,7 @@ protected:
   SmartIF<IGeomSvc> m_geosvc;
   //SmartIF<ICRDEcalSvc> m_edmsvc;
   typedef std::vector<float> FloatVec;
+  typedef std::map<const edm4hep::MCParticle, float> MCParticleToEnergyWeightMap;
 
 	int _nEvt ;
 	float m_length;
@@ -73,6 +75,7 @@ protected:
 	TTree* t_SimCont;
 	TTree* t_SimBar;
 	
+  double totE;
   FloatVec m_step_t;  // yyy: time of each step
 	FloatVec m_step_x, m_step_y, m_step_z, m_step_E, m_step_T1, m_step_T2, m_stepBar_x, m_stepBar_y, m_stepBar_z;
 	FloatVec m_simBar_x, m_simBar_y, m_simBar_z, m_simBar_T1, m_simBar_T2, m_simBar_Q1, m_simBar_Q2, m_simBar_dlayer, m_simBar_part, m_simBar_stave, m_simBar_slayer, m_simBar_module;
@@ -106,6 +109,7 @@ protected:
   // Output collections
   DataHandle<edm4hep::CalorimeterHitCollection>    w_DigiCaloCol{"DigiCaloCol", Gaudi::DataHandle::Writer, this};
   DataHandle<edm4hep::MCRecoCaloAssociationCollection>    w_CaloAssociationCol{"MCRecoCaloAssociationCollection", Gaudi::DataHandle::Writer, this};
+  DataHandle<edm4hep::MCRecoCaloParticleAssociationCollection>    w_MCPCaloAssociationCol{"MCRecoCaloParticleAssociationCollection", Gaudi::DataHandle::Writer, this};
 };
 
 #endif

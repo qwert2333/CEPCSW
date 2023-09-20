@@ -186,18 +186,32 @@ namespace PandoraPlus{
     return results;
   }
 
+  double Calo3DCluster::getEnergy() const{
+    double result = 0;
+    for(int m=0; m<m_2dclusters.size(); m++)
+      result += m_2dclusters[m]->getEnergy();
+    return result;
+  }
+
   double Calo3DCluster::getHitsE() const{
     double en=0;
     for(int i=0;i<hits.size(); i++) en+=hits[i]->getEnergy();
     return en;
   }
 
-  double Calo3DCluster::getEnergy() const{
-    double result = 0;
-    for(int m=0; m<m_2dclusters.size(); m++)
-      result += m_2dclusters[m]->getEnergy();
-	
-    return result;
+  double Calo3DCluster::getLongiE() const{
+    double en=0;
+    for(auto iter: map_halfClusUCol){
+      if(iter.first!="LinkedLongiCluster") continue;
+      for(auto iclus: iter.second)
+        en += iclus->getEnergy();
+    }
+    for(auto iter: map_halfClusVCol){
+      if(iter.first!="LinkedLongiCluster") continue;
+      for(auto iclus: iter.second)
+        en += iclus->getEnergy();
+    }
+    return en;
   }
 
   TVector3 Calo3DCluster::getHitCenter() const{
@@ -212,8 +226,9 @@ namespace PandoraPlus{
 
   TVector3 Calo3DCluster::getShowerCenter() const{
     TVector3 spos(0,0,0);
-    double totE = getEnergy();
-    for(int i=0;i<m_2dclusters.size(); i++) spos += m_2dclusters[i]->getPos()*(m_2dclusters[i]->getEnergy()/totE);
+    double totE = 0.;
+    for(int i=0;i<m_2dclusters.size(); i++){ spos += m_2dclusters[i]->getPos()*m_2dclusters[i]->getEnergy(); totE += m_2dclusters[i]->getEnergy(); }
+    spos = spos*(1./totE);
     return spos;
   }
 
@@ -262,6 +277,24 @@ namespace PandoraPlus{
     return emptyCol; 
   }
 
+  std::vector< std::pair<edm4hep::MCParticle, float> > Calo3DCluster::getLinkedMCPfromHFCluster(std::string name){
+    MCParticleWeight.clear();
+
+    std::map<edm4hep::MCParticle, float> map_truthP_totE; map_truthP_totE.clear();
+    for(auto icl: map_halfClusUCol[name]){
+      for(auto ipair: icl->getLinkedMCP()) map_truthP_totE[ipair.first] += icl->getEnergy()*ipair.second;
+    }
+    for(auto icl: map_halfClusVCol[name]){
+      for(auto ipair: icl->getLinkedMCP()) map_truthP_totE[ipair.first] += icl->getEnergy()*ipair.second;
+    }
+
+    for(auto imcp: map_truthP_totE){
+      MCParticleWeight.push_back( std::make_pair(imcp.first, imcp.second/getLongiE()) );
+    }
+
+    return MCParticleWeight;
+  }
+
 
   void Calo3DCluster::FitAxis(){
     if(m_2dclusters.size()==0) axis.SetXYZ(0,0,0);
@@ -306,10 +339,8 @@ namespace PandoraPlus{
     }
   }
 
-  void Calo3DCluster::FitAxisHit(){
-
-
-  }
+  //void Calo3DCluster::FitAxisHit(){
+  //}
 
   //void Calo3DCluster::FitProfile(){
   //}

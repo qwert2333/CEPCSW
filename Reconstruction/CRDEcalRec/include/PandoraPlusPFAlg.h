@@ -92,19 +92,22 @@ protected:
 
   //Readin collection names
   Gaudi::Property< std::string > name_MCParticleCol{ this, "MCParticleCollection", "MCParticle" };
+  Gaudi::Property< std::string > name_MCPRecoCaloAssoCol{ this, "MCRecoCaloParticleAssociationCollection", "MCRecoCaloParticleAssociationCollection" };
   Gaudi::Property< std::vector<std::string> > name_TrackCol{ this, "TrackCollections", {"MarlinTrkTracks"} };
   Gaudi::Property< std::vector<std::string> > name_EcalHits{ this, "ECalCaloHitCollections", {"ECALBarrel"} };
   Gaudi::Property< std::vector<std::string> > name_EcalReadout{ this, "ECalReadOutNames", {"EcalBarrelCollection"} }; 
   Gaudi::Property< std::vector<std::string> > name_HcalHits{ this, "HCalCaloHitCollections", {"HCALBarrel"} };
   Gaudi::Property< std::vector<std::string> > name_HcalReadout{ this, "HCalReadOutNames", {"HcalBarrelCollection"} }; 
+  
 
   //---Readin collections
   typedef DataHandle<edm4hep::TrackCollection>           TrackType; 
   typedef DataHandle<edm4hep::CalorimeterHitCollection>  CaloType; 
   DataHandle<edm4hep::MCParticleCollection>* r_MCParticleCol; 
+  DataHandle<edm4hep::MCRecoCaloParticleAssociationCollection>* r_MCPRecoCaloAssoCol; 
   std::vector<TrackType*> r_TrackCols; 
-  std::vector<CaloType*>  r_ECalHitCols; 
-  std::vector<CaloType*>  r_HCalHitCols; 
+  //std::vector<CaloType*>  r_ECalHitCols; 
+  //std::vector<CaloType*>  r_HCalHitCols; 
   std::vector<CaloType*>  r_CaloHitCols; 
 
 
@@ -159,36 +162,27 @@ protected:
 
   TTree *t_axis;
   int m_NaxisU, m_NaxisV;
-  IntVec m_axisU_Nhit, m_axisU_type, m_axisV_Nhit, m_axisV_type;
-  FloatVec m_axisU_x, m_axisU_y, m_axisU_z, m_axisU_E, m_axisV_x, m_axisV_y, m_axisV_z, m_axisV_E;
+  IntVec m_axisU_Nhit, m_axisU_type, m_axisU_Nmcp, m_axisV_Nhit, m_axisV_type, m_axisV_Nmcp;
+  FloatVec m_axisU_x, m_axisU_y, m_axisU_z, m_axisU_E, m_axisU_truthFracMax, m_axisV_x, m_axisV_y, m_axisV_z, m_axisV_E, m_axisV_truthFracMax;
   FloatVec m_axisUhit_tag, m_axisUhit_type, m_axisUhit_x, m_axisUhit_y, m_axisUhit_z, m_axisUhit_E;
   FloatVec m_axisVhit_tag, m_axisVhit_type, m_axisVhit_x, m_axisVhit_y, m_axisVhit_z, m_axisVhit_E;
 
-
-  // yyy: check TrackMatchingAlg
-  TTree * t_Match;
-  FloatVec matchV_track_axis_tag, matchV_track_axis_x, matchV_track_axis_y, matchV_track_axis_z; 
-  FloatVec matchU_track_axis_tag, matchU_track_axis_x, matchU_track_axis_y, matchU_track_axis_z; 
-
   TTree *t_Cluster;
   int m_Nclus, m_Nmc;
-  IntVec m_Clus_Ntrk, m_Clus_Nhit;
-  FloatVec m_Clus_x, m_Clus_y, m_Clus_z, m_Clus_E, m_Clus_Px, m_Clus_Py, m_Clus_Pz, m_Clus_Ptrk;
+  float m_totE;
+  IntVec m_Clus_Ntrk, m_Clus_Nhit, m_Clus_truthPDG;
+  FloatVec m_Clus_x, m_Clus_y, m_Clus_z, m_Clus_E, m_Clus_Px, m_Clus_Py, m_Clus_Pz, m_Clus_Ptrk, m_Clus_truthFrac;
   FloatVec m_Clus_hitx, m_Clus_hity, m_Clus_hitz, m_Clus_hitE, m_Clus_hittag, m_Clus_hittag_trk;
   IntVec m_mcPdgid, m_mcStatus;
   FloatVec m_mcPx, m_mcPy, m_mcPz, m_mcEn, m_mcMass, m_mcCharge, m_mcEPx, m_mcEPy, m_mcEPz;
 
-  TTree *t_Shower;
-  int m_Nshowers;
-  float m_Eclus; 
-  FloatVec m_shower2D_x, m_shower2D_y, m_shower2D_z, m_shower2D_E;
-  IntVec m_shower2D_Module, m_shower2D_Stave, m_shower2D_Part, m_shower2D_Dlayer;
 
-  TTree *t_LongiClus; 
-  int m_NHfClusU, m_NHfClusV;
-  FloatVec m_HfClusU_x, m_HfClusU_y, m_HfClusU_z, m_HfClusU_E, m_HfClusU_Nhit, m_HfClusU_Ntrk; 
-  FloatVec m_HfClusV_x, m_HfClusV_y, m_HfClusV_z, m_HfClusV_E, m_HfClusV_Nhit, m_HfClusV_Ntrk;
-
+  TTree *t_Tower;
+  int m_module, m_part, m_stave;
+  IntVec m_HFClusU_Nhit, m_HFClusU_type, m_HFClusV_Nhit, m_HFClusV_type;
+  FloatVec m_HFClusU_x, m_HFClusU_y, m_HFClusU_z, m_HFClusU_E, m_HFClusV_x, m_HFClusV_y, m_HFClusV_z, m_HFClusV_E;
+  FloatVec m_HFClusUhit_tag, m_HFClusUhit_type, m_HFClusUhit_x, m_HFClusUhit_y, m_HFClusUhit_z, m_HFClusUhit_E;
+  FloatVec m_HFClusVhit_tag, m_HFClusVhit_type, m_HFClusVhit_x, m_HFClusVhit_y, m_HFClusVhit_z, m_HFClusVhit_E;  
 
   TTree *t_Track;
   int m_Ntrk; 
@@ -200,8 +194,7 @@ protected:
   void ClearBar();
   void ClearLayer();
   void ClearHough(); // yyy
-  void ClearMatch(); // yyy
-  void ClearShower();
+  void ClearTower();
   void ClearCluster();
   void ClearTrack();
   void ClearAxis();

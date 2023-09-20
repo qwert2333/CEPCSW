@@ -2,6 +2,7 @@
 #define CALOBAR_H
 
 #include <DD4hep/Objects.h>
+#include "edm4hep/MCParticle.h"
 #include "TVector3.h"
 
 namespace PandoraPlus{
@@ -41,6 +42,7 @@ namespace PandoraPlus{
 
     TVector3 getPosition() const { return position; }
     double getEnergy() const { return (Q1+Q2)/2.; }
+    std::vector< std::pair<edm4hep::MCParticle, float> > getLinkedMCP() const { return MCParticleWeight; }
     bool isAtLowerEdgePhi() const; 
     bool isAtUpperEdgePhi() const; 
     bool isAtLowerEdgeZ() const; 
@@ -50,6 +52,8 @@ namespace PandoraPlus{
     bool isLongiNeighbor(const CaloUnit* x) const;
     bool isLongiModuleAdjacent( const CaloUnit* x ) const;
 
+    void addLinkedMCP( std::pair<edm4hep::MCParticle, float> _pair ) { MCParticleWeight.push_back(_pair); }
+    void setLinkedMCP( std::vector<std::pair<edm4hep::MCParticle, float>> _pairVec ) { MCParticleWeight.clear(); MCParticleWeight = _pairVec; }
     void setGeomInfo(int _m, int _p, int _s, int _l, int _phi, int _z) { Nmodule=_m; Npart=_p; Nstave=_s; Nlayer=_l; NbarPhi=_phi; NbarZ=_z; }
     void setcellID(unsigned long long _cellid) { cellID = _cellid; }
     void setcellID(int _system, int _module, int _stave, int _dlayer, int _part, int _slayer, int _bar) { system=_system; module=_module; stave=_stave; dlayer=_dlayer; part=_part; slayer=_slayer; bar=_bar; }
@@ -86,14 +90,7 @@ namespace PandoraPlus{
 		double T2;    // T in right readout;
 
     double barLength;
-
-
-    //static int Nmodule;
-    //static int Npart;
-    //static int Nstave;
-    //static int Nlayer;
-    //static int NbarPhi;
-    //static int NbarZ;
+    std::vector< std::pair<edm4hep::MCParticle, float> > MCParticleWeight; 
 
   };
   

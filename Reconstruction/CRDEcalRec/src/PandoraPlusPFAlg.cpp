@@ -73,14 +73,17 @@ StatusCode PandoraPlusPFAlg::initialize()
   //---Calo Hits---
   for(auto& _ecal : name_EcalHits){
     if(!_ecal.empty()){ 
-      r_ECalHitCols.push_back( new CaloType(_ecal, Gaudi::DataHandle::Reader, this) );
+      //r_ECalHitCols.push_back( new CaloType(_ecal, Gaudi::DataHandle::Reader, this) );
       r_CaloHitCols.push_back( new CaloType(_ecal, Gaudi::DataHandle::Reader, this) );
   }}
   for(auto& _hcal : name_HcalHits){ 
     if(!_hcal.empty()){
-      r_HCalHitCols.push_back( new CaloType(_hcal, Gaudi::DataHandle::Reader, this) );
+      //r_HCalHitCols.push_back( new CaloType(_hcal, Gaudi::DataHandle::Reader, this) );
       r_CaloHitCols.push_back( new CaloType(_hcal, Gaudi::DataHandle::Reader, this) );
   }}
+
+  //---MCParticle CaloHit Association
+  if(!name_MCPRecoCaloAssoCol.empty()) r_MCPRecoCaloAssoCol = new DataHandle<edm4hep::MCRecoCaloParticleAssociationCollection> (name_MCPRecoCaloAssoCol, Gaudi::DataHandle::Reader, this);
 
 
   //Register Algorithms
@@ -105,7 +108,7 @@ StatusCode PandoraPlusPFAlg::initialize()
       if(type_AlgPars.value()[ialg].at(ipar)=="int")    m_settings.map_intPars[name_AlgPars.value()[ialg].at(ipar)] = std::stoi( (string)value_AlgPars.value()[ialg].at(ipar) );
       if(type_AlgPars.value()[ialg].at(ipar)=="double") m_settings.map_floatPars[name_AlgPars.value()[ialg].at(ipar)] = std::stod( (string)value_AlgPars.value()[ialg].at(ipar) );
       if(type_AlgPars.value()[ialg].at(ipar)=="string") m_settings.map_stringPars[name_AlgPars.value()[ialg].at(ipar)] = value_AlgPars.value()[ialg].at(ipar) ;
-      if(type_AlgPars.value()[ialg].at(ipar)=="bool")   m_settings.map_boolPars[name_AlgPars.value()[ialg].at(ipar)] = (bool)std::stoi( value_AlgPars.value()[ialg].at(ipar) );
+      if(type_AlgPars.value()[ialg].at(ipar)=="bool")   m_settings.map_boolPars[name_AlgPars.value()[ialg].at(ipar)] = (bool)std::stoi( (string)value_AlgPars.value()[ialg].at(ipar) );
     }
 
     m_algorithmManager.RegisterAlgorithm( name_Algs.value()[ialg], m_settings );
@@ -139,9 +142,7 @@ StatusCode PandoraPlusPFAlg::initialize()
     t_SimBar = new TTree("SimBarHit", "SimBarHit");
     t_Layers = new TTree("RecLayers","RecLayers");
     t_Hough = new TTree("Hough","Hough");   // yyy: Hough
-    t_Match = new TTree("Match","Match");   // yyy: Match
-    t_LongiClus = new TTree("HalfClus", "HalfClus");
-    t_Shower = new TTree("RecShowers", "RecShowers");
+    t_Tower = new TTree("RecTowers", "RecTowers");
     t_Cluster = new TTree("RecClusters", "RecClusters");
     t_Track = new TTree("RecTracks", "RecTracks");
     t_axis = new TTree("Axis","Axis"); 
@@ -221,49 +222,9 @@ StatusCode PandoraPlusPFAlg::initialize()
     //t_Hough->Branch("houghU_slayer", &m_houghU_slayer);
 
 
-    // yyy: Match
-    t_Match->Branch("matchV_track_axis_tag", &matchV_track_axis_tag);
-    t_Match->Branch("matchV_track_axis_x", &matchV_track_axis_x);
-    t_Match->Branch("matchV_track_axis_y", &matchV_track_axis_y);
-    t_Match->Branch("matchV_track_axis_z", &matchV_track_axis_z);
-    t_Match->Branch("matchU_track_axis_tag", &matchU_track_axis_tag);
-    t_Match->Branch("matchU_track_axis_x", &matchU_track_axis_x);
-    t_Match->Branch("matchU_track_axis_y", &matchU_track_axis_y);
-    t_Match->Branch("matchU_track_axis_z", &matchU_track_axis_z);
-
-
-    //CaloHalfClusters
-    t_LongiClus->Branch("NHfClusU", &m_NHfClusU);
-    t_LongiClus->Branch("NHfClusV", &m_NHfClusV);
-    t_LongiClus->Branch("HfClusU_x", &m_HfClusU_x);
-    t_LongiClus->Branch("HfClusU_y", &m_HfClusU_y);
-    t_LongiClus->Branch("HfClusU_z", &m_HfClusU_z);
-    t_LongiClus->Branch("HfClusU_E", &m_HfClusU_E);
-    t_LongiClus->Branch("HfClusU_Nhit", &m_HfClusU_Nhit);
-    t_LongiClus->Branch("HfClusU_Ntrk", &m_HfClusU_Ntrk);
-    t_LongiClus->Branch("HfClusV_x", &m_HfClusV_x);
-    t_LongiClus->Branch("HfClusV_y", &m_HfClusV_y);
-    t_LongiClus->Branch("HfClusV_z", &m_HfClusV_z);
-    t_LongiClus->Branch("HfClusV_E", &m_HfClusV_E);
-    t_LongiClus->Branch("HfClusV_Nhit", &m_HfClusV_Nhit);
-    t_LongiClus->Branch("HfClusV_Ntrk", &m_HfClusV_Ntrk);
-
-
-    //2DShowers in each cluster
-    t_Shower->Branch("Nshowers", &m_Nshowers);
-    t_Shower->Branch("Eclus", &m_Eclus);
-    t_Shower->Branch("shower2D_x", &m_shower2D_x);
-    t_Shower->Branch("shower2D_y", &m_shower2D_y);
-    t_Shower->Branch("shower2D_z", &m_shower2D_z);
-    t_Shower->Branch("shower2D_E", &m_shower2D_E);
-    t_Shower->Branch("shower2D_Module", &m_shower2D_Module);
-    t_Shower->Branch("shower2D_Stave", &m_shower2D_Stave);
-    t_Shower->Branch("shower2D_Part", &m_shower2D_Part);
-    t_Shower->Branch("shower2D_Dlayer", &m_shower2D_Dlayer);
-
-
     //Clusters and MCParticles
     t_Cluster->Branch("Nclus", &m_Nclus);
+    t_Cluster->Branch("totE",  &m_totE);
     t_Cluster->Branch("Clus_x", &m_Clus_x);
     t_Cluster->Branch("Clus_y", &m_Clus_y);
     t_Cluster->Branch("Clus_z", &m_Clus_z);
@@ -274,6 +235,8 @@ StatusCode PandoraPlusPFAlg::initialize()
     t_Cluster->Branch("Clus_Ptrk", &m_Clus_Ptrk);
     t_Cluster->Branch("Clus_Ntrk", &m_Clus_Ntrk);
     t_Cluster->Branch("Clus_Nhit", &m_Clus_Nhit);
+    t_Cluster->Branch("Clus_truthPDG", &m_Clus_truthPDG);
+    t_Cluster->Branch("Clus_truthFrac", &m_Clus_truthFrac);
     t_Cluster->Branch("Clus_hitx", &m_Clus_hitx);
     t_Cluster->Branch("Clus_hity", &m_Clus_hity);
     t_Cluster->Branch("Clus_hitz", &m_Clus_hitz);
@@ -319,12 +282,16 @@ StatusCode PandoraPlusPFAlg::initialize()
     t_axis->Branch("axisU_E", &m_axisU_E);
     t_axis->Branch("axisU_Nhit", &m_axisU_Nhit);
     t_axis->Branch("axisU_type", &m_axisU_type);
+    t_axis->Branch("axisU_Nmcp", &m_axisU_Nmcp);
+    t_axis->Branch("axisU_truthFracMax", &m_axisU_truthFracMax);
     t_axis->Branch("axisV_x", &m_axisV_x);
     t_axis->Branch("axisV_y", &m_axisV_y);
     t_axis->Branch("axisV_z", &m_axisV_z);
     t_axis->Branch("axisV_E", &m_axisV_E);
     t_axis->Branch("axisV_Nhit", &m_axisV_Nhit);
     t_axis->Branch("axisV_type", &m_axisV_type);
+    t_axis->Branch("axisV_Nmcp", &m_axisV_Nmcp);
+    t_axis->Branch("axisV_truthFracMax", &m_axisV_truthFracMax);
     t_axis->Branch("axisUhit_tag", &m_axisUhit_tag);
     t_axis->Branch("axisUhit_type", &m_axisUhit_type);
     t_axis->Branch("axisUhit_x", &m_axisUhit_x);
@@ -337,6 +304,35 @@ StatusCode PandoraPlusPFAlg::initialize()
     t_axis->Branch("axisVhit_y", &m_axisVhit_y);
     t_axis->Branch("axisVhit_z", &m_axisVhit_z);
     t_axis->Branch("axisVhit_E", &m_axisVhit_E);
+
+    //Tower
+    t_Tower->Branch("module", &m_module );
+    t_Tower->Branch("part", &m_part );
+    t_Tower->Branch("stave", &m_stave );
+    t_Tower->Branch("HFClusU_Nhit", &m_HFClusU_Nhit );
+    t_Tower->Branch("HFClusU_type", &m_HFClusU_type );
+    t_Tower->Branch("HFClusU_x",    &m_HFClusU_x );
+    t_Tower->Branch("HFClusU_y",    &m_HFClusU_y );
+    t_Tower->Branch("HFClusU_z",    &m_HFClusU_z );
+    t_Tower->Branch("HFClusU_E",    &m_HFClusU_E );
+    t_Tower->Branch("HFClusV_Nhit", &m_HFClusV_Nhit );
+    t_Tower->Branch("HFClusV_type", &m_HFClusV_type );
+    t_Tower->Branch("HFClusV_x",    &m_HFClusV_x );
+    t_Tower->Branch("HFClusV_y",    &m_HFClusV_y );
+    t_Tower->Branch("HFClusV_z",    &m_HFClusV_z );
+    t_Tower->Branch("HFClusV_E",    &m_HFClusV_E );
+    t_Tower->Branch("HFClusUhit_type", &m_HFClusUhit_type );
+    t_Tower->Branch("HFClusUhit_tag",  &m_HFClusUhit_tag );
+    t_Tower->Branch("HFClusUhit_x",    &m_HFClusUhit_x );
+    t_Tower->Branch("HFClusUhit_y",    &m_HFClusUhit_y );
+    t_Tower->Branch("HFClusUhit_z",    &m_HFClusUhit_z );
+    t_Tower->Branch("HFClusUhit_E",    &m_HFClusUhit_E );
+    t_Tower->Branch("HFClusVhit_type", &m_HFClusVhit_type );
+    t_Tower->Branch("HFClusVhit_tag",  &m_HFClusVhit_tag );
+    t_Tower->Branch("HFClusVhit_x",    &m_HFClusVhit_x );
+    t_Tower->Branch("HFClusVhit_y",    &m_HFClusVhit_y );
+    t_Tower->Branch("HFClusVhit_z",    &m_HFClusVhit_z );
+    t_Tower->Branch("HFClusVhit_E",    &m_HFClusVhit_E );
 
   }
 
@@ -360,16 +356,18 @@ std::cout<<"Readin MCParticle"<<std::endl;
 cout<<"Readin Tracks"<<endl;
   m_pTrackCreator->CreateTracks( m_DataCol, r_TrackCols );
 cout<<"Readin CaloHits"<<endl;
-  m_pCaloHitsCreator->CreateCaloHits( m_DataCol, r_CaloHitCols, map_readout_decoder );
-
+  m_pCaloHitsCreator->CreateCaloHits( m_DataCol, r_CaloHitCols, map_readout_decoder, r_MCPRecoCaloAssoCol );
 
   //Perform PFA algorithm
 cout<<"Run Algorithms"<<endl;
   m_algorithmManager.RunAlgorithm( m_DataCol );
 
 cout<<"Create output"<<endl;
+cout<<"  Creating CaloHits"<<endl;
   m_pOutputCreator->CreateRecCaloHits( m_DataCol, w_RecCaloCol );
+cout<<"  Creating clusters"<<endl;
   m_pOutputCreator->CreateCluster( m_DataCol, w_ClusterCollection );
+cout<<"  Creating PFOs"<<endl;
   m_pOutputCreator->CreatePFO( m_DataCol, w_ReconstructedParticleCollection );
 
 
@@ -530,34 +528,6 @@ cout<<"Write tuples"<<endl;
   t_Hough->Fill();
 
 
-  // ------------------------------------
-  // yyy: TrackMatchingAlg
-  ClearMatch();
-  for(int i=0; i<m_halfclusterV.size(); i++){  // loop half cluster V
-    std::vector<const PandoraPlus::CaloHalfCluster*> m_trackaxisV = m_halfclusterV[i]->getHalfClusterCol("MergedAxis");
-    for(int ita=0; ita<m_trackaxisV.size(); ita++){ // loop track axis V
-      for(int ilm=0; ilm<m_trackaxisV[ita]->getCluster().size(); ilm++){ // loop local max
-        matchV_track_axis_tag.push_back( m_trackaxisV[ita]->getEnergy() );
-        matchV_track_axis_x.push_back( m_trackaxisV[ita]->getCluster()[ilm]->getPos().x() );
-        matchV_track_axis_y.push_back( m_trackaxisV[ita]->getCluster()[ilm]->getPos().y() );
-        matchV_track_axis_z.push_back( m_trackaxisV[ita]->getCluster()[ilm]->getPos().z() );
-      }
-    }
-  }
-  for(int i=0; i<m_halfclusterU.size(); i++){  // loop half cluster U
-    std::vector<const PandoraPlus::CaloHalfCluster*> m_trackaxisU = m_halfclusterU[i]->getHalfClusterCol("MergedAxis");
-    for(int ita=0; ita<m_trackaxisU.size(); ita++){ // loop track axis V
-      for(int ilm=0; ilm<m_trackaxisU[ita]->getCluster().size(); ilm++){ // loop local max
-        matchU_track_axis_tag.push_back( m_trackaxisU[ita]->getEnergy() );
-        matchU_track_axis_x.push_back( m_trackaxisU[ita]->getCluster()[ilm]->getPos().x() );
-        matchU_track_axis_y.push_back( m_trackaxisU[ita]->getCluster()[ilm]->getPos().y() );
-        matchU_track_axis_z.push_back( m_trackaxisU[ita]->getCluster()[ilm]->getPos().z() );
-      }
-    }
-  }
-  t_Match->Fill();
-
-
   // ---------------------------------------------
   // Save axis info (Splitted showers in tower)
   ClearAxis();
@@ -569,7 +539,7 @@ cout<<"Write tuples"<<endl;
   for(int it=0; it<ntower; it++)
     m_towerCol.push_back( m_DataCol.map_CaloCluster["ESTower"][it].get() );
 
-  for(int it=0; it<m_towerCol.size(); it++){
+/*  for(int it=0; it<m_towerCol.size(); it++){
     std::vector<const PandoraPlus::CaloHalfCluster*> m_HFClusUCol = m_towerCol.at(it)->getHalfClusterUCol("ESHalfClusterU");
     std::vector<const PandoraPlus::CaloHalfCluster*> m_HFClusVCol = m_towerCol.at(it)->getHalfClusterVCol("ESHalfClusterV");
 
@@ -577,7 +547,7 @@ cout<<"Write tuples"<<endl;
     m_allaxisV.insert(m_allaxisV.end(), m_HFClusVCol.begin(), m_HFClusVCol.end());
   }
 
-/*  for(int i=0; i<m_halfclusterU.size(); i++){
+  for(int i=0; i<m_halfclusterU.size(); i++){
     std::vector<const PandoraPlus::CaloHalfCluster*> tmp_clus = m_halfclusterU[i]->getHalfClusterCol("MergedAxis");
     //std::vector<const PandoraPlus::CaloHalfCluster*> tmp_clus = m_halfclusterU[i]->getAllHalfClusterCol();
     m_allaxisU.insert( m_allaxisU.end(), tmp_clus.begin(), tmp_clus.end() );
@@ -588,6 +558,13 @@ cout<<"Write tuples"<<endl;
     m_allaxisV.insert( m_allaxisV.end(), tmp_clus.begin(), tmp_clus.end() );
   }
 */
+  for(int i=0; i<m_DataCol.map_HalfCluster["ESHalfClusterU"].size(); i++){
+    m_allaxisU.push_back( m_DataCol.map_HalfCluster["ESHalfClusterU"][i].get());
+  }
+  for(int i=0; i<m_DataCol.map_HalfCluster["ESHalfClusterV"].size(); i++){
+    m_allaxisV.push_back( m_DataCol.map_HalfCluster["ESHalfClusterV"][i].get());
+  }
+
   m_NaxisU = m_allaxisU.size();
   m_NaxisV = m_allaxisV.size();
   for(int iax=0; iax<m_allaxisU.size(); iax++){
@@ -605,6 +582,22 @@ cout<<"Write tuples"<<endl;
       m_axisUhit_z.push_back( m_allaxisU[iax]->getCluster()[ihit]->getPos().z() );
       m_axisUhit_E.push_back( m_allaxisU[iax]->getCluster()[ihit]->getEnergy() );
     }
+
+    std::map<edm4hep::MCParticle, float> map_truthP_totE; map_truthP_totE.clear();
+    for(auto ish : m_allaxisU[iax]->getCluster()){
+      for(auto ibar : ish->getBars()){
+        for(auto ipair : ibar->getLinkedMCP()) map_truthP_totE[ipair.first] += ibar->getEnergy()*ipair.second;
+      }
+    }
+    float maxFrac = -99;
+    int Nmcp=0;
+    for(auto imcp : map_truthP_totE){
+      if(imcp.second/m_allaxisU[iax]->getEnergy()>maxFrac) maxFrac=imcp.second/m_allaxisU[iax]->getEnergy();
+      if(imcp.second/m_allaxisU[iax]->getEnergy()>0.05) Nmcp++;
+    }
+    map_truthP_totE.clear();
+    m_axisU_Nmcp.push_back(Nmcp);
+    m_axisU_truthFracMax.push_back(maxFrac); 
   }
 
   for(int iax=0; iax<m_allaxisV.size(); iax++){
@@ -622,53 +615,76 @@ cout<<"Write tuples"<<endl;
       m_axisVhit_z.push_back( m_allaxisV[iax]->getCluster()[ihit]->getPos().z() );
       m_axisVhit_E.push_back( m_allaxisV[iax]->getCluster()[ihit]->getEnergy() );
     }
+
+    std::map<edm4hep::MCParticle, float> map_truthP_totE; map_truthP_totE.clear();
+    for(auto ish : m_allaxisV[iax]->getCluster()){
+      for(auto ibar : ish->getBars()){
+        for(auto ipair : ibar->getLinkedMCP()) map_truthP_totE[ipair.first] += ibar->getEnergy()*ipair.second;
+      }
+    }
+    float maxFrac = -99;
+    int Nmcp = 0;
+    for(auto imcp : map_truthP_totE){
+      if(imcp.second/m_allaxisV[iax]->getEnergy()>maxFrac) maxFrac=imcp.second/m_allaxisV[iax]->getEnergy();
+      if(imcp.second/m_allaxisV[iax]->getEnergy()>0.05) Nmcp++;
+    }
+    map_truthP_totE.clear();
+    m_axisV_truthFracMax.push_back(maxFrac);
+    m_axisV_Nmcp.push_back(Nmcp);
   }
   t_axis->Fill();
 
 
   // --------------------------------------------
-  // Save splitted half cluster info
-  std::vector<PandoraPlus::CaloHalfCluster*> vec_LongiU;
-  std::vector<PandoraPlus::CaloHalfCluster*> vec_LongiV;
-  for(int i=0; i<m_DataCol.map_HalfCluster["ESHalfClusterU"].size(); i++)
-    vec_LongiU.push_back( m_DataCol.map_HalfCluster["ESHalfClusterU"][i].get() );
-  for(int i=0; i<m_DataCol.map_HalfCluster["ESHalfClusterV"].size(); i++)
-    vec_LongiV.push_back( m_DataCol.map_HalfCluster["ESHalfClusterV"][i].get() );
+  // Save splitted half cluster in tower
+  ntower = m_DataCol.map_CaloCluster["ESTower"].size();
+    ClearTower();
+  for(int it=0; it<ntower; it++){
 
-  
-  m_NHfClusU = vec_LongiU.size();
-  m_NHfClusV = vec_LongiV.size();
-  m_HfClusU_x.clear();
-  m_HfClusU_y.clear();
-  m_HfClusU_z.clear();
-  m_HfClusU_E.clear();
-  m_HfClusU_Nhit.clear();
-  m_HfClusU_Ntrk.clear();
-  m_HfClusV_x.clear();
-  m_HfClusV_y.clear();
-  m_HfClusV_z.clear();
-  m_HfClusV_E.clear();
-  m_HfClusV_Nhit.clear();
-  m_HfClusV_Ntrk.clear();
-  for(int ih=0; ih<m_NHfClusU; ih++){
-    m_HfClusU_x.push_back( vec_LongiU[ih]->getPos().x() );
-    m_HfClusU_y.push_back( vec_LongiU[ih]->getPos().y() );
-    m_HfClusU_z.push_back( vec_LongiU[ih]->getPos().z() );
-    m_HfClusU_E.push_back(vec_LongiU[ih]->getEnergy());
-    m_HfClusU_Nhit.push_back( vec_LongiU[ih]->getCluster().size() );
-    m_HfClusU_Ntrk.push_back( vec_LongiU[ih]->getAssociatedTracks().size() );
+    const PandoraPlus::Calo3DCluster* p_tower = m_DataCol.map_CaloCluster["ESTower"][it].get();
+    if(p_tower->getTowerID().size()<1){ cout<<"ERROR: no towerID! "<<endl; continue; }
+    m_module = p_tower->getTowerID()[0][0];
+    m_part = p_tower->getTowerID()[0][1];
+    m_stave = p_tower->getTowerID()[0][2];
+
+    std::vector<const PandoraPlus::CaloHalfCluster*> m_HFClusUCol = m_towerCol.at(it)->getHalfClusterUCol("ESHalfClusterU");
+    std::vector<const PandoraPlus::CaloHalfCluster*> m_HFClusVCol = m_towerCol.at(it)->getHalfClusterVCol("ESHalfClusterV");
+    for(int ih=0; ih<m_HFClusUCol.size(); ih++){
+      m_HFClusU_Nhit.push_back( m_HFClusUCol[ih]->getCluster().size() );
+      m_HFClusU_type.push_back( m_HFClusUCol[ih]->getType() );
+      m_HFClusU_x.push_back( m_HFClusUCol[ih]->getPos().x() );
+      m_HFClusU_y.push_back( m_HFClusUCol[ih]->getPos().y() );
+      m_HFClusU_z.push_back( m_HFClusUCol[ih]->getPos().z() );
+      m_HFClusU_E.push_back( m_HFClusUCol[ih]->getEnergy() );
+      for(int ihit=0; ihit<m_HFClusUCol[ih]->getCluster().size(); ihit++){
+        m_HFClusUhit_tag.push_back( m_HFClusUCol[ih]->getEnergy() );
+        m_HFClusUhit_type.push_back( m_HFClusUCol[ih]->getType() );
+        m_HFClusUhit_x.push_back( m_HFClusUCol[ih]->getCluster()[ihit]->getPos().x() );
+        m_HFClusUhit_y.push_back( m_HFClusUCol[ih]->getCluster()[ihit]->getPos().y() );
+        m_HFClusUhit_z.push_back( m_HFClusUCol[ih]->getCluster()[ihit]->getPos().z() );
+        m_HFClusUhit_E.push_back( m_HFClusUCol[ih]->getCluster()[ihit]->getEnergy() );
+      }
+    }
+
+    for(int ih=0; ih<m_HFClusVCol.size(); ih++){
+      m_HFClusV_Nhit.push_back( m_HFClusVCol[ih]->getCluster().size() );
+      m_HFClusV_type.push_back( m_HFClusVCol[ih]->getType() );
+      m_HFClusV_x.push_back( m_HFClusVCol[ih]->getPos().x() );
+      m_HFClusV_y.push_back( m_HFClusVCol[ih]->getPos().y() );
+      m_HFClusV_z.push_back( m_HFClusVCol[ih]->getPos().z() );
+      m_HFClusV_E.push_back( m_HFClusVCol[ih]->getEnergy() );
+      for(int ihit=0; ihit<m_HFClusVCol[ih]->getCluster().size(); ihit++){
+        m_HFClusVhit_tag.push_back( m_HFClusVCol[ih]->getEnergy() );
+        m_HFClusVhit_type.push_back( m_HFClusVCol[ih]->getType() );
+        m_HFClusVhit_x.push_back( m_HFClusVCol[ih]->getCluster()[ihit]->getPos().x() );
+        m_HFClusVhit_y.push_back( m_HFClusVCol[ih]->getCluster()[ihit]->getPos().y() );
+        m_HFClusVhit_z.push_back( m_HFClusVCol[ih]->getCluster()[ihit]->getPos().z() );
+        m_HFClusVhit_E.push_back( m_HFClusVCol[ih]->getCluster()[ihit]->getEnergy() );
+      }
+    }
+
   }
-  for(int ih=0; ih<m_NHfClusV; ih++){
-    m_HfClusV_x.push_back( vec_LongiV[ih]->getPos().x() );
-    m_HfClusV_y.push_back( vec_LongiV[ih]->getPos().y() );
-    m_HfClusV_z.push_back( vec_LongiV[ih]->getPos().z() );
-    m_HfClusV_E.push_back(vec_LongiV[ih]->getEnergy());
-    m_HfClusV_Nhit.push_back( vec_LongiV[ih]->getCluster().size() );
-    m_HfClusV_Ntrk.push_back( vec_LongiV[ih]->getAssociatedTracks().size() );
-  }  
-  t_LongiClus->Fill();
-
-
+    t_Tower->Fill();
 
 cout<<"  Write 3DClusters and MCP "<<endl;
   // ---------------------------------------------
@@ -680,12 +696,13 @@ cout<<"  Write 3DClusters and MCP "<<endl;
     m_clusvec.push_back( m_DataCol.map_CaloCluster["EcalCluster"][i].get() );
 
   m_Nclus = m_clusvec.size();
+  m_totE = 0;
   for(int ic=0; ic<m_clusvec.size(); ic++){
     //For ECAL cluster
     m_Clus_x.push_back( m_clusvec[ic]->getShowerCenter().x() );
     m_Clus_y.push_back( m_clusvec[ic]->getShowerCenter().y() );
     m_Clus_z.push_back( m_clusvec[ic]->getShowerCenter().z() );
-    m_Clus_E.push_back( m_clusvec[ic]->getEnergy() );
+    m_Clus_E.push_back( m_clusvec[ic]->getLongiE() );
     m_Clus_Px.push_back( m_clusvec[ic]->getAxis().x() );
     m_Clus_Py.push_back( m_clusvec[ic]->getAxis().y() );
     m_Clus_Pz.push_back( m_clusvec[ic]->getAxis().z() );
@@ -693,6 +710,18 @@ cout<<"  Write 3DClusters and MCP "<<endl;
     m_Clus_Ntrk.push_back( m_clusvec[ic]->getAssociatedTracks().size() );
     if( m_clusvec[ic]->getAssociatedTracks().size()>=1 ) m_Clus_Ptrk.push_back( m_clusvec[ic]->getAssociatedTracks()[0]->getMomentum() );
     else m_Clus_Ptrk.push_back(-99.);
+    float maxFrac=-99;
+    int maxFracPDG=0;
+    for(auto imcp:m_clusvec[ic]->getLinkedMCP()){
+      if(imcp.second>maxFrac){
+        maxFrac = imcp.second;
+        maxFracPDG = imcp.first.getPDG();
+      }
+    }
+    m_Clus_truthFrac.push_back(maxFrac);
+    m_Clus_truthPDG.push_back(maxFracPDG);
+
+    m_totE += m_clusvec[ic]->getLongiE();
 
     for(int ihit=0; ihit<m_clusvec[ic]->getCluster().size(); ihit++){
       m_Clus_hitx.push_back( m_clusvec[ic]->getCluster()[ihit]->getPos().x() );
@@ -782,14 +811,12 @@ StatusCode PandoraPlusPFAlg::finalize()
   t_SimBar->Write();
   t_Layers->Write();
   t_Hough->Write(); // yyy
-  t_Match->Write(); // yyy
-  t_LongiClus->Write(); 
-  t_Shower->Write();
   t_Cluster->Write();
+  t_Tower->Write();
   t_Track->Write();
   t_axis->Write();
   m_wfile->Close();
-  delete m_wfile, t_SimBar, t_Layers, t_Hough, t_Match, t_LongiClus, t_Cluster, t_Track, t_axis;
+  delete m_wfile, t_SimBar, t_Layers, t_Hough, t_Cluster, t_Tower, t_Track, t_axis;
 
   delete m_pMCParticleCreator;
   delete m_pTrackCreator; 
@@ -797,13 +824,14 @@ StatusCode PandoraPlusPFAlg::finalize()
   delete m_pOutputCreator;
 
   delete r_MCParticleCol;
+  delete r_MCPRecoCaloAssoCol; 
   for(auto iter : r_TrackCols) delete iter; 
-  for(auto iter : r_ECalHitCols) delete iter; 
-  for(auto iter : r_HCalHitCols) delete iter; 
+  //for(auto iter : r_ECalHitCols) delete iter; 
+  //for(auto iter : r_HCalHitCols) delete iter; 
   for(auto iter : r_CaloHitCols) delete iter; 
   r_TrackCols.clear();
-  r_ECalHitCols.clear();
-  r_HCalHitCols.clear();
+  //r_ECalHitCols.clear();
+  //r_HCalHitCols.clear();
   r_CaloHitCols.clear();
 
 
@@ -882,34 +910,11 @@ void PandoraPlusPFAlg::ClearHough(){
   m_houghU_E.clear();
 }
 
-// yyy
-void PandoraPlusPFAlg::ClearMatch(){
-  matchV_track_axis_tag.clear();
-  matchV_track_axis_x.clear();
-  matchV_track_axis_y.clear();
-  matchV_track_axis_z.clear();
-  matchU_track_axis_tag.clear();
-  matchU_track_axis_x.clear();
-  matchU_track_axis_y.clear();
-  matchU_track_axis_z.clear();
-}
-
-void PandoraPlusPFAlg::ClearShower(){
-  m_Nshowers = -99;
-  m_Eclus = -99;
-  m_shower2D_x.clear();
-  m_shower2D_y.clear();
-  m_shower2D_z.clear();
-  m_shower2D_E.clear();
-  m_shower2D_Module.clear();
-  m_shower2D_Part.clear();
-  m_shower2D_Stave.clear();
-  m_shower2D_Dlayer.clear();
-}
 
 void PandoraPlusPFAlg::ClearCluster(){
   m_Nclus = -99;
   m_Nmc = -99;
+  m_totE = -99;
   m_Clus_x.clear();
   m_Clus_y.clear();
   m_Clus_z.clear();
@@ -920,6 +925,8 @@ void PandoraPlusPFAlg::ClearCluster(){
   m_Clus_Ptrk.clear();
   m_Clus_Ntrk.clear();
   m_Clus_Nhit.clear();
+  m_Clus_truthFrac.clear();
+  m_Clus_truthPDG.clear();
   m_Clus_hitx.clear();
   m_Clus_hity.clear();
   m_Clus_hitz.clear();
@@ -963,16 +970,20 @@ void PandoraPlusPFAlg::ClearAxis(){
   m_NaxisV = -99;
   m_axisU_Nhit.clear(); 
   m_axisU_type.clear(); 
+  m_axisU_Nmcp.clear();
   m_axisV_Nhit.clear(); 
   m_axisV_type.clear();
+  m_axisV_Nmcp.clear();
   m_axisU_x.clear();
   m_axisU_y.clear();
   m_axisU_z.clear();
   m_axisU_E.clear();
+  m_axisU_truthFracMax.clear();
   m_axisV_x.clear();
   m_axisV_y.clear();
   m_axisV_z.clear();
   m_axisV_E.clear();
+  m_axisV_truthFracMax.clear();
   m_axisUhit_tag.clear();
   m_axisUhit_type.clear();
   m_axisUhit_x.clear(); 
@@ -985,6 +996,37 @@ void PandoraPlusPFAlg::ClearAxis(){
   m_axisVhit_y.clear();
   m_axisVhit_z.clear();
   m_axisVhit_E.clear();
+  
+}
+
+void PandoraPlusPFAlg::ClearTower(){
+  m_module = -1;
+  m_part = -1;
+  m_stave = -1;
+  m_HFClusU_Nhit.clear();
+  m_HFClusU_type.clear();
+  m_HFClusV_Nhit.clear();
+  m_HFClusV_type.clear();
+  m_HFClusU_x.clear();
+  m_HFClusU_y.clear();
+  m_HFClusU_z.clear();
+  m_HFClusU_E.clear();
+  m_HFClusV_x.clear();
+  m_HFClusV_y.clear();
+  m_HFClusV_z.clear();
+  m_HFClusV_E.clear();
+  m_HFClusUhit_tag.clear();
+  m_HFClusUhit_type.clear();
+  m_HFClusUhit_x.clear();
+  m_HFClusUhit_y.clear();
+  m_HFClusUhit_z.clear();
+  m_HFClusUhit_E.clear();
+  m_HFClusVhit_tag.clear();
+  m_HFClusVhit_type.clear();
+  m_HFClusVhit_x.clear();
+  m_HFClusVhit_y.clear();
+  m_HFClusVhit_z.clear();
+  m_HFClusVhit_E.clear();
 
 }
 

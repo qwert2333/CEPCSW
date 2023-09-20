@@ -44,6 +44,6 @@ Keep the collection names compatible between the prototype and the existing CEPC
 * TPCCollection
 * SETCollection
 
-## Update in branch : EcalRec-2.1.0.alpha
-* New version: add HCAL into the reconstruction
-** Geo: move the magnet out of HCAL, tune HCAL size.
+## Update in branch : EcalRec-2.1.3.alpha
+* New version: Start to solve the ambiguity problem
+

@@ -38,6 +38,7 @@ CRDEcalDigiAlg::CRDEcalDigiAlg(const std::string& name, ISvcLocator* svcLoc)
 	// Output collections
 	declareProperty("CaloHitCollection", w_DigiCaloCol, "Handle of Digi CaloHit collection");
 	declareProperty("CaloAssociationCollection", w_CaloAssociationCol, "Handle of CaloAssociation collection");
+	declareProperty("CaloMCPAssociationCollection", w_MCPCaloAssociationCol, "Handle of CaloAssociation collection");
    
 }
 
@@ -58,6 +59,7 @@ StatusCode CRDEcalDigiAlg::initialize()
 	t_SimCont->Branch("step_E", &m_step_E);
 	t_SimCont->Branch("step_T1", &m_step_T1);
 	t_SimCont->Branch("step_T2", &m_step_T2);
+  t_SimBar->Branch("totE", &totE);
 	t_SimBar->Branch("simBar_x", &m_simBar_x);
 	t_SimBar->Branch("simBar_y", &m_simBar_y);
 	t_SimBar->Branch("simBar_z", &m_simBar_z);
@@ -104,6 +106,7 @@ StatusCode CRDEcalDigiAlg::execute()
 
 	edm4hep::CalorimeterHitCollection* caloVec = w_DigiCaloCol.createAndPut();
 	edm4hep::MCRecoCaloAssociationCollection* caloAssoVec = w_CaloAssociationCol.createAndPut();
+  edm4hep::MCRecoCaloParticleAssociationCollection* caloMCPAssoVec = w_MCPCaloAssociationCol.createAndPut();
  	std::vector<edm4hep::SimCalorimeterHit> m_simhitCol; m_simhitCol.clear();
   std::vector<CaloBar> m_barCol; m_barCol.clear(); 
 
@@ -114,7 +117,7 @@ StatusCode CRDEcalDigiAlg::execute()
   }
   if(_Debug>=1) std::cout<<"digi, input sim hit size="<< SimHitCol->size() <<std::endl;
 
-	double totE_bar=0;
+	totE=0;
 	double totE_Digi=0;
 
 	//Merge input simhit(steps) to real simhit(bar).
@@ -145,6 +148,7 @@ StatusCode CRDEcalDigiAlg::execute()
 		//hitbar.T1 = 99999; hitbar.T2 = 99999;
 		//if(_Debug>=2) std::cout<<"SimHit contribution size: "<<SimHit.contributions_size()<<std::endl;
 
+    MCParticleToEnergyWeightMap MCPEnMap; MCPEnMap.clear();
 		std::vector<HitStep> DigiLvec; DigiLvec.clear();
 		std::vector<HitStep> DigiRvec; DigiRvec.clear();
 		double totQ1 = 0;
@@ -158,6 +162,8 @@ StatusCode CRDEcalDigiAlg::execute()
 			double en = conb.getEnergy();
 			if(en == 0) continue;
 
+      auto mcp = conb.getParticle();
+      MCPEnMap[mcp] += en;
 			TVector3 steppos(conb.getStepPosition().x, conb.getStepPosition().y, conb.getStepPosition().z);
 			TVector3 rpos = steppos-hitbar.getPosition();
 			float step_time = conb.getTime();		// yyy: step time
@@ -272,14 +278,49 @@ StatusCode CRDEcalDigiAlg::execute()
     digiHit2.setTime(hitbar.getT2());
     digiHit2.setPosition(m_pos);
 
+    //SimHit - CaloHit association
+    auto rel1 = caloAssoVec->create();
+    rel1.setRec(digiHit1);
+    rel1.setSim(SimHit);
+    rel1.setWeight( hitbar.getQ1()/(hitbar.getQ1()+hitbar.getQ2()) );
+    auto rel2 = caloAssoVec->create();
+    rel2.setRec(digiHit2);
+    rel2.setSim(SimHit);
+    rel2.setWeight( hitbar.getQ2()/(hitbar.getQ1()+hitbar.getQ2()) );
 
-    auto rel = caloAssoVec->create();
-    rel.setRec(digiHit1);
-    rel.setSim(SimHit);
-    rel.setWeight(1.);
+
+
+    //MCParticle - CaloHit association
+    //float maxMCE = -99.;
+    //edm4hep::MCParticle selMCP; 
+    for(auto iter : MCPEnMap){
+      //if(iter.second>maxMCE){
+      //  maxMCE = iter.second;
+      //  selMCP = iter.first;
+      //}
+      auto rel_MCP1 = caloMCPAssoVec->create();
+      rel_MCP1.setRec(digiHit1);
+      rel_MCP1.setSim(iter.first);
+      rel_MCP1.setWeight(iter.second/digiHit1.getEnergy());
+      auto rel_MCP2 = caloMCPAssoVec->create();
+      rel_MCP2.setRec(digiHit2);
+      rel_MCP2.setSim(iter.first);
+      rel_MCP2.setWeight(iter.second/digiHit2.getEnergy());      
+    }
+
+    //if(selMCP.isAvailable()){
+    //  auto rel_MCP1 = caloMCPAssoVec->create();
+    //  rel_MCP1.setRec(digiHit1);
+    //  rel_MCP1.setSim(selMCP);
+    //  rel_MCP1.setWeight(1.);
+    //  auto rel_MCP2 = caloMCPAssoVec->create();
+    //  rel_MCP2.setRec(digiHit2);
+    //  rel_MCP2.setSim(selMCP);
+    //  rel_MCP2.setWeight(1.);
+    //}
 
     m_barCol.push_back(hitbar);
-		totE_bar+=(hitbar.getQ1()+hitbar.getQ2())/2;
+		totE+=(hitbar.getQ1()+hitbar.getQ2())/2;
 		
     //Temp: write into trees. 
 		m_simBar_x.push_back(hitbar.getPosition().x());
@@ -303,7 +344,7 @@ StatusCode CRDEcalDigiAlg::execute()
 	t_SimCont->Fill();
 	t_SimBar->Fill();
 	if(_Debug>=1) std::cout<<"End Loop: Bar Digitalization!"<<std::endl;
-	std::cout<<"Total Bar Energy: "<<totE_bar<<std::endl;
+	std::cout<<"Total Bar Energy: "<<totE<<std::endl;
 
   _nEvt ++ ;
   //delete SimHitCol, caloVec, caloAssoVec; 
@@ -333,7 +374,7 @@ StatusCode CRDEcalDigiAlg::MergeHits( const edm4hep::SimCalorimeterHitCollection
 	for(int iter=0; iter<m_col.size(); iter++){
 		edm4hep::SimCalorimeterHit m_step = m_col[iter];
 		if(!m_step.isAvailable()){ cout<<"ERROR HIT!"<<endl; continue;}
-		if(m_step.getEnergy()==0) continue;
+		if(m_step.getEnergy()==0 || m_step.contributions_size()<1) continue;
 		unsigned long long cellid = m_step.getCellID();
 		dd4hep::Position hitpos = m_cellIDConverter->position(cellid);
 		edm4hep::Vector3f pos(hitpos.x()*10, hitpos.y()*10, hitpos.z()*10);
@@ -341,13 +382,9 @@ StatusCode CRDEcalDigiAlg::MergeHits( const edm4hep::SimCalorimeterHitCollection
 		edm4hep::MutableCaloHitContribution conb;
 		conb.setEnergy(m_step.getEnergy());
 		conb.setStepPosition(m_step.getPosition());
-	//---oooOOO000OOOooo---
-	if(m_step.contributions_size()==1)
+    conb.setParticle( m_step.getContributions(0).getParticle() );
 		conb.setTime(m_step.getContributions(0).getTime());
-	else{
-		cout<<"yyy: MergeHits(), m_step.contributions_size()!=1"<<endl;
-	}
-	//---oooOOO000OOOooo---
+
 		edm4hep::MutableSimCalorimeterHit m_hit = find(m_mergedhit, cellid);
 		if(m_hit.getCellID()==0){
 			//m_hit = new edm4hep::SimCalorimeterHit();
@@ -422,6 +459,7 @@ edm4hep::MutableSimCalorimeterHit CRDEcalDigiAlg::find(const std::vector<edm4hep
 }
 
 void CRDEcalDigiAlg::Clear(){
+  totE = -99;
 	m_step_x.clear();
 	m_step_y.clear();
 	m_step_z.clear();
