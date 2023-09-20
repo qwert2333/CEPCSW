@@ -29,6 +29,7 @@ namespace PandoraPlus {
     TVector3 getPos() const; 
     TVector3 getAxis() const { return axis; }
     TVector3 getEnergyCenter() const;
+    std::vector<int> getEnergyCenterTower() const;
     int getSlayer() const { return slayer; }
     std::vector< std::vector<int> > getTowerID() const { return towerID; }
     double getHoughAlpha() const { return Hough_alpha; }
@@ -78,7 +79,7 @@ namespace PandoraPlus {
 
 
   private:
-    int type; //0: Track cluster. 1: EM cluster. 2: Hadronic cluster. 3: Other cluster. 
+    int type; // yyy: new definition: track: 10000, Hough: 100, cone: 1, merge: sum them
     std::vector< std::vector<int> > towerID; //[module, part, stave]
     int slayer;
     TVector3 axis;

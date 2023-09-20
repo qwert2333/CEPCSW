@@ -79,7 +79,7 @@ StatusCode TrackMatchingAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
           continue;
 
         t_track_axis->addAssociatedTrack(m_TrackCol[itrk]);
-        t_track_axis->setType(0); //Track-type axis. 
+        t_track_axis->setType(10000); //Track-type axis. 
         m_TrackCol[itrk]->addAssociatedHalfClusterV( p_HalfClusterV->at(ihc).get() );
         m_datacol.map_HalfCluster["bkHalfCluster"].push_back(t_track_axis);
         p_HalfClusterV->at(ihc).get()->addHalfCluster(settings.map_stringPars["OutputLongiClusName"], t_track_axis.get());
@@ -98,7 +98,7 @@ StatusCode TrackMatchingAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
           continue;
         
         t_track_axis->addAssociatedTrack(m_TrackCol[itrk]);
-        t_track_axis->setType(0); //Track-type axis. 
+        t_track_axis->setType(10000); //Track-type axis. 
         m_TrackCol[itrk]->addAssociatedHalfClusterU( p_HalfClusterU->at(ihc).get() );
         m_datacol.map_HalfCluster["bkHalfCluster"].push_back(t_track_axis);
         p_HalfClusterU->at(ihc).get()->addHalfCluster(settings.map_stringPars["OutputLongiClusName"], t_track_axis.get());
@@ -561,7 +561,7 @@ StatusCode TrackMatchingAlg::CreatConeAxis(PandoraPlusDataCol& m_datacol, Pandor
       continue;
     
     t_track_axis->addAssociatedTrack(track);
-    t_track_axis->setType(0); //Track-type axis. 
+    t_track_axis->setType(10000); //Track-type axis. 
     
     if(nearbyHalfClusters[ihc]->getSlayer()==1){
       track->addAssociatedHalfClusterV( nearbyHalfClusters[ihc] );

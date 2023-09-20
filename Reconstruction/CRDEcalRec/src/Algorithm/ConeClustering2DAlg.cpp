@@ -129,7 +129,7 @@ StatusCode ConeClustering2DAlg::LongiConeLinking(  std::map<int, std::vector<con
     if(iter->first < settings.map_floatPars["th_beginLayer"] || iter->first > settings.map_floatPars["th_stopLayer"] ) continue; 
     std::shared_ptr<PandoraPlus::CaloHalfCluster> m_clus = std::make_shared<PandoraPlus::CaloHalfCluster>();
     m_clus->addUnit(ShowersinFirstLayer[i]);
-    m_clus->setType(2);
+    m_clus->setType(1);
     m_clusCol.push_back(m_clus);
   }
   iter++;
@@ -162,7 +162,7 @@ StatusCode ConeClustering2DAlg::LongiConeLinking(  std::map<int, std::vector<con
       for(int i=0;i<ShowersinLayer.size(); i++){
         std::shared_ptr<PandoraPlus::CaloHalfCluster> m_clus = std::make_shared<PandoraPlus::CaloHalfCluster>();
         m_clus->addUnit(ShowersinLayer[i]);
-        m_clus->setType(2);
+        m_clus->setType(1);
         m_clusCol.push_back(m_clus);
     }}//end new cluster
   }//end loop layers.

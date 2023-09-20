@@ -507,7 +507,7 @@ StatusCode HoughClusteringAlg::ClusterFinding(vector<PandoraPlus::HoughObject>& 
       //delete m_clus;
       continue;
     } 
-    m_clus->setType(1); //EM-type axis.     
+    m_clus->setType(100); //EM-type axis.     
     m_clusCol.push_back(m_clus);
   }
 
@@ -558,7 +558,7 @@ StatusCode HoughClusteringAlg::CleanClusters( std::vector<std::shared_ptr<Pandor
           clus_tail->addUnit( m_longiClusCol[ic].get()->getCluster()[jh]);
         
         if( clus_head->isContinueN(settings.map_intPars["th_continueN"]) ) {
-            clus_head->setType(1); 
+            clus_head->setType(100); 
             clus_head->setHoughPars(m_longiClusCol[ic].get()->getHoughAlpha(), m_longiClusCol[ic].get()->getHoughRho());
             m_longiClusCol.push_back(clus_head);
         }
@@ -567,7 +567,7 @@ StatusCode HoughClusteringAlg::CleanClusters( std::vector<std::shared_ptr<Pandor
         //}
         if( clus_tail->isContinueN(settings.map_intPars["th_continueN"]) ) {
           clus_tail->setHoughPars(m_longiClusCol[ic].get()->getHoughAlpha(), m_longiClusCol[ic].get()->getHoughRho());
-          clus_tail->setType(1);
+          clus_tail->setType(100);
           m_longiClusCol.push_back(clus_tail);
         }
         //else{
