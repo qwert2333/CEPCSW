@@ -47,16 +47,6 @@ from Configurables import HepMCRdr
 from Configurables import GenPrinter
 
 gun = GtGunTool("GtGunTool")
-gun.Particles = [SimPARTICLES]
-gun.PositionXs = [SimPARTICLEX]
-gun.PositionYs = [SimPARTICLEY]
-gun.PositionZs = [SimPARTICLEZ]
-gun.EnergyMins = [SimPARTICLEEMIN] # GeV
-gun.EnergyMaxs = [SimPARTICLEEMAX] # GeV
-gun.ThetaMins  = [SimPARTICLETHETAMIN]   # deg
-gun.ThetaMaxs  = [SimPARTICLETHETAMAX]   # deg
-gun.PhiMins    = [SimPARTICLEPHIMIN]   # deg
-gun.PhiMaxs    = [SimPARTICLEPHIMAX]   # deg
 
 stdheprdr = StdHepRdr("StdHepRdr")
 stdheprdr.Input = "READSTDHEP"

@@ -106,7 +106,7 @@ PandoraPlusPFAlg.AlgParNames = [ ["Par1", "Par2"],
                                  ["ReadinLocalMaxName", "th_Nshowers"],
                                  ["axis_Angle", "relP_Angle", "relP_Dis"],
                                  [""],
-                                 [""] ]
+                                 ["TruthMatch"] ]
 PandoraPlusPFAlg.AlgParTypes = [ ["double", "double"],
                                  ["double"],
                                  ["double", "double"],
@@ -115,7 +115,7 @@ PandoraPlusPFAlg.AlgParTypes = [ ["double", "double"],
                                  ["string", "int"], 
                                  ["double","double", "double"],
                                  [""],
-                                 [""]  ]
+                                 ["bool"]  ]
 PandoraPlusPFAlg.AlgParValues = [ ["1.", "3.14"],
                                   ["1."],
                                   ["0.005", "0."],
@@ -124,7 +124,7 @@ PandoraPlusPFAlg.AlgParValues = [ ["1.", "3.14"],
                                   ["LeftLocalMax", "3"], 
                                   ["1.57", "1.57", "70"],  #Pi/2, Pi/2, 70.
                                   [""],
-                                  [""]  ]
+                                  ["0"]  ]
 
 
 ########################################

@@ -37,12 +37,14 @@ namespace PandoraPlus {
     std::map<std::string, std::vector<const PandoraPlus::CaloHalfCluster*> > getHalfClusterUMap() const { return map_halfClusUCol; }
     std::map<std::string, std::vector<const PandoraPlus::CaloHalfCluster*> > getHalfClusterVMap() const { return map_halfClusVCol; }
     std::vector<const PandoraPlus::Track*> getAssociatedTracks() const { return m_TrackCol; }
+    std::vector< std::pair<edm4hep::MCParticle, float> > getLinkedMCP() const { return MCParticleWeight; }
+    std::vector< std::pair<edm4hep::MCParticle, float> > getLinkedMCPfromHFCluster(std::string name);
 
     std::vector<const Calo3DCluster*> getTowers() const {return m_towers; }
     std::vector<const CaloUnit*> getBars() const;
-    double getHitsE() const;
     double getEnergy() const; 
-    //double getShowerE() const { return getEnergy(); }
+    double getHitsE() const;
+    double getLongiE() const;
     TVector3 getHitCenter() const;
     TVector3 getShowerCenter() const; 
     TVector3 getAxis() const { return axis; }
@@ -74,7 +76,7 @@ namespace PandoraPlus {
 
     //void FitProfile();
     void FitAxis();
-    void FitAxisHit();
+    //void FitAxisHit();
 
   private:
     std::vector<const PandoraPlus::CaloHit*> hits; 
@@ -85,6 +87,7 @@ namespace PandoraPlus {
     std::map<std::string, std::vector<const PandoraPlus::CaloHalfCluster*> > map_halfClusUCol;
     std::map<std::string, std::vector<const PandoraPlus::CaloHalfCluster*> > map_halfClusVCol;
     std::vector<const PandoraPlus::Track*> m_TrackCol;
+    std::vector< std::pair<edm4hep::MCParticle, float> > MCParticleWeight;
 
     std::vector< std::vector<int> > towerID; //[module, part, stave]
     TVector3 axis;

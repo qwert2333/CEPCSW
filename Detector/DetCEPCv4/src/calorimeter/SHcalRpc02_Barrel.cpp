@@ -43,7 +43,7 @@ using dd4hep::rec::LayeredCalorimeterData;
  */
 static Ref_t create_detector(Detector& theDetector, xml_h element, SensitiveDetector sens)  {
   cout << "--------------------------" << endl;
-  cout << "creating SHcalRpc01_Barrel" << endl;
+  cout << "creating SHcalRpc02_Barrel" << endl;
   cout << "--------------------------" << endl;
 
   xml_det_t    x_det  = element;

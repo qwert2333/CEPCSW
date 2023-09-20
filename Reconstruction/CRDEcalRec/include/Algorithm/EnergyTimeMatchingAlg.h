@@ -26,6 +26,9 @@ public:
   StatusCode RunAlgorithm( PandoraPlusDataCol& m_datasvc );
   StatusCode ClearAlgorithm(); 
 
+  StatusCode TruthMatching( std::vector<const PandoraPlus::CaloHalfCluster*>& m_ClUCol, 
+                            std::vector<const PandoraPlus::CaloHalfCluster*>& m_ClVCol,
+                            std::vector<std::shared_ptr<PandoraPlus::Calo3DCluster>>& m_clusters );
 
   StatusCode XYClusterMatchingL0( const PandoraPlus::CaloHalfCluster* m_longiClX, 
                                   const PandoraPlus::CaloHalfCluster* m_longiClY, 
@@ -35,18 +38,15 @@ public:
                                   std::vector<const PandoraPlus::CaloHalfCluster*>& m_longiClN, 
                                   std::vector<std::shared_ptr<PandoraPlus::Calo3DCluster>>& m_clusters );
 
-  StatusCode XYClusterMatchingL2( std::vector<const PandoraPlus::CaloHalfCluster*>& m_ClUCol, 
-                                  std::vector<const PandoraPlus::CaloHalfCluster*>& m_ClVCol, 
+  StatusCode XYClusterMatchingL2( std::vector<const PandoraPlus::CaloHalfCluster*>& m_ClUCol,
+                                  std::vector<const PandoraPlus::CaloHalfCluster*>& m_ClVCol,
                                   std::vector<std::shared_ptr<PandoraPlus::Calo3DCluster>>& m_clusters );
 
-  StatusCode XYClusterMatchingL3( std::vector<const PandoraPlus::CaloHalfCluster*>& m_ClUCol, 
-                                  std::vector<const PandoraPlus::CaloHalfCluster*>& m_ClVCol, 
+  StatusCode XYClusterMatchingL3( std::vector<const PandoraPlus::CaloHalfCluster*>& m_ClUCol,
+                                  std::vector<const PandoraPlus::CaloHalfCluster*>& m_ClVCol,
                                   std::vector<std::shared_ptr<PandoraPlus::Calo3DCluster>>& m_clusters );
 
-
-  StatusCode GetFullMatchedShowers( std::vector<const PandoraPlus::Calo1DCluster*>& barShowerXCol, 
-                                    std::vector<const PandoraPlus::Calo1DCluster*>& barShowerYCol, 
-                                    std::vector<PandoraPlus::Calo2DCluster*>& outshCol );
+  StatusCode ClusterReconnecting(std::vector<std::shared_ptr<PandoraPlus::Calo3DCluster>>& m_clusterCol);
 
   StatusCode GetMatchedShowersL0( const PandoraPlus::Calo1DCluster* barShowerX, 
                                   const PandoraPlus::Calo1DCluster* barShowerY, 
@@ -56,13 +56,13 @@ public:
                                   std::vector<const PandoraPlus::Calo1DCluster*>& showerNCol, 
                                   std::vector<PandoraPlus::Calo2DCluster*>& outshCol ); //1*N
 
-  StatusCode GetMatchedShowersL2( std::vector<const PandoraPlus::Calo1DCluster*>& barShowerXCol, 
-                                  std::vector<const PandoraPlus::Calo1DCluster*>& barShowerYCol, 
-                                  std::vector<PandoraPlus::Calo2DCluster*>& outshCol ); 
+//  StatusCode GetMatchedShowersL2( std::vector<const PandoraPlus::Calo1DCluster*>& barShowerXCol,
+//                                  std::vector<const PandoraPlus::Calo1DCluster*>& barShowerYCol,
+//                                  std::vector<PandoraPlus::Calo2DCluster*>& outshCol );
 
-  StatusCode GetMatchedShowersL3( std::vector<const PandoraPlus::Calo1DCluster*>& barShowerXCol, 
-                                  std::vector<const PandoraPlus::Calo1DCluster*>& barShowerYCol, 
-                                  std::vector<PandoraPlus::Calo2DCluster*>& outshCol );
+//  StatusCode GetMatchedShowersL3( std::vector<const PandoraPlus::Calo1DCluster*>& barShowerXCol,
+//                                  std::vector<const PandoraPlus::Calo1DCluster*>& barShowerYCol,
+//                                  std::vector<PandoraPlus::Calo2DCluster*>& outshCol );
 
   double** GetClusterChi2Map(std::vector<std::vector<const PandoraPlus::Calo1DCluster*>>& barShowerXCol, std::vector<std::vector<const PandoraPlus::Calo1DCluster*>>& barShowerYCol);
 

@@ -9,7 +9,7 @@ StatusCode AxisMergingAlg::ReadSettings(Settings& m_settings){
   //Initialize parameters
   if(settings.map_stringPars.find("OutputAxisName")==settings.map_stringPars.end()) settings.map_stringPars["OutputAxisName"] = "MergedAxis";
   if(settings.map_floatPars.find("th_overlap")==settings.map_floatPars.end()) settings.map_floatPars["th_overlap"] = 0.5;
-  if(settings.map_intPars.find("th_CoreNhit")==settings.map_intPars.end()) settings.map_intPars["th_CoreNhit"] = 7;
+  if(settings.map_intPars.find("th_CoreNhit")==settings.map_intPars.end()) settings.map_intPars["th_CoreNhit"] = 3;
   if(settings.map_floatPars.find("axis_Angle")==settings.map_floatPars.end()) settings.map_floatPars["axis_Angle"] = TMath::Pi()/4.;
   if(settings.map_floatPars.find("relP_Angle")==settings.map_floatPars.end()) settings.map_floatPars["relP_Angle"] = TMath::Pi()/4.;
   if(settings.map_floatPars.find("relP_Dis")==settings.map_floatPars.end()) settings.map_floatPars["relP_Dis"] = 5*PandoraPlus::CaloUnit::barsize;
@@ -72,6 +72,42 @@ StatusCode AxisMergingAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
     std::sort( m_newAxisUCol.begin(), m_newAxisUCol.end(), compLayer );
 
 
+printf("  In HalfClusterU #%d: readin axis size %d \n", ih, m_newAxisUCol.size());
+/*
+std::map<std::string, std::vector<const PandoraPlus::CaloHalfCluster*> > tmp_HClusMap =  p_HalfClusterU.at(ih)->getHalfClusterMap();
+cout<<"Print Readin AxisU: "<<endl;
+for(auto iter : tmp_HClusMap){
+  cout<<"  Axis name: "<<iter.first<<endl;
+  for(int ia=0; ia<iter.second.size(); ia++){
+    cout<<"    No. #"<<ia<<endl;
+    for(int il=0 ;il<iter.second[ia]->getCluster().size(); il++)
+    printf("    LocalMax %d: (%.3f, %.3f, %.3f, %.3f), towerID [%d, %d, %d], %p \n", il, 
+        iter.second[ia]->getCluster()[il]->getPos().x(), 
+        iter.second[ia]->getCluster()[il]->getPos().y(), 
+        iter.second[ia]->getCluster()[il]->getPos().z(), 
+        iter.second[ia]->getCluster()[il]->getEnergy(), 
+        iter.second[ia]->getCluster()[il]);
+  }
+cout<<endl;
+}
+*/
+/*
+cout<<"Print Readin AxisU: "<<endl;
+for(int ia=0; ia<m_newAxisUCol.size(); ia++){
+cout<<"  Axis #"<<ia<<": type "<<m_newAxisUCol[ia]->getType()<<endl;
+for(int il=0 ;il<m_newAxisUCol[ia]->getCluster().size(); il++)
+  printf("    LocalMax %d: (%.3f, %.3f, %.3f, %.3f), towerID [%d, %d, %d], %p \n", il, 
+    m_newAxisUCol[ia]->getCluster()[il]->getPos().x(), 
+    m_newAxisUCol[ia]->getCluster()[il]->getPos().y(), 
+    m_newAxisUCol[ia]->getCluster()[il]->getPos().z(), 
+    m_newAxisUCol[ia]->getCluster()[il]->getTowerID()[0][0],
+    m_newAxisUCol[ia]->getCluster()[il]->getTowerID()[0][1],
+    m_newAxisUCol[ia]->getCluster()[il]->getTowerID()[0][2],
+    m_newAxisUCol[ia]->getCluster()[il]->getEnergy(), 
+    m_newAxisUCol[ia]->getCluster()[il]);
+cout<<endl;
+}
+*/
     //Case1: Merge axes associated to the same track. 
     TrkMatchedMerging(m_newAxisUCol);    
     cout << "  yyy: after TrkMatchedMerging(), axis size = " <<  m_newAxisUCol.size() << endl;
@@ -110,6 +146,26 @@ StatusCode AxisMergingAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
 
 
     cout << "  yyy: check axis quality" << endl;
+//printf("  In HalfClusterU #%d: After Step4: axis size %d \n", ih, m_newAxisUCol.size());
+
+/*
+cout<<"  After merging: axis size "<<m_newAxisUCol.size()<<", Check the overlap"<<endl;
+cout<<"Print Merged AxisU: "<<endl;
+for(int ia=0; ia<m_newAxisUCol.size(); ia++){
+cout<<"  Axis #"<<ia<<": type "<<m_newAxisUCol[ia]->getType()<<endl;
+for(int il=0 ;il<m_newAxisUCol[ia]->getCluster().size(); il++)
+  printf("    LocalMax %d: (%.3f, %.3f, %.3f, %.3f), towerID [%d, %d, %d], %p \n", il, 
+    m_newAxisUCol[ia]->getCluster()[il]->getPos().x(), 
+    m_newAxisUCol[ia]->getCluster()[il]->getPos().y(), 
+    m_newAxisUCol[ia]->getCluster()[il]->getPos().z(), 
+    m_newAxisUCol[ia]->getCluster()[il]->getEnergy(), 
+    m_newAxisUCol[ia]->getCluster()[il]->getTowerID()[0][0], 
+    m_newAxisUCol[ia]->getCluster()[il]->getTowerID()[0][1], 
+    m_newAxisUCol[ia]->getCluster()[il]->getTowerID()[0][2], 
+    m_newAxisUCol[ia]->getCluster()[il]);
+cout<<endl;
+}
+*/
     //Check axis quality
     std::vector<PandoraPlus::CaloHalfCluster*> tmp_goodAxis; tmp_goodAxis.clear(); 
     std::vector<PandoraPlus::CaloHalfCluster*> tmp_badAxis; tmp_badAxis.clear();

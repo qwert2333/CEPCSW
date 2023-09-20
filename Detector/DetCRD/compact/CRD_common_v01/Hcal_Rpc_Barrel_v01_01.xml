@@ -47,7 +47,7 @@
 		 rmin2="0.0" rmax2="Hcal_barrel_outer_radius + env_safety"/>
           <shape type="PolyhedraRegular"  numsides="Hcal_barrel_symmetry" rmin="0.0"
                  rmax="Hcal_barrel_inner_radius - env_safety" dz="2*(Hcal_barrel_half_length + env_safety)"/>
-	              <rotation x="0" y="0" z="-180*deg/Hcal_barrel_symmetry"/>
+	        <rotation x="0" y="0" z="-180*deg/Hcal_barrel_symmetry"/>
         </shape>
       </envelope>
       <type_flags type=" DetType_CALORIMETER + DetType_BARREL + DetType_HADRONIC " />
