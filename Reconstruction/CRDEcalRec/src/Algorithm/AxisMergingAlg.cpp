@@ -82,8 +82,9 @@ StatusCode AxisMergingAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
 
     // Case3: Merge fake photon to track axis.
     BranchMerging(m_newAxisUCol);
+    cout << "  yyy: after BranchMerging(), axis size = " <<  m_newAxisUCol.size() << endl;
 
-    //Case3: Merge fragments to core axes. 
+    //Case4: Merge fragments to core axes. 
     FragmentsMerging(m_newAxisUCol);
     cout << "  yyy: after FragmentsMerging(), axis size = " <<  m_newAxisUCol.size() << endl;
 
@@ -92,20 +93,20 @@ StatusCode AxisMergingAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
     //printf("  In HalfClusterU #%d: After Step4: axis size %d \n", ih, m_newAxisUCol.size());
 
 
-    cout<<"  yyy: after all merging: axis size "<<m_newAxisUCol.size()<<endl;
-    for(int ia=0; ia<m_newAxisUCol.size(); ia++){
-      cout<<"  yyy: axis #"<<ia<<endl;
-      for(int il=0 ;il<m_newAxisUCol[ia]->getCluster().size(); il++)
-        printf("         LocalMax %d: (%.2f, %.2f, %.2f, %.4f), towerID [%d, %d, %d], %p \n", il, 
-          m_newAxisUCol[ia]->getCluster()[il]->getPos().x(), 
-          m_newAxisUCol[ia]->getCluster()[il]->getPos().y(), 
-          m_newAxisUCol[ia]->getCluster()[il]->getPos().z(), 
-          m_newAxisUCol[ia]->getCluster()[il]->getEnergy(), 
-          m_newAxisUCol[ia]->getCluster()[il]->getTowerID()[0][0], 
-          m_newAxisUCol[ia]->getCluster()[il]->getTowerID()[0][1], 
-          m_newAxisUCol[ia]->getCluster()[il]->getTowerID()[0][2], 
-          m_newAxisUCol[ia]->getCluster()[il]);
-    }
+    // cout<<"  yyy: after all merging: axis size "<<m_newAxisUCol.size()<<endl;
+    // for(int ia=0; ia<m_newAxisUCol.size(); ia++){
+    //   cout<<"  yyy: axis #"<<ia<<endl;
+    //   for(int il=0 ;il<m_newAxisUCol[ia]->getCluster().size(); il++)
+    //     printf("         LocalMax %d: (%.2f, %.2f, %.2f, %.4f), towerID [%d, %d, %d], %p \n", il, 
+    //       m_newAxisUCol[ia]->getCluster()[il]->getPos().x(), 
+    //       m_newAxisUCol[ia]->getCluster()[il]->getPos().y(), 
+    //       m_newAxisUCol[ia]->getCluster()[il]->getPos().z(), 
+    //       m_newAxisUCol[ia]->getCluster()[il]->getEnergy(), 
+    //       m_newAxisUCol[ia]->getCluster()[il]->getTowerID()[0][0], 
+    //       m_newAxisUCol[ia]->getCluster()[il]->getTowerID()[0][1], 
+    //       m_newAxisUCol[ia]->getCluster()[il]->getTowerID()[0][2], 
+    //       m_newAxisUCol[ia]->getCluster()[il]);
+    // }
 
 
     cout << "  yyy: check axis quality" << endl;
@@ -115,20 +116,16 @@ StatusCode AxisMergingAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
     for(int ic=0; ic<m_newAxisUCol.size(); ic++){
       if( (m_newAxisUCol[ic]->getType()==100 && m_newAxisUCol[ic]->getCluster().size()>=settings.map_intPars["th_CoreNhit"] ) ||
           m_newAxisUCol[ic]->getType()>100 ){
-            cout << "    yyy: axis " << ic << " is a good axis" << endl;
             tmp_goodAxis.push_back( m_newAxisUCol[ic] );
           }
         
 
       else {
-        cout << "    yyy: axis " << ic << " is a bad axis" << endl;
         tmp_badAxis.push_back( m_newAxisUCol[ic] );
       }
     }  
-    cout << "  yyy: N of good axis = " << tmp_goodAxis.size() << ", N of bad axis = " << tmp_badAxis.size() << endl;
 
     for(int ic=0; ic<tmp_badAxis.size(); ic++){
-      cout << "  yyy: for bad axis " << ic << endl;
       MergeToClosestCluster( tmp_badAxis[ic], tmp_goodAxis );
     }
       
@@ -173,8 +170,9 @@ StatusCode AxisMergingAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
 
     //Case3: Merge fake photon to track axis.
     BranchMerging(m_newAxisVCol);
+    cout << "  yyy: after BranchMerging(), axis size = " <<  m_newAxisVCol.size() << endl;
 
-    //Case3: Merge fragments to core axes. 
+    //Case4: Merge fragments to core axes. 
     FragmentsMerging(m_newAxisVCol);
     cout << "  yyy: after FragmentsMerging(), axis size = " <<  m_newAxisVCol.size() << endl;
 
@@ -182,20 +180,20 @@ StatusCode AxisMergingAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
     //ConeMerging(m_newAxisVCol);
     //printf("  In HalfClusterV #%d: After Step4: axis size %d \n", ih, m_newAxisVCol.size());
 
-    cout<<"  yyy: after all merging: axis size "<<m_newAxisVCol.size()<<endl;
-    for(int ia=0; ia<m_newAxisVCol.size(); ia++){
-      cout<<"  yyy: axis #"<<ia<<endl;
-      for(int il=0 ;il<m_newAxisVCol[ia]->getCluster().size(); il++)
-        printf("         LocalMax %d: (%.2f, %.2f, %.2f, %.4f), towerID [%d, %d, %d], %p \n", il, 
-          m_newAxisVCol[ia]->getCluster()[il]->getPos().x(), 
-          m_newAxisVCol[ia]->getCluster()[il]->getPos().y(), 
-          m_newAxisVCol[ia]->getCluster()[il]->getPos().z(), 
-          m_newAxisVCol[ia]->getCluster()[il]->getEnergy(), 
-          m_newAxisVCol[ia]->getCluster()[il]->getTowerID()[0][0], 
-          m_newAxisVCol[ia]->getCluster()[il]->getTowerID()[0][1], 
-          m_newAxisVCol[ia]->getCluster()[il]->getTowerID()[0][2], 
-          m_newAxisVCol[ia]->getCluster()[il]);
-    }
+    // cout<<"  yyy: after all merging: axis size "<<m_newAxisVCol.size()<<endl;
+    // for(int ia=0; ia<m_newAxisVCol.size(); ia++){
+    //   cout<<"  yyy: axis #"<<ia<<endl;
+    //   for(int il=0 ;il<m_newAxisVCol[ia]->getCluster().size(); il++)
+    //     printf("         LocalMax %d: (%.2f, %.2f, %.2f, %.4f), towerID [%d, %d, %d], %p \n", il, 
+    //       m_newAxisVCol[ia]->getCluster()[il]->getPos().x(), 
+    //       m_newAxisVCol[ia]->getCluster()[il]->getPos().y(), 
+    //       m_newAxisVCol[ia]->getCluster()[il]->getPos().z(), 
+    //       m_newAxisVCol[ia]->getCluster()[il]->getEnergy(), 
+    //       m_newAxisVCol[ia]->getCluster()[il]->getTowerID()[0][0], 
+    //       m_newAxisVCol[ia]->getCluster()[il]->getTowerID()[0][1], 
+    //       m_newAxisVCol[ia]->getCluster()[il]->getTowerID()[0][2], 
+    //       m_newAxisVCol[ia]->getCluster()[il]);
+    // }
 
     cout << "  yyy: check axis quality" << endl;
     //Check axis quality
@@ -204,20 +202,16 @@ StatusCode AxisMergingAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
     for(int ic=0; ic<m_newAxisVCol.size(); ic++){
       if( (m_newAxisVCol[ic]->getType()==100 && m_newAxisVCol[ic]->getCluster().size()>=settings.map_intPars["th_CoreNhit"] ) ||
           m_newAxisVCol[ic]->getType()>100 ){
-            cout << "    yyy: axis " << ic << " is a good axis" << endl;
             tmp_goodAxis.push_back( m_newAxisVCol[ic] );
           }
         
 
       else {
-        cout << "    yyy: axis " << ic << " is a bad axis" << endl;
         tmp_badAxis.push_back( m_newAxisVCol[ic] );
       }
     }
-    cout << "  yyy: N of good axis = " << tmp_goodAxis.size() << ", N of bad axis = " << tmp_badAxis.size() << endl;
 
     for(int ic=0; ic<tmp_badAxis.size(); ic++){
-      cout << "  yyy: for bad axis " << ic << endl;
       MergeToClosestCluster( tmp_badAxis[ic], tmp_goodAxis );
     }
       
@@ -281,7 +275,7 @@ StatusCode AxisMergingAlg::TrkMatchedMerging( std::vector<PandoraPlus::CaloHalfC
         // }
 
         m_axisCol[iax]->mergeHalfCluster( m_axisCol[jax] );
-        cout << "    yyy: after merge them, new type=" << m_axisCol[iax]->getType() << endl;
+        // cout << "    yyy: after merge them, new type=" << m_axisCol[iax]->getType() << endl;
         //delete m_axisCol[jax]; m_axisCol[jax]=nullptr;
         m_axisCol.erase(m_axisCol.begin()+jax);
         jax--;
@@ -297,7 +291,7 @@ StatusCode AxisMergingAlg::OverlapMerging( std::vector<PandoraPlus::CaloHalfClus
   cout << "  yyy: calling OverlapMerging(), m_axisCol.size()=" << m_axisCol.size() << endl;
   if(m_axisCol.size()<2) return StatusCode::SUCCESS;
 
-  cout << "  yyy: first interate" << endl;
+  // cout << "  yyy: first interate" << endl;
   for(int iax=0; iax<m_axisCol.size(); iax++){
     const PandoraPlus::CaloHalfCluster* m_axis = m_axisCol[iax];
     for(int jax=iax+1; jax<m_axisCol.size(); jax++){
@@ -340,7 +334,7 @@ StatusCode AxisMergingAlg::OverlapMerging( std::vector<PandoraPlus::CaloHalfClus
         int axis_type = m_axisCol[iax]->getType() + m_axisCol[jax]->getType();
         m_axisCol[iax]->setType(axis_type);
 
-        cout << "    yyy: after merge them, new type=" << m_axisCol[iax]->getType() << endl;
+        // cout << "    yyy: after merge them, new type=" << m_axisCol[iax]->getType() << endl;
         //delete m_axisCol[jax]; m_axisCol[jax]=nullptr;
         m_axisCol.erase(m_axisCol.begin()+jax);
         jax--;
@@ -354,7 +348,7 @@ StatusCode AxisMergingAlg::OverlapMerging( std::vector<PandoraPlus::CaloHalfClus
   }
 
 
-  cout << "  yyy: second interate" << endl;
+  // cout << "  yyy: second interate" << endl;
   //iterate
   for(int iax=0; iax<m_axisCol.size(); iax++){
     const PandoraPlus::CaloHalfCluster* m_axis = m_axisCol[iax];
@@ -399,7 +393,7 @@ StatusCode AxisMergingAlg::OverlapMerging( std::vector<PandoraPlus::CaloHalfClus
         int axis_type = m_axisCol[iax]->getType() + m_axisCol[jax]->getType();
         m_axisCol[iax]->setType(axis_type);
 
-        cout << "    yyy: after merge them, new type=" << m_axisCol[iax]->getType() << endl;
+        // cout << "    yyy: after merge them, new type=" << m_axisCol[iax]->getType() << endl;
 
         //delete m_axisCol[jax]; m_axisCol[jax]=nullptr;
         m_axisCol.erase(m_axisCol.begin()+jax);
@@ -428,7 +422,7 @@ StatusCode AxisMergingAlg::BranchMerging( std::vector<PandoraPlus::CaloHalfClust
     const PandoraPlus::CaloHalfCluster* m_axis = m_axisCol[iax];
 
     if (m_axis->getType()<10000){
-      cout << "yyy:  m_axisCol[" << iax << "] is not a track axis. skip" << endl;
+      // cout << "yyy:  m_axisCol[" << iax << "] is not a track axis. skip" << endl;
       continue;
     }
 
@@ -437,7 +431,7 @@ StatusCode AxisMergingAlg::BranchMerging( std::vector<PandoraPlus::CaloHalfClust
       const PandoraPlus::CaloHalfCluster* p_axis = m_axisCol[jax];
       
       if (p_axis->getType()/100%100<1){
-        cout << "yyy:  m_axisCol[" << jax << "] is not a Hough axis. skip" << endl;
+        // cout << "yyy:  m_axisCol[" << jax << "] is not a Hough axis. skip" << endl;
         continue;
       }
 
@@ -466,8 +460,8 @@ StatusCode AxisMergingAlg::BranchMerging( std::vector<PandoraPlus::CaloHalfClust
         double y0 = m_axis->getEnergyCenter().y();
         double distance = TMath::Abs( x0*TMath::Cos(hough_alpha) + y0*TMath::Sin(hough_alpha) - hough_rho );
 
-        cout << "    yyy:V rho = " << hough_rho << ", alpha = " << hough_alpha << ", x0 = " << x0 << ", y0 = " << y0 << endl;
-        cout << "         distanceV = " << distance << endl;
+        // cout << "    yyy:V rho = " << hough_rho << ", alpha = " << hough_alpha << ", x0 = " << x0 << ", y0 = " << y0 << endl;
+        // cout << "         distanceV = " << distance << endl;
 
         if (distance<settings.map_floatPars["th_branch_distance"]){
           m_axisCol[iax]->mergeHalfCluster( m_axisCol[jax] );
@@ -476,29 +470,29 @@ StatusCode AxisMergingAlg::BranchMerging( std::vector<PandoraPlus::CaloHalfClust
           m_axisCol.erase(m_axisCol.begin()+jax);
           jax--;
           if(iax>jax+1) iax--;
-          cout << "  yyy: axis " << jax << " is merged into axis " << iax << endl;
+          // cout << "  yyy: axis " << jax << " is merged into axis " << iax << endl;
         }
       }
 
       // U plane
       else{
         int m_module = m_axis->getEnergyCenterTower()[0];
-        cout << "  yyy:branceU: m_module = " << m_module << endl;
+        // cout << "  yyy:branceU: m_module = " << m_module << endl;
         int p_module = p_axis->getTowerID()[0][0];
-        cout << "  yyy:branceU: p_module = " << p_module << endl;
+        // cout << "  yyy:branceU: p_module = " << p_module << endl;
         // Do not merge the two axis in two different modules
         if (m_module != p_module) continue;
 
         TVector3 t_pos = m_axis->getEnergyCenter();
-        cout << "  yyy:branceU: t_pos = " << t_pos.x() << ", " << t_pos.y() << ", " << t_pos.z() << endl;
+        // cout << "  yyy:branceU: t_pos = " << t_pos.x() << ", " << t_pos.y() << ", " << t_pos.z() << endl;
         t_pos.RotateZ( TMath::Pi()/4.*(6-m_module) );
-        cout << "  yyy:branceU: t_pos after rotate to module 6 = " << t_pos.x() << ", " << t_pos.y() << ", " << t_pos.z() << endl;
+        // cout << "  yyy:branceU: t_pos after rotate to module 6 = " << t_pos.x() << ", " << t_pos.y() << ", " << t_pos.z() << endl;
         double x0 = t_pos.x();
         double y0 = t_pos.z();
         double distance = TMath::Abs( x0*TMath::Cos(hough_alpha) + y0*TMath::Sin(hough_alpha) - hough_rho );
 
-        cout << "    yyy:U rho = " << hough_rho << ", alpha = " << hough_alpha << ", x0 = " << x0 << ", z0 = " << y0 << endl;
-        cout << "         distanceU = " << distance << endl;
+        // cout << "    yyy:U rho = " << hough_rho << ", alpha = " << hough_alpha << ", x0 = " << x0 << ", z0 = " << y0 << endl;
+        // cout << "         distanceU = " << distance << endl;
 
         if (distance<settings.map_floatPars["th_branch_distance"]){
           m_axisCol[iax]->mergeHalfCluster( m_axisCol[jax] );
@@ -507,7 +501,7 @@ StatusCode AxisMergingAlg::BranchMerging( std::vector<PandoraPlus::CaloHalfClust
           m_axisCol.erase(m_axisCol.begin()+jax);
           jax--;
           if(iax>jax+1) iax--;
-          cout << "  yyy: axis " << jax << " is merged into axis " << iax << endl;
+          // cout << "  yyy: axis " << jax << " is merged into axis " << iax << endl;
         }
 
 
@@ -549,7 +543,7 @@ StatusCode AxisMergingAlg::FragmentsMerging( std::vector<PandoraPlus::CaloHalfCl
         m_axis->getType()>100 ) ) 
       { m_axis=nullptr; continue; }
 
-    cout << "    yyy: m_axisCol[" << iax << "] is a core" << endl;
+    // cout << "    yyy: m_axisCol[" << iax << "] is a core" << endl;
 
     for(int jax=0; jax<m_axisCol.size(); jax++){
       if(jax==iax) continue;
@@ -557,15 +551,15 @@ StatusCode AxisMergingAlg::FragmentsMerging( std::vector<PandoraPlus::CaloHalfCl
       //Do not merge 2 cores. 
       if( (p_axis->getType()==100 && p_axis->getCluster().size()>=settings.map_intPars["th_CoreNhit"] ) ||
           p_axis->getType()>100 ){
-            cout << "    yyy: m_axisCol[" << jax << "] is also a core, do not merge 2 cores" << endl;
-            cout << "         hit in m_axisCol["<<iax<<"]:"<<endl;
+            // cout << "    yyy: m_axisCol[" << jax << "] is also a core, do not merge 2 cores" << endl;
+            // cout << "         hit in m_axisCol["<<iax<<"]:"<<endl;
             for(int yii=0; yii<m_axisCol[iax]->getCluster().size(); yii++){
               cout << "           (" << std::fixed << std::setprecision(2) << m_axisCol[iax]->getCluster()[yii]->getPos().x()
                   << ", " << std::fixed << std::setprecision(2) << m_axisCol[iax]->getCluster()[yii]->getPos().y()
                   << ", " << std::fixed << std::setprecision(2) << m_axisCol[iax]->getCluster()[yii]->getPos().z()
                   << ")" << endl;
             }
-            cout << "         hit in m_axisCol["<<jax<<"]:"<<endl;
+            // cout << "         hit in m_axisCol["<<jax<<"]:"<<endl;
             for(int yii=0; yii<m_axisCol[jax]->getCluster().size(); yii++){
               cout << "           (" << std::fixed << std::setprecision(2) << m_axisCol[jax]->getCluster()[yii]->getPos().x()
                   << ", " << std::fixed << std::setprecision(2) << m_axisCol[jax]->getCluster()[yii]->getPos().y()
@@ -582,54 +576,54 @@ StatusCode AxisMergingAlg::FragmentsMerging( std::vector<PandoraPlus::CaloHalfCl
       TVector3 relP3 = m_axis->getEnergyCenter() - p_axis->getClusterInLayer( p_axis->getEndDlayer() )[0]->getPos();
       TVector3 relP4 = p_axis->getPos() - m_axis->getPos();
 
-      cout << "    yyy: m_axisCol[" << jax << "] is NOT a core, comparing them" << endl;
-      cout << "    yyy: relP1 = (" << std::fixed << std::setprecision(2) << relP1.x() 
-           <<                 ", " << std::fixed << std::setprecision(2) << relP1.y() 
-           <<                 ", " << std::fixed << std::setprecision(2) << relP1.z()
-           << endl
-           << "         relP2 = (" << std::fixed << std::setprecision(2) << relP2.x() 
-           <<                 ", " << std::fixed << std::setprecision(2) << relP2.y() 
-           <<                 ", " << std::fixed << std::setprecision(2) << relP2.z() 
-           << endl
-           << "         relP3 = (" << std::fixed << std::setprecision(2) << relP3.x() 
-           <<                 ", " << std::fixed << std::setprecision(2) << relP3.y() 
-           <<                 ", " << std::fixed << std::setprecision(2) << relP3.z() 
-           << endl
-           << "         relP4 = (" << std::fixed << std::setprecision(2) << relP4.x() 
-           <<                 ", " << std::fixed << std::setprecision(2) << relP4.y() 
-           <<                 ", " << std::fixed << std::setprecision(2) << relP4.z() 
-           << endl
-           << "         p_axis->getAxis() = (" << std::fixed << std::setprecision(2) << p_axis->getAxis().x() 
-           <<                             ", " << std::fixed << std::setprecision(2) << p_axis->getAxis().y() 
-           <<                             ", " << std::fixed << std::setprecision(2) << p_axis->getAxis().z() 
-           << endl
-           << "         m_axis->getAxis() = (" << std::fixed << std::setprecision(2) << m_axis->getAxis().x() 
-           <<                             ", " << std::fixed << std::setprecision(2) << m_axis->getAxis().y() 
-           <<                             ", " << std::fixed << std::setprecision(2) << m_axis->getAxis().z() 
-           << endl;
+      // cout << "    yyy: m_axisCol[" << jax << "] is NOT a core, comparing them" << endl;
+      // cout << "    yyy: relP1 = (" << std::fixed << std::setprecision(2) << relP1.x() 
+      //      <<                 ", " << std::fixed << std::setprecision(2) << relP1.y() 
+      //      <<                 ", " << std::fixed << std::setprecision(2) << relP1.z()
+      //      << endl
+      //      << "         relP2 = (" << std::fixed << std::setprecision(2) << relP2.x() 
+      //      <<                 ", " << std::fixed << std::setprecision(2) << relP2.y() 
+      //      <<                 ", " << std::fixed << std::setprecision(2) << relP2.z() 
+      //      << endl
+      //      << "         relP3 = (" << std::fixed << std::setprecision(2) << relP3.x() 
+      //      <<                 ", " << std::fixed << std::setprecision(2) << relP3.y() 
+      //      <<                 ", " << std::fixed << std::setprecision(2) << relP3.z() 
+      //      << endl
+      //      << "         relP4 = (" << std::fixed << std::setprecision(2) << relP4.x() 
+      //      <<                 ", " << std::fixed << std::setprecision(2) << relP4.y() 
+      //      <<                 ", " << std::fixed << std::setprecision(2) << relP4.z() 
+      //      << endl
+      //      << "         p_axis->getAxis() = (" << std::fixed << std::setprecision(2) << p_axis->getAxis().x() 
+      //      <<                             ", " << std::fixed << std::setprecision(2) << p_axis->getAxis().y() 
+      //      <<                             ", " << std::fixed << std::setprecision(2) << p_axis->getAxis().z() 
+      //      << endl
+      //      << "         m_axis->getAxis() = (" << std::fixed << std::setprecision(2) << m_axis->getAxis().x() 
+      //      <<                             ", " << std::fixed << std::setprecision(2) << m_axis->getAxis().y() 
+      //      <<                             ", " << std::fixed << std::setprecision(2) << m_axis->getAxis().z() 
+      //      << endl;
 
       if( (relP1.Angle(p_axis->getAxis()) < settings.map_floatPars["axis_Angle"] && relP1.Mag()<=settings.map_floatPars["relP_Dis"]) ||
           (relP2.Angle(p_axis->getAxis()) < settings.map_floatPars["axis_Angle"] && relP2.Mag()<=settings.map_floatPars["relP_Dis"]) ||
           (relP3.Angle(p_axis->getAxis()) < settings.map_floatPars["axis_Angle"] && relP3.Mag()<=settings.map_floatPars["relP_Dis"]) || 
           ( p_axis->getType()<100 && relP4.Angle(m_axis->getAxis())<settings.map_floatPars["axis_Angle"] && relP4.Mag()<=settings.map_floatPars["relP_Dis"]) )
       {
-        cout << "    yyy: m_axisCol[" << iax << "] (core) with type=" << m_axisCol[iax]->getType() 
-             << " and [" << jax << "] (branch) with type=" << m_axisCol[jax]->getType() 
-             << " are merged" << endl;
-        cout << "         hit in m_axisCol["<<iax<<"]:"<<endl;
-        for(int yii=0; yii<m_axisCol[iax]->getCluster().size(); yii++){
-          cout << "           (" << std::fixed << std::setprecision(2) << m_axisCol[iax]->getCluster()[yii]->getPos().x()
-               << ", " << std::fixed << std::setprecision(2) << m_axisCol[iax]->getCluster()[yii]->getPos().y()
-               << ", " << std::fixed << std::setprecision(2) << m_axisCol[iax]->getCluster()[yii]->getPos().z()
-               << ")" << endl;
-        }
-        cout << "         hit in m_axisCol["<<jax<<"]:"<<endl;
-        for(int yii=0; yii<m_axisCol[jax]->getCluster().size(); yii++){
-          cout << "           (" << std::fixed << std::setprecision(2) << m_axisCol[jax]->getCluster()[yii]->getPos().x()
-               << ", " << std::fixed << std::setprecision(2) << m_axisCol[jax]->getCluster()[yii]->getPos().y()
-               << ", " << std::fixed << std::setprecision(2) << m_axisCol[jax]->getCluster()[yii]->getPos().z()
-               << ")" << endl;
-        }
+        // cout << "    yyy: m_axisCol[" << iax << "] (core) with type=" << m_axisCol[iax]->getType() 
+        //      << " and [" << jax << "] (branch) with type=" << m_axisCol[jax]->getType() 
+        //      << " are merged" << endl;
+        // cout << "         hit in m_axisCol["<<iax<<"]:"<<endl;
+        // for(int yii=0; yii<m_axisCol[iax]->getCluster().size(); yii++){
+        //   cout << "           (" << std::fixed << std::setprecision(2) << m_axisCol[iax]->getCluster()[yii]->getPos().x()
+        //        << ", " << std::fixed << std::setprecision(2) << m_axisCol[iax]->getCluster()[yii]->getPos().y()
+        //        << ", " << std::fixed << std::setprecision(2) << m_axisCol[iax]->getCluster()[yii]->getPos().z()
+        //        << ")" << endl;
+        // }
+        // cout << "         hit in m_axisCol["<<jax<<"]:"<<endl;
+        // for(int yii=0; yii<m_axisCol[jax]->getCluster().size(); yii++){
+        //   cout << "           (" << std::fixed << std::setprecision(2) << m_axisCol[jax]->getCluster()[yii]->getPos().x()
+        //        << ", " << std::fixed << std::setprecision(2) << m_axisCol[jax]->getCluster()[yii]->getPos().y()
+        //        << ", " << std::fixed << std::setprecision(2) << m_axisCol[jax]->getCluster()[yii]->getPos().z()
+        //        << ")" << endl;
+        // }
  
         m_axisCol[iax]->mergeHalfCluster( m_axisCol[jax] );
 
@@ -759,7 +753,7 @@ StatusCode AxisMergingAlg::MergeToClosestCluster( PandoraPlus::CaloHalfCluster* 
   cout << "  yyy: calling MergeToClosestCluster()" << endl;
   if(m_axisCol.size()==0){ 
     m_axisCol.push_back(m_badaxis);
-    cout << "  yyy: no good axis, treat the bad axis as good axis" << endl;
+    // cout << "  yyy: no good axis, treat the bad axis as good axis" << endl;
     return StatusCode::SUCCESS;
   }
 
@@ -778,21 +772,21 @@ StatusCode AxisMergingAlg::MergeToClosestCluster( PandoraPlus::CaloHalfCluster* 
     int axis_type = m_axisCol[index]->getType() + m_badaxis->getType();
     m_axisCol[index]->setType(axis_type);
 
-    cout << "  yyy: merge bad axis to good axis " << index << endl;
-    cout << "       hit in bad axis: " << endl;
-    for(int yii=0; yii<m_badaxis->getCluster().size(); yii++){
-      cout << "           (" << std::fixed << std::setprecision(2) << m_badaxis->getCluster()[yii]->getPos().x()
-           << ", " << std::fixed << std::setprecision(2) << m_badaxis->getCluster()[yii]->getPos().y()
-           << ", " << std::fixed << std::setprecision(2) << m_badaxis->getCluster()[yii]->getPos().z()
-           << ")" << endl;
-    }
-    cout << "       hit in good axis " << index << ":" << endl;
-    for(int yii=0; yii<m_axisCol[index]->getCluster().size(); yii++){
-      cout << "           (" << std::fixed << std::setprecision(2) << m_axisCol[index]->getCluster()[yii]->getPos().x()
-           << ", " << std::fixed << std::setprecision(2) << m_axisCol[index]->getCluster()[yii]->getPos().y()
-           << ", " << std::fixed << std::setprecision(2) << m_axisCol[index]->getCluster()[yii]->getPos().z()
-           << ")" << endl;
-    }
+    // cout << "  yyy: merge bad axis to good axis " << index << endl;
+    // cout << "       hit in bad axis: " << endl;
+    // for(int yii=0; yii<m_badaxis->getCluster().size(); yii++){
+    //   cout << "           (" << std::fixed << std::setprecision(2) << m_badaxis->getCluster()[yii]->getPos().x()
+    //        << ", " << std::fixed << std::setprecision(2) << m_badaxis->getCluster()[yii]->getPos().y()
+    //        << ", " << std::fixed << std::setprecision(2) << m_badaxis->getCluster()[yii]->getPos().z()
+    //        << ")" << endl;
+    // }
+    // cout << "       hit in good axis " << index << ":" << endl;
+    // for(int yii=0; yii<m_axisCol[index]->getCluster().size(); yii++){
+    //   cout << "           (" << std::fixed << std::setprecision(2) << m_axisCol[index]->getCluster()[yii]->getPos().x()
+    //        << ", " << std::fixed << std::setprecision(2) << m_axisCol[index]->getCluster()[yii]->getPos().y()
+    //        << ", " << std::fixed << std::setprecision(2) << m_axisCol[index]->getCluster()[yii]->getPos().z()
+    //        << ")" << endl;
+    // }
   } 
 
   //delete m_badaxis; m_badaxis=nullptr;
