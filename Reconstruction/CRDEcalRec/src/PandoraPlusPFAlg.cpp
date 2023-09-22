@@ -237,6 +237,19 @@ StatusCode PandoraPlusPFAlg::initialize()
     t_Cluster->Branch("Clus_Nhit", &m_Clus_Nhit);
     t_Cluster->Branch("Clus_truthPDG", &m_Clus_truthPDG);
     t_Cluster->Branch("Clus_truthFrac", &m_Clus_truthFrac);
+    t_Cluster->Branch("Clus_startLayer", &m_Clus_startLayer);
+    t_Cluster->Branch("Clus_endLayer", &m_Clus_endLayer);
+    t_Cluster->Branch("Clus_maxELayer", &m_Clus_maxELayer);
+    t_Cluster->Branch("Clus_maxWidthLayer", &m_Clus_maxWidthLayer);
+    t_Cluster->Branch("Clus_typeU", &m_Clus_typeU);
+    t_Cluster->Branch("Clus_typeV", &m_Clus_typeV);
+    t_Cluster->Branch("Clus_width", &m_Clus_width);
+    t_Cluster->Branch("Clus_ScndM", &m_Clus_ScndM);
+    t_Cluster->Branch("Clus_E1Etot", &m_Clus_E1Etot);
+    t_Cluster->Branch("Clus_E2Etot", &m_Clus_E2Etot);
+    t_Cluster->Branch("Clus_E5Etot", &m_Clus_E5Etot);
+    t_Cluster->Branch("Clus_EhalfEtot", &m_Clus_EhalfEtot);
+    t_Cluster->Branch("Clus_EaxisEtot", &m_Clus_EaxisEtot);
     t_Cluster->Branch("Clus_hitx", &m_Clus_hitx);
     t_Cluster->Branch("Clus_hity", &m_Clus_hity);
     t_Cluster->Branch("Clus_hitz", &m_Clus_hitz);
@@ -732,6 +745,69 @@ cout<<"  Write 3DClusters and MCP "<<endl;
       m_Clus_hittag_trk.push_back( m_clusvec[ic]->getAssociatedTracks().size() );
     }
 
+    //Cluster properties for photon ID
+cout<<"HFCluster size: "<<m_clusvec[ic]->getHalfClusterUCol("LinkedLongiCluster").size()<<"  "<<m_clusvec[ic]->getHalfClusterVCol("LinkedLongiCluster").size()<<endl;
+    const CaloHalfCluster* p_HFClusterU = m_clusvec[ic]->getHalfClusterUCol("LinkedLongiCluster")[0];
+    const CaloHalfCluster* p_HFClusterV = m_clusvec[ic]->getHalfClusterVCol("LinkedLongiCluster")[0];
+    int startLayer = min(p_HFClusterU->getBeginningDlayer(), p_HFClusterV->getBeginningDlayer());
+    int endLayer = max(p_HFClusterU->getEndDlayer(), p_HFClusterV->getEndDlayer());
+    int maxELayer = -99;
+    int maxWidthLayer = -99;
+    double maxE = -99;
+    double maxWidth = -99; 
+    double maxScndM = -99;
+    double E1=0;
+    double E2=0; 
+    double E5=0;
+    double Ehalf=0;
+
+    int icount = 0;
+    for(int il=startLayer; il<endLayer; il++){
+      std::vector<const Calo1DCluster*> m_showersU = p_HFClusterU->getClusterInLayer(il);
+      std::vector<const Calo1DCluster*> m_showersV = p_HFClusterV->getClusterInLayer(il);
+      if(m_showersU.size()==0 && m_showersV.size()==0) continue;
+
+      double showerE = 0;
+      double widthU = 0;
+      double widthV = 0;
+      double scndMomentU = 0;
+      double scndMomentV = 0;
+      for(auto ish:m_showersU){
+        showerE += ish->getEnergy();
+        widthU += ish->getWidth();
+        scndMomentU += ish->getScndMoment();
+      }
+      for(auto ish:m_showersV){
+        showerE += ish->getEnergy();
+        widthV += ish->getWidth();
+        scndMomentV += ish->getScndMoment();
+      } 
+      double width = sqrt(widthU*widthU + widthV*widthV);
+      double scndM = sqrt(scndMomentU*scndMomentU + scndMomentV*scndMomentV);
+      if(showerE>maxE){ maxE = showerE; maxELayer = il; } 
+      if(width>maxWidth){ maxWidth = width; maxWidthLayer = il; }
+      if(scndM>maxScndM) maxScndM = scndM;
+
+      if(icount==0) E1 = showerE;
+      if(icount<2) E2 += showerE;
+      if(icount<5) E5 += showerE;
+      if(il<(startLayer+endLayer)/2) Ehalf += showerE;
+      icount++;
+    }
+    m_Clus_startLayer.push_back(startLayer);
+    m_Clus_endLayer.push_back(endLayer);
+    m_Clus_maxELayer.push_back(maxELayer);
+    m_Clus_maxWidthLayer.push_back(maxWidthLayer);
+    m_Clus_typeU.push_back(p_HFClusterU->getType());
+    m_Clus_typeV.push_back(p_HFClusterV->getType());
+    m_Clus_width.push_back(maxWidth);
+    m_Clus_ScndM.push_back(maxScndM);
+    m_Clus_E1Etot.push_back(E1/m_clusvec[ic]->getLongiE());
+    m_Clus_E2Etot.push_back(E2/m_clusvec[ic]->getLongiE());
+    m_Clus_E5Etot.push_back(E5/m_clusvec[ic]->getLongiE()); 
+    m_Clus_EhalfEtot.push_back(Ehalf/m_clusvec[ic]->getLongiE());
+
+
     //For HCAL cluster
 //    m_Clus_x.push_back( m_clusvec[ic]->getHitCenter().x() );
 //  m_Clus_y.push_back( m_clusvec[ic]->getHitCenter().y() );
@@ -927,6 +1003,19 @@ void PandoraPlusPFAlg::ClearCluster(){
   m_Clus_Nhit.clear();
   m_Clus_truthFrac.clear();
   m_Clus_truthPDG.clear();
+  m_Clus_startLayer.clear(); 
+  m_Clus_endLayer.clear(); 
+  m_Clus_maxELayer.clear();
+  m_Clus_maxWidthLayer.clear();
+  m_Clus_typeU.clear();
+  m_Clus_typeV.clear();
+  m_Clus_width.clear();
+  m_Clus_ScndM.clear();
+  m_Clus_E1Etot.clear();
+  m_Clus_E2Etot.clear();
+  m_Clus_E5Etot.clear();
+  m_Clus_EhalfEtot.clear();
+  m_Clus_EaxisEtot.clear();
   m_Clus_hitx.clear();
   m_Clus_hity.clear();
   m_Clus_hitz.clear();

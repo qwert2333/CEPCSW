@@ -171,7 +171,9 @@ protected:
   int m_Nclus, m_Nmc;
   float m_totE;
   IntVec m_Clus_Ntrk, m_Clus_Nhit, m_Clus_truthPDG;
+  IntVec m_Clus_startLayer, m_Clus_endLayer, m_Clus_maxELayer, m_Clus_maxWidthLayer, m_Clus_typeU, m_Clus_typeV;
   FloatVec m_Clus_x, m_Clus_y, m_Clus_z, m_Clus_E, m_Clus_Px, m_Clus_Py, m_Clus_Pz, m_Clus_Ptrk, m_Clus_truthFrac;
+  FloatVec m_Clus_width, m_Clus_ScndM, m_Clus_E1Etot, m_Clus_E2Etot, m_Clus_E5Etot, m_Clus_EhalfEtot, m_Clus_EaxisEtot;
   FloatVec m_Clus_hitx, m_Clus_hity, m_Clus_hitz, m_Clus_hitE, m_Clus_hittag, m_Clus_hittag_trk;
   IntVec m_mcPdgid, m_mcStatus;
   FloatVec m_mcPx, m_mcPy, m_mcPz, m_mcEn, m_mcMass, m_mcCharge, m_mcEPx, m_mcEPy, m_mcEPz;

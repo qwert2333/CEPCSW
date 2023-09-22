@@ -467,7 +467,7 @@ for(int i=0; i<tmp_clusters.size(); i++) printf("  Pos+E: (%.3f, %.3f, %.3f). En
 //Match for the left clusters:
   
 
-cout<<"  Print reconstructed cluster energy and trk: "<<endl;
+//cout<<"  Print reconstructed cluster energy and trk: "<<endl;
 //for(int i=0; i<m_clusterCol.size(); i++) cout<<"En = "<<m_clusterCol[i].get()->getEnergy()<<", trk size "<<m_clusterCol[i].get()->getAssociatedTracks().size()<<endl;
 //for(int ic=0; ic<m_clusterCol.size(); ic++){
 //  cout<<"    Cluster #"<<ic<<": En = "<<m_clusterCol[ic]->getEnergy()<<", Nhit = "<<m_clusterCol[ic]->getCluster().size()<<", Ntrk = "<<m_clusterCol[ic].get()->getAssociatedTracks().size();
