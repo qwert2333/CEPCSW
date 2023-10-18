@@ -78,6 +78,8 @@ namespace PandoraPlus {
     void FitAxis();
     //void FitAxisHit();
 
+    bool isHCALNeighbor(const PandoraPlus::CaloHit* m_hit) const;
+
   private:
     std::vector<const PandoraPlus::CaloHit*> hits; 
     std::vector<const PandoraPlus::Calo2DCluster*> m_2dclusters;

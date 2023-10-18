@@ -1,6 +1,7 @@
 # Modules
 gaudi_add_module(CRDEcalDigi
                  SOURCES src/CRDEcalDigiAlg.cpp
+                 SOURCES src/CRDHcalDigiAlg.cpp
                  LINK k4FWCore::k4FWCore
                       GearSvc
                       DetInterface

@@ -486,6 +486,7 @@ StatusCode AxisMergingAlg::BranchMerging( std::vector<PandoraPlus::CaloHalfClust
       if(jax==iax) continue;
       const PandoraPlus::CaloHalfCluster* p_axis = m_axisCol[jax];
       
+      if (p_axis->getType()>=10000) continue; // Do not merge two track axis
       if (p_axis->getType()/100%100<1){
         // cout << "yyy:  m_axisCol[" << jax << "] is not a Hough axis. skip" << endl;
         continue;

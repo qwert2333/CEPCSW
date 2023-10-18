@@ -345,6 +345,15 @@ namespace PandoraPlus{
   //void Calo3DCluster::FitProfile(){
   //}
 
+  bool Calo3DCluster::isHCALNeighbor(const PandoraPlus::CaloHit* m_hit) const
+  {
+    for(int i=0; i<hits.size(); i++)
+    {
+      if( sqrt( pow(m_hit->getPosition().x()-hits[i]->getPosition().x(),2) + pow(m_hit->getPosition().y()-hits[i]->getPosition().y(),2) + pow(m_hit->getPosition().z()-hits[i]->getPosition().z(),2) ) <= sqrt(pow(40,2)*3) )
+        return true;
+    }
+    return false;
+  }
 
 };
 #endif
