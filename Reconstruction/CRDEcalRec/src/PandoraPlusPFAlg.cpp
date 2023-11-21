@@ -3,6 +3,9 @@
 
 #include "PandoraPlusPFAlg.h"
 
+// #include <fstream>
+// #include <ctime>
+
 using namespace std;
 using namespace dd4hep;
 
@@ -98,6 +101,7 @@ StatusCode PandoraPlusPFAlg::initialize()
   m_algorithmManager.RegisterAlgorithmFactory("AxisMergingAlg",         new AxisMergingAlg::Factory);
   m_algorithmManager.RegisterAlgorithmFactory("EnergySplittingAlg",     new EnergySplittingAlg::Factory);
   m_algorithmManager.RegisterAlgorithmFactory("EnergyTimeMatchingAlg",  new EnergyTimeMatchingAlg::Factory);
+  m_algorithmManager.RegisterAlgorithmFactory("PFOCreatingAlg",         new PFOCreatingAlg::Factory);
   //m_algorithmManager.RegisterAlgorithmFactory("ConeClusteringAlg",      new ConeClusteringAlg::Factory);
   //m_algorithmManager.RegisterAlgorithmFactory("ConeClusteringAlgHCAL",  new ConeClusteringAlg::Factory);
 
@@ -152,6 +156,7 @@ StatusCode PandoraPlusPFAlg::initialize()
     t_HCAL_Cluster = new TTree("RecHcalClusters", "RecHcalClusters");
     t_Track = new TTree("RecTracks", "RecTracks");
     t_axis = new TTree("Axis","Axis"); 
+    t_PFO = new TTree("PFO", "PFO");
 
     //Bar
     t_SimBar->Branch("simBar_x", &m_simBar_x);
@@ -423,6 +428,21 @@ StatusCode PandoraPlusPFAlg::initialize()
     t_Tower->Branch("HFClusVhit_z",    &m_HFClusVhit_z );
     t_Tower->Branch("HFClusVhit_E",    &m_HFClusVhit_E );
 
+    t_PFO->Branch("pfo_tag",     &pfo_tag);
+    t_PFO->Branch("n_track",     &n_track);
+    t_PFO->Branch("n_ecal_clus", &n_ecal_clus);
+    t_PFO->Branch("n_hcal_clus", &n_hcal_clus);
+    t_PFO->Branch("ecal_pfo_tag", &m_ecal_pfo_tag);
+    t_PFO->Branch("ecal_clus_x", &m_ecal_clus_x);
+    t_PFO->Branch("ecal_clus_y", &m_ecal_clus_y);
+    t_PFO->Branch("ecal_clus_z", &m_ecal_clus_z);
+    t_PFO->Branch("ecal_clus_E", &m_ecal_clus_E);
+    t_PFO->Branch("hcal_pfo_tag", &m_hcal_pfo_tag);
+    t_PFO->Branch("hcal_clus_x", &m_hcal_clus_x);
+    t_PFO->Branch("hcal_clus_y", &m_hcal_clus_y);
+    t_PFO->Branch("hcal_clus_z", &m_hcal_clus_z);
+    t_PFO->Branch("hcal_clus_E", &m_hcal_clus_E);
+
   }
 
   return GaudiAlgorithm::initialize();
@@ -430,6 +450,9 @@ StatusCode PandoraPlusPFAlg::initialize()
 
 StatusCode PandoraPlusPFAlg::execute()
 {
+// clock_t yyy_start, yyy_endrec, yyy_endfill;
+// yyy_start = clock(); // 记录开始时间
+
   if(_nEvt==0) std::cout<<"PandoraPlusPFAlg::execute Start"<<std::endl;
   std::cout<<"Processing event: "<<_nEvt<<std::endl;
 
@@ -460,6 +483,7 @@ cout<<"  Creating PFOs"<<endl;
   m_pOutputCreator->CreatePFO( m_DataCol, w_ReconstructedParticleCollection );
 
 
+yyy_endrec = clock();  // 重建结束的时间
 
 cout<<"Write tuples"<<endl;
   //---------------------Write Ana tuples-------------------------
@@ -588,182 +612,182 @@ cout<<"Write tuples"<<endl;
   t_HalfCluster->Fill();
 
 
-  ClearHough();
-  for(int i=0; i<m_halfclusterV.size(); i++){  // loop half cluster V
-    std::vector<const PandoraPlus::CaloHalfCluster*> m_houghaxisV = m_halfclusterV[i]->getHalfClusterCol("HoughAxis");
-    for(int ita=0; ita<m_houghaxisV.size(); ita++){ // loop axis V
-      for(int ilm=0; ilm<m_houghaxisV[ita]->getCluster().size(); ilm++){ // loop local max
-        houghV_cluster_tag.push_back( i );
-        houghV_axis_tag.push_back( ita );
-        houghV_axis_x.push_back( m_houghaxisV[ita]->getCluster()[ilm]->getPos().x() );
-        houghV_axis_y.push_back( m_houghaxisV[ita]->getCluster()[ilm]->getPos().y() );
-        houghV_axis_z.push_back( m_houghaxisV[ita]->getCluster()[ilm]->getPos().z() );
-        houghV_axis_E.push_back( m_houghaxisV[ita]->getCluster()[ilm]->getEnergy()  );
-      }
-    }
-  }
-  for(int i=0; i<m_halfclusterU.size(); i++){  // loop half cluster U
-    std::vector<const PandoraPlus::CaloHalfCluster*> m_houghaxisU = m_halfclusterU[i]->getHalfClusterCol("HoughAxis");
-    for(int ita=0; ita<m_houghaxisU.size(); ita++){ // loop axis U
-      for(int ilm=0; ilm<m_houghaxisU[ita]->getCluster().size(); ilm++){ // loop local max
-        houghU_cluster_tag.push_back( i );
-        houghU_axis_tag.push_back( ita );
-        houghU_axis_x.push_back( m_houghaxisU[ita]->getCluster()[ilm]->getPos().x() );
-        houghU_axis_y.push_back( m_houghaxisU[ita]->getCluster()[ilm]->getPos().y() );
-        houghU_axis_z.push_back( m_houghaxisU[ita]->getCluster()[ilm]->getPos().z() );
-        houghU_axis_E.push_back( m_houghaxisU[ita]->getCluster()[ilm]->getEnergy()  );
-      }
-    }
-  }
-  t_Hough->Fill();
+  // ClearHough();
+  // for(int i=0; i<m_halfclusterV.size(); i++){  // loop half cluster V
+  //   std::vector<const PandoraPlus::CaloHalfCluster*> m_houghaxisV = m_halfclusterV[i]->getHalfClusterCol("HoughAxis");
+  //   for(int ita=0; ita<m_houghaxisV.size(); ita++){ // loop axis V
+  //     for(int ilm=0; ilm<m_houghaxisV[ita]->getCluster().size(); ilm++){ // loop local max
+  //       houghV_cluster_tag.push_back( i );
+  //       houghV_axis_tag.push_back( ita );
+  //       houghV_axis_x.push_back( m_houghaxisV[ita]->getCluster()[ilm]->getPos().x() );
+  //       houghV_axis_y.push_back( m_houghaxisV[ita]->getCluster()[ilm]->getPos().y() );
+  //       houghV_axis_z.push_back( m_houghaxisV[ita]->getCluster()[ilm]->getPos().z() );
+  //       houghV_axis_E.push_back( m_houghaxisV[ita]->getCluster()[ilm]->getEnergy()  );
+  //     }
+  //   }
+  // }
+  // for(int i=0; i<m_halfclusterU.size(); i++){  // loop half cluster U
+  //   std::vector<const PandoraPlus::CaloHalfCluster*> m_houghaxisU = m_halfclusterU[i]->getHalfClusterCol("HoughAxis");
+  //   for(int ita=0; ita<m_houghaxisU.size(); ita++){ // loop axis U
+  //     for(int ilm=0; ilm<m_houghaxisU[ita]->getCluster().size(); ilm++){ // loop local max
+  //       houghU_cluster_tag.push_back( i );
+  //       houghU_axis_tag.push_back( ita );
+  //       houghU_axis_x.push_back( m_houghaxisU[ita]->getCluster()[ilm]->getPos().x() );
+  //       houghU_axis_y.push_back( m_houghaxisU[ita]->getCluster()[ilm]->getPos().y() );
+  //       houghU_axis_z.push_back( m_houghaxisU[ita]->getCluster()[ilm]->getPos().z() );
+  //       houghU_axis_E.push_back( m_houghaxisU[ita]->getCluster()[ilm]->getEnergy()  );
+  //     }
+  //   }
+  // }
+  // t_Hough->Fill();
 
 
   // ------------------------------------
   // yyy: TrackMatchingAlg
-  ClearMatch();
-  for(int i=0; i<m_halfclusterV.size(); i++){  // loop half cluster V
-    std::vector<const PandoraPlus::CaloHalfCluster*> m_trackaxisV = m_halfclusterV[i]->getHalfClusterCol("TrackAxis");
-    for(int ita=0; ita<m_trackaxisV.size(); ita++){ // loop track axis V
-      for(int ilm=0; ilm<m_trackaxisV[ita]->getCluster().size(); ilm++){ // loop local max
-        matchV_cluster_tag.push_back( i );
-        matchV_track_axis_tag.push_back( ita );
-        matchV_track_axis_x.push_back( m_trackaxisV[ita]->getCluster()[ilm]->getPos().x() );
-        matchV_track_axis_y.push_back( m_trackaxisV[ita]->getCluster()[ilm]->getPos().y() );
-        matchV_track_axis_z.push_back( m_trackaxisV[ita]->getCluster()[ilm]->getPos().z() );
-        matchV_track_axis_E.push_back( m_trackaxisV[ita]->getCluster()[ilm]->getEnergy()  );
-      }
-    }
-  }
-  for(int i=0; i<m_halfclusterU.size(); i++){  // loop half cluster U
-    std::vector<const PandoraPlus::CaloHalfCluster*> m_trackaxisU = m_halfclusterU[i]->getHalfClusterCol("TrackAxis");
-    for(int ita=0; ita<m_trackaxisU.size(); ita++){ // loop track axis V
-      for(int ilm=0; ilm<m_trackaxisU[ita]->getCluster().size(); ilm++){ // loop local max
-        matchU_cluster_tag.push_back( i );
-        matchU_track_axis_tag.push_back( ita );
-        matchU_track_axis_x.push_back( m_trackaxisU[ita]->getCluster()[ilm]->getPos().x() );
-        matchU_track_axis_y.push_back( m_trackaxisU[ita]->getCluster()[ilm]->getPos().y() );
-        matchU_track_axis_z.push_back( m_trackaxisU[ita]->getCluster()[ilm]->getPos().z() );
-        matchU_track_axis_E.push_back( m_trackaxisU[ita]->getCluster()[ilm]->getEnergy()  );
-      }
-    }
-  }
-  t_Match->Fill();
+  // ClearMatch();
+  // for(int i=0; i<m_halfclusterV.size(); i++){  // loop half cluster V
+  //   std::vector<const PandoraPlus::CaloHalfCluster*> m_trackaxisV = m_halfclusterV[i]->getHalfClusterCol("TrackAxis");
+  //   for(int ita=0; ita<m_trackaxisV.size(); ita++){ // loop track axis V
+  //     for(int ilm=0; ilm<m_trackaxisV[ita]->getCluster().size(); ilm++){ // loop local max
+  //       matchV_cluster_tag.push_back( i );
+  //       matchV_track_axis_tag.push_back( ita );
+  //       matchV_track_axis_x.push_back( m_trackaxisV[ita]->getCluster()[ilm]->getPos().x() );
+  //       matchV_track_axis_y.push_back( m_trackaxisV[ita]->getCluster()[ilm]->getPos().y() );
+  //       matchV_track_axis_z.push_back( m_trackaxisV[ita]->getCluster()[ilm]->getPos().z() );
+  //       matchV_track_axis_E.push_back( m_trackaxisV[ita]->getCluster()[ilm]->getEnergy()  );
+  //     }
+  //   }
+  // }
+  // for(int i=0; i<m_halfclusterU.size(); i++){  // loop half cluster U
+  //   std::vector<const PandoraPlus::CaloHalfCluster*> m_trackaxisU = m_halfclusterU[i]->getHalfClusterCol("TrackAxis");
+  //   for(int ita=0; ita<m_trackaxisU.size(); ita++){ // loop track axis V
+  //     for(int ilm=0; ilm<m_trackaxisU[ita]->getCluster().size(); ilm++){ // loop local max
+  //       matchU_cluster_tag.push_back( i );
+  //       matchU_track_axis_tag.push_back( ita );
+  //       matchU_track_axis_x.push_back( m_trackaxisU[ita]->getCluster()[ilm]->getPos().x() );
+  //       matchU_track_axis_y.push_back( m_trackaxisU[ita]->getCluster()[ilm]->getPos().y() );
+  //       matchU_track_axis_z.push_back( m_trackaxisU[ita]->getCluster()[ilm]->getPos().z() );
+  //       matchU_track_axis_E.push_back( m_trackaxisU[ita]->getCluster()[ilm]->getEnergy()  );
+  //     }
+  //   }
+  // }
+  // t_Match->Fill();
 
 
   // yyy: Cone 
-  ClearCone();
-  for(int i=0; i<m_halfclusterV.size(); i++){  // loop half cluster V
-    std::vector<const PandoraPlus::CaloHalfCluster*> m_coneaxisV = m_halfclusterV[i]->getHalfClusterCol("ConeAxis");
-    for(int ita=0; ita<m_coneaxisV.size(); ita++){ // loop track axis V
-      for(int ilm=0; ilm<m_coneaxisV[ita]->getCluster().size(); ilm++){ // loop local max
-        coneV_cluster_tag.push_back( i );
-        coneV_axis_tag.push_back( ita );
-        coneV_axis_x.push_back( m_coneaxisV[ita]->getCluster()[ilm]->getPos().x() );
-        coneV_axis_y.push_back( m_coneaxisV[ita]->getCluster()[ilm]->getPos().y() );
-        coneV_axis_z.push_back( m_coneaxisV[ita]->getCluster()[ilm]->getPos().z() );
-        coneV_axis_E.push_back( m_coneaxisV[ita]->getCluster()[ilm]->getEnergy()  );
-      }
-    }
-  }
-  for(int i=0; i<m_halfclusterU.size(); i++){  // loop half cluster U
-    std::vector<const PandoraPlus::CaloHalfCluster*> m_coneaxisU = m_halfclusterU[i]->getHalfClusterCol("ConeAxis");
-    for(int ita=0; ita<m_coneaxisU.size(); ita++){ // loop track axis V
-      for(int ilm=0; ilm<m_coneaxisU[ita]->getCluster().size(); ilm++){ // loop local max
-        coneU_cluster_tag.push_back( i );
-        coneU_axis_tag.push_back( ita );
-        coneU_axis_x.push_back( m_coneaxisU[ita]->getCluster()[ilm]->getPos().x() );
-        coneU_axis_y.push_back( m_coneaxisU[ita]->getCluster()[ilm]->getPos().y() );
-        coneU_axis_z.push_back( m_coneaxisU[ita]->getCluster()[ilm]->getPos().z() );
-        coneU_axis_E.push_back( m_coneaxisU[ita]->getCluster()[ilm]->getEnergy()  );
-      }
-    }
-  }
-  t_Cone->Fill();
+  // ClearCone();
+  // for(int i=0; i<m_halfclusterV.size(); i++){  // loop half cluster V
+  //   std::vector<const PandoraPlus::CaloHalfCluster*> m_coneaxisV = m_halfclusterV[i]->getHalfClusterCol("ConeAxis");
+  //   for(int ita=0; ita<m_coneaxisV.size(); ita++){ // loop track axis V
+  //     for(int ilm=0; ilm<m_coneaxisV[ita]->getCluster().size(); ilm++){ // loop local max
+  //       coneV_cluster_tag.push_back( i );
+  //       coneV_axis_tag.push_back( ita );
+  //       coneV_axis_x.push_back( m_coneaxisV[ita]->getCluster()[ilm]->getPos().x() );
+  //       coneV_axis_y.push_back( m_coneaxisV[ita]->getCluster()[ilm]->getPos().y() );
+  //       coneV_axis_z.push_back( m_coneaxisV[ita]->getCluster()[ilm]->getPos().z() );
+  //       coneV_axis_E.push_back( m_coneaxisV[ita]->getCluster()[ilm]->getEnergy()  );
+  //     }
+  //   }
+  // }
+  // for(int i=0; i<m_halfclusterU.size(); i++){  // loop half cluster U
+  //   std::vector<const PandoraPlus::CaloHalfCluster*> m_coneaxisU = m_halfclusterU[i]->getHalfClusterCol("ConeAxis");
+  //   for(int ita=0; ita<m_coneaxisU.size(); ita++){ // loop track axis V
+  //     for(int ilm=0; ilm<m_coneaxisU[ita]->getCluster().size(); ilm++){ // loop local max
+  //       coneU_cluster_tag.push_back( i );
+  //       coneU_axis_tag.push_back( ita );
+  //       coneU_axis_x.push_back( m_coneaxisU[ita]->getCluster()[ilm]->getPos().x() );
+  //       coneU_axis_y.push_back( m_coneaxisU[ita]->getCluster()[ilm]->getPos().y() );
+  //       coneU_axis_z.push_back( m_coneaxisU[ita]->getCluster()[ilm]->getPos().z() );
+  //       coneU_axis_E.push_back( m_coneaxisU[ita]->getCluster()[ilm]->getEnergy()  );
+  //     }
+  //   }
+  // }
+  // t_Cone->Fill();
 
 
   // yyy
-  ClearMerge();
-  int axisV_index=0;
-  int axisU_index=0;
-  for(int i=0; i<m_halfclusterV.size(); i++){  // loop half cluster V
-    std::vector<const PandoraPlus::CaloHalfCluster*> m_mergedaxisV = m_halfclusterV[i]->getHalfClusterCol("MergedAxis");
-    for(int ita=0; ita<m_mergedaxisV.size(); ita++){ // loop  axis V
-      for(int ilm=0; ilm<m_mergedaxisV[ita]->getCluster().size(); ilm++){ // loop local max
-        mergeV_axis_index.push_back(axisV_index);
-        // hit information in an axis: (x, y, z, E)
-        mergeV_axis_hit_x.push_back( m_mergedaxisV[ita]->getCluster()[ilm]->getPos().x() );
-        mergeV_axis_hit_y.push_back( m_mergedaxisV[ita]->getCluster()[ilm]->getPos().y() );
-        mergeV_axis_hit_z.push_back( m_mergedaxisV[ita]->getCluster()[ilm]->getPos().z() );
-        mergeV_axis_hit_E.push_back( m_mergedaxisV[ita]->getCluster()[ilm]->getEnergy()  );
-        // axis information itself
-        mergeV_cluster_E.push_back( m_halfclusterV[i]->getEnergy() );
-        mergeV_axis_E.push_back( m_mergedaxisV[ita]->getEnergy() );
-        mergeV_istrk.push_back( m_mergedaxisV[ita]->getAssociatedTracks().size() );
-        mergeV_type.push_back( m_mergedaxisV[ita]->getType() );
-        // truth information of an axis
-        std::map<edm4hep::MCParticle, float> map_truthP_totE; map_truthP_totE.clear();
-        for(auto ish : m_mergedaxisV[ita]->getCluster()){
-          for(auto ibar : ish->getBars()){
-            for(auto ipair : ibar->getLinkedMCP()) map_truthP_totE[ipair.first] += ibar->getEnergy()*ipair.second;
-          }
-        }
-        float maxFrac = -99;
-        int pdg_id = 987915;
-        for(auto imcp : map_truthP_totE){
-          if(imcp.second/m_mergedaxisV[ita]->getEnergy()>maxFrac){
-            maxFrac=imcp.second/m_mergedaxisV[ita]->getEnergy();
-            pdg_id = imcp.first.getPDG();
-          } 
-        }
-        map_truthP_totE.clear();
-        mergeV_truthFracMax.push_back(maxFrac);
-        mergeV_truthMaxPDGID.push_back(pdg_id);
-      }
-      axisV_index++;
-      cout << "yyy: clusterV " << i << ", axisV " << ita 
-           << ", axisEnergy=" << m_mergedaxisV[ita]->getEnergy()
-           << ", istrk=" << m_mergedaxisV[ita]->getAssociatedTracks().size()
-           << ", type=" << m_mergedaxisV[ita]->getType() << endl;
-    }
-  }
-  for(int i=0; i<m_halfclusterU.size(); i++){  // loop half cluster U
-    std::vector<const PandoraPlus::CaloHalfCluster*> m_mergedaxisU = m_halfclusterU[i]->getHalfClusterCol("MergedAxis");
-    for(int ita=0; ita<m_mergedaxisU.size(); ita++){ // loop  axis U
-      for(int ilm=0; ilm<m_mergedaxisU[ita]->getCluster().size(); ilm++){ // loop local max
-        mergeU_axis_index.push_back(axisU_index);
-        // hit information in an axis: (x, y, z, E)
-        mergeU_axis_hit_x.push_back( m_mergedaxisU[ita]->getCluster()[ilm]->getPos().x() );
-        mergeU_axis_hit_y.push_back( m_mergedaxisU[ita]->getCluster()[ilm]->getPos().y() );
-        mergeU_axis_hit_z.push_back( m_mergedaxisU[ita]->getCluster()[ilm]->getPos().z() );
-        mergeU_axis_hit_E.push_back( m_mergedaxisU[ita]->getCluster()[ilm]->getEnergy()  );
-        // axis information itself
-        mergeU_cluster_E.push_back( m_halfclusterU[i]->getEnergy() );
-        mergeU_axis_E.push_back( m_mergedaxisU[ita]->getEnergy() );
-        mergeU_istrk.push_back( m_mergedaxisU[ita]->getAssociatedTracks().size() );
-        mergeU_type.push_back( m_mergedaxisU[ita]->getType() );
-        // truth information in an axis
-        std::map<edm4hep::MCParticle, float> map_truthP_totE; map_truthP_totE.clear();
-        for(auto ish : m_mergedaxisU[ita]->getCluster()){
-          for(auto ibar : ish->getBars()){
-            for(auto ipair : ibar->getLinkedMCP()) map_truthP_totE[ipair.first] += ibar->getEnergy()*ipair.second;
-          }
-        }
-        float maxFrac = -99;
-        int pdg_id = 987915;
-        for(auto imcp : map_truthP_totE){
-          if(imcp.second/m_mergedaxisU[ita]->getEnergy()>maxFrac){
-            maxFrac=imcp.second/m_mergedaxisU[ita]->getEnergy();
-            pdg_id = imcp.first.getPDG();
-          } 
-        }
-        map_truthP_totE.clear();
-        mergeU_truthFracMax.push_back(maxFrac);
-        mergeU_truthMaxPDGID.push_back(pdg_id);
-      }
-      axisU_index++;
-    }
-  }
-  t_Merge->Fill();
+  // ClearMerge();
+  // int axisV_index=0;
+  // int axisU_index=0;
+  // for(int i=0; i<m_halfclusterV.size(); i++){  // loop half cluster V
+  //   std::vector<const PandoraPlus::CaloHalfCluster*> m_mergedaxisV = m_halfclusterV[i]->getHalfClusterCol("MergedAxis");
+  //   for(int ita=0; ita<m_mergedaxisV.size(); ita++){ // loop  axis V
+  //     for(int ilm=0; ilm<m_mergedaxisV[ita]->getCluster().size(); ilm++){ // loop local max
+  //       mergeV_axis_index.push_back(axisV_index);
+  //       // hit information in an axis: (x, y, z, E)
+  //       mergeV_axis_hit_x.push_back( m_mergedaxisV[ita]->getCluster()[ilm]->getPos().x() );
+  //       mergeV_axis_hit_y.push_back( m_mergedaxisV[ita]->getCluster()[ilm]->getPos().y() );
+  //       mergeV_axis_hit_z.push_back( m_mergedaxisV[ita]->getCluster()[ilm]->getPos().z() );
+  //       mergeV_axis_hit_E.push_back( m_mergedaxisV[ita]->getCluster()[ilm]->getEnergy()  );
+  //       // axis information itself
+  //       mergeV_cluster_E.push_back( m_halfclusterV[i]->getEnergy() );
+  //       mergeV_axis_E.push_back( m_mergedaxisV[ita]->getEnergy() );
+  //       mergeV_istrk.push_back( m_mergedaxisV[ita]->getAssociatedTracks().size() );
+  //       mergeV_type.push_back( m_mergedaxisV[ita]->getType() );
+  //       // truth information of an axis
+  //       std::map<edm4hep::MCParticle, float> map_truthP_totE; map_truthP_totE.clear();
+  //       for(auto ish : m_mergedaxisV[ita]->getCluster()){
+  //         for(auto ibar : ish->getBars()){
+  //           for(auto ipair : ibar->getLinkedMCP()) map_truthP_totE[ipair.first] += ibar->getEnergy()*ipair.second;
+  //         }
+  //       }
+  //       float maxFrac = -99;
+  //       int pdg_id = 987915;
+  //       for(auto imcp : map_truthP_totE){
+  //         if(imcp.second/m_mergedaxisV[ita]->getEnergy()>maxFrac){
+  //           maxFrac=imcp.second/m_mergedaxisV[ita]->getEnergy();
+  //           pdg_id = imcp.first.getPDG();
+  //         } 
+  //       }
+  //       map_truthP_totE.clear();
+  //       mergeV_truthFracMax.push_back(maxFrac);
+  //       mergeV_truthMaxPDGID.push_back(pdg_id);
+  //     }
+  //     axisV_index++;
+  //     cout << "yyy: clusterV " << i << ", axisV " << ita 
+  //          << ", axisEnergy=" << m_mergedaxisV[ita]->getEnergy()
+  //          << ", istrk=" << m_mergedaxisV[ita]->getAssociatedTracks().size()
+  //          << ", type=" << m_mergedaxisV[ita]->getType() << endl;
+  //   }
+  // }
+  // for(int i=0; i<m_halfclusterU.size(); i++){  // loop half cluster U
+  //   std::vector<const PandoraPlus::CaloHalfCluster*> m_mergedaxisU = m_halfclusterU[i]->getHalfClusterCol("MergedAxis");
+  //   for(int ita=0; ita<m_mergedaxisU.size(); ita++){ // loop  axis U
+  //     for(int ilm=0; ilm<m_mergedaxisU[ita]->getCluster().size(); ilm++){ // loop local max
+  //       mergeU_axis_index.push_back(axisU_index);
+  //       // hit information in an axis: (x, y, z, E)
+  //       mergeU_axis_hit_x.push_back( m_mergedaxisU[ita]->getCluster()[ilm]->getPos().x() );
+  //       mergeU_axis_hit_y.push_back( m_mergedaxisU[ita]->getCluster()[ilm]->getPos().y() );
+  //       mergeU_axis_hit_z.push_back( m_mergedaxisU[ita]->getCluster()[ilm]->getPos().z() );
+  //       mergeU_axis_hit_E.push_back( m_mergedaxisU[ita]->getCluster()[ilm]->getEnergy()  );
+  //       // axis information itself
+  //       mergeU_cluster_E.push_back( m_halfclusterU[i]->getEnergy() );
+  //       mergeU_axis_E.push_back( m_mergedaxisU[ita]->getEnergy() );
+  //       mergeU_istrk.push_back( m_mergedaxisU[ita]->getAssociatedTracks().size() );
+  //       mergeU_type.push_back( m_mergedaxisU[ita]->getType() );
+  //       // truth information in an axis
+  //       std::map<edm4hep::MCParticle, float> map_truthP_totE; map_truthP_totE.clear();
+  //       for(auto ish : m_mergedaxisU[ita]->getCluster()){
+  //         for(auto ibar : ish->getBars()){
+  //           for(auto ipair : ibar->getLinkedMCP()) map_truthP_totE[ipair.first] += ibar->getEnergy()*ipair.second;
+  //         }
+  //       }
+  //       float maxFrac = -99;
+  //       int pdg_id = 987915;
+  //       for(auto imcp : map_truthP_totE){
+  //         if(imcp.second/m_mergedaxisU[ita]->getEnergy()>maxFrac){
+  //           maxFrac=imcp.second/m_mergedaxisU[ita]->getEnergy();
+  //           pdg_id = imcp.first.getPDG();
+  //         } 
+  //       }
+  //       map_truthP_totE.clear();
+  //       mergeU_truthFracMax.push_back(maxFrac);
+  //       mergeU_truthMaxPDGID.push_back(pdg_id);
+  //     }
+  //     axisU_index++;
+  //   }
+  // }
+  // t_Merge->Fill();
   
   // ---------------------------------------------
   // Save axis info (Splitted showers in tower)
@@ -931,7 +955,7 @@ cout<<"Write tuples"<<endl;
     }
 
   }
-    t_Tower->Fill();
+  t_Tower->Fill();
 
 cout<<"  Write 3DClusters and MCP "<<endl;
   // ---------------------------------------------
@@ -975,7 +999,7 @@ cout<<"  Write 3DClusters and MCP "<<endl;
       m_Clus_hity.push_back( m_clusvec[ic]->getCluster()[ihit]->getPos().y() );
       m_Clus_hitz.push_back( m_clusvec[ic]->getCluster()[ihit]->getPos().z() );
       m_Clus_hitE.push_back( m_clusvec[ic]->getCluster()[ihit]->getEnergy() );
-      m_Clus_hittag.push_back( m_clusvec[ic]->getEnergy() );
+      m_Clus_hittag.push_back( ic );
       m_Clus_hittag_trk.push_back( m_clusvec[ic]->getAssociatedTracks().size() );
     }
 
@@ -1076,6 +1100,7 @@ cout<<"HFCluster size: "<<m_clusvec[ic]->getHalfClusterUCol("LinkedLongiCluster"
   t_Cluster->Fill();
 
 
+  ClearHCALCluster();
   std::vector<PandoraPlus::Calo3DCluster*> m_hcalclusvec;
   for(int i=0; i<m_DataCol.map_CaloCluster["HCALCluster"].size(); i++)
     m_hcalclusvec.push_back( m_DataCol.map_CaloCluster["HCALCluster"][i].get() );
@@ -1107,7 +1132,7 @@ cout<<"HFCluster size: "<<m_clusvec[ic]->getHalfClusterUCol("LinkedLongiCluster"
   m_Ntrk = m_trkCol.size();
   for(int itrk=0; itrk<m_Ntrk; itrk++){
     m_type.push_back(m_trkCol[itrk]->getType());
-    std::vector<TrackState> AllTrackStates = m_trkCol[itrk]->getTrackStates("Input");
+    std::vector<TrackState> AllTrackStates = m_trkCol[itrk]->getAllTrackStates();
     for(int istate=0; istate<AllTrackStates.size(); istate++){
       m_trkstate_d0.push_back( AllTrackStates[istate].D0 );
       m_trkstate_z0.push_back( AllTrackStates[istate].Z0 );
@@ -1123,12 +1148,54 @@ cout<<"HFCluster size: "<<m_clusvec[ic]->getHalfClusterUCol("LinkedLongiCluster"
   }}
   t_Track->Fill();
 
+  // yyy: pfo
+  ClearPFO();
+  std::vector<PandoraPlus::PFObject*> m_pfobjects; m_pfobjects.clear();
+  for(int ip=0; ip<m_DataCol.map_PFObjects["outputPFO"].size(); ip++)
+    m_pfobjects.push_back(m_DataCol.map_PFObjects["outputPFO"][ip].get());
+
+  for(int ip=0; ip<m_pfobjects.size(); ip++){
+    std::vector<const Track*> t_tracks = m_pfobjects[ip]->getTracks();
+    std::vector<const Calo3DCluster*> t_ecal_clusters = m_pfobjects[ip]->getECALClusters();
+    std::vector<const Calo3DCluster*> t_hcal_clusters =  m_pfobjects[ip]->getHCALClusters();
+
+    pfo_tag.push_back(ip);
+    n_track.push_back(t_tracks.size());
+    n_ecal_clus.push_back(t_ecal_clusters.size());
+    n_hcal_clus.push_back(t_hcal_clusters.size());
+
+    for(int ie=0; ie<t_ecal_clusters.size(); ie++){
+      m_ecal_pfo_tag.push_back(ip);
+      m_ecal_clus_x.push_back(t_ecal_clusters[ie]->getShowerCenter().x());
+      m_ecal_clus_y.push_back(t_ecal_clusters[ie]->getShowerCenter().y());
+      m_ecal_clus_z.push_back(t_ecal_clusters[ie]->getShowerCenter().z());
+      m_ecal_clus_E.push_back(t_ecal_clusters[ie]->getLongiE());
+    }
+    for(int ih=0; ih<t_hcal_clusters.size(); ih++){
+      m_hcal_pfo_tag.push_back(ip);
+      m_hcal_clus_x.push_back(t_hcal_clusters[ih]->getHitCenter().x());
+      m_hcal_clus_y.push_back(t_hcal_clusters[ih]->getHitCenter().y());
+      m_hcal_clus_z.push_back(t_hcal_clusters[ih]->getHitCenter().z());
+      m_hcal_clus_E.push_back(t_hcal_clusters[ih]->getHitsE());
+    }
+
+  }
+  t_PFO->Fill();
+
 
 
   //Clean Events
   //system("/cefs/higgs/songwz/winter22/CEPCSW/workarea/memory/memory_test.sh before_clean");
   m_DataCol.Clear();
   //system("/cefs/higgs/songwz/winter22/CEPCSW/workarea/memory/memory_test.sh event_end");
+
+// yyy_endfill = clock();  // 填完数据的时间
+// double duration_rec = double(yyy_endrec - yyy_start) / CLOCKS_PER_SEC;
+// double duration_fill = double(yyy_endfill - yyy_endrec) / CLOCKS_PER_SEC;
+// // 将时间输出到txt文件中
+// std::ofstream outfile("runtime_rec.txt", std::ios::app);
+// outfile << _nEvt << "    " << duration_rec << "    " << duration_fill << std::endl;
+// outfile.close();
 
   std::cout<<"Event: "<<_nEvt<<" is done"<<std::endl;
   _nEvt ++ ;
@@ -1150,8 +1217,9 @@ StatusCode PandoraPlusPFAlg::finalize()
   t_Tower->Write();
   t_Track->Write();
   t_axis->Write();
+  t_PFO->Write();
   m_wfile->Close();
-  delete m_wfile, t_SimBar, t_Layers,t_HalfCluster, t_Hough, t_Match, t_Cone, t_Merge, t_Cluster, t_Tower, t_Track, t_axis;
+  delete m_wfile, t_SimBar, t_Layers,t_HalfCluster, t_Hough, t_Match, t_Cone, t_Merge, t_Cluster, t_Tower, t_Track, t_axis, t_PFO;
 
   delete m_pMCParticleCreator;
   delete m_pTrackCreator; 
@@ -1458,6 +1526,23 @@ void PandoraPlusPFAlg::ClearTower(){
   m_HFClusVhit_z.clear();
   m_HFClusVhit_E.clear();
 
+}
+
+void PandoraPlusPFAlg::ClearPFO(){
+  pfo_tag.clear();
+  n_track.clear();
+  n_ecal_clus.clear();
+  n_hcal_clus.clear();
+  m_ecal_pfo_tag.clear();
+  m_ecal_clus_x.clear();
+  m_ecal_clus_y.clear();
+  m_ecal_clus_z.clear();
+  m_ecal_clus_E.clear();
+  m_hcal_pfo_tag.clear();
+  m_hcal_clus_x.clear();
+  m_hcal_clus_y.clear();
+  m_hcal_clus_z.clear();
+  m_hcal_clus_E.clear();
 }
 
 #endif

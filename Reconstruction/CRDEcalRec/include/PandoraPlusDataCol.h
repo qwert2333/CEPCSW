@@ -12,7 +12,7 @@
 #include "Objects/Calo3DCluster.h"
 #include "Objects/HoughObject.h"
 #include "Objects/HoughSpace.h"
-//#include "Objects/PFObject.h"
+#include "Objects/PFObject.h"
 #include "Objects/Track.h"
 
 #include "k4FWCore/DataHandle.h"
@@ -59,6 +59,7 @@ public:
   std::map<std::string, std::vector<std::shared_ptr<PandoraPlus::CaloHalfCluster>>> map_HalfCluster;
   std::map<std::string, std::vector<std::shared_ptr<PandoraPlus::Calo2DCluster>>> map_2DCluster; 
   std::map<std::string, std::vector<std::shared_ptr<PandoraPlus::Calo3DCluster>>> map_CaloCluster; //Cluster
+  std::map<std::string, std::vector<std::shared_ptr<PandoraPlus::PFObject>>> map_PFObjects;
 
 
 };

@@ -20,6 +20,9 @@
 #include <algorithm>
 #include <map>
 
+// #include <fstream>
+// #include <ctime>
+
 #define C 299.79  // unit: mm/ns
 #define PI 3.141592653
 using namespace std;
@@ -96,6 +99,9 @@ StatusCode CRDEcalDigiAlg::initialize()
 
 StatusCode CRDEcalDigiAlg::execute()
 {
+// clock_t yyy_start, yyy_enddigi;
+// yyy_start = clock(); // 记录开始时间
+
 	if(_nEvt==0) std::cout<<"CRDEcalDigiAlg::execute Start"<<std::endl;
 	std::cout<<"Processing event: "<<_nEvt<<std::endl;
    if(_nEvt<_Nskip){ _nEvt++; return StatusCode::SUCCESS; }
@@ -345,6 +351,13 @@ StatusCode CRDEcalDigiAlg::execute()
 	t_SimBar->Fill();
 	if(_Debug>=1) std::cout<<"End Loop: Bar Digitalization!"<<std::endl;
 	std::cout<<"Total Bar Energy: "<<totE<<std::endl;
+
+// yyy_enddigi = clock();
+// double duration_digi = double(yyy_enddigi - yyy_start) / CLOCKS_PER_SEC;
+// // 将时间输出到txt文件中
+// std::ofstream outfile("runtime_ecaldigi.txt", std::ios::app);
+// outfile << _nEvt << "    " << duration_digi << std::endl;
+// outfile.close();
 
   _nEvt ++ ;
   //delete SimHitCol, caloVec, caloAssoVec; 

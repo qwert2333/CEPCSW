@@ -19,6 +19,7 @@ StatusCode PandoraPlusDataCol::Clear(){
   map_HalfCluster.clear();
   map_2DCluster.clear();
   map_CaloCluster.clear();
+  map_PFObjects.clear();
   
   return StatusCode::SUCCESS; 
 };

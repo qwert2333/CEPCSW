@@ -27,6 +27,7 @@
 #include "Algorithm/EnergyTimeMatchingAlg.h"
 //#include "Algorithm/ConeClusteringAlg.h"
 #include "Algorithm/TrackExtrapolatingAlg.h"
+#include "Algorithm/PFOCreatingAlg.h"
 
 #include "TVector3.h"
 #include "TRandom3.h"
@@ -221,6 +222,12 @@ protected:
   FloatVec m_trkstate_refx, m_trkstate_refy, m_trkstate_refz; 
   IntVec m_trkstate_tag, m_trkstate_location, m_type;
 
+  // yyy: output PFO information
+  TTree *t_PFO;
+  IntVec pfo_tag, n_track, n_ecal_clus, n_hcal_clus, m_ecal_pfo_tag, m_hcal_pfo_tag;
+  FloatVec  m_ecal_clus_x, m_ecal_clus_y, m_ecal_clus_z, m_ecal_clus_E, 
+            m_hcal_clus_x, m_hcal_clus_y, m_hcal_clus_z, m_hcal_clus_E;
+
 
   void ClearBar();
   void ClearLayer();
@@ -234,6 +241,7 @@ protected:
   void ClearHCALCluster();
   void ClearTrack();
   void ClearAxis();
+  void ClearPFO(); // yyy
 
 
 

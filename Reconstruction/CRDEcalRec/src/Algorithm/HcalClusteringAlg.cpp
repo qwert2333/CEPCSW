@@ -47,11 +47,11 @@ StatusCode HcalClusteringAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
 //   LongiConeLinking( m_orderedHit, m_clusterCol );
   Clustering(m_hcalHits, m_clusterCol);
 //   m_datacol.bk_Cluster3DCol.insert(  m_datacol.bk_Cluster3DCol.end(), m_clusterCol.begin(), m_clusterCol.end() );
-  cout<<"  Cluster size: "<<m_clusterCol.size()<<endl;
-  for(int ic=0; ic<m_clusterCol.size(); ic++)
-  {
-    cout<<"    Cluster "<<ic<<":"<<m_clusterCol[ic]->getCaloHits().size()<<endl;
-  }
+  // cout<<"  Cluster size: "<<m_clusterCol.size()<<endl;
+  // for(int ic=0; ic<m_clusterCol.size(); ic++)
+  // {
+  //   cout<<"    Cluster "<<ic<<":"<<m_clusterCol[ic]->getCaloHits().size()<<endl;
+  // }
 
 //   m_datacol.map_CaloCluster[settings.map_stringPars["OutputCluster"]] = m_clusterCol;
   m_datacol.map_CaloCluster["HCALCluster"]= m_clusterCol;

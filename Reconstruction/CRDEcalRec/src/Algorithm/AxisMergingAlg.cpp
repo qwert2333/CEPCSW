@@ -44,9 +44,9 @@ StatusCode AxisMergingAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
     return StatusCode::SUCCESS;
   }
 
-  cout << "yyy: Readin halfcluster size in U, V: "<<p_HalfClusterU.size()<<", "<<p_HalfClusterV.size()<<endl;
+  // cout << "yyy: Readin halfcluster size in U, V: "<<p_HalfClusterU.size()<<", "<<p_HalfClusterV.size()<<endl;
 
-  cout << "yyy: Merge axis in U pHalfClusterU" << endl;
+  // cout << "yyy: Merge axis in U pHalfClusterU" << endl;
   //Merge axis in HalfClusterU: 
   for(int ih=0; ih<p_HalfClusterU.size(); ih++){
     m_axisUCol.clear(); m_newAxisUCol.clear();
@@ -58,8 +58,8 @@ StatusCode AxisMergingAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
       m_newAxisUCol.push_back( ptr_cloned.get() );
     }
 
-    cout << "  yyy: For p_HalfClusterU[" << ih << "], m_newAxisUCol.size() = " << m_newAxisUCol.size() 
-         << ", if size<2, no need to merge" << endl;
+    // cout << "  yyy: For p_HalfClusterU[" << ih << "], m_newAxisUCol.size() = " << m_newAxisUCol.size() 
+    //      << ", if size<2, no need to merge" << endl;
 
     if(m_newAxisUCol.size()<2){ //No need to merge, save into OutputAxis. 
       std::vector<const PandoraPlus::CaloHalfCluster*> tmp_axisCol; tmp_axisCol.clear();
@@ -110,19 +110,19 @@ cout<<endl;
 */
     //Case1: Merge axes associated to the same track. 
     TrkMatchedMerging(m_newAxisUCol);    
-    cout << "  yyy: after TrkMatchedMerging(), axis size = " <<  m_newAxisUCol.size() << endl;
+    // cout << "  yyy: after TrkMatchedMerging(), axis size = " <<  m_newAxisUCol.size() << endl;
 
     //Case2: Merge axes that share same localMax.
     OverlapMerging(m_newAxisUCol);
-    cout << "  yyy: after OverlapMerging(), axis size = " <<  m_newAxisUCol.size() << endl;
+    // cout << "  yyy: after OverlapMerging(), axis size = " <<  m_newAxisUCol.size() << endl;
 
     // Case3: Merge fake photon to track axis.
     BranchMerging(m_newAxisUCol);
-    cout << "  yyy: after BranchMerging(), axis size = " <<  m_newAxisUCol.size() << endl;
+    // cout << "  yyy: after BranchMerging(), axis size = " <<  m_newAxisUCol.size() << endl;
 
     //Case4: Merge fragments to core axes. 
     FragmentsMerging(m_newAxisUCol);
-    cout << "  yyy: after FragmentsMerging(), axis size = " <<  m_newAxisUCol.size() << endl;
+    // cout << "  yyy: after FragmentsMerging(), axis size = " <<  m_newAxisUCol.size() << endl;
 
     //Case4: Merge nearby axes. 
     //ConeMerging(m_newAxisUCol);
@@ -145,7 +145,7 @@ cout<<endl;
     // }
 
 
-    cout << "  yyy: check axis quality" << endl;
+    // cout << "  yyy: check axis quality" << endl;
 //printf("  In HalfClusterU #%d: After Step4: axis size %d \n", ih, m_newAxisUCol.size());
 
 /*
@@ -194,7 +194,7 @@ cout<<endl;
 
   }
 
-  cout << "yyy: Merge axis in V pHalfClusterV" << endl;
+  // cout << "yyy: Merge axis in V pHalfClusterV" << endl;
   //Merge axis in HalfClusterV:
   for(int ih=0; ih<p_HalfClusterV.size(); ih++){
     m_axisVCol.clear(); m_newAxisVCol.clear();
@@ -206,8 +206,8 @@ cout<<endl;
       m_newAxisVCol.push_back( ptr_cloned.get() );
     }
 
-    cout << "  yyy: For p_HalfClusterV[" << ih << "], m_newAxisVCol.size() = " << m_newAxisVCol.size() 
-         << ", if size<2, no need to merge" << endl;
+    // cout << "  yyy: For p_HalfClusterV[" << ih << "], m_newAxisVCol.size() = " << m_newAxisVCol.size() 
+    //      << ", if size<2, no need to merge" << endl;
 
     if(m_newAxisVCol.size()<2){
       std::vector<const PandoraPlus::CaloHalfCluster*> tmp_axisCol; tmp_axisCol.clear();
@@ -218,19 +218,19 @@ cout<<endl;
     std::sort( m_newAxisVCol.begin(), m_newAxisVCol.end(), compLayer );
     //Case1: Merge axes associated to the same track. 
     TrkMatchedMerging(m_newAxisVCol);
-    cout << "  yyy: after TrkMatchedMerging(), axis size = " <<  m_newAxisVCol.size() << endl;
+    // cout << "  yyy: after TrkMatchedMerging(), axis size = " <<  m_newAxisVCol.size() << endl;
 
     //Case2: Merge axes that share same localMax.
     OverlapMerging(m_newAxisVCol);
-    cout << "  yyy: after OverlapMerging(), axis size = " <<  m_newAxisVCol.size() << endl;
+    // cout << "  yyy: after OverlapMerging(), axis size = " <<  m_newAxisVCol.size() << endl;
 
     //Case3: Merge fake photon to track axis.
     BranchMerging(m_newAxisVCol);
-    cout << "  yyy: after BranchMerging(), axis size = " <<  m_newAxisVCol.size() << endl;
+    // cout << "  yyy: after BranchMerging(), axis size = " <<  m_newAxisVCol.size() << endl;
 
     //Case4: Merge fragments to core axes. 
     FragmentsMerging(m_newAxisVCol);
-    cout << "  yyy: after FragmentsMerging(), axis size = " <<  m_newAxisVCol.size() << endl;
+    // cout << "  yyy: after FragmentsMerging(), axis size = " <<  m_newAxisVCol.size() << endl;
 
     //Case4: Merge nearby axes.
     //ConeMerging(m_newAxisVCol);
@@ -251,7 +251,7 @@ cout<<endl;
     //       m_newAxisVCol[ia]->getCluster()[il]);
     // }
 
-    cout << "  yyy: check axis quality" << endl;
+    // cout << "  yyy: check axis quality" << endl;
     //Check axis quality
     std::vector<PandoraPlus::CaloHalfCluster*> tmp_goodAxis; tmp_goodAxis.clear();
     std::vector<PandoraPlus::CaloHalfCluster*> tmp_badAxis; tmp_badAxis.clear();
@@ -296,7 +296,7 @@ StatusCode AxisMergingAlg::ClearAlgorithm(){
 
 
 StatusCode AxisMergingAlg::TrkMatchedMerging( std::vector<PandoraPlus::CaloHalfCluster*>& m_axisCol ){
-  cout << "  yyy: calling TrkMatchedMerging(), m_axisCol.size()=" << m_axisCol.size() << endl;
+  // cout << "  yyy: calling TrkMatchedMerging(), m_axisCol.size()=" << m_axisCol.size() << endl;
   if(m_axisCol.size()<2) return StatusCode::SUCCESS;
 
   for(int iax=0; iax<m_axisCol.size(); iax++){
@@ -344,7 +344,7 @@ StatusCode AxisMergingAlg::TrkMatchedMerging( std::vector<PandoraPlus::CaloHalfC
 
 
 StatusCode AxisMergingAlg::OverlapMerging( std::vector<PandoraPlus::CaloHalfCluster*>& m_axisCol ){
-  cout << "  yyy: calling OverlapMerging(), m_axisCol.size()=" << m_axisCol.size() << endl;
+  // cout << "  yyy: calling OverlapMerging(), m_axisCol.size()=" << m_axisCol.size() << endl;
   if(m_axisCol.size()<2) return StatusCode::SUCCESS;
 
   // cout << "  yyy: first interate" << endl;
@@ -469,7 +469,7 @@ StatusCode AxisMergingAlg::OverlapMerging( std::vector<PandoraPlus::CaloHalfClus
 
 
 StatusCode AxisMergingAlg::BranchMerging( std::vector<PandoraPlus::CaloHalfCluster*>& m_axisCol ){
-  cout << "  yyy: calling BranchMerging(), m_axisCol.size()=" << m_axisCol.size() << endl;
+  // cout << "  yyy: calling BranchMerging(), m_axisCol.size()=" << m_axisCol.size() << endl;
   if(m_axisCol.size()<2) return StatusCode::SUCCESS;
 
   // Merge fake Hough axis to track axis
@@ -572,7 +572,7 @@ StatusCode AxisMergingAlg::BranchMerging( std::vector<PandoraPlus::CaloHalfClust
 
 
 StatusCode AxisMergingAlg::FragmentsMerging( std::vector<PandoraPlus::CaloHalfCluster*>& m_axisCol ){
-  cout << "  yyy: calling FragmentsMerging(), m_axisCol.size()=" << m_axisCol.size() << endl;
+  // cout << "  yyy: calling FragmentsMerging(), m_axisCol.size()=" << m_axisCol.size() << endl;
   if(m_axisCol.size()<2) return StatusCode::SUCCESS;
 
   /*
@@ -807,7 +807,7 @@ StatusCode AxisMergingAlg::ConeMerging( std::vector<PandoraPlus::CaloHalfCluster
 
 
 StatusCode AxisMergingAlg::MergeToClosestCluster( PandoraPlus::CaloHalfCluster* m_badaxis, std::vector<PandoraPlus::CaloHalfCluster*>& m_axisCol ){
-  cout << "  yyy: calling MergeToClosestCluster()" << endl;
+  // cout << "  yyy: calling MergeToClosestCluster()" << endl;
   if(m_axisCol.size()==0){ 
     m_axisCol.push_back(m_badaxis);
     // cout << "  yyy: no good axis, treat the bad axis as good axis" << endl;

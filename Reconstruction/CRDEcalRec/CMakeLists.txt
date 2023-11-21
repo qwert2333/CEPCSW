@@ -8,6 +8,7 @@ gaudi_add_library(CRDEcalRecLib
                           src/Objects/Track.cc
                           src/Objects/HoughSpace.cc
                           src/Objects/HoughObject.cc
+                          src/Objects/PFObject.cc
                   LINK    k4FWCore::k4FWCore
                           GearSvc
                           DetInterface
@@ -41,6 +42,7 @@ gaudi_add_module(CRDEcalRec
                          src/Algorithm/EnergySplittingAlg.cpp
                          src/Algorithm/EnergyTimeMatchingAlg.cpp
                          src/Algorithm/HcalClusteringAlg.cpp
+                         src/Algorithm/PFOCreatingAlg.cpp
                  LINK    CRDEcalRecLib
 )
 target_include_directories(CRDEcalRec PUBLIC
