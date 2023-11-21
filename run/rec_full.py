@@ -1,9 +1,10 @@
 from Gaudi.Configuration import *
 Nskip = 0
-Nevt = NEVT
+Nevt = 10
+Name_suffix = 'Gamma'
 
 ############## GeomSvc #################
-geometry_option = "CRD_o1_v01/CRD_o1_v01.xml"
+geometry_option = "CRD_o1_v01/CRD_o1_v01_TPC.xml"
 
 if not os.getenv("DETCRDROOT"):
     print("Can't find the geometry. Please setup envvar DETCRDROOT." )
@@ -23,7 +24,7 @@ geomsvc.compact = geometry_path
 from Configurables import k4DataSvc
 podioevent = k4DataSvc("EventDataSvc")
 podioevent.inputs = [
-"SIMFILE"
+"Digi_Gamma.root"
 ]
 ##########################################
 
@@ -31,43 +32,16 @@ podioevent.inputs = [
 ########## Podio Input ###################
 from Configurables import PodioInput
 inp = PodioInput("InputReader")
-inp.collections = ["EcalBarrelCollection", "EcalBarrelContributionCollection", "HcalBarrelCollection", "HcalBarrelContributionCollection", "MCParticle", "MarlinTrkTracks"]
+inp.collections = ["EcalBarrelCollection", 
+                   "EcalBarrelContributionCollection", 
+                   "ECALBarrel",
+                   "HcalBarrelCollection", 
+                   "HcalBarrelContributionCollection", 
+                   "HCALBarrel",
+                   "MCParticle", 
+                   "MarlinTrkTracks",
+                   "MCRecoCaloParticleAssociationCollection" ]
 ##########################################
-
-########## Digitalization ################
-
-##ECAL##
-from Configurables import CRDEcalDigiAlg
-EcalDigi = CRDEcalDigiAlg("CRDEcalDigiAlg")
-EcalDigi.ReadOutName = "EcalBarrelCollection"
-EcalDigi.SimCaloHitCollection = "EcalBarrelCollection"
-EcalDigi.CaloHitCollection = "ECALBarrel"
-EcalDigi.CaloAssociationCollection = "RecoCaloAssociation_ECALBarrel"
-EcalDigi.SkipEvt = Nskip
-EcalDigi.Seed = 2079
-#Digitalization parameters
-EcalDigi.CalibrECAL = 1
-EcalDigi.AttenuationLength = 7e10
-EcalDigi.TimeResolution = 0.5        #unit: ns
-EcalDigi.EnergyThreshold = 0.0001   #0.1 MeV
-EcalDigi.ChargeThresholdFrac = 0.05
-EcalDigi.Debug=1
-EcalDigi.OutFileName = "DIGIFILE"
-#########################################
-
-##HCAL##
-from Configurables import G2CDArborAlg
-caloDigi = G2CDArborAlg("G2CDArborAlg")
-caloDigi.ReadLCIO = False
-#caloDigi.CalibrECAL = [48.16, 96.32]
-caloDigi.CalibrECAL = [46.538, 93.0769]
-caloDigi.ECALCollections = []
-caloDigi.ECALReadOutNames= []
-caloDigi.DigiECALCollection = []
-caloDigi.HCALCollections = ["HcalBarrelCollection"]
-caloDigi.HCALReadOutNames= ["HcalBarrelCollection"]
-caloDigi.DigiHCALCollection = ["HCALBarrel"]
-caloDigi.EventReportEvery = 100
 
 ######### Reconstruction ################
 from Configurables import PandoraPlusPFAlg
@@ -78,7 +52,7 @@ PandoraPlusPFAlg.BField = 3.
 PandoraPlusPFAlg.Debug = 0
 PandoraPlusPFAlg.SkipEvt = Nskip
 PandoraPlusPFAlg.WriteAna = 1
-PandoraPlusPFAlg.AnaFileName = "RECFILE"
+PandoraPlusPFAlg.AnaFileName = "testRec_"+Name_suffix+".root"
 ##----Readin collections----
 PandoraPlusPFAlg.MCParticleCollection = "MCParticle"
 PandoraPlusPFAlg.TrackCollections = ["MarlinTrkTracks"]
@@ -106,7 +80,7 @@ PandoraPlusPFAlg.AlgParNames = [ ["Par1", "Par2"],
                                  ["ReadinLocalMaxName", "th_Nshowers"],
                                  ["axis_Angle", "relP_Angle", "relP_Dis"],
                                  [""],
-                                 ["TruthMatch"] ]
+                                 [""] ]
 PandoraPlusPFAlg.AlgParTypes = [ ["double", "double"],
                                  ["double"],
                                  ["double", "double"],
@@ -115,7 +89,7 @@ PandoraPlusPFAlg.AlgParTypes = [ ["double", "double"],
                                  ["string", "int"], 
                                  ["double","double", "double"],
                                  [""],
-                                 ["bool"]  ]
+                                 [""]  ]
 PandoraPlusPFAlg.AlgParValues = [ ["1.", "3.14"],
                                   ["1."],
                                   ["0.005", "0."],
@@ -124,7 +98,7 @@ PandoraPlusPFAlg.AlgParValues = [ ["1.", "3.14"],
                                   ["LeftLocalMax", "3"], 
                                   ["1.57", "1.57", "70"],  #Pi/2, Pi/2, 70.
                                   [""],
-                                  ["0"]  ]
+                                  [""]  ]
 
 
 ########################################
@@ -142,7 +116,8 @@ out.outputCommands = ["keep *"]
 
 from Configurables import ApplicationMgr
 ApplicationMgr( 
-    TopAlg=[inp, EcalDigi,caloDigi, PandoraPlusPFAlg ],
+    TopAlg=[inp, PandoraPlusPFAlg ],
+    #TopAlg=[inp, EcalDigi,caloDigi],
     EvtSel="NONE",
     EvtMax=Nevt,
     ExtSvc=[podioevent, geomsvc],

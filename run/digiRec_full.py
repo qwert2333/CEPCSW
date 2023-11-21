@@ -1,10 +1,10 @@
 from Gaudi.Configuration import *
 Nskip = 0
-Nevt = 30
-Name_suffix = 'GamPi_3deg_allmerge'
+Nevt = 100
+Name_suffix = 'mip'
 
 ############## GeomSvc #################
-geometry_option = "CRD_o1_v01/CRD_o1_v01.xml"
+geometry_option = "CRD_o1_v01/CRD_o1_v01_TPC.xml"
 
 if not os.getenv("DETCRDROOT"):
     print("Can't find the geometry. Please setup envvar DETCRDROOT." )
@@ -24,7 +24,7 @@ geomsvc.compact = geometry_path
 from Configurables import k4DataSvc
 podioevent = k4DataSvc("EventDataSvc")
 podioevent.inputs = [
-"/publicfs/atlas/atlasnew/higgs/hgg/guofy/CEPCSW_v207/run/SimSample/CRDFull_GamPi_3deg.root"
+"CRD_TPC_Mu.root"
 ]
 ##########################################
 

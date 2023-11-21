@@ -291,7 +291,7 @@ ApplicationMgr(
     #TopAlg = [genalg, detsimalg, digiVXD, digiSIT, out],
     TopAlg = [genalg, detsimalg, digiVXD, digiSIT, digiSET, digiFTD, spSET, digiTPC, tracking, forward, subset, full, out],
     EvtSel = 'NONE',
-    EvtMax = 1000,
+    EvtMax = 100,
     ExtSvc = [rndmengine, rndmgensvc, dsvc, evtseeder, geosvc, gearsvc, tracksystemsvc],
     #ExtSvc = [rndmengine, rndmgensvc, dsvc, geosvc],
     OutputLevel=INFO
