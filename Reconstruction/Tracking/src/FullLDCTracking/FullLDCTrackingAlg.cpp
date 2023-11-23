@@ -116,7 +116,12 @@ FullLDCTrackingAlg::FullLDCTrackingAlg(const std::string& name, ISvcLocator* svc
   declareProperty("SiTracks", _SiTrackColHdl, "Si Track Collection");
   
   // Input relation collections
-  
+  declareProperty("VTXHitRelCol", _VTXHitRelColHdl, "Vertex TrackerHit association name");  
+  declareProperty("SITHitRelCol", _SITHitRelColHdl, "SIT TrackerHit association name");  
+  declareProperty("SETHitRelCol", _SETHitRelColHdl, "SET TrackerHit association name");  
+  declareProperty("FTDHitRelCol", _FTDHitRelColHdl, "FTD TrackerHit association name");  
+  declareProperty("TPCHitRelCol", _TPCHitRelColHdl, "TPC TrackerHit association name");  
+
   /*
   registerInputCollection(LCIO::LCRELATION,
                           "TPCTracksMCPRelColl",
@@ -132,6 +137,7 @@ FullLDCTrackingAlg::FullLDCTrackingAlg(const std::string& name, ISvcLocator* svc
   */ 
   // Output track collection
   declareProperty("OutputTracks", _OutputTrackColHdl, "Full LDC track collection name");
+  declareProperty("OutputTrackAssociationCollection", _OutputTrkRelColHdl, "Track - MCParticle association collection name");
 }
 
 
@@ -204,7 +210,8 @@ StatusCode FullLDCTrackingAlg::execute() {
   auto stopwatch = TStopwatch();
   // debug() << endmsg;
   auto outCol = _OutputTrackColHdl.createAndPut();
-  
+  auto outRelCol = _OutputTrkRelColHdl.createAndPut();  
+
   prepareVectors();
   debug() << "************************************PrepareVectors done..." << endmsg;
   
@@ -239,6 +246,15 @@ StatusCode FullLDCTrackingAlg::execute() {
   catch(std::runtime_error& e){
     error() << e.what() << std::endl;
   }
+
+  //Create the association
+  try{
+    CreateTrackAssociation(outCol, outRelCol);
+  }
+  catch(std::runtime_error& e){
+    error() << e.what() << std::endl;
+  }
+
   CleanUp();
   debug() << "Cleanup is done." << endmsg;
   _nEvt++;
@@ -3789,7 +3805,7 @@ HelixClass * FullLDCTrackingAlg::GetExtrapolationHelix( TrackExtended * track) {
           ts_at_calo = getTrackStateAt(trk_lcio, 4/*lcio::TrackState::AtCalorimeter*/);
 
           debug() << "FullLDCTrackingAlg::GetExtrapolationHelix set ts_at_calo with ref_z = " << z_ref << endmsg;
-	}
+	      }
       }
     }
   }
@@ -4983,3 +4999,88 @@ void FullLDCTrackingAlg::checkTrackState(int type){
     }
   }
 }
+
+void FullLDCTrackingAlg::CreateTrackAssociation(edm4hep::TrackCollection* trkCol, edm4hep::MCRecoTrackParticleAssociationCollection* relCol){
+
+  const edm4hep::MCRecoTrackerAssociationCollection* VTXHitRelCol = _VTXHitRelColHdl.get(); 
+  const edm4hep::MCRecoTrackerAssociationCollection* SITHitRelCol = _SITHitRelColHdl.get(); 
+  const edm4hep::MCRecoTrackerAssociationCollection* SETHitRelCol = _SETHitRelColHdl.get(); 
+  const edm4hep::MCRecoTrackerAssociationCollection* FTDHitRelCol = _FTDHitRelColHdl.get(); 
+  const edm4hep::MCRecoTrackerAssociationCollection* TPCHitRelCol = _TPCHitRelColHdl.get(); 
+
+
+  //Loop for the tracks
+  for(int itrk=0; itrk<trkCol->size(); itrk++){
+    edm4hep::Track iTrk = trkCol->at(itrk);
+    if(!iTrk.isAvailable()) continue;
+
+    std::map<const edm4hep::MCParticle, int> MCParticleToNhitMap;
+    //Loop for trackerhits in the track
+    int nHit = iTrk.trackerHits_size();
+    for(int iHit=0; iHit<nHit; ++iHit){
+      const edm4hep::TrackerHit hit = iTrk.getTrackerHits(iHit);
+      if(!hit.isAvailable()) continue;
+
+      //Get SimTrackerHit from Association: loop all kinds of associations
+      bool findSimHit = false; 
+      edm4hep::SimTrackerHit p_simHit;
+      for(int irel = 0; irel<VTXHitRelCol->size() && !findSimHit; ++irel){
+        if(hit == VTXHitRelCol->at(irel).getRec()){
+          p_simHit = VTXHitRelCol->at(irel).getSim();
+          findSimHit = true;
+          break;
+        }
+      }
+
+      for(int irel = 0; irel<SITHitRelCol->size() && !findSimHit; ++irel){
+        if(hit == SITHitRelCol->at(irel).getRec()){
+          p_simHit = SITHitRelCol->at(irel).getSim();
+          findSimHit = true;
+          break;
+        } 
+      }      
+
+      for(int irel = 0; irel<SETHitRelCol->size() && !findSimHit; ++irel){
+        if(hit == SETHitRelCol->at(irel).getRec()){
+          p_simHit = SETHitRelCol->at(irel).getSim();
+          findSimHit = true;
+          break;
+        }
+      }
+
+      for(int irel = 0; irel<FTDHitRelCol->size() && !findSimHit; ++irel){
+        if(hit == FTDHitRelCol->at(irel).getRec()){
+          p_simHit = FTDHitRelCol->at(irel).getSim();
+          findSimHit = true;
+          break;
+        }
+      }
+
+      for(int irel = 0; irel<TPCHitRelCol->size() && !findSimHit; ++irel){
+        if(hit == TPCHitRelCol->at(irel).getRec()){
+          p_simHit = TPCHitRelCol->at(irel).getSim();
+          findSimHit = true;
+          break;
+        }
+      }
+
+      //Get MCP from SimTrackerHit
+      if(findSimHit && p_simHit.isAvailable()){
+        const edm4hep::MCParticle mcp = p_simHit.getMCParticle();
+        if(MCParticleToNhitMap.find(mcp)==MCParticleToNhitMap.end()) MCParticleToNhitMap[mcp]=1;
+        else MCParticleToNhitMap[mcp]++;
+      }
+    } //End loop tracker hits. 
+
+    for(auto& iter : MCParticleToNhitMap){
+      auto rel = relCol->create();
+      rel.setRec(iTrk);
+      rel.setSim(iter.first);
+      rel.setWeight( (double)iter.second/nHit  );
+    }
+
+  } //End loop tracks. 
+}
+
+
+

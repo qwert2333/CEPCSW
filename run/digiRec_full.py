@@ -1,7 +1,7 @@
 from Gaudi.Configuration import *
 Nskip = 0
-Nevt = 100
-Name_suffix = 'mip'
+Nevt = 5
+Name_suffix = 'PseudoJet_truthMatch'
 
 ############## GeomSvc #################
 geometry_option = "CRD_o1_v01/CRD_o1_v01_TPC.xml"
@@ -24,7 +24,7 @@ geomsvc.compact = geometry_path
 from Configurables import k4DataSvc
 podioevent = k4DataSvc("EventDataSvc")
 podioevent.inputs = [
-"CRD_TPC_Mu.root"
+"/cefs/higgs/guofy/CEPCSW_v214/run/PseudoJet_Gams/PseudoJet_Module6/Sim/Simu_PseudoJet_Module6_000.root"
 ]
 ##########################################
 
@@ -97,8 +97,8 @@ PandoraPlusPFAlg.AlgList = ["ExampleAlg",
                             "HoughClusteringAlg",
                             "ConeClustering2DAlg",
                             "AxisMergingAlg",
-                            "EnergySplittingAlg",
-                            "EnergyTimeMatchingAlg"]
+                            "EnergySplittingAlg" ]
+#                            "TruthMatchingAlg"]
 PandoraPlusPFAlg.AlgParNames = [ ["Par1", "Par2"],
                                  ["Par1"],
                                  ["Eth_localMax", "Eth_MaxWithNeigh"],
@@ -106,8 +106,8 @@ PandoraPlusPFAlg.AlgParNames = [ ["Par1", "Par2"],
                                  ["th_Layers","th_peak"],
                                  ["ReadinLocalMaxName", "th_Nshowers"],
                                  ["axis_Angle", "relP_Angle", "relP_Dis"],
-                                 [""],
                                  [""] ]
+#                                 [""] ]
 PandoraPlusPFAlg.AlgParTypes = [ ["double", "double"],
                                  ["double"],
                                  ["double", "double"],
@@ -115,8 +115,8 @@ PandoraPlusPFAlg.AlgParTypes = [ ["double", "double"],
                                  ["int", "int"], 
                                  ["string", "int"], 
                                  ["double","double", "double"],
-                                 [""],
-                                 [""]  ]
+                                 [""] ]
+#                                 [""]  ]
 PandoraPlusPFAlg.AlgParValues = [ ["1.", "3.14"],
                                   ["1."],
                                   ["0.005", "0."],
@@ -124,8 +124,8 @@ PandoraPlusPFAlg.AlgParValues = [ ["1.", "3.14"],
                                   ["10","3"], 
                                   ["LeftLocalMax", "3"], 
                                   ["1.57", "1.57", "70"],  #Pi/2, Pi/2, 70.
-                                  [""],
-                                  [""]  ]
+                                  [""] ]
+#                                  [""]  ]
 
 
 ########################################
