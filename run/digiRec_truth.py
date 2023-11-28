@@ -97,16 +97,32 @@ PandoraPlusPFAlg.HCalMCPAssociationName = ["HCALBarrelParticleAssoCol"]
 
 PandoraPlusPFAlg.AlgList = ["ExampleAlg",
                             "GlobalClusteringAlg",
-                            "LocalMaxFindingAlg" ]
+                            "LocalMaxFindingAlg",
+                            "TruthTrackMatchingAlg",
+                            "TruthPatternRecAlg",
+                            "TruthEnergySplittingAlg",
+                            "TruthMatchingAlg" ]
 PandoraPlusPFAlg.AlgParNames = [ ["Par1", "Par2"],
                                  ["Par1"],
-                                 ["Eth_localMax", "Eth_MaxWithNeigh"] ]
+                                 ["Eth_localMax", "Eth_MaxWithNeigh"],
+                                 [""],
+                                 [""],
+                                 [""],
+                                 [""] ]
 PandoraPlusPFAlg.AlgParTypes = [ ["double", "double"],
                                  ["double"],
-                                 ["double", "double"] ]
+                                 ["double", "double"],
+                                 [""],
+                                 [""],
+                                 [""],
+                                 [""]  ]
 PandoraPlusPFAlg.AlgParValues = [ ["1.", "3.14"],
                                   ["1."],
-                                  ["0.005", "0."] ]
+                                  ["0.005", "0."],
+                                  [""],
+                                  [""],
+                                  [""],
+                                  [""]  ]
 
 
 ########################################
@@ -124,7 +140,7 @@ out.outputCommands = ["keep *"]
 
 from Configurables import ApplicationMgr
 ApplicationMgr( 
-    TopAlg=[inp, EcalDigi,HcalDigi, PandoraPlusPFAlg, out ],
+    TopAlg=[inp, EcalDigi, HcalDigi, PandoraPlusPFAlg],
     #TopAlg=[inp, EcalDigi,caloDigi],
     EvtSel="NONE",
     EvtMax=Nevt,

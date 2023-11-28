@@ -10,8 +10,8 @@
 #include "edm4hep/CalorimeterHitCollection.h"
 #include "edm4hep/SimCalorimeterHitCollection.h"
 #include "edm4hep/MCRecoCaloAssociationCollection.h"
-#include "HitStep.h"
-#include "CaloHit.h"
+#include "edm4hep/MCRecoCaloParticleAssociationCollection.h"
+#include "edm4hep/MCParticle.h"
 
 #include <DDRec/DetectorData.h>
 #include <DDRec/CellIDPositionConverter.h>
@@ -52,11 +52,6 @@ public:
    */
   virtual StatusCode finalize() ;
 
-
-  StatusCode MergeHits(const edm4hep::SimCalorimeterHitCollection& m_col, std::vector<edm4hep::SimCalorimeterHit>& m_hits);  
-
-	edm4hep::MutableSimCalorimeterHit find(const std::vector<edm4hep::MutableSimCalorimeterHit>& m_col, unsigned long long& cellid) const;
-
 	void Clear();
 
 protected:
@@ -64,14 +59,13 @@ protected:
   SmartIF<IGeomSvc> m_geosvc;
   //SmartIF<ICRDEcalSvc> m_edmsvc;
   typedef std::vector<float> FloatVec;
+  typedef std::map<const edm4hep::MCParticle, float> MCParticleToEnergyWeightMap;
 
 	int _nEvt ;
 	TRandom3 rndm;
 	TFile* m_wfile;
-	TTree* t_SimCont;
 	TTree* t_simHit;
 
-	FloatVec m_step_x, m_step_y, m_step_z, m_step_E;
 	FloatVec m_simHit_x, m_simHit_y, m_simHit_z, m_simHit_E, m_simHit_slice, m_simHit_layer, m_simHit_tower, m_simHit_stave, m_simHit_module;
   std::vector<unsigned long long> m_simHit_cellID;
   std::vector<int> m_simHit_steps;
@@ -91,15 +85,15 @@ protected:
   mutable Gaudi::Property<int>   _Nskip{this,  "SkipEvt", 0, "Skip event"};
   mutable Gaudi::Property<float> _seed{this,   "Seed", 2131, "Random Seed"};
   mutable Gaudi::Property<int>  _Debug{this,   "Debug", 0, "Debug level"};
-  mutable Gaudi::Property<float> _Eth {this,   "EnergyThreshold", 0.001, "Energy Threshold (/GeV)"};
-  // mutable Gaudi::Property<float> r_cali{this,  "CalibrECAL", 1, "Calibration coefficients for ECAL"};
-  
-  // mutable Gaudi::Property<float> _Qthfrac  {this, 	"ChargeThresholdFrac", 0.05, "Charge threshold fraction"};
+  mutable Gaudi::Property<float> _MIPCali {this,   "MIPResponse",  0.0005, "MIP response (/GeV)"};
+  mutable Gaudi::Property<float> _Eth_Mip {this,   "MIPThreshold", 0.5, "Energy Threshold (/MIP)"};
+  mutable Gaudi::Property<float> r_cali{this,  "CalibrHCAL", 1, "Global calibration coefficients for HCAL"};
 
 
   // Output collections
   DataHandle<edm4hep::CalorimeterHitCollection>    w_DigiCaloCol{"DigiCaloCol", Gaudi::DataHandle::Writer, this};
-  DataHandle<edm4hep::MCRecoCaloAssociationCollection>    w_CaloAssociationCol{"MCRecoCaloAssociationCollection", Gaudi::DataHandle::Writer, this};
+  DataHandle<edm4hep::MCRecoCaloAssociationCollection>    w_CaloAssociationCol{"HCALBarrelAssoCol", Gaudi::DataHandle::Writer, this};
+  DataHandle<edm4hep::MCRecoCaloParticleAssociationCollection>    w_MCPCaloAssociationCol{"HCALBarrelParticleAssoCol", Gaudi::DataHandle::Writer, this};
 };
 
 #endif
