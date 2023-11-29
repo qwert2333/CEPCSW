@@ -29,6 +29,11 @@
 #include "Algorithm/TrackExtrapolatingAlg.h"
 #include "Algorithm/PFOCreatingAlg.h"
 
+#include "Algorithm/TruthTrackMatchingAlg.h"
+#include "Algorithm/TruthMatchingAlg.h"
+#include "Algorithm/TruthPatternRecAlg.h"
+#include "Algorithm/TruthEnergySplittingAlg.h"
+
 #include "TVector3.h"
 #include "TRandom3.h"
 #include "TFile.h"
@@ -94,24 +99,27 @@ protected:
 
   //Readin collection names
   Gaudi::Property< std::string > name_MCParticleCol{ this, "MCParticleCollection", "MCParticle" };
-  Gaudi::Property< std::string > name_MCPRecoCaloAssoCol{ this, "MCRecoCaloParticleAssociationCollection", "MCRecoCaloParticleAssociationCollection" };
+  Gaudi::Property< std::string > name_MCPTrkAssoCol{this, "MCRecoTrackParticleAssociationCollection", "MarlinTrkAssociation"};
   Gaudi::Property< std::vector<std::string> > name_TrackCol{ this, "TrackCollections", {"MarlinTrkTracks"} };
   Gaudi::Property< std::vector<std::string> > name_EcalHits{ this, "ECalCaloHitCollections", {"ECALBarrel"} };
   Gaudi::Property< std::vector<std::string> > name_EcalReadout{ this, "ECalReadOutNames", {"EcalBarrelCollection"} }; 
+  Gaudi::Property< std::vector<std::string> > name_EcalMCPAssociation{ this, "ECalMCPAssociationName", {"ECALBarrelParticleAssoCol"} };
   Gaudi::Property< std::vector<std::string> > name_HcalHits{ this, "HCalCaloHitCollections", {"HCALBarrel"} };
   Gaudi::Property< std::vector<std::string> > name_HcalReadout{ this, "HCalReadOutNames", {"HcalBarrelCollection"} }; 
+  Gaudi::Property< std::vector<std::string> > name_HcalMCPAssociation{ this, "HCalMCPAssociationName", {"HCALBarrelParticleAssoCol"} };
   
 
   //---Readin collections
-  typedef DataHandle<edm4hep::TrackCollection>           TrackType; 
-  typedef DataHandle<edm4hep::CalorimeterHitCollection>  CaloType; 
+  typedef DataHandle<edm4hep::TrackCollection>                          TrackType; 
+  typedef DataHandle<edm4hep::CalorimeterHitCollection>                 CaloType; 
+  typedef DataHandle<edm4hep::MCRecoCaloParticleAssociationCollection>  CaloParticleAssoType; 
   DataHandle<edm4hep::MCParticleCollection>* r_MCParticleCol; 
-  DataHandle<edm4hep::MCRecoCaloParticleAssociationCollection>* r_MCPRecoCaloAssoCol; 
+  DataHandle<edm4hep::MCRecoTrackParticleAssociationCollection>* r_MCPTrkAssoCol;  
   std::vector<TrackType*> r_TrackCols; 
   //std::vector<CaloType*>  r_ECalHitCols; 
   //std::vector<CaloType*>  r_HCalHitCols; 
   std::vector<CaloType*>  r_CaloHitCols; 
-
+  std::map<std::string, CaloParticleAssoType*> map_CaloMCPAssoCols;
 
   //Global parameters.
   Gaudi::Property<float>  m_BField{this,  "BField", 3., "Magnetic field"};
@@ -130,10 +138,10 @@ protected:
 
 
   // Output collections
-  DataHandle<edm4hep::CalorimeterHitCollection>         w_RecCaloCol{"RecECALBarrel", Gaudi::DataHandle::Writer, this};
-  DataHandle<edm4hep::ClusterCollection>                w_ClusterCollection {"PandoraClusters",Gaudi::DataHandle::Writer, this};
-  DataHandle<edm4hep::ReconstructedParticleCollection>  w_ReconstructedParticleCollection {"PandoraPFOs"    ,Gaudi::DataHandle::Writer, this};
-  DataHandle<edm4hep::VertexCollection>                 w_VertexCollection {"PandoraPFANewStartVertices",Gaudi::DataHandle::Writer, this};
+  DataHandle<edm4hep::CalorimeterHitCollection>             w_RecCaloCol{"RecECALBarrel", Gaudi::DataHandle::Writer, this};
+  DataHandle<edm4hep::ClusterCollection>                    w_ClusterCollection {"PandoraClusters",Gaudi::DataHandle::Writer, this};
+  DataHandle<edm4hep::ReconstructedParticleCollection>      w_ReconstructedParticleCollection {"PandoraPFOs"    ,Gaudi::DataHandle::Writer, this};
+  DataHandle<edm4hep::VertexCollection>                     w_VertexCollection {"PandoraPFANewStartVertices",Gaudi::DataHandle::Writer, this};
   DataHandle<edm4hep::MCRecoParticleAssociationCollection>  w_MCRecoParticleAssociationCollection {"pfoMCRecoParticleAssociation",Gaudi::DataHandle::Writer, this};
 
 

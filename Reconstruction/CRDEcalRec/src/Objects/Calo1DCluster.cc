@@ -38,6 +38,7 @@ namespace PandoraPlus{
     p_cluster->setBars( Bars );
     p_cluster->setSeeds( Seeds );
     p_cluster->setIDInfo();
+    p_cluster->setLinkedMCP( MCParticleWeight );
     for(int i=0; i<CousinClusters.size(); i++) p_cluster->addCousinCluster( CousinClusters[i] );
     for(int i=0; i<ChildClusters.size(); i++) p_cluster->addChildCluster( ChildClusters[i] );
    
@@ -206,6 +207,45 @@ namespace PandoraPlus{
     }
     //if(Seeds.size()==0 && index>=0 && maxE>0.005 ) Seeds.push_back( Bars[index] );
     if(Seeds.size()==0 && index>=0 ) Seeds.push_back( Bars[index] );
+  }
+
+
+  std::vector< std::pair<edm4hep::MCParticle, float> > Calo1DCluster::getLinkedMCPfromUnit(){
+    MCParticleWeight.clear();
+
+    std::map<edm4hep::MCParticle, float> map_truthP_totE; map_truthP_totE.clear();
+    for(auto ibar : Bars ){
+      for(auto ipair : ibar->getLinkedMCP()) map_truthP_totE[ipair.first] += ibar->getEnergy()*ipair.second;
+    }
+
+    for(auto imcp: map_truthP_totE){
+      MCParticleWeight.push_back( std::make_pair(imcp.first, imcp.second/getEnergy()) );
+    }
+
+    return MCParticleWeight;
+  }
+
+  edm4hep::MCParticle Calo1DCluster::getLeadingMCP() const{
+    float maxWeight = -1.;
+    edm4hep::MCParticle mcp;
+    for(auto& iter: MCParticleWeight){
+      if(iter.second>maxWeight){
+        mcp = iter.first;
+        maxWeight = iter.second;
+      }
+    }
+
+    return mcp;
+  }
+
+  float Calo1DCluster::getLeadingMCPweight() const{
+    float maxWeight = -1.;
+    for(auto& iter: MCParticleWeight){
+      if(iter.second>maxWeight){
+        maxWeight = iter.second;
+      }
+    }
+    return maxWeight;
   }
 
 };

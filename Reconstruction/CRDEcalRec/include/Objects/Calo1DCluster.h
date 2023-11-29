@@ -46,6 +46,10 @@ namespace PandoraPlus{
     bool getGlobalRange( double& xmin,  double& ymin, double& zmin, double& xmax, double& ymax, double& zmax ) const;
     int  getLeftEdge();
     int  getRightEdge();
+    std::vector< std::pair<edm4hep::MCParticle, float> > getLinkedMCP() const { return MCParticleWeight; }
+    std::vector< std::pair<edm4hep::MCParticle, float> > getLinkedMCPfromUnit();
+    edm4hep::MCParticle getLeadingMCP() const;
+    float getLeadingMCPweight() const;
 
 	  void addUnit(const PandoraPlus::CaloUnit* _bar );
     void addSeed(const PandoraPlus::CaloUnit* _seed ) { Seeds.push_back(_seed); }
@@ -54,6 +58,8 @@ namespace PandoraPlus{
     void addCousinCluster( const PandoraPlus::Calo1DCluster* clus ) { CousinClusters.push_back(clus); }
     void addChildCluster( const PandoraPlus::Calo1DCluster* clus ) { ChildClusters.push_back(clus); }
     void deleteCousinCluster( const PandoraPlus::Calo1DCluster* _cl );
+    void addLinkedMCP( std::pair<edm4hep::MCParticle, float> _pair ) { MCParticleWeight.push_back(_pair); }
+    void setLinkedMCP( std::vector<std::pair<edm4hep::MCParticle, float>> _pairVec ) { MCParticleWeight.clear(); MCParticleWeight = _pairVec; }
     void setSeed();  //Set the most energitic unit as seed, Eseed>5 MeV (hardcoded). 
     void setIDInfo(); 
 
@@ -72,6 +78,7 @@ namespace PandoraPlus{
     std::vector< const PandoraPlus::Calo1DCluster* > CousinClusters;
     std::vector< const PandoraPlus::Calo1DCluster* > ChildClusters;
 
+    std::vector< std::pair<edm4hep::MCParticle, float> > MCParticleWeight;
   };
 }
 #endif

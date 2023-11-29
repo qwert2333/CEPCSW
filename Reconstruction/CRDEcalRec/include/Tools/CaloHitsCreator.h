@@ -20,7 +20,7 @@ namespace PandoraPlus{
     StatusCode CreateCaloHits( PandoraPlusDataCol& m_DataCol,
                                std::vector<DataHandle<edm4hep::CalorimeterHitCollection>*>& r_CaloHitCols, 
                                std::map<std::string, dd4hep::DDSegmentation::BitFieldCoder*>& map_decoder, 
-                               DataHandle<edm4hep::MCRecoCaloParticleAssociationCollection>* r_MCParticleRecoCaloCol ); 
+                               std::map<std::string, DataHandle<edm4hep::MCRecoCaloParticleAssociationCollection>*>& map_CaloParticleAssoCol ); 
 
     //StatusCode CreateMCParticleCaloHitsAsso( std::vector<DataHandle<edm4hep::CalorimeterHitCollection>*>& r_CaloHitCols, 
     //                                         DataHandle<edm4hep::MCRecoCaloParticleAssociationCollection>* r_MCParticleRecoCaloCol );

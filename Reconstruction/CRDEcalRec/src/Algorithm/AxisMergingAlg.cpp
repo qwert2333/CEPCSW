@@ -37,7 +37,7 @@ StatusCode AxisMergingAlg::Initialize( PandoraPlusDataCol& m_datacol ){
 };
 
 StatusCode AxisMergingAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
-  cout << "yyy: ----------------------------  Running Axis MergingAlg  -----------------------------------" << endl;
+  //cout << "yyy: ----------------------------  Running Axis MergingAlg  -----------------------------------" << endl;
 
   if( p_HalfClusterU.size() + p_HalfClusterV.size()==0 ) {
     std::cout<<"AxisMergingAlg: No HalfCluster input"<<std::endl;
@@ -72,7 +72,7 @@ StatusCode AxisMergingAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
     std::sort( m_newAxisUCol.begin(), m_newAxisUCol.end(), compLayer );
 
 
-printf("  In HalfClusterU #%d: readin axis size %d \n", ih, m_newAxisUCol.size());
+//printf("  In HalfClusterU #%d: readin axis size %d \n", ih, m_newAxisUCol.size());
 /*
 std::map<std::string, std::vector<const PandoraPlus::CaloHalfCluster*> > tmp_HClusMap =  p_HalfClusterU.at(ih)->getHalfClusterMap();
 cout<<"Print Readin AxisU: "<<endl;
@@ -610,19 +610,19 @@ StatusCode AxisMergingAlg::FragmentsMerging( std::vector<PandoraPlus::CaloHalfCl
           p_axis->getType()>100 ){
             // cout << "    yyy: m_axisCol[" << jax << "] is also a core, do not merge 2 cores" << endl;
             // cout << "         hit in m_axisCol["<<iax<<"]:"<<endl;
-            for(int yii=0; yii<m_axisCol[iax]->getCluster().size(); yii++){
-              cout << "           (" << std::fixed << std::setprecision(2) << m_axisCol[iax]->getCluster()[yii]->getPos().x()
-                  << ", " << std::fixed << std::setprecision(2) << m_axisCol[iax]->getCluster()[yii]->getPos().y()
-                  << ", " << std::fixed << std::setprecision(2) << m_axisCol[iax]->getCluster()[yii]->getPos().z()
-                  << ")" << endl;
-            }
+            //for(int yii=0; yii<m_axisCol[iax]->getCluster().size(); yii++){
+            //  cout << "           (" << std::fixed << std::setprecision(2) << m_axisCol[iax]->getCluster()[yii]->getPos().x()
+            //      << ", " << std::fixed << std::setprecision(2) << m_axisCol[iax]->getCluster()[yii]->getPos().y()
+            //      << ", " << std::fixed << std::setprecision(2) << m_axisCol[iax]->getCluster()[yii]->getPos().z()
+            //      << ")" << endl;
+            //}
             // cout << "         hit in m_axisCol["<<jax<<"]:"<<endl;
-            for(int yii=0; yii<m_axisCol[jax]->getCluster().size(); yii++){
-              cout << "           (" << std::fixed << std::setprecision(2) << m_axisCol[jax]->getCluster()[yii]->getPos().x()
-                  << ", " << std::fixed << std::setprecision(2) << m_axisCol[jax]->getCluster()[yii]->getPos().y()
-                  << ", " << std::fixed << std::setprecision(2) << m_axisCol[jax]->getCluster()[yii]->getPos().z()
-                  << ")" << endl;
-            }
+            //for(int yii=0; yii<m_axisCol[jax]->getCluster().size(); yii++){
+            //  cout << "           (" << std::fixed << std::setprecision(2) << m_axisCol[jax]->getCluster()[yii]->getPos().x()
+            //      << ", " << std::fixed << std::setprecision(2) << m_axisCol[jax]->getCluster()[yii]->getPos().y()
+            //      << ", " << std::fixed << std::setprecision(2) << m_axisCol[jax]->getCluster()[yii]->getPos().z()
+            //      << ")" << endl;
+            //}
             
             p_axis=nullptr; 
             continue; 

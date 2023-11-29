@@ -16,7 +16,8 @@ namespace PandoraPlus{
     ~TrackCreator() { delete m_TrkExtraAlg; };
    
     StatusCode CreateTracks( PandoraPlusDataCol& m_DataCol, 
-                             std::vector<DataHandle<edm4hep::TrackCollection>*>& r_TrackCols ); 
+                             std::vector<DataHandle<edm4hep::TrackCollection>*>& r_TrackCols, 
+                             DataHandle<edm4hep::MCRecoTrackParticleAssociationCollection>* r_MCParticleTrkCol ); 
    
    
     StatusCode Reset(){};

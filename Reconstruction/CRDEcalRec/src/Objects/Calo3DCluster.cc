@@ -295,6 +295,29 @@ namespace PandoraPlus{
     return MCParticleWeight;
   }
 
+  edm4hep::MCParticle Calo3DCluster::getLeadingMCP() const{
+    float maxWeight = -1.;
+    edm4hep::MCParticle mcp;
+    for(auto& iter: MCParticleWeight){
+      if(iter.second>maxWeight){
+        mcp = iter.first;
+        maxWeight = iter.second;
+      }
+    }
+
+    return mcp;
+  }
+
+  float Calo3DCluster::getLeadingMCPweight() const{
+    float maxWeight = -1.;
+    for(auto& iter: MCParticleWeight){
+      if(iter.second>maxWeight){
+        maxWeight = iter.second;
+      }
+    }
+    return maxWeight;
+  }
+
 
   void Calo3DCluster::FitAxis(){
     if(m_2dclusters.size()==0) axis.SetXYZ(0,0,0);

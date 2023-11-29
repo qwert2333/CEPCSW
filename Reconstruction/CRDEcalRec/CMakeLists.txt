@@ -43,6 +43,10 @@ gaudi_add_module(CRDEcalRec
                          src/Algorithm/EnergyTimeMatchingAlg.cpp
                          src/Algorithm/HcalClusteringAlg.cpp
                          src/Algorithm/PFOCreatingAlg.cpp
+                         src/Algorithm/TruthTrackMatchingAlg.cpp
+                         src/Algorithm/TruthMatchingAlg.cpp
+                         src/Algorithm/TruthPatternRecAlg.cpp
+                         src/Algorithm/TruthEnergySplittingAlg.cpp
                  LINK    CRDEcalRecLib
 )
 target_include_directories(CRDEcalRec PUBLIC

@@ -21,6 +21,9 @@ namespace PandoraPlus {
   std::map<std::string, std::vector<TrackState> > getTrackStatesMap() const { return m_trackStates; }
   std::vector<PandoraPlus::CaloHalfCluster*> getAssociatedHalfClustersU() const { return m_halfClusterUCol; }  
   std::vector<PandoraPlus::CaloHalfCluster*> getAssociatedHalfClustersV() const { return m_halfClusterVCol; }  
+  std::vector< std::pair<edm4hep::MCParticle, float> > getLinkedMCP() const { return MCParticleWeight; }
+  edm4hep::MCParticle getLeadingMCP() const;
+  float getLeadingMCPweight() const;
   float getPt() const;
   float getPz() const;
   float getMomentum() const { return sqrt( getPt()*getPt() + getPz()*getPz() ); } 
@@ -28,6 +31,8 @@ namespace PandoraPlus {
   void setTrackStates( std::string name, std::vector<TrackState>& _states ) { m_trackStates[name]=_states; }
   void addAssociatedHalfClusterU( PandoraPlus::CaloHalfCluster* _cl ) { m_halfClusterUCol.push_back(_cl); }
   void addAssociatedHalfClusterV( PandoraPlus::CaloHalfCluster* _cl ) { m_halfClusterVCol.push_back(_cl); }
+  void addLinkedMCP( std::pair<edm4hep::MCParticle, float> _pair ) { MCParticleWeight.push_back(_pair); }
+  void setLinkedMCP( std::vector<std::pair<edm4hep::MCParticle, float>> _pairVec ) { MCParticleWeight.clear(); MCParticleWeight = _pairVec; }
 
   void setType(int _type) { m_type=_type; }
   int getType() const { return m_type; }
@@ -40,6 +45,7 @@ namespace PandoraPlus {
     std::vector<PandoraPlus::CaloHalfCluster*> m_halfClusterVCol; 
 
     int m_type;
+    std::vector< std::pair<edm4hep::MCParticle, float> > MCParticleWeight;
   };
 
 };

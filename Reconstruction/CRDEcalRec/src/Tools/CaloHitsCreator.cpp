@@ -11,7 +11,7 @@ namespace PandoraPlus{
   StatusCode CaloHitsCreator::CreateCaloHits( PandoraPlusDataCol& m_DataCol, 
                                               std::vector<DataHandle<edm4hep::CalorimeterHitCollection>*>& r_CaloHitCols, 
                                               std::map<std::string, dd4hep::DDSegmentation::BitFieldCoder*>& map_decoder,
-                                              DataHandle<edm4hep::MCRecoCaloParticleAssociationCollection>* r_MCParticleRecoCaloCol )
+                                              std::map<std::string, DataHandle<edm4hep::MCRecoCaloParticleAssociationCollection>*>& map_CaloParticleAssoCol )
   {
     if(r_CaloHitCols.size()==0 || settings.map_stringVecPars.at("CaloHitCollections").size()==0) StatusCode::SUCCESS;
 
@@ -35,6 +35,9 @@ namespace PandoraPlus{
       if( settings.map_stringPars.at("EcalType")=="BarEcal" && iter.first == "ECALBarrel") continue; 
       
       std::vector<std::shared_ptr<PandoraPlus::CaloHit>> m_hitCol; m_hitCol.clear();
+      const edm4hep::MCRecoCaloParticleAssociationCollection* const_MCPCaloAssoCol;
+      if( map_CaloParticleAssoCol.find(iter.first)!=map_CaloParticleAssoCol.end()) 
+        const_MCPCaloAssoCol = map_CaloParticleAssoCol[iter.first]->get();
 
       for(int ihit=0; ihit<iter.second.size(); ihit++){
         //PandoraPlus::CaloHit* m_hit = new PandoraPlus::CaloHit();
@@ -47,10 +50,14 @@ namespace PandoraPlus{
         m_hit->setPosition( pos );
         m_hit->setEnergy( iter.second[ihit].getEnergy() );
 
+        for(int ilink=0; ilink<const_MCPCaloAssoCol->size(); ilink++){
+          if( iter.second[ihit] == const_MCPCaloAssoCol->at(ilink).getRec() ) m_hit->addLinkedMCP( std::make_pair(const_MCPCaloAssoCol->at(ilink).getSim(), const_MCPCaloAssoCol->at(ilink).getWeight()) );
+        }
+
         m_hitCol.push_back( m_hit );
-        //m_DataCol.bk_HitCol.push_back( m_hit );
       }
       m_DataCol.map_CaloHit[iter.first] = m_hitCol;
+      const_MCPCaloAssoCol = nullptr;
     }
 
 
@@ -58,7 +65,7 @@ namespace PandoraPlus{
     if(settings.map_stringPars.at("EcalType")=="BarEcal"){
       std::vector<std::shared_ptr<PandoraPlus::CaloUnit>> m_barCol; m_barCol.clear(); 
 
-      const edm4hep::MCRecoCaloParticleAssociationCollection* const_MCPCaloAssoCol = r_MCParticleRecoCaloCol->get();   
+      const edm4hep::MCRecoCaloParticleAssociationCollection* const_MCPCaloAssoCol = map_CaloParticleAssoCol["ECALBarrel"]->get();   
       auto CaloHits = m_DataCol.collectionMap_CaloHit["ECALBarrel"]; 
       std::map<std::uint64_t, std::vector<PandoraPlus::CaloUnit> > map_cellID_hits; map_cellID_hits.clear();
       for(auto& hit : CaloHits){ 
@@ -108,7 +115,7 @@ namespace PandoraPlus{
 
    
       m_DataCol.map_BarCol["BarCol"] = m_barCol; 
-      //Group bars to Blocks
+      const_MCPCaloAssoCol = nullptr;
     }
     return StatusCode::SUCCESS;
   };

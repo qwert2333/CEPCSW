@@ -43,6 +43,8 @@ namespace PandoraPlus{
     TVector3 getPosition() const { return position; }
     double getEnergy() const { return (Q1+Q2)/2.; }
     std::vector< std::pair<edm4hep::MCParticle, float> > getLinkedMCP() const { return MCParticleWeight; }
+    edm4hep::MCParticle getLeadingMCP() const;
+    float getLeadingMCPweight() const;
     bool isAtLowerEdgePhi() const; 
     bool isAtUpperEdgePhi() const; 
     bool isAtLowerEdgeZ() const; 

@@ -86,7 +86,15 @@ StatusCode PandoraPlusPFAlg::initialize()
   }}
 
   //---MCParticle CaloHit Association
-  if(!name_MCPRecoCaloAssoCol.empty()) r_MCPRecoCaloAssoCol = new DataHandle<edm4hep::MCRecoCaloParticleAssociationCollection> (name_MCPRecoCaloAssoCol, Gaudi::DataHandle::Reader, this);
+  if(!name_MCPTrkAssoCol.empty())      r_MCPTrkAssoCol = new DataHandle<edm4hep::MCRecoTrackParticleAssociationCollection> (name_MCPTrkAssoCol, Gaudi::DataHandle::Reader, this);
+
+  std::vector<std::string> name_CaloAssoCol = name_EcalMCPAssociation; 
+  name_CaloAssoCol.insert(name_CaloAssoCol.end(), name_HcalMCPAssociation.begin(), name_HcalMCPAssociation.end());
+  if(name_CaloAssoCol.size()==name_CaloHits.size()){
+    for(int iCol=0; iCol<name_CaloAssoCol.size(); iCol++){
+      map_CaloMCPAssoCols[name_CaloHits[iCol]] = new CaloParticleAssoType(name_CaloAssoCol[iCol], Gaudi::DataHandle::Reader, this);
+    }
+  }
 
 
   //Register Algorithms
@@ -105,6 +113,10 @@ StatusCode PandoraPlusPFAlg::initialize()
   //m_algorithmManager.RegisterAlgorithmFactory("ConeClusteringAlg",      new ConeClusteringAlg::Factory);
   //m_algorithmManager.RegisterAlgorithmFactory("ConeClusteringAlgHCAL",  new ConeClusteringAlg::Factory);
 
+  m_algorithmManager.RegisterAlgorithmFactory("TruthTrackMatchingAlg",       new TruthTrackMatchingAlg::Factory);
+  m_algorithmManager.RegisterAlgorithmFactory("TruthPatternRecAlg",          new TruthPatternRecAlg::Factory);
+  m_algorithmManager.RegisterAlgorithmFactory("TruthEnergySplittingAlg",     new TruthEnergySplittingAlg::Factory);
+  m_algorithmManager.RegisterAlgorithmFactory("TruthMatchingAlg",            new TruthMatchingAlg::Factory);
 
   //--- Create algorithm from readin settings ---
   for(int ialg=0; ialg<name_Algs.value().size(); ialg++){
@@ -466,9 +478,9 @@ StatusCode PandoraPlusPFAlg::execute()
 std::cout<<"Readin MCParticle"<<std::endl;
   m_pMCParticleCreator->CreateMCParticle( m_DataCol, *r_MCParticleCol );
 cout<<"Readin Tracks"<<endl;
-  m_pTrackCreator->CreateTracks( m_DataCol, r_TrackCols );
+  m_pTrackCreator->CreateTracks( m_DataCol, r_TrackCols, r_MCPTrkAssoCol );
 cout<<"Readin CaloHits"<<endl;
-  m_pCaloHitsCreator->CreateCaloHits( m_DataCol, r_CaloHitCols, map_readout_decoder, r_MCPRecoCaloAssoCol );
+  m_pCaloHitsCreator->CreateCaloHits( m_DataCol, r_CaloHitCols, map_readout_decoder, map_CaloMCPAssoCols );
 
   //Perform PFA algorithm
 cout<<"Run Algorithms"<<endl;
@@ -483,7 +495,7 @@ cout<<"  Creating PFOs"<<endl;
   m_pOutputCreator->CreatePFO( m_DataCol, w_ReconstructedParticleCollection );
 
 
-yyy_endrec = clock();  // 重建结束的时间
+// yyy_endrec = clock();  // 重建结束的时间
 
 cout<<"Write tuples"<<endl;
   //---------------------Write Ana tuples-------------------------
@@ -800,25 +812,25 @@ cout<<"Write tuples"<<endl;
   for(int it=0; it<ntower; it++)
     m_towerCol.push_back( m_DataCol.map_CaloCluster["ESTower"][it].get() );
 
-/*  for(int it=0; it<m_towerCol.size(); it++){
-    std::vector<const PandoraPlus::CaloHalfCluster*> m_HFClusUCol = m_towerCol.at(it)->getHalfClusterUCol("ESHalfClusterU");
-    std::vector<const PandoraPlus::CaloHalfCluster*> m_HFClusVCol = m_towerCol.at(it)->getHalfClusterVCol("ESHalfClusterV");
-
-    m_allaxisU.insert(m_allaxisU.end(), m_HFClusUCol.begin(), m_HFClusUCol.end());
-    m_allaxisV.insert(m_allaxisV.end(), m_HFClusVCol.begin(), m_HFClusVCol.end());
-  }
-
-  for(int i=0; i<m_halfclusterU.size(); i++){
-    std::vector<const PandoraPlus::CaloHalfCluster*> tmp_clus = m_halfclusterU[i]->getHalfClusterCol("MergedAxis");
-    //std::vector<const PandoraPlus::CaloHalfCluster*> tmp_clus = m_halfclusterU[i]->getAllHalfClusterCol();
-    m_allaxisU.insert( m_allaxisU.end(), tmp_clus.begin(), tmp_clus.end() );
-  }
-  for(int i=0; i<m_halfclusterV.size(); i++){
-    std::vector<const PandoraPlus::CaloHalfCluster*> tmp_clus = m_halfclusterV[i]->getHalfClusterCol("MergedAxis");
-    //std::vector<const PandoraPlus::CaloHalfCluster*> tmp_clus = m_halfclusterV[i]->getAllHalfClusterCol();
-    m_allaxisV.insert( m_allaxisV.end(), tmp_clus.begin(), tmp_clus.end() );
-  }
-*/
+//    for(int it=0; it<m_towerCol.size(); it++){
+//    std::vector<const PandoraPlus::CaloHalfCluster*> m_HFClusUCol = m_towerCol.at(it)->getHalfClusterUCol("ESHalfClusterU");
+//    std::vector<const PandoraPlus::CaloHalfCluster*> m_HFClusVCol = m_towerCol.at(it)->getHalfClusterVCol("ESHalfClusterV");
+//  
+//    m_allaxisU.insert(m_allaxisU.end(), m_HFClusUCol.begin(), m_HFClusUCol.end());
+//    m_allaxisV.insert(m_allaxisV.end(), m_HFClusVCol.begin(), m_HFClusVCol.end());
+//  }
+//  
+//  for(int i=0; i<m_halfclusterU.size(); i++){
+//    std::vector<const PandoraPlus::CaloHalfCluster*> tmp_clus = m_halfclusterU[i]->getHalfClusterCol("MergedAxis");
+//    //std::vector<const PandoraPlus::CaloHalfCluster*> tmp_clus = m_halfclusterU[i]->getAllHalfClusterCol();
+//    m_allaxisU.insert( m_allaxisU.end(), tmp_clus.begin(), tmp_clus.end() );
+//  }
+//  for(int i=0; i<m_halfclusterV.size(); i++){
+//    std::vector<const PandoraPlus::CaloHalfCluster*> tmp_clus = m_halfclusterV[i]->getHalfClusterCol("MergedAxis");
+//    //std::vector<const PandoraPlus::CaloHalfCluster*> tmp_clus = m_halfclusterV[i]->getAllHalfClusterCol();
+//    m_allaxisV.insert( m_allaxisV.end(), tmp_clus.begin(), tmp_clus.end() );
+//  }
+//  
   for(int i=0; i<m_DataCol.map_HalfCluster["ESHalfClusterU"].size(); i++){
     m_allaxisU.push_back( m_DataCol.map_HalfCluster["ESHalfClusterU"][i].get());
   }
@@ -1183,11 +1195,12 @@ cout<<"HFCluster size: "<<m_clusvec[ic]->getHalfClusterUCol("LinkedLongiCluster"
   t_PFO->Fill();
 
 
-
   //Clean Events
   //system("/cefs/higgs/songwz/winter22/CEPCSW/workarea/memory/memory_test.sh before_clean");
   m_DataCol.Clear();
   //system("/cefs/higgs/songwz/winter22/CEPCSW/workarea/memory/memory_test.sh event_end");
+
+
 
 // yyy_endfill = clock();  // 填完数据的时间
 // double duration_rec = double(yyy_endrec - yyy_start) / CLOCKS_PER_SEC;
@@ -1227,11 +1240,11 @@ StatusCode PandoraPlusPFAlg::finalize()
   delete m_pOutputCreator;
 
   delete r_MCParticleCol;
-  delete r_MCPRecoCaloAssoCol; 
   for(auto iter : r_TrackCols) delete iter; 
   //for(auto iter : r_ECalHitCols) delete iter; 
   //for(auto iter : r_HCalHitCols) delete iter; 
   for(auto iter : r_CaloHitCols) delete iter; 
+  for(auto iter : map_CaloMCPAssoCols) delete iter.second;
   r_TrackCols.clear();
   //r_ECalHitCols.clear();
   //r_HCalHitCols.clear();

@@ -111,6 +111,29 @@ namespace PandoraPlus{
     return m_bar;
   }
 
+  edm4hep::MCParticle CaloUnit::getLeadingMCP() const{
+    float maxWeight = -1.;
+    edm4hep::MCParticle mcp;
+    for(auto& iter: MCParticleWeight){
+      if(iter.second>maxWeight){
+        mcp = iter.first;
+        maxWeight = iter.second;
+      }
+    }
+
+    return mcp;
+  }
+
+  float CaloUnit::getLeadingMCPweight() const{
+    float maxWeight = -1.;
+    for(auto& iter: MCParticleWeight){
+      if(iter.second>maxWeight){
+        maxWeight = iter.second;
+      }
+    }
+    return maxWeight;
+  }
+
   bool CaloUnit::isLongiModuleAdjacent( const CaloUnit* x ) const{
 
     if(module==x->getModule()) return false;

@@ -38,6 +38,7 @@ printf("  LocalMaxFindingAlg: Readin HalfCluster size (%d, %d) \n", p_HalfClusU-
 
     std::vector<const PandoraPlus::Calo1DCluster*> tmp_localMax; tmp_localMax.clear();
     for(auto iter : ptr_localMax){
+      iter->getLinkedMCPfromUnit();
       tmp_localMax.push_back(iter.get());
       m_datacol.map_1DCluster["bk1DCluster"].push_back(iter);
     }

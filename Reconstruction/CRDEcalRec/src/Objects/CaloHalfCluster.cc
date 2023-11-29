@@ -415,5 +415,27 @@ namespace PandoraPlus{
     return MCParticleWeight;
   }
 
+  edm4hep::MCParticle CaloHalfCluster::getLeadingMCP() const{
+    float maxWeight = -1.;
+    edm4hep::MCParticle mcp; 
+    for(auto& iter: MCParticleWeight){
+      if(iter.second>maxWeight){
+        mcp = iter.first;
+        maxWeight = iter.second;
+      }
+    }
+
+    return mcp;
+  }
+
+  float CaloHalfCluster::getLeadingMCPweight() const{
+    float maxWeight = -1.;
+    for(auto& iter: MCParticleWeight){
+      if(iter.second>maxWeight){
+        maxWeight = iter.second;
+      }
+    }
+    return maxWeight;
+  }
 };
 #endif

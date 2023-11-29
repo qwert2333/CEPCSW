@@ -49,6 +49,8 @@ namespace PandoraPlus {
     std::vector<const PandoraPlus::Track*> getAssociatedTracks() const { return m_TrackCol; }
     std::vector< std::pair<edm4hep::MCParticle, float> > getLinkedMCP() const { return MCParticleWeight; }
     std::vector< std::pair<edm4hep::MCParticle, float> > getLinkedMCPfromUnit();
+    edm4hep::MCParticle getLeadingMCP() const; 
+    float getLeadingMCPweight() const;
 
     int getBeginningDlayer() const;
     int getEndDlayer() const;
