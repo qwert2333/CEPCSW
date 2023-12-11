@@ -295,7 +295,6 @@ StatusCode CRDEcalDigiAlg::execute()
     rel2.setWeight( hitbar.getQ2()/(hitbar.getQ1()+hitbar.getQ2()) );
 
 
-
     //MCParticle - CaloHit association
     //float maxMCE = -99.;
     //edm4hep::MCParticle selMCP; 

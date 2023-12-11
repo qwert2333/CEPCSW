@@ -1,6 +1,7 @@
 # Modules
 gaudi_add_library(CRDEcalRecLib
                   SOURCES src/Objects/CaloUnit.cc
+                          src/Objects/CaloHit.cc
                           src/Objects/Calo1DCluster.cc
                           src/Objects/Calo2DCluster.cc
                           src/Objects/Calo3DCluster.cc
@@ -47,6 +48,8 @@ gaudi_add_module(CRDEcalRec
                          src/Algorithm/TruthMatchingAlg.cpp
                          src/Algorithm/TruthPatternRecAlg.cpp
                          src/Algorithm/TruthEnergySplittingAlg.cpp
+                         src/Algorithm/TruthClusteringAlg.cpp
+                         src/Algorithm/TruthClusterMergingAlg.cpp
                  LINK    CRDEcalRecLib
 )
 target_include_directories(CRDEcalRec PUBLIC

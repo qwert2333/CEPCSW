@@ -53,7 +53,6 @@ namespace PandoraPlus{
         for(int ilink=0; ilink<const_MCPCaloAssoCol->size(); ilink++){
           if( iter.second[ihit] == const_MCPCaloAssoCol->at(ilink).getRec() ) m_hit->addLinkedMCP( std::make_pair(const_MCPCaloAssoCol->at(ilink).getSim(), const_MCPCaloAssoCol->at(ilink).getWeight()) );
         }
-
         m_hitCol.push_back( m_hit );
       }
       m_DataCol.map_CaloHit[iter.first] = m_hitCol;
@@ -77,9 +76,10 @@ namespace PandoraPlus{
         for(int ilink=0; ilink<const_MCPCaloAssoCol->size(); ilink++){
           if( hit == const_MCPCaloAssoCol->at(ilink).getRec() ) m_bar.addLinkedMCP( std::make_pair(const_MCPCaloAssoCol->at(ilink).getSim(), const_MCPCaloAssoCol->at(ilink).getWeight()) );
         } 
+
+
         map_cellID_hits[hit.getCellID()].push_back(m_bar);
       }
-   
       for(auto& hit : map_cellID_hits){
         if(hit.second.size()!=2){ std::cout<<"WARNING: didn't find correct hit pairs! "<<std::endl; continue; }
    

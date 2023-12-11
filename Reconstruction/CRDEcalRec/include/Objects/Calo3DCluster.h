@@ -19,6 +19,7 @@ namespace PandoraPlus {
     void Check(); 
     void Clear2DClusters() { m_2dclusters.clear(); };
     void CleanLongiClusters();
+    std::shared_ptr<PandoraPlus::Calo3DCluster> Clone() const;
 
     inline bool operator == (const Calo3DCluster &x) const{
       return ( m_2dclusters == x.getCluster()  );
@@ -39,6 +40,7 @@ namespace PandoraPlus {
     std::vector<const PandoraPlus::Track*> getAssociatedTracks() const { return m_TrackCol; }
     std::vector< std::pair<edm4hep::MCParticle, float> > getLinkedMCP() const { return MCParticleWeight; }
     std::vector< std::pair<edm4hep::MCParticle, float> > getLinkedMCPfromHFCluster(std::string name);
+    std::vector< std::pair<edm4hep::MCParticle, float> > getLinkedMCPfromHit();
     edm4hep::MCParticle getLeadingMCP() const;
     float getLeadingMCPweight() const;
 
@@ -74,6 +76,8 @@ namespace PandoraPlus {
     void addLocalMaxU( std::string name, const Calo1DCluster* _shU ) { map_localMaxU[name].push_back(_shU); }
     void addLocalMaxV( std::string name, const Calo1DCluster* _shV ) { map_localMaxV[name].push_back(_shV); }
     void addAssociatedTrack(const PandoraPlus::Track* _track){ m_TrackCol.push_back(_track); }
+    void addLinkedMCP( std::pair<edm4hep::MCParticle, float> _pair ) { MCParticleWeight.push_back(_pair); }
+    void setLinkedMCP( std::vector<std::pair<edm4hep::MCParticle, float>> _pairVec ) { MCParticleWeight.clear(); MCParticleWeight = _pairVec; }
     void mergeCluster( const PandoraPlus::Calo3DCluster* _clus );
 
     //void FitProfile();

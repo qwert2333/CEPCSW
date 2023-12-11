@@ -28,7 +28,6 @@ StatusCode LocalMaxFindingAlg::Initialize( PandoraPlusDataCol& m_datacol ){
 StatusCode LocalMaxFindingAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol){
 
   if(!p_HalfClusU || !p_HalfClusV) {std::cout<<"ERROR: No HalfClusters in present data collection! "<<std::endl; return StatusCode::FAILURE; }
-printf("  LocalMaxFindingAlg: Readin HalfCluster size (%d, %d) \n", p_HalfClusU->size(), p_HalfClusV->size());
 
   for(int iu = 0; iu<p_HalfClusU->size(); iu++){
     std::vector<const Calo1DCluster*> m_1dClusCol = p_HalfClusU->at(iu).get()->getCluster();
@@ -55,6 +54,7 @@ printf("  LocalMaxFindingAlg: Readin HalfCluster size (%d, %d) \n", p_HalfClusU-
 
     std::vector<const PandoraPlus::Calo1DCluster*> tmp_localMax; tmp_localMax.clear();
     for(auto iter : ptr_localMax){
+      iter->getLinkedMCPfromUnit();
       tmp_localMax.push_back(iter.get());
       m_datacol.map_1DCluster["bk1DCluster"].push_back(iter);
     }
@@ -80,13 +80,13 @@ StatusCode LocalMaxFindingAlg::GetLocalMax( const PandoraPlus::Calo1DCluster* m_
 
   std::vector<const PandoraPlus::CaloUnit*> m_barCol = m_1dClus->getBars();
 
-//cout<<"  LocalMaxFindingAlg::GetLocalMax: Input bar collection size: "<<m_barUCol.size()<<"  "<<m_barVCol.size()<<endl;
+//cout<<"  LocalMaxFindingAlg::GetLocalMax: Input bar collection size: "<<m_barCol.size()<<endl;
 
   std::vector<const PandoraPlus::CaloUnit*> localMaxCol; localMaxCol.clear();
 
   GetLocalMaxBar( m_barCol, localMaxCol );
 
-//cout<<"  LocalMaxFindingAlg::GetLocalMax: Found local max bar size: "<<localMaxUCol.size()<<"  "<<localMaxVCol.size()<<endl;
+//cout<<"  LocalMaxFindingAlg::GetLocalMax: Found local max bar size: "<<localMaxCol.size()<<endl;
 //cout<<"  Transfer bar to barShower"<<endl;
 
   for(int j=0; j<localMaxCol.size(); j++){

@@ -118,7 +118,6 @@ StatusCode CRDHcalDigiAlg::execute()
 
     unsigned long long id = simhit.getCellID();
     double Ehit = simhit.getEnergy();
-
     //Energy threshold
     if(Ehit<_MIPCali*_Eth_Mip) continue;
 
@@ -128,6 +127,7 @@ StatusCode CRDHcalDigiAlg::execute()
 
     //Loop contributions to get hit time and MCParticle. 
     double Thit_ave = 0.;
+    double Ehit_raw = 0.;
     MCParticleToEnergyWeightMap MCPEnMap; MCPEnMap.clear();
     for(int iConb=0; iConb<simhit.contributions_size(); ++iConb){
       auto conb = simhit.getContributions(iConb);
@@ -138,9 +138,9 @@ StatusCode CRDHcalDigiAlg::execute()
       
       auto mcp = conb.getParticle();
       MCPEnMap[mcp] += conb.getEnergy();
+      Ehit_raw += conb.getEnergy();
     }
     Thit_ave = Thit_ave/simhit.contributions_size();
-
     //Create DigiHit
     auto digiHit = caloVec->create();
     digiHit.setCellID(id);
@@ -159,7 +159,7 @@ StatusCode CRDHcalDigiAlg::execute()
       auto rel_MC = caloMCPAssoVec->create();
       rel_MC.setRec(digiHit);
       rel_MC.setSim(iter.first);
-      rel_MC.setWeight(iter.second/Ehit);
+      rel_MC.setWeight(iter.second/Ehit_raw);
     }
 
 

@@ -1,19 +1,19 @@
-#ifndef _EXAMPLE_ALG_H
-#define _EXAMPLE_ALG_H
+#ifndef _TRUTHCLUSTERMERGING_ALG_H
+#define _TRUTHCLUSTERMERGING_ALG_H
 
 #include "Tools/Algorithm.h"
 
 using namespace PandoraPlus;
-class ExampleAlg: public PandoraPlus::Algorithm{
+class TruthClusterMergingAlg: public PandoraPlus::Algorithm{
 public: 
 
-  ExampleAlg(){};
-  ~ExampleAlg(){};
+  TruthClusterMergingAlg(){};
+  ~TruthClusterMergingAlg(){};
 
   class Factory : public PandoraPlus::AlgorithmFactory
   {
   public: 
-    PandoraPlus::Algorithm* CreateAlgorithm() const{ return new ExampleAlg(); } 
+    PandoraPlus::Algorithm* CreateAlgorithm() const{ return new TruthClusterMergingAlg(); } 
 
   };
 
@@ -22,10 +22,14 @@ public:
   StatusCode RunAlgorithm( PandoraPlusDataCol& m_datacol );
   StatusCode ClearAlgorithm();
 
-  //Self defined algorithms
-  StatusCode SelfAlg1(); 
 
 private: 
+
+  std::vector<const PandoraPlus::Calo3DCluster*> m_EcalClusterCol;
+  std::vector<const PandoraPlus::Calo3DCluster*> m_HcalClusterCol;
+  std::vector<std::shared_ptr<PandoraPlus::Calo3DCluster>> merged_EcalClusterCol;
+  std::vector<std::shared_ptr<PandoraPlus::Calo3DCluster>> merged_HcalClusterCol;
+  std::vector<std::shared_ptr<PandoraPlus::Calo3DCluster>> merged_CombClusterCol;
 
 };
 #endif

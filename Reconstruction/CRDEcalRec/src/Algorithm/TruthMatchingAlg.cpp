@@ -7,9 +7,10 @@ StatusCode TruthMatchingAlg::ReadSettings(Settings& m_settings){
   settings = m_settings;
 
   //Initialize parameters
-  if(settings.map_stringPars.find("ReadinHFClusterName")==settings.map_stringPars.end()) settings.map_stringPars["ReadinHFClusterName"] = "ESHalfCluster";
-  if(settings.map_stringPars.find("ReadinTowerName")==settings.map_stringPars.end()) settings.map_stringPars["ReadinTowerName"] = "ESTower";
-
+  if(settings.map_stringPars.find("ReadinHFClusterName")==settings.map_stringPars.end()) settings.map_stringPars["ReadinHFClusterName"] = "TruthESCluster";
+  if(settings.map_stringPars.find("ReadinTowerName")==settings.map_stringPars.end()) settings.map_stringPars["ReadinTowerName"] = "TruthESTower";
+  if(settings.map_stringPars.find("OutputClusterName")==settings.map_stringPars.end()) settings.map_stringPars["OutputClusterName"] = "TruthEcalCluster";
+  
   return StatusCode::SUCCESS;
 };
 
@@ -30,15 +31,18 @@ StatusCode TruthMatchingAlg::Initialize( PandoraPlusDataCol& m_datacol ){
 };
 
 StatusCode TruthMatchingAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
+cout<<"TruthMatchingAlg: readin tower size "<<m_towerCol.size()<<endl;
 
   for(int it=0; it<m_towerCol.size(); it++){
 
     std::vector<std::shared_ptr<PandoraPlus::Calo3DCluster>> tmp_clusters; tmp_clusters.clear();
     m_HFClusUCol = m_towerCol.at(it)->getHalfClusterUCol(settings.map_stringPars["ReadinHFClusterName"]+"U");
     m_HFClusVCol = m_towerCol.at(it)->getHalfClusterVCol(settings.map_stringPars["ReadinHFClusterName"]+"V");
+//cout<<"  In tower #"<<it<<": HFCluster size "<<m_HFClusUCol.size()<<", "<<m_HFClusVCol.size()<<endl;
 
 
     TruthMatching(m_HFClusUCol, m_HFClusVCol, tmp_clusters);
+//cout<<"  After matching: 3DCluster size "<<tmp_clusters.size()<<endl;
     m_clusterCol.insert(m_clusterCol.end(), tmp_clusters.begin(), tmp_clusters.end());
   }
 
@@ -56,8 +60,9 @@ StatusCode TruthMatchingAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
       }
     }
   }
+//cout<<"After cluster merging: size "<<m_clusterCol.size()<<endl;
 
-  m_datacol.map_CaloCluster["EcalCluster"] = m_clusterCol;
+  m_datacol.map_CaloCluster[settings.map_stringPars["OutputClusterName"]] = m_clusterCol;
 
   m_datacol.map_BarCol["bkBar"].insert( m_datacol.map_BarCol["bkBar"].end(), m_bkCol.map_BarCol["bkBar"].begin(), m_bkCol.map_BarCol["bkBar"].end() );
   m_datacol.map_1DCluster["bk1DCluster"].insert( m_datacol.map_1DCluster["bk1DCluster"].end(), m_bkCol.map_1DCluster["bk1DCluster"].begin(), m_bkCol.map_1DCluster["bk1DCluster"].end() );
@@ -83,19 +88,23 @@ StatusCode TruthMatchingAlg::ClearAlgorithm(){
 
 
 StatusCode TruthMatchingAlg::TruthMatching( std::vector<const PandoraPlus::CaloHalfCluster*>& m_ClUCol,
-                                                 std::vector<const PandoraPlus::CaloHalfCluster*>& m_ClVCol,
-                                                 std::vector<std::shared_ptr<PandoraPlus::Calo3DCluster>>& m_clusters )
+                                            std::vector<const PandoraPlus::CaloHalfCluster*>& m_ClVCol,
+                                            std::vector<std::shared_ptr<PandoraPlus::Calo3DCluster>>& m_clusters )
 {
   if(m_ClUCol.size()==0 || m_ClVCol.size()==0) return StatusCode::SUCCESS;
   std::vector<std::shared_ptr<PandoraPlus::CaloHalfCluster>> m_truthESClUCol; m_truthESClUCol.clear();
   std::vector<std::shared_ptr<PandoraPlus::CaloHalfCluster>> m_truthESClVCol; m_truthESClVCol.clear();
 
+//cout<<"  Input HFCluster size "<<m_ClUCol.size()<<", "<<m_ClVCol.size()<<endl;
 
   //Truth split in HFClusterU
   for(int icl=0; icl<m_ClUCol.size(); icl++){
-    auto truthMap = const_cast<CaloHalfCluster*>(m_ClUCol[icl])->getLinkedMCPfromUnit();
+    auto truthMap = m_ClUCol[icl]->getLinkedMCP();
+//cout<<"    In HFClusU #"<<icl<<": truth link size "<<truthMap.size()<<endl;
+//for(auto& iter: truthMap)
+//  printf("    MC pid %d, weight %.3f \n", iter.first.getPDG(), iter.second);
 
-    for(auto iter: truthMap ){
+    for(auto& iter: truthMap ){
       if(iter.second<0.05) continue;
 
       std::shared_ptr<PandoraPlus::CaloHalfCluster> newClus = std::make_shared<PandoraPlus::CaloHalfCluster>();
@@ -108,9 +117,7 @@ StatusCode TruthMatchingAlg::TruthMatching( std::vector<const PandoraPlus::CaloH
           auto bar = p_shower->getCluster()[ibar]->Clone();
           bar->setQ(bar->getQ1()*iter.second, bar->getQ2()*iter.second );
 
-          std::vector<std::pair<edm4hep::MCParticle, float>> emptyMap; emptyMap.clear();
-          emptyMap.push_back( make_pair(iter.first, 1.) );
-          bar->setLinkedMCP(emptyMap);
+          bar->setLinkedMCP(std::vector<std::pair<edm4hep::MCParticle, float>>{std::make_pair(iter.first, 1.)});
           Bars.push_back(bar.get());
           m_bkCol.map_BarCol["bkBar"].push_back(bar);
         }
@@ -119,7 +126,7 @@ StatusCode TruthMatchingAlg::TruthMatching( std::vector<const PandoraPlus::CaloH
         shower->setBars(Bars);
         shower->setSeed();
         shower->setIDInfo();
-
+        shower->getLinkedMCPfromUnit();
         newClus->addUnit(shower.get());
         m_bkCol.map_1DCluster["bk1DCluster"].push_back( shower );
       }
@@ -128,11 +135,11 @@ StatusCode TruthMatchingAlg::TruthMatching( std::vector<const PandoraPlus::CaloH
       newClus->setIntercept( m_ClUCol[icl]->getHoughIntercept() );
       newClus->fitAxis("");
       newClus->getLinkedMCPfromUnit();
+      newClus->mergeClusterInLayer();
       m_truthESClUCol.push_back(newClus);
-      //m_bkCol.map_HalfCluster["bkHalfCluster"].push_back(newClus);
     }
   }
-
+//cout<<"    New HFClusterU size "<<m_truthESClUCol.size()<<endl;
   //Merge HFClusters linked to the same MCP
   for(int icl=0; icl<m_truthESClUCol.size() && m_truthESClUCol.size()>1; icl++){
     for(int jcl=icl+1; jcl<m_truthESClUCol.size(); jcl++){
@@ -146,12 +153,16 @@ StatusCode TruthMatchingAlg::TruthMatching( std::vector<const PandoraPlus::CaloH
       }
     }
   }
+//cout<<"    HFClusterU size after merge "<<m_truthESClUCol.size()<<endl;
   for(int icl=0; icl<m_truthESClUCol.size(); icl++) m_bkCol.map_HalfCluster["bkHalfCluster"].push_back(m_truthESClUCol[icl]);
 
 
   //Truth split in HFClusterV
   for(int icl=0; icl<m_ClVCol.size(); icl++){
-    auto truthMap = const_cast<CaloHalfCluster*>(m_ClVCol[icl])->getLinkedMCPfromUnit();
+    auto truthMap = m_ClVCol[icl]->getLinkedMCP();
+//cout<<"    In HFClusV #"<<icl<<": energy "<<m_ClVCol[icl]->getEnergy()<<", 1Dcluster size "<<m_ClVCol[icl]->getCluster().size()<<", truth link size "<<truthMap.size()<<endl;
+//for(auto& iter: truthMap)
+//  printf("    MC pid %d, weight %.3f \n", iter.first.getPDG(), iter.second);
 
     for(auto iter: truthMap ){
       if(iter.second<0.05) continue;
@@ -166,18 +177,15 @@ StatusCode TruthMatchingAlg::TruthMatching( std::vector<const PandoraPlus::CaloH
           auto bar = p_shower->getCluster()[ibar]->Clone();
           bar->setQ(bar->getQ1()*iter.second, bar->getQ2()*iter.second );
 
-          std::vector<std::pair<edm4hep::MCParticle, float>> emptyMap; emptyMap.clear();
-          emptyMap.push_back( make_pair(iter.first, 1.) );
-          bar->setLinkedMCP(emptyMap);
+          bar->setLinkedMCP(std::vector<std::pair<edm4hep::MCParticle, float>>{std::make_pair(iter.first, 1.)});
           Bars.push_back(bar.get());
           m_bkCol.map_BarCol["bkBar"].push_back(bar);
         }
-
         std::shared_ptr<PandoraPlus::Calo1DCluster> shower = std::make_shared<PandoraPlus::Calo1DCluster>();
         shower->setBars(Bars);
         shower->setSeed();
         shower->setIDInfo();
-
+        shower->getLinkedMCPfromUnit();
         newClus->addUnit(shower.get());
         m_bkCol.map_1DCluster["bk1DCluster"].push_back( shower );
       }
@@ -186,10 +194,11 @@ StatusCode TruthMatchingAlg::TruthMatching( std::vector<const PandoraPlus::CaloH
       newClus->setIntercept( m_ClVCol[icl]->getHoughIntercept() );
       newClus->fitAxis("");
       newClus->getLinkedMCPfromUnit();
+      newClus->mergeClusterInLayer();
       m_truthESClVCol.push_back(newClus);
-      //m_bkCol.map_HalfCluster["bkHalfCluster"].push_back(newClus);
     }
   }
+//cout<<"    New HFClusterV size "<<m_truthESClVCol.size()<<endl;
 
   //Merge HFClusters linked to the same MCP
   for(int icl=0; icl<m_truthESClVCol.size() && m_truthESClVCol.size()>1; icl++){
@@ -205,11 +214,13 @@ StatusCode TruthMatchingAlg::TruthMatching( std::vector<const PandoraPlus::CaloH
     }
   }
   for(int icl=0; icl<m_truthESClVCol.size(); icl++) m_bkCol.map_HalfCluster["bkHalfCluster"].push_back(m_truthESClVCol[icl]);
+//cout<<"    HFClusterU size after merge "<<m_truthESClUCol.size()<<endl;
+
 
   //Doing matching.
   for(int icl=0; icl<m_truthESClUCol.size(); icl++){
     for(int jcl=0; jcl<m_truthESClVCol.size(); jcl++){
-      if(m_truthESClUCol[icl]->getLinkedMCP()[0].first == m_truthESClVCol[jcl]->getLinkedMCP()[0].first){
+      if(m_truthESClUCol[icl]->getLeadingMCP() == m_truthESClVCol[jcl]->getLeadingMCP()){
         std::shared_ptr<PandoraPlus::Calo3DCluster> tmp_clus = std::make_shared<PandoraPlus::Calo3DCluster>();
         XYClusterMatchingL0(m_truthESClUCol[icl].get(), m_truthESClVCol[jcl].get(), tmp_clus);
         m_clusters.push_back(tmp_clus);
@@ -223,9 +234,30 @@ StatusCode TruthMatchingAlg::TruthMatching( std::vector<const PandoraPlus::CaloH
 
 //Longitudinal cluster: 1*1
 StatusCode TruthMatchingAlg::XYClusterMatchingL0( const PandoraPlus::CaloHalfCluster* m_longiClU,
-                                                       const PandoraPlus::CaloHalfCluster* m_longiClV,
-                                                       std::shared_ptr<PandoraPlus::Calo3DCluster>& m_clus )
+                                                  const PandoraPlus::CaloHalfCluster* m_longiClV,
+                                                  std::shared_ptr<PandoraPlus::Calo3DCluster>& m_clus )
 {
+/*
+cout<<"  XYClusterMatchingL0: print input HFClusterU. ";
+printf("cluster size %d, MCP link size %d, Cover tower %d: ", m_longiClU->getCluster().size(), m_longiClU->getLinkedMCP().size(), m_longiClU->getTowerID().size());
+for(int it=0; it<m_longiClU->getTowerID().size(); it++) printf(" [%d, %d, %d] ", m_longiClU->getTowerID()[it][0], m_longiClU->getTowerID()[it][1], m_longiClU->getTowerID()[it][2]);
+cout<<endl;
+for(int ic=0; ic<m_longiClU->getCluster().size(); ic++){
+  printf("    Cluster #%d: layer %d, energy %.3f, bar size %d, seed size %d, MCP link size %d: ", ic, m_longiClU->getCluster()[ic]->getDlayer(), m_longiClU->getCluster()[ic]->getEnergy(), m_longiClU->getCluster()[ic]->getBars().size(), m_longiClU->getCluster()[ic]->getNseeds(), m_longiClU->getCluster()[ic]->getLinkedMCP().size() );
+  for(int imc=0; imc<m_longiClU->getCluster()[ic]->getLinkedMCP().size(); imc++) cout<<m_longiClU->getCluster()[ic]->getLinkedMCP()[imc].first.getPDG()<<", ";
+  cout<<endl;
+}
+cout<<"  XYClusterMatchingL0: print input HFClusterV. ";
+printf("cluster size %d, MCP link size %d, Cover tower %d: ", m_longiClV->getCluster().size(), m_longiClV->getLinkedMCP().size(), m_longiClV->getTowerID().size());
+for(int it=0; it<m_longiClV->getTowerID().size(); it++) printf(" [%d, %d, %d] ", m_longiClV->getTowerID()[it][0], m_longiClV->getTowerID()[it][1], m_longiClV->getTowerID()[it][2]);
+cout<<endl;
+for(int ic=0; ic<m_longiClV->getCluster().size(); ic++){
+  printf("    Cluster #%d: layer %d, energy %.3f, bar size %d, seed size %d, MCP link size %d: ", ic, m_longiClV->getCluster()[ic]->getDlayer(), m_longiClV->getCluster()[ic]->getEnergy(), m_longiClV->getCluster()[ic]->getBars().size(), m_longiClV->getCluster()[ic]->getNseeds(), m_longiClV->getCluster()[ic]->getLinkedMCP().size() );
+  for(int imc=0; imc<m_longiClV->getCluster()[ic]->getLinkedMCP().size(); imc++) cout<<m_longiClV->getCluster()[ic]->getLinkedMCP()[imc].first.getPDG()<<", ";
+  cout<<endl;
+}
+cout<<endl;
+*/
 
   std::vector<int> layerindex; layerindex.clear();
   std::map<int, std::vector<const PandoraPlus::Calo1DCluster*> > map_showersUinlayer; map_showersUinlayer.clear();
@@ -242,12 +274,15 @@ StatusCode TruthMatchingAlg::XYClusterMatchingL0( const PandoraPlus::CaloHalfClu
     map_showersVinlayer[m_layer].push_back(m_longiClV->getCluster()[is]);
   }
 
+//cout<<"    in XYClusterMatchingL0: "<<layerindex.size()<<" layer need matching"<<endl;
+
   for(int il=0; il<layerindex.size(); il++){
     std::vector<const PandoraPlus::Calo1DCluster*> m_showerXcol = map_showersUinlayer[layerindex[il]];
     std::vector<const PandoraPlus::Calo1DCluster*> m_showerYcol = map_showersVinlayer[layerindex[il]];
 
     std::vector<PandoraPlus::Calo2DCluster*> m_showerinlayer; m_showerinlayer.clear();
 
+//cout<<"    in layer "<<layerindex[il]<<": 1D shower size ("<<m_showerXcol.size()<<", "<<m_showerYcol.size()<<"). "<<endl;
     if(m_showerXcol.size()==0 || m_showerYcol.size()==0) continue;
     //else if(m_showerXcol.size()==0){
     //  std::shared_ptr<PandoraPlus::Calo2DCluster> tmp_shower = std::make_shared<PandoraPlus::Calo2DCluster>();
@@ -270,6 +305,7 @@ StatusCode TruthMatchingAlg::XYClusterMatchingL0( const PandoraPlus::CaloHalfClu
     else{ std::cout<<"CAUSION in XYClusterMatchingL0: HFCluster has ["<<m_showerXcol.size()<<", "<<m_showerYcol.size()<<"] showers in layer "<<layerindex[il]<<std::endl; }
 
     for(int is=0; is<m_showerinlayer.size(); is++) m_clus->addUnit(m_showerinlayer[is]);
+//cout<<"    after matching: 2D shower size "<<m_showerinlayer.size()<<endl;
   }
 
 
@@ -291,6 +327,7 @@ StatusCode TruthMatchingAlg::GetMatchedShowersL0( const PandoraPlus::Calo1DClust
                                                   const PandoraPlus::Calo1DCluster* barShowerV,
                                                   PandoraPlus::Calo2DCluster* outsh )
 {
+//cout<<"  In GetMatchedShowersL0"<<endl;
 
   std::vector<const PandoraPlus::CaloHit*> m_digiCol; m_digiCol.clear();
   int NbarsX = barShowerU->getBars().size();

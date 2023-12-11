@@ -4,7 +4,7 @@ CurrPATH="$PWD"
 WorkPATH=$CurrPATH
 
 #--------------------------------------------------------------
-EventName="PseudoJet_5Part"
+EventName="PseudoJet_3Gam2Pi"
 
 # -----------------------------------------------------------
 # Simulating / Processing event number per file
@@ -45,14 +45,15 @@ do
     GunParticleY=0.,0.,0.,0.,0.
     GunParticleZ=0.,0.,0.,0.,0.
     GunParticleEMin=5.,5.,5.,5.,5.
-    GunParticleEMax=20.,20.,20.,20.,20.
+    GunParticleEMax=5.,5.,5.,5.,5.
     GunParticleThetaMin=80.,80.,80.,80.,80.
     GunParticleThetaMax=100.,100.,100.,100.,100.
     GunParticlePhiMin=-5.,-5.,-5.,-10.,-10.
     GunParticlePhiMax=15.,15.,15.,10.,10.
 
     SimuFile=$SimuPATH/Simu_${SampleName}.root
-    DigiFile=$RecoPATH/Digi_${SampleName}.root
+    ECALDigiFile=$RecoPATH/DigiEcal_${SampleName}.root
+    HCALDigiFile=$RecoPATH/DigiHcal_${SampleName}.root
     RecoFile=$RecoPATH/Reco_${SampleName}.root
     # -----------------------------------------------------------
 
@@ -61,7 +62,7 @@ do
     shFile=$jobPATH/sub_${SampleName}.sh
 
     #---------------------------------
-    /bin/cp -fr $WorkPATH/template/detsim_FullDet_TPC_temp.py ${simScriptFile}
+    /bin/cp -fr $WorkPATH/template/detsim_FullDet_HCAL_temp.py ${simScriptFile}
     sed -i "s#RNDMSEED#${iFile}#g" ${simScriptFile}
     sed -i "s#SimPARTICLES#${GunParticle}#g" ${simScriptFile}
     sed -i "s#SimPARTICLEX#${GunParticleX}#g" ${simScriptFile}
@@ -76,18 +77,19 @@ do
     sed -i "s#SIMFILE#${SimuFile}#g" ${simScriptFile}
     sed -i "s#NEVT#${Nevt}#g" ${simScriptFile}
 
-    /bin/cp -fr $WorkPATH/template/digiRec_temp.py ${recScriptFile}
-    sed -i "s#SIMFILE#${SimuFile}#g" ${recScriptFile}
-    sed -i "s#DIGIFILE#${DigiFile}#g" ${recScriptFile}
-    sed -i "s#RECFILE#${RecoFile}#g" ${recScriptFile}
-    sed -i "s#NEVT#${Nevt}#g" ${recScriptFile}
+#    /bin/cp -fr $WorkPATH/template/digiRec_temp_truth.py ${recScriptFile}
+#    sed -i "s#SIMFILE#${SimuFile}#g" ${recScriptFile}
+#    sed -i "s#ECALDIGIFILE#${ECALDigiFile}#g" ${recScriptFile}
+#    sed -i "s#HCALDIGIFILE#${HCALDigiFile}#g" ${recScriptFile}
+#    sed -i "s#RECFILE#${RecoFile}#g" ${recScriptFile}
+#    sed -i "s#NEVT#${Nevt}#g" ${recScriptFile}
 
     #---------------------------------
     echo \
     "
 cd $jobPATH
 ./run.sh ${simScriptFile}
-./run.sh ${recScriptFile}
+#./run.sh ${recScriptFile}
 
     " > ${shFile}
 
@@ -110,7 +112,7 @@ jobBatchName=$jobPATH/sub_${EventName}_00"%{ProcId}"
 echo $jobBatchName
 
 # export PATH=/afs/ihep.ac.cn/soft/common/sysgroup/hep_job/bin:$PATH
-hep_sub ${jobBatchName}.sh -g higgs -o ${jobBatchName}.out -e ${jobBatchName}.err -n $NSubJob
+hep_sub ${jobBatchName}.sh -g atlas -o ${jobBatchName}.out -e ${jobBatchName}.err -n $NSubJob
 
 # hep_sub -wt test ${jobBatchName}.sh -g higgs -o ${jobBatchName}.out -e ${jobBatchName}.err -n $NSubJob
 # --------------------------------------------------------------------------------

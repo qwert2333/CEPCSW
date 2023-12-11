@@ -6,7 +6,7 @@ dsvc = k4DataSvc("EventDataSvc")
 
 from Configurables import RndmGenSvc, HepRndm__Engine_CLHEP__RanluxEngine_
 
-seed = [135]
+seed = [RNDMSEED]
 # rndmengine = HepRndm__Engine_CLHEP__RanluxEngine_() # The default engine in Gaudi
 rndmengine = HepRndm__Engine_CLHEP__HepJamesRandom_("RndmGenSvc.Engine") # The default engine in Geant4
 rndmengine.SetSingleton = True
@@ -47,18 +47,16 @@ from Configurables import HepMCRdr
 from Configurables import GenPrinter
 
 gun = GtGunTool("GtGunTool")
-gun.Particles = ["gamma","gamma"]
-#gun.Particles = ["nu_e"]
-gun.PositionXs = [0.,0.]
-gun.PositionYs = [0.,0.]
-gun.PositionZs = [0.,0.]
-gun.EnergyMins = [5.,5.] # GeV
-gun.EnergyMaxs = [5.,5.] # GeV
-gun.ThetaMins  = [90.,91.]   # deg
-gun.ThetaMaxs  = [90.,91.]   # deg
-gun.PhiMins    = [0.,0.]   # deg
-gun.PhiMaxs    = [0.,0.]   # deg
-
+gun.Particles = [SimPARTICLES]
+gun.PositionXs = [SimPARTICLEX]
+gun.PositionYs = [SimPARTICLEY]
+gun.PositionZs = [SimPARTICLEZ]
+gun.EnergyMins = [SimPARTICLEEMIN] # GeV
+gun.EnergyMaxs = [SimPARTICLEEMAX] # GeV
+gun.ThetaMins  = [SimPARTICLETHETAMIN]   # deg
+gun.ThetaMaxs  = [SimPARTICLETHETAMAX]   # deg
+gun.PhiMins    = [SimPARTICLEPHIMIN]   # deg
+gun.PhiMaxs    = [SimPARTICLEPHIMAX]   # deg
 
 # stdheprdr = StdHepRdr("StdHepRdr")
 # stdheprdr.Input = "/cefs/data/stdhep/CEPC240/higgs/exclusive/E240.Pnnh_bb.e0.p0.whizard195/nnh_bb.e0.p0.00001.stdhep"
@@ -290,7 +288,7 @@ elif dedxoption == "BetheBlochEquationDedxSimTool":
 # output
 from Configurables import PodioOutput
 out = PodioOutput("outputalg")
-out.filename = "CRD_HCal_GamGam_1deg.root"
+out.filename = "SIMFILE"
 out.outputCommands = ["keep *"]
 
 # ApplicationMgr
@@ -299,7 +297,7 @@ ApplicationMgr(
     TopAlg = [genalg, detsimalg, digiVXD, digiSIT, digiSET, digiFTD, spSET, digiTPC, tracking, forward, subset, full, out],
     #TopAlg = [genalg, detsimalg, digiVXD, digiSIT, digiSET, digiFTD, spSET, digiTPC, tracking, forward, subset, out],
     EvtSel = 'NONE',
-    EvtMax = 100,
+    EvtMax = NEVT,
     ExtSvc = [rndmengine, rndmgensvc, dsvc, evtseeder, geosvc, gearsvc, tracksystemsvc],
     #ExtSvc = [rndmengine, rndmgensvc, dsvc, geosvc],
     OutputLevel=INFO

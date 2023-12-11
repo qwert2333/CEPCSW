@@ -1,6 +1,6 @@
 from Gaudi.Configuration import *
 Nskip = 0
-Nevt = 3
+Nevt = 10
 Name_suffix = 'PseudoJet'
 
 ############## GeomSvc #################
@@ -24,6 +24,7 @@ geomsvc.compact = geometry_path
 from Configurables import k4DataSvc
 podioevent = k4DataSvc("EventDataSvc")
 podioevent.inputs = [
+#"CRD_HCal_Gamma10GeV.root"
 "PseudoJet_3Gam2Pi/Sim/Simu_PseudoJet_3Gam2Pi_000.root"
 ]
 ##########################################
@@ -95,38 +96,18 @@ PandoraPlusPFAlg.HCalMCPAssociationName = ["HCALBarrelParticleAssoCol"]
 
 #----Algorithms----
 
-PandoraPlusPFAlg.AlgList = ["GlobalClusteringAlg",
-                            "LocalMaxFindingAlg",
-                            "TruthTrackMatchingAlg" ]
-#                            "TruthPatternRecAlg",
-#                            "TruthEnergySplittingAlg",
-#                            "TruthMatchingAlg", 
-#                            "TruthClusteringAlg",
-#                            "TruthClusterMergingAlg" ]
-PandoraPlusPFAlg.AlgParNames = [ ["unit_threshold"],
-                                 ["Eth_localMax", "Eth_MaxWithNeigh"],
+PandoraPlusPFAlg.AlgList = ["TruthClusteringAlg",
+                            "TruthMatchingAlg",
+                            "TruthClusterMergingAlg" ]
+PandoraPlusPFAlg.AlgParNames = [ [""] ,
+                                 [""] ,
                                  [""] ]
-#                                 [""],
-#                                 [""],
-#                                 [""],
-#                                 ["DoECALClustering"],
-#                                 [""] ]
-PandoraPlusPFAlg.AlgParTypes = [ ["double"],
-                                 ["double", "double"],
+PandoraPlusPFAlg.AlgParTypes = [ [""] ,
+                                 [""] ,
                                  [""] ]
-#                                 [""],
-#                                 [""],
-#                                 [""],
-#                                 ["bool"],
-#                                 [""] ]
-PandoraPlusPFAlg.AlgParValues = [ ["0.001"],
-                                  ["0.005", "0."],
-                                  [""] ]
-#                                  [""],
-#                                  [""],
-#                                  [""],
-#                                  ["0"],
-#                                  [""]  ]
+PandoraPlusPFAlg.AlgParValues = [ [""] ,
+                                  [""] ,
+                                  [""]  ]
 
 
 ########################################

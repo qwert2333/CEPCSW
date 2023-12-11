@@ -33,6 +33,31 @@ namespace PandoraPlus{
     //if(!m_towers[i]) { m_towers.erase(m_towers.begin()+i); i--; }
   }
 
+
+  std::shared_ptr<PandoraPlus::Calo3DCluster> Calo3DCluster::Clone() const{
+    std::shared_ptr<PandoraPlus::Calo3DCluster> m_clus = std::make_shared<PandoraPlus::Calo3DCluster>();
+    m_clus->setCaloHits(hits);
+    m_clus->setClusters(m_2dclusters);
+    m_clus->setTowers(m_towers);
+    for(auto iter:towerID)
+      m_clus->addTowerID(iter);
+    for(auto iter:map_localMaxU) 
+      for(int ilm=0; ilm<iter.second.size(); ilm++) m_clus->addLocalMaxU(iter.first, iter.second[ilm]);
+    for(auto iter:map_localMaxV)
+      for(int ilm=0; ilm<iter.second.size(); ilm++) m_clus->addLocalMaxV(iter.first, iter.second[ilm]);
+    for(auto iter:map_halfClusUCol)
+      for(int ihf=0; ihf<iter.second.size(); ihf++) m_clus->addHalfClusterU(iter.first, iter.second[ihf]);
+    for(auto iter:map_halfClusVCol)
+      for(int ihf=0; ihf<iter.second.size(); ihf++) m_clus->addHalfClusterV(iter.first, iter.second[ihf]);
+    for(auto iter:m_TrackCol)
+      m_clus->addAssociatedTrack(iter);
+    m_clus->setLinkedMCP(MCParticleWeight);
+    m_clus->FitAxis();
+
+    return m_clus;
+  }
+
+
   //TODO: This function is sooooooo time consumeing now!!
   bool Calo3DCluster::isNeighbor(const PandoraPlus::Calo2DCluster* m_2dcluster) const
   {
@@ -294,6 +319,21 @@ namespace PandoraPlus{
 
     return MCParticleWeight;
   }
+
+  std::vector< std::pair<edm4hep::MCParticle, float> > Calo3DCluster::getLinkedMCPfromHit(){
+    MCParticleWeight.clear();
+
+    std::map<edm4hep::MCParticle, float> map_truthP_totE; map_truthP_totE.clear();
+    for(auto ihit: hits){
+      for(auto ipair: ihit->getLinkedMCP()) map_truthP_totE[ipair.first] += ihit->getEnergy()*ipair.second;
+    }
+
+    for(auto imcp: map_truthP_totE){
+      MCParticleWeight.push_back( std::make_pair(imcp.first, imcp.second/getHitsE()) );
+    }
+
+    return MCParticleWeight;
+  }  
 
   edm4hep::MCParticle Calo3DCluster::getLeadingMCP() const{
     float maxWeight = -1.;

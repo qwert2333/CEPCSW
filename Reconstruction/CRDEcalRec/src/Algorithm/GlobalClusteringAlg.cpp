@@ -7,7 +7,9 @@ using namespace PandoraPlus;
 StatusCode GlobalClusteringAlg::ReadSettings(PandoraPlus::Settings& m_settings){
   settings = m_settings;
   if(settings.map_floatPars.find("unit_threshold")==settings.map_floatPars.end())  settings.map_floatPars["unit_threshold"] = 0.001;
-
+  if(settings.map_stringPars.find("InputECALBars")==settings.map_stringPars.end()) settings.map_stringPars["InputECALBars"] = "BarCol";
+  if(settings.map_stringPars.find("OutputECAL1DClusters")==settings.map_stringPars.end()) settings.map_stringPars["OutputECAL1DClusters"] = "Cluster1DCol";
+  if(settings.map_stringPars.find("OutputECALHalfClusters")==settings.map_stringPars.end()) settings.map_stringPars["OutputECALHalfClusters"] = "HalfClusterCol";
   return StatusCode::SUCCESS;
 };
 
@@ -19,7 +21,7 @@ StatusCode GlobalClusteringAlg::Initialize( PandoraPlusDataCol& m_datacol ){
   m_halfclusters.clear();
 
   //Readin data from DataCol: 
-  m_bars = m_datacol.map_BarCol["BarCol"];
+  m_bars = m_datacol.map_BarCol[settings.map_stringPars["InputECALBars"]];
 
 
   return StatusCode::SUCCESS;
@@ -30,7 +32,6 @@ StatusCode GlobalClusteringAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
   //time_t time_cb;  
   //time(&time_cb);  
   //cout<<" When begin clustering: "<<ctime(&time_cb)<<endl;
-cout<<"  GlobalClusteringAlg: Readin Bar size: "<<m_bars.size()<<endl;
 
   //Threshold and scale factor (Todo) for bars. 
   for(int ibar=0; ibar<m_bars.size(); ibar++)
@@ -58,13 +59,13 @@ cout<<"  GlobalClusteringAlg: Readin Bar size: "<<m_bars.size()<<endl;
   std::vector<std::shared_ptr<PandoraPlus::CaloHalfCluster>> m_HalfClusterV; m_HalfClusterV.clear();
   std::vector<std::shared_ptr<PandoraPlus::CaloHalfCluster>> m_HalfClusterU; m_HalfClusterU.clear();
   for(int i=0; i<m_halfclusters.size() && m_halfclusters[i]; i++){
-    if(m_halfclusters[i]->getSlayer()==0)
+    if(m_halfclusters[i]->getSlayer()==0 && m_halfclusters[i]->getCluster().size()>0)
       m_HalfClusterU.push_back(m_halfclusters[i]);
-    else if(m_halfclusters[i]->getSlayer()==1)
+    else if(m_halfclusters[i]->getSlayer()==1 && m_halfclusters[i]->getCluster().size()>0)
       m_HalfClusterV.push_back(m_halfclusters[i]);
   }
 
-printf("  GlobalClustering: RestBarCol size %d, 1DCluster size %d, HalfCluster size (%d, %d) \n", m_restbars.size(), m_1dclusters.size(), m_HalfClusterU.size(), m_HalfClusterV.size());
+//printf("  GlobalClustering: RestBarCol size %d, 1DCluster size %d, HalfCluster size (%d, %d) \n", m_restbars.size(), m_1dclusters.size(), m_HalfClusterU.size(), m_HalfClusterV.size());
 //for(int ic=0; ic<m_HalfClusterU.size(); ic++) cout<<m_HalfClusterU[ic]->getEnergy()<<'\t';
 //cout<<endl;
 //for(int ic=0; ic<m_HalfClusterV.size(); ic++) cout<<m_HalfClusterV[ic]->getEnergy()<<'\t';
@@ -73,9 +74,9 @@ printf("  GlobalClustering: RestBarCol size %d, 1DCluster size %d, HalfCluster s
 
   //Write results into DataCol.
   //m_datacol.map_BarCol["RestBarCol"] = m_restbars;
-  m_datacol.map_1DCluster["Cluster1DCol"] = m_1dclusters;
-  m_datacol.map_HalfCluster["HalfClusterColU"] = m_HalfClusterU;
-  m_datacol.map_HalfCluster["HalfClusterColV"] = m_HalfClusterV;
+  m_datacol.map_1DCluster[settings.map_stringPars["OutputECAL1DClusters"]] = m_1dclusters;
+  m_datacol.map_HalfCluster[settings.map_stringPars["OutputECALHalfClusters"]+"U"] = m_HalfClusterU;
+  m_datacol.map_HalfCluster[settings.map_stringPars["OutputECALHalfClusters"]+"V"] = m_HalfClusterV;
 
   //time_t time_ce;  
   //time(&time_ce); 

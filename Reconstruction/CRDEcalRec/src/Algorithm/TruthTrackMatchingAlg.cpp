@@ -98,19 +98,6 @@ StatusCode TruthTrackMatchingAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
     std::vector<PandoraPlus::CaloHalfCluster*> m_matchedUCol = itrk->getAssociatedHalfClustersU();
     std::vector<PandoraPlus::CaloHalfCluster*> m_matchedVCol = itrk->getAssociatedHalfClustersV();
 
-    // std::cout << "yyy: Before merge, m_matchedVCol.size() = " << m_matchedVCol.size() << std::endl;
-    for(int imc=0; imc<m_matchedVCol.size(); imc++){
-      // std::cout<<"  yyy: m_matchedVCol["<<imc<<"]->getCluster().size()="<<m_matchedVCol[imc]->getCluster().size()<<std::endl;
-      // std::cout<<"  yyy: m_matchedVCol["<<imc<<"]->getAssociatedTracks().size()=" << m_matchedVCol[imc]->getAssociatedTracks().size() << std::endl;
-      int N_trk_axis = m_matchedVCol[imc]->getHalfClusterMap()["TrackAxis"].size() ;
-      // std::cout<<"  yyy: m_matchedVCol["<<imc<<"]->getHalfClusterMap()[TrackAxis].size()="<< N_trk_axis << std::endl;
-      for(int itk=0; itk<N_trk_axis; itk++){
-        // std::cout<<"    yyy: for TrackAxis " << itk
-        // << ", Nlm = " << m_matchedVCol[imc]->getHalfClusterMap()["TrackAxis"][itk]->getCluster().size()
-        // << ", N trk = " << m_matchedVCol[imc]->getHalfClusterMap()["TrackAxis"][itk]->getAssociatedTracks().size() << std::endl;
-      }
-    }
-
     if( m_matchedUCol.size()>1 ){
       for(int i=1; i<m_matchedUCol.size(); i++){
         m_matchedUCol[0]->mergeHalfCluster( m_matchedUCol[i] );
@@ -124,6 +111,7 @@ StatusCode TruthTrackMatchingAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
       }
     }
   }//End loop track
+
 
   //Check vector: clean the merged clusters
   for(int ihc=0; ihc<p_HalfClusterU->size(); ihc++){
@@ -139,6 +127,22 @@ StatusCode TruthTrackMatchingAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
       ihc--;
     }
   }
+
+cout<<"Print HalfClusters and axis"<<endl;
+cout<<"  HalfClusterU size: "<<p_HalfClusterU->size()<<endl;
+for(int i=0; i<p_HalfClusterU->size(); i++){
+  std::vector<const PandoraPlus::Calo1DCluster*> m_1dcluster = p_HalfClusterU->at(i)->getCluster();
+  std::vector<const PandoraPlus::Calo1DCluster*> m_localMax = p_HalfClusterU->at(i).get()->getLocalMaxCol(settings.map_stringPars["ReadinLocalMaxName"]);
+  std::vector<const PandoraPlus::CaloHalfCluster*> m_axis = p_HalfClusterU->at(i)->getHalfClusterCol(settings.map_stringPars["OutputLongiClusName"]);
+  printf("    In HalfCluster #%d: 1D cluster size %d, localMax size %d, axis size %d \n", i, m_1dcluster.size(), m_localMax.size(), m_axis.size());
+
+  cout<<"    Print 1D cluster"<<endl;
+  for(int i1d=0; i1d<m_1dcluster.size(); i1d++)
+    printf("      ");
+
+}
+
+
 
   return StatusCode::SUCCESS;
 };
