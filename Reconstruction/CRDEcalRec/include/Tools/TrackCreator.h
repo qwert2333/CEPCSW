@@ -19,6 +19,8 @@ namespace PandoraPlus{
                              std::vector<DataHandle<edm4hep::TrackCollection>*>& r_TrackCols, 
                              DataHandle<edm4hep::MCRecoTrackParticleAssociationCollection>* r_MCParticleTrkCol ); 
    
+    StatusCode CreateTracksFromMCParticle(PandoraPlusDataCol& m_DataCol, 
+                                          DataHandle<edm4hep::MCParticleCollection>* r_MCParticleCol);
    
     StatusCode Reset(){};
 
