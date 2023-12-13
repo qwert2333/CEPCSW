@@ -4,11 +4,11 @@ CurrPATH="$PWD"
 WorkPATH=$CurrPATH
 
 #--------------------------------------------------------------
-EventName="PseudoJet_3Gam2Pi"
+EventName="SinglePi_30GeV"
 
 # -----------------------------------------------------------
 # Simulating / Processing event number per file
-Nevt=100
+Nevt=200
 
 # -----------------------------------------------------------
 # RecoDir=LayerCut${LayerCut}_Threshold${HCAL_Threshold_MIP}MIP_Calibration${HCAL_Calibration}
@@ -40,16 +40,27 @@ do
     #--------------------------------------------------------------
     SampleName=${EventName}_${FileID}
 
-    GunParticle=\"gamma\",\"gamma\",\"gamma\",\"pi-\",\"pi-\"
-    GunParticleX=0.,0.,0.,0.,0.
-    GunParticleY=0.,0.,0.,0.,0.
-    GunParticleZ=0.,0.,0.,0.,0.
-    GunParticleEMin=5.,5.,5.,5.,5.
-    GunParticleEMax=5.,5.,5.,5.,5.
-    GunParticleThetaMin=80.,80.,80.,80.,80.
-    GunParticleThetaMax=100.,100.,100.,100.,100.
-    GunParticlePhiMin=-5.,-5.,-5.,-10.,-10.
-    GunParticlePhiMax=15.,15.,15.,10.,10.
+    # GunParticle=\"gamma\",\"gamma\",\"gamma\",\"pi-\",\"pi-\"
+    # GunParticleX=0.,0.,0.,0.,0.
+    # GunParticleY=0.,0.,0.,0.,0.
+    # GunParticleZ=0.,0.,0.,0.,0.
+    # GunParticleEMin=5.,5.,5.,5.,5.
+    # GunParticleEMax=5.,5.,5.,5.,5.
+    # GunParticleThetaMin=80.,80.,80.,80.,80.
+    # GunParticleThetaMax=100.,100.,100.,100.,100.
+    # GunParticlePhiMin=-5.,-5.,-5.,-10.,-10.
+    # GunParticlePhiMax=15.,15.,15.,10.,10.
+
+    # GunParticle=\"pi-\"
+    # GunParticleX=0.
+    # GunParticleY=0.
+    # GunParticleZ=0.
+    # GunParticleEMin=30.
+    # GunParticleEMax=30.
+    # GunParticleThetaMin=80.
+    # GunParticleThetaMax=100.
+    # GunParticlePhiMin=0.
+    # GunParticlePhiMax=360.
 
     SimuFile=$SimuPATH/Simu_${SampleName}.root
     ECALDigiFile=$RecoPATH/DigiEcal_${SampleName}.root
@@ -62,34 +73,34 @@ do
     shFile=$jobPATH/sub_${SampleName}.sh
 
     #---------------------------------
-    /bin/cp -fr $WorkPATH/template/detsim_FullDet_HCAL_temp.py ${simScriptFile}
-    sed -i "s#RNDMSEED#${iFile}#g" ${simScriptFile}
-    sed -i "s#SimPARTICLES#${GunParticle}#g" ${simScriptFile}
-    sed -i "s#SimPARTICLEX#${GunParticleX}#g" ${simScriptFile}
-    sed -i "s#SimPARTICLEY#${GunParticleY}#g" ${simScriptFile}
-    sed -i "s#SimPARTICLEZ#${GunParticleZ}#g" ${simScriptFile}
-    sed -i "s#SimPARTICLEEMIN#${GunParticleEMin}#g" ${simScriptFile}
-    sed -i "s#SimPARTICLEEMAX#${GunParticleEMax}#g" ${simScriptFile}
-    sed -i "s#SimPARTICLETHETAMIN#${GunParticleThetaMin}#g" ${simScriptFile}
-    sed -i "s#SimPARTICLETHETAMAX#${GunParticleThetaMax}#g" ${simScriptFile}
-    sed -i "s#SimPARTICLEPHIMIN#${GunParticlePhiMin}#g" ${simScriptFile}
-    sed -i "s#SimPARTICLEPHIMAX#${GunParticlePhiMax}#g" ${simScriptFile}
-    sed -i "s#SIMFILE#${SimuFile}#g" ${simScriptFile}
-    sed -i "s#NEVT#${Nevt}#g" ${simScriptFile}
+    # /bin/cp -fr $WorkPATH/template/detsim_FullDet_HCAL_temp.py ${simScriptFile}
+    # sed -i "s#RNDMSEED#${iFile}#g" ${simScriptFile}
+    # sed -i "s#SimPARTICLES#${GunParticle}#g" ${simScriptFile}
+    # sed -i "s#SimPARTICLEX#${GunParticleX}#g" ${simScriptFile}
+    # sed -i "s#SimPARTICLEY#${GunParticleY}#g" ${simScriptFile}
+    # sed -i "s#SimPARTICLEZ#${GunParticleZ}#g" ${simScriptFile}
+    # sed -i "s#SimPARTICLEEMIN#${GunParticleEMin}#g" ${simScriptFile}
+    # sed -i "s#SimPARTICLEEMAX#${GunParticleEMax}#g" ${simScriptFile}
+    # sed -i "s#SimPARTICLETHETAMIN#${GunParticleThetaMin}#g" ${simScriptFile}
+    # sed -i "s#SimPARTICLETHETAMAX#${GunParticleThetaMax}#g" ${simScriptFile}
+    # sed -i "s#SimPARTICLEPHIMIN#${GunParticlePhiMin}#g" ${simScriptFile}
+    # sed -i "s#SimPARTICLEPHIMAX#${GunParticlePhiMax}#g" ${simScriptFile}
+    # sed -i "s#SIMFILE#${SimuFile}#g" ${simScriptFile}
+    # sed -i "s#NEVT#${Nevt}#g" ${simScriptFile}
 
-#    /bin/cp -fr $WorkPATH/template/digiRec_temp_truth.py ${recScriptFile}
-#    sed -i "s#SIMFILE#${SimuFile}#g" ${recScriptFile}
-#    sed -i "s#ECALDIGIFILE#${ECALDigiFile}#g" ${recScriptFile}
-#    sed -i "s#HCALDIGIFILE#${HCALDigiFile}#g" ${recScriptFile}
-#    sed -i "s#RECFILE#${RecoFile}#g" ${recScriptFile}
-#    sed -i "s#NEVT#${Nevt}#g" ${recScriptFile}
+    /bin/cp -fr $WorkPATH/template/digiRec_temp_truth_s1.py ${recScriptFile}
+    sed -i "s#SIMFILE#${SimuFile}#g" ${recScriptFile}
+    sed -i "s#ECALDIGIFILE#${ECALDigiFile}#g" ${recScriptFile}
+    sed -i "s#HCALDIGIFILE#${HCALDigiFile}#g" ${recScriptFile}
+    sed -i "s#RECFILE#${RecoFile}#g" ${recScriptFile}
+    sed -i "s#NEVT#${Nevt}#g" ${recScriptFile}
 
     #---------------------------------
     echo \
     "
 cd $jobPATH
-./run.sh ${simScriptFile}
-#./run.sh ${recScriptFile}
+#./run.sh ${simScriptFile}
+./run.sh ${recScriptFile}
 
     " > ${shFile}
 

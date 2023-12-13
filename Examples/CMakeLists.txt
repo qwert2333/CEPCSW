@@ -9,6 +9,7 @@ gaudi_add_module(Examples
                          src/Edm4hepTest/Edm4hepReadDCAlg.cpp
                          src/Edm4hepTest/Edm4hepWriteAlg.cpp
                          src/DumpIDAlg/DumpIDAlg.cpp
+                         src/ReadDigi/ReadDigiAlg.cpp
                  LINK DetInterface
                       k4FWCore::k4FWCore
                       Gaudi::GaudiAlgLib Gaudi::GaudiKernel

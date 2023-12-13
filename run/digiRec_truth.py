@@ -97,33 +97,33 @@ PandoraPlusPFAlg.HCalMCPAssociationName = ["HCALBarrelParticleAssoCol"]
 
 PandoraPlusPFAlg.AlgList = ["GlobalClusteringAlg",
                             "LocalMaxFindingAlg",
-                            "TruthTrackMatchingAlg" ]
-#                            "TruthPatternRecAlg",
-#                            "TruthEnergySplittingAlg",
+                            "TruthTrackMatchingAlg",
+                            "TruthPatternRecAlg",
+                            "TruthEnergySplittingAlg" ]
 #                            "TruthMatchingAlg", 
 #                            "TruthClusteringAlg",
 #                            "TruthClusterMergingAlg" ]
 PandoraPlusPFAlg.AlgParNames = [ ["unit_threshold"],
                                  ["Eth_localMax", "Eth_MaxWithNeigh"],
+                                 [""],
+                                 [""],
                                  [""] ]
-#                                 [""],
-#                                 [""],
 #                                 [""],
 #                                 ["DoECALClustering"],
 #                                 [""] ]
 PandoraPlusPFAlg.AlgParTypes = [ ["double"],
                                  ["double", "double"],
+                                 [""],
+                                 [""],
                                  [""] ]
-#                                 [""],
-#                                 [""],
 #                                 [""],
 #                                 ["bool"],
 #                                 [""] ]
 PandoraPlusPFAlg.AlgParValues = [ ["0.001"],
                                   ["0.005", "0."],
+                                  [""], 
+                                  [""],
                                   [""] ]
-#                                  [""],
-#                                  [""],
 #                                  [""],
 #                                  ["0"],
 #                                  [""]  ]

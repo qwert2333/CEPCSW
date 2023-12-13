@@ -16,7 +16,7 @@ rndmgensvc = RndmGenSvc("RndmGenSvc")
 rndmgensvc.Engine = rndmengine.name()
 
 #geometry_option = "CRD_o1_v01/CRD_o1_v01.xml"
-geometry_option = "CRD_o1_v01/CRD_o1_v01_TPC.xml"
+geometry_option = "CRD_o1_v01/CRD_o1_v01_HCAL.xml"
 #...
 
 if not os.getenv("DETCRDROOT"):
@@ -59,7 +59,7 @@ stdheprdr.Input = "READSTDHEP"
 genprinter = GenPrinter("GenPrinter")
 
 genalg = GenAlgo("GenAlgo")
-# genalg.GenTools = ["GtGunTool"]
+#genalg.GenTools = ["GtGunTool"]
 genalg.GenTools = ["StdHepRdr"]
 # genalg.GenTools = ["StdHepRdr", "GenPrinter"]
 # genalg.GenTools = ["SLCIORdr", "GenPrinter"]
@@ -108,6 +108,7 @@ from Configurables import CalorimeterSensDetTool
 from Configurables import DriftChamberSensDetTool
 cal_sensdettool = CalorimeterSensDetTool("CalorimeterSensDetTool")
 cal_sensdettool.CalNamesMergeDisable = ["CaloDetector"]
+cal_sensdettool.CalNamesApplyBirks = ["HcalBarrel"]
 
 # digitization
 vxdhitname  = "VXDTrackerHits"
@@ -121,6 +122,7 @@ from Configurables import PlanarDigiAlg
 digiVXD = PlanarDigiAlg("VXDDigi")
 digiVXD.SimTrackHitCollection = "VXDCollection"
 digiVXD.TrackerHitCollection = vxdhitname
+digiVXD.TrackerHitAssociationCollection = "VXDTrackerHitAssociation"
 digiVXD.ResolutionU = [0.0028, 0.006, 0.004, 0.004, 0.004, 0.004]
 digiVXD.ResolutionV = [0.0028, 0.006, 0.004, 0.004, 0.004, 0.004]
 digiVXD.UsePlanarTag = True
@@ -180,6 +182,7 @@ digiTPC = TPCDigiAlg("TPCDigi")
 digiTPC.TPCCollection = "TPCCollection"
 digiTPC.TPCLowPtCollection = "TPCLowPtCollection"
 digiTPC.TPCTrackerHitsCol = tpchitname
+digiTPC.TPCTrackerHitAssCol = "TPCTrackerHitAssociation"
 #digiTPC.OutputLevel = DEBUG
 
 # tracking
@@ -241,6 +244,11 @@ full.FTDSpacePoints = ftdspname
 full.SITRawHits     = sithitname
 full.SETRawHits     = sethitname
 full.FTDRawHits     = ftdhitname
+full.VTXHitRelCol   = "VXDTrackerHitAssociation"
+full.SITHitRelCol   = "SITTrackerHitAssociation"
+full.SETHitRelCol   = "SETSpacePointAssociation"
+full.FTDHitRelCol   = "FTDTrackerHitAssociation"
+full.TPCHitRelCol   = "TPCTrackerHitAssociation"
 full.TPCTracks = "ClupatraTracks" # add standalone TPC or DC track here
 full.SiTracks  = "SubsetTracks"
 full.OutputTracks  = "MarlinTrkTracks"
@@ -276,8 +284,8 @@ out.outputCommands = ["keep *"]
 # ApplicationMgr
 from Configurables import ApplicationMgr
 ApplicationMgr(
-    #TopAlg = [genalg, detsimalg, digiVXD, digiSIT, out],
     TopAlg = [genalg, detsimalg, digiVXD, digiSIT, digiSET, digiFTD, spSET, digiTPC, tracking, forward, subset, full, out],
+    #TopAlg = [genalg, detsimalg, digiVXD, digiSIT, digiSET, digiFTD, spSET, digiTPC, tracking, forward, subset, out],
     EvtSel = 'NONE',
     EvtMax = NEVT,
     ExtSvc = [rndmengine, rndmgensvc, dsvc, evtseeder, geosvc, gearsvc, tracksystemsvc],

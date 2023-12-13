@@ -128,6 +128,7 @@ StatusCode TruthTrackMatchingAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
     }
   }
 
+
 cout<<"Print HalfClusters and axis"<<endl;
 cout<<"  HalfClusterU size: "<<p_HalfClusterU->size()<<endl;
 for(int i=0; i<p_HalfClusterU->size(); i++){
@@ -139,7 +140,6 @@ for(int i=0; i<p_HalfClusterU->size(); i++){
   cout<<"    Print 1D cluster"<<endl;
   for(int i1d=0; i1d<m_1dcluster.size(); i1d++)
     printf("      ");
-
 }
 
 

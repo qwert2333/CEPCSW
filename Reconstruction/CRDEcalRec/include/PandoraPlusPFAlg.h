@@ -188,11 +188,19 @@ protected:
   IntVec m_trkstate_tag, m_trkstate_location, m_type;
 
 
+  TTree *t_PFO;
+  IntVec pfo_tag, n_track, n_ecal_clus, n_hcal_clus, m_trk_pfo_tag, m_ecal_pfo_tag, m_hcal_pfo_tag;
+  IntVec m_trk_mcpid, m_ecal_clus_mcpid, m_hcal_clus_mcpid;
+  FloatVec  m_trk_pt, m_trk_pz, m_trk_mc_px, m_trk_mc_py, m_trk_mc_pz, m_trk_mc_E;
+  FloatVec  m_ecal_clus_x, m_ecal_clus_y, m_ecal_clus_z, m_ecal_clus_E, m_ecal_clus_mc_px, m_ecal_clus_mc_py, m_ecal_clus_mc_pz, m_ecal_clus_mc_E,
+            m_hcal_clus_x, m_hcal_clus_y, m_hcal_clus_z, m_hcal_clus_E, m_hcal_clus_mc_px, m_hcal_clus_mc_py, m_hcal_clus_mc_pz, m_hcal_clus_mc_E;
+
+
   void ClearBar();
   void ClearCluster();
   void ClearTrack();
   void ClearHalfCluster();
-
+  void ClearPFO();
 
 };
 #endif
