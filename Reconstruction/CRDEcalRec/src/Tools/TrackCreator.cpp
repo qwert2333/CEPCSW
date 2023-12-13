@@ -88,5 +88,57 @@ namespace PandoraPlus{
     return StatusCode::SUCCESS;
   }
 
+
+  StatusCode TrackCreator::CreateTracksFromMCParticle(PandoraPlusDataCol& m_DataCol, 
+                                          DataHandle<edm4hep::MCParticleCollection>* r_MCParticleCol){
+    // Convert MC charged particles to local Track objects.
+    // Assuming the tracks are ideal helixes.
+    std::cout << "yyy: CreateTracksFromMCParticle()" << std::endl;
+
+    // Get charged MC particles with generatorStatus==1
+    const edm4hep::MCParticleCollection* const_MCPCol = r_MCParticleCol->get();
+    std::vector<edm4hep::MCParticle> m_MCPvec; m_MCPvec.clear(); 
+    for(int i=0; i<const_MCPCol->size(); i++){
+      edm4hep::MCParticle m_MCp = const_MCPCol->at(i);
+      if(m_MCp.getGeneratorStatus()==1 && m_MCp.getCharge()!=0)
+        m_MCPvec.push_back(m_MCp);
+    }
+
+    // Convert to local Track objects
+    std::vector<std::shared_ptr<PandoraPlus::Track>> m_trkCol; m_trkCol.clear();
+    for(auto mcp : m_MCPvec){
+      std::shared_ptr<PandoraPlus::Track> m_trk = std::make_shared<PandoraPlus::Track>();
+      std::vector<PandoraPlus::TrackState> m_trkstates;
+
+      TVector3 mcp_vertex(mcp.getVertex().x, mcp.getVertex().y, mcp.getVertex().z);
+      TVector3 mcp_p(mcp.getMomentum().x, mcp.getMomentum().y, mcp.getMomentum().z);
+      double mcp_pT = TMath::Sqrt(mcp_p.X()*mcp_p.X() + mcp_p.Y()*mcp_p.Y());
+      double charge = mcp.getCharge();
+
+      // Evaluate track state at vertex
+      PandoraPlus::TrackState m_trkst;  
+      m_trkst.location = 5;  // At vertex
+      m_trkst.D0 = 0;
+      m_trkst.Z0 = 0;
+      m_trkst.phi0 = TMath::ATan2(mcp_p.Y(), mcp_p.X());
+      m_trkst.Kappa = 1 / mcp_pT;
+      if(charge<0) m_trkst.Kappa = -m_trkst.Kappa;
+      m_trkst.tanLambda = mcp_p.Z() / mcp_pT;
+      m_trkst.Omega = 0.3 * settings.map_floatPars.at("BField") / 1000. / mcp_pT;
+      m_trkst.referencePoint = mcp_vertex;
+
+      m_trkstates.push_back(m_trkst);
+
+      m_trk->setTrackStates("Input", m_trkstates);
+      m_trk->setType(0);  // It is a "MC track" and not detected by any tracker system
+      m_trk->addLinkedMCP( std::make_pair(mcp, 1.) );
+      m_trkCol.push_back(m_trk);
+    }
+    m_DataCol.TrackCol = m_trkCol;
+
+
+    return StatusCode::SUCCESS;
+  }
+
 };
 #endif

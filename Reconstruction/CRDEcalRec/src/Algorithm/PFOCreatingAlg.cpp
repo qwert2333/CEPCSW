@@ -53,26 +53,9 @@ StatusCode PFOCreatingAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
 
     // Charged cluster in ECAL (A cluster with a track)
     if(ecal_cls_track.size()==1){  
-      // cout << "  yyy: ECAL cluster " << ie << " is a track cluster." << endl;
-      // cout << "       (x, y, z, E) = ( " 
-      //       << std::fixed << std::setprecision(2) << m_ecal_clusters[ie]->getShowerCenter().x() << ", "
-      //       << std::fixed << std::setprecision(2) << m_ecal_clusters[ie]->getShowerCenter().y() << ", "
-      //       << std::fixed << std::setprecision(2) << m_ecal_clusters[ie]->getShowerCenter().z() << ", "
-      //       << std::fixed << std::setprecision(3) << m_ecal_clusters[ie]->getLongiE() << ")" << endl;
-
       std::vector<PandoraPlus::Calo3DCluster*> hcal_clus_candidate;
       hcal_clus_candidate.clear();
       GetChargedHCALCandidates(ecal_cls_track[0], m_hcal_clusters, hcal_clus_candidate);
-
-      // cout << "    yyy: Number of connected HCAL clusters: " << hcal_clus_candidate.size() << endl;
-      // cout << "         Their (x, y, z, E):" << endl;
-      // for(int ihc=0; ihc<hcal_clus_candidate.size(); ihc++){
-      //   cout << "           (" 
-      //         << std::fixed << std::setprecision(2) << hcal_clus_candidate[ihc]->getHitCenter().x() << ", "
-      //         << std::fixed << std::setprecision(2) << hcal_clus_candidate[ihc]->getHitCenter().y() << ", "
-      //         << std::fixed << std::setprecision(2) << hcal_clus_candidate[ihc]->getHitCenter().z() << ", "
-      //         << std::fixed << std::setprecision(6) << hcal_clus_candidate[ihc]->getHitsE() << ") " << endl; 
-      // }
 
       std::shared_ptr<PandoraPlus::PFObject> tmp_pfo = std::make_shared<PandoraPlus::PFObject>();
       tmp_pfo->addTrack(ecal_cls_track[0]);
@@ -88,13 +71,6 @@ StatusCode PFOCreatingAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
 
     // Neutral cluster in ECAL (A cluster without track)
     else if(ecal_cls_track.size()==0){
-      // cout << "  yyy: ECAL cluster " << ie << " is a neutral cluster." << endl;
-      // cout << "       (x, y, z, E) = ( " 
-      //       << std::fixed << std::setprecision(2) << m_ecal_clusters[ie]->getShowerCenter().x() << ", "
-      //       << std::fixed << std::setprecision(2) << m_ecal_clusters[ie]->getShowerCenter().y() << ", "
-      //       << std::fixed << std::setprecision(2) << m_ecal_clusters[ie]->getShowerCenter().z() << ", "
-      //       << std::fixed << std::setprecision(3) << m_ecal_clusters[ie]->getLongiE() << ")" << endl;
-
       // Create PFO with only a ECAL cluster
       std::shared_ptr<PandoraPlus::PFObject> tmp_pfo = std::make_shared<PandoraPlus::PFObject>();
       tmp_pfo->addECALCluster(m_ecal_clusters[ie]);
@@ -105,6 +81,13 @@ StatusCode PFOCreatingAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
     else{
       cout << "  yyy: Error: Wrong number of tracks" << endl;
     }
+  }
+
+  // Create PFO with only tracks
+  for(int it=0; it<m_tracks.size(); it++){
+    std::shared_ptr<PandoraPlus::PFObject> tmp_pfo = std::make_shared<PandoraPlus::PFObject>();
+    tmp_pfo->addTrack(m_tracks[it]);
+    m_pfobjects.push_back(tmp_pfo);
   }
 
   
@@ -136,15 +119,7 @@ StatusCode PFOCreatingAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
       m_pfobjects.push_back(tmp_pfo);
     }
 
-  }
-
-  // Create PFO with only tracks
-  for(int it=0; it<m_tracks.size(); it++){
-    std::shared_ptr<PandoraPlus::PFObject> tmp_pfo = std::make_shared<PandoraPlus::PFObject>();
-    tmp_pfo->addTrack(m_tracks[it]);
-    m_pfobjects.push_back(tmp_pfo);
-  }
-  
+  }  
 
   m_datacol.map_PFObjects["outputPFO"] = m_pfobjects;
 
