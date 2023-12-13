@@ -218,6 +218,9 @@ cout<<"  Ecal halfcluster size "<<m_halfclusterU.size()<<", "<<m_halfclusterV.si
     m_datacol.map_CaloCluster[settings.map_stringPars["OutputECALTower"]] = m_towers;
   }
 
+
+
+
   //HCAL clustering
   if(settings.map_boolPars["DoHCALClustering"]){
 cout<<"Input HCAL hit size "<<m_hits.size()<<endl;
@@ -281,6 +284,10 @@ for(auto& iter: map_hitCol){
       }
     }
 cout<<"  HCAL cluster size "<<m_clusters.size()<<endl;
+for(int ic=0; ic<m_clusters.size(); ic++){
+
+
+}
     m_datacol.map_CaloCluster[settings.map_stringPars["OutputHCALClusters"]] = m_clusters;
   }
 

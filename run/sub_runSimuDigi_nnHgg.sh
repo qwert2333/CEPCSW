@@ -15,7 +15,7 @@ Nevt=100
 # RecoPATH=$EvtDir/Reco/$GeoDir/$RecoDir
 # RecoPATH=$WorkPATH/${EventName}/InitialTest_50Evt/Reco_BaselineArbor   #!!!!!!!!!!!!!!!!!!!!
 #SimuPATH=$WorkPATH/${EventName}/Sim
-SimuPATH=/cefs/higgs/guofy/CEPCSW_v212/run/E240_nnHgg/Sim
+SimuPATH=/cefs/higgs/zyang/cepcsoft/CEPCSW_v2.1.6.alpha/yang/physics/simdir
 RecoPATH=$WorkPATH/${EventName}_Reco/Reco   #!!!!!!!!!!!!!!!!!!!!
 jobPATH=$WorkPATH/${EventName}_Reco/job
 #if [ ! -d "$SimuPATH" ]
@@ -42,8 +42,9 @@ do
     SampleName=${EventName}_${iFile}
     StdHepFile=$StdHepPATH/nnh_gg.e0.p0.${FileID}.stdhep
 
-    SimuFile=$SimuPATH/Simu_${SampleName}.root
-    DigiFile=$RecoPATH/Digi_${SampleName}.root
+    SimuFile=$SimuPATH/nnH_gg_${FileID}.root
+    ECALDigiFile=$RecoPATH/DigiEcal_${SampleName}.root
+    HCALDigiFile=$RecoPATH/DigiHcal_${SampleName}.root
     RecoFile=$RecoPATH/Reco_${SampleName}.root
     # -----------------------------------------------------------
 
@@ -58,9 +59,10 @@ do
 #    sed -i "s#SIMFILE#${SimuFile}#g" ${simScriptFile}
 #    sed -i "s#NEVT#${Nevt}#g" ${simScriptFile}
 
-    /bin/cp -fr $WorkPATH/template/digiRec_temp.py ${recScriptFile}
+    /bin/cp -fr $WorkPATH/template/digiRec_temp_truth_s1.py ${recScriptFile}
     sed -i "s#SIMFILE#${SimuFile}#g" ${recScriptFile}
-    sed -i "s#DIGIFILE#${DigiFile}#g" ${recScriptFile}
+    sed -i "s#ECALDIGIFILE#${ECALDigiFile}#g" ${recScriptFile}
+    sed -i "s#HCALDIGIFILE#${HCALDigiFile}#g" ${recScriptFile}
     sed -i "s#RECFILE#${RecoFile}#g" ${recScriptFile}
     sed -i "s#NEVT#${Nevt}#g" ${recScriptFile}
 

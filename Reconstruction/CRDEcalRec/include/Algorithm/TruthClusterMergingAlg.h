@@ -29,7 +29,7 @@ private:
   std::vector<const PandoraPlus::Calo3DCluster*> m_HcalClusterCol;
   std::vector<std::shared_ptr<PandoraPlus::Calo3DCluster>> merged_EcalClusterCol;
   std::vector<std::shared_ptr<PandoraPlus::Calo3DCluster>> merged_HcalClusterCol;
-  std::vector<std::shared_ptr<PandoraPlus::Calo3DCluster>> merged_CombClusterCol;
+  std::vector<std::shared_ptr<PandoraPlus::PFObject>> merged_CombClusterCol;
 
 };
 #endif

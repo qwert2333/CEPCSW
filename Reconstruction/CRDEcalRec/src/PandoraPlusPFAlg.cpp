@@ -162,6 +162,8 @@ StatusCode PandoraPlusPFAlg::initialize()
     t_HalfCluster = new TTree("HalfCluster","HalfCluster");
     t_Cluster = new TTree("RecClusters", "RecClusters");
     t_Track = new TTree("RecTracks", "RecTracks");
+    t_PFO = new TTree("PFO", "PFO");
+
 
     //Bar
     t_SimBar->Branch("totE_EcalSim", &m_totE_EcalSim);
@@ -252,8 +254,7 @@ StatusCode PandoraPlusPFAlg::initialize()
     t_Cluster->Branch("Hcal_hit_x", &m_Hcal_hit_x);
     t_Cluster->Branch("Hcal_hit_y", &m_Hcal_hit_y);
     t_Cluster->Branch("Hcal_hit_z", &m_Hcal_hit_z);
-    t_Cluster->Branch("Hcal_hit_E", &m_Hcal_hit_E);
-    
+    t_Cluster->Branch("Hcal_hit_E", &m_Hcal_hit_E);   
 
 
     // Tracks
@@ -270,6 +271,41 @@ StatusCode PandoraPlusPFAlg::initialize()
     t_Track->Branch("m_trkstate_refz", &m_trkstate_refz);
     t_Track->Branch("m_trkstate_location", &m_trkstate_location);
     t_Track->Branch("m_trkstate_tag", &m_trkstate_tag);
+
+
+    //PFOs
+    t_PFO->Branch("pfo_tag",     &pfo_tag);
+    t_PFO->Branch("n_track",     &n_track);
+    t_PFO->Branch("n_ecal_clus", &n_ecal_clus);
+    t_PFO->Branch("n_hcal_clus", &n_hcal_clus);
+    t_PFO->Branch("trk_pfo_tag", &m_trk_pfo_tag);
+    t_PFO->Branch("trk_pt", &m_trk_pt);
+    t_PFO->Branch("trk_pz", &m_trk_pz);
+    t_PFO->Branch("trk_mcpid", &m_trk_mcpid);
+    t_PFO->Branch("trk_mc_px", &m_trk_mc_px);
+    t_PFO->Branch("trk_mc_py", &m_trk_mc_py);
+    t_PFO->Branch("trk_mc_pz", &m_trk_mc_pz);
+    t_PFO->Branch("trk_mc_E", &m_trk_mc_E);
+    t_PFO->Branch("ecal_pfo_tag", &m_ecal_pfo_tag);
+    t_PFO->Branch("ecal_clus_x", &m_ecal_clus_x);
+    t_PFO->Branch("ecal_clus_y", &m_ecal_clus_y);
+    t_PFO->Branch("ecal_clus_z", &m_ecal_clus_z);
+    t_PFO->Branch("ecal_clus_E", &m_ecal_clus_E);
+    t_PFO->Branch("ecal_clus_mcpid", &m_ecal_clus_mcpid);
+    t_PFO->Branch("ecal_clus_mc_px", &m_ecal_clus_mc_px);
+    t_PFO->Branch("ecal_clus_mc_py", &m_ecal_clus_mc_py);
+    t_PFO->Branch("ecal_clus_mc_pz", &m_ecal_clus_mc_pz);
+    t_PFO->Branch("ecal_clus_mc_E",  &m_ecal_clus_mc_E);
+    t_PFO->Branch("hcal_pfo_tag", &m_hcal_pfo_tag);
+    t_PFO->Branch("hcal_clus_x", &m_hcal_clus_x);
+    t_PFO->Branch("hcal_clus_y", &m_hcal_clus_y);
+    t_PFO->Branch("hcal_clus_z", &m_hcal_clus_z);
+    t_PFO->Branch("hcal_clus_E", &m_hcal_clus_E);
+    t_PFO->Branch("hcal_clus_mcpid", &m_hcal_clus_mcpid);
+    t_PFO->Branch("hcal_clus_mc_px", &m_hcal_clus_mc_px);
+    t_PFO->Branch("hcal_clus_mc_py", &m_hcal_clus_mc_py);
+    t_PFO->Branch("hcal_clus_mc_pz", &m_hcal_clus_mc_pz);
+    t_PFO->Branch("hcal_clus_mc_E",  &m_hcal_clus_mc_E);
 
   }
 
@@ -555,6 +591,66 @@ cout<<"Write tuples"<<endl;
   }}
   t_Track->Fill();
 
+
+  //Save PFO info
+  ClearPFO();
+  std::vector<PandoraPlus::PFObject*> m_pfobjects; m_pfobjects.clear();
+  for(int ip=0; ip<m_DataCol.map_PFObjects["TruthCombPFO"].size(); ip++)
+    m_pfobjects.push_back(m_DataCol.map_PFObjects["TruthCombPFO"][ip].get());
+
+  for(int ip=0; ip<m_pfobjects.size(); ip++){
+    std::vector<const Track*> t_tracks = m_pfobjects[ip]->getTracks();
+    std::vector<const Calo3DCluster*> t_ecal_clusters = m_pfobjects[ip]->getECALClusters();
+    std::vector<const Calo3DCluster*> t_hcal_clusters =  m_pfobjects[ip]->getHCALClusters();
+
+    pfo_tag.push_back(ip);
+    n_track.push_back(t_tracks.size());
+    n_ecal_clus.push_back(t_ecal_clusters.size());
+    n_hcal_clus.push_back(t_hcal_clusters.size());
+
+    for(int it=0; it<t_tracks.size(); it++){
+      m_trk_pfo_tag.push_back(ip);
+      m_trk_pt.push_back(t_tracks[it]->getPt());
+      m_trk_pz.push_back(t_tracks[it]->getPz());
+      auto mcp = t_tracks[it]->getLeadingMCP();
+      m_trk_mcpid.push_back(mcp.getPDG());
+      m_trk_mc_px.push_back(mcp.getMomentum().x);
+      m_trk_mc_py.push_back(mcp.getMomentum().y);
+      m_trk_mc_pz.push_back(mcp.getMomentum().z);
+      m_trk_mc_E.push_back(mcp.getEnergy());
+    }
+
+    for(int ie=0; ie<t_ecal_clusters.size(); ie++){
+      m_ecal_pfo_tag.push_back(ip);
+      m_ecal_clus_x.push_back(t_ecal_clusters[ie]->getShowerCenter().x());
+      m_ecal_clus_y.push_back(t_ecal_clusters[ie]->getShowerCenter().y());
+      m_ecal_clus_z.push_back(t_ecal_clusters[ie]->getShowerCenter().z());
+      m_ecal_clus_E.push_back(t_ecal_clusters[ie]->getLongiE());
+      auto mcp = t_ecal_clusters[ie]->getLeadingMCP();
+      m_ecal_clus_mcpid.push_back(mcp.getPDG());
+      m_ecal_clus_mc_px.push_back(mcp.getMomentum().x);
+      m_ecal_clus_mc_py.push_back(mcp.getMomentum().y);
+      m_ecal_clus_mc_pz.push_back(mcp.getMomentum().z);
+      m_ecal_clus_mc_E.push_back(mcp.getEnergy());
+    }
+    for(int ih=0; ih<t_hcal_clusters.size(); ih++){
+      m_hcal_pfo_tag.push_back(ip);
+      m_hcal_clus_x.push_back(t_hcal_clusters[ih]->getHitCenter().x());
+      m_hcal_clus_y.push_back(t_hcal_clusters[ih]->getHitCenter().y());
+      m_hcal_clus_z.push_back(t_hcal_clusters[ih]->getHitCenter().z());
+      m_hcal_clus_E.push_back(t_hcal_clusters[ih]->getHitsE());
+      auto mcp = t_hcal_clusters[ih]->getLeadingMCP();
+      m_hcal_clus_mcpid.push_back(mcp.getPDG());
+      m_hcal_clus_mc_px.push_back(mcp.getMomentum().x);
+      m_hcal_clus_mc_py.push_back(mcp.getMomentum().y);
+      m_hcal_clus_mc_pz.push_back(mcp.getMomentum().z);
+      m_hcal_clus_mc_E.push_back(mcp.getEnergy());
+    }
+
+  }
+  t_PFO->Fill();
+
+
   //Clean Events
   //system("/cefs/higgs/songwz/winter22/CEPCSW/workarea/memory/memory_test.sh before_clean");
   m_DataCol.Clear();
@@ -573,8 +669,9 @@ StatusCode PandoraPlusPFAlg::finalize()
   t_HalfCluster->Write();
   t_Cluster->Write();
   t_Track->Write();
+  t_PFO->Write();
   m_wfile->Close();
-  delete m_wfile, t_SimBar, t_HalfCluster, t_Cluster, t_Track;
+  delete m_wfile, t_SimBar, t_HalfCluster, t_Cluster, t_Track, t_PFO;
 
   delete m_pMCParticleCreator;
   delete m_pTrackCreator; 
@@ -710,6 +807,42 @@ void PandoraPlusPFAlg::ClearTrack(){
   m_trkstate_refz.clear();
   m_trkstate_location.clear();
   m_trkstate_tag.clear();
+}
+
+
+void PandoraPlusPFAlg::ClearPFO(){
+  pfo_tag.clear();
+  n_track.clear();
+  n_ecal_clus.clear();
+  n_hcal_clus.clear();
+  m_trk_pfo_tag.clear();
+  m_trk_mcpid.clear();
+  m_trk_pt.clear();
+  m_trk_pz.clear();
+  m_trk_mc_px.clear();
+  m_trk_mc_py.clear();
+  m_trk_mc_pz.clear();
+  m_trk_mc_E.clear();
+  m_ecal_pfo_tag.clear();
+  m_ecal_clus_x.clear();
+  m_ecal_clus_y.clear();
+  m_ecal_clus_z.clear();
+  m_ecal_clus_E.clear();
+  m_ecal_clus_mcpid.clear();
+  m_ecal_clus_mc_px.clear();
+  m_ecal_clus_mc_py.clear();
+  m_ecal_clus_mc_pz.clear();
+  m_ecal_clus_mc_E.clear();
+  m_hcal_pfo_tag.clear();
+  m_hcal_clus_x.clear();
+  m_hcal_clus_y.clear();
+  m_hcal_clus_z.clear();
+  m_hcal_clus_E.clear();
+  m_hcal_clus_mcpid.clear();
+  m_hcal_clus_mc_px.clear();
+  m_hcal_clus_mc_py.clear();
+  m_hcal_clus_mc_pz.clear();
+  m_hcal_clus_mc_E.clear();
 }
 
 

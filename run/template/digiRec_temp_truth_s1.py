@@ -1,7 +1,6 @@
 from Gaudi.Configuration import *
 Nskip = 0
-Nevt = 200
-Name_suffix = 'Pi5GeV'
+Nevt = NEVT
 
 ############## GeomSvc #################
 geometry_option = "CRD_o1_v01/CRD_o1_v01_HCAL.xml"
@@ -24,8 +23,7 @@ geomsvc.compact = geometry_path
 from Configurables import k4DataSvc
 podioevent = k4DataSvc("EventDataSvc")
 podioevent.inputs = [
-"SinglePi_5GeV/Sim/Simu_SinglePi_5GeV.root"
-#"PseudoJet_3Gam2Pi/Sim/Simu_PseudoJet_3Gam2Pi_000.root"
+"SIMFILE"
 ]
 ##########################################
 
@@ -55,7 +53,7 @@ EcalDigi.TimeResolution = 0.5        #unit: ns
 EcalDigi.EnergyThreshold = 0.0001   #0.1 MeV
 EcalDigi.ChargeThresholdFrac = 0.05
 EcalDigi.Debug=1
-EcalDigi.OutFileName = "DigiEcal_"+Name_suffix+".root"
+EcalDigi.OutFileName = "ECALDIGIFILE"
 #########################################
 
 ##HCAL##
@@ -69,10 +67,11 @@ HcalDigi.CaloMCPAssociationCollection = "HCALBarrelParticleAssoCol"
 HcalDigi.SkipEvt = Nskip
 HcalDigi.Seed = 2079
 #Digitalization parameters
+HcalDigi.CalibrHCAL = 1
 HcalDigi.MIPResponse = 0.0005  # 0.5 MeV / MIP
 HcalDigi.MIPThreshold = 0.5    # Unit: MIP
 HcalDigi.Debug=0
-HcalDigi.OutFileName = "DigiHcal_"+Name_suffix+".root"
+HcalDigi.OutFileName = "HCALDIGIFILE"
 
 ######### Reconstruction ################
 from Configurables import PandoraPlusPFAlg
@@ -83,7 +82,7 @@ PandoraPlusPFAlg.BField = 3.
 PandoraPlusPFAlg.Debug = 0
 PandoraPlusPFAlg.SkipEvt = Nskip
 PandoraPlusPFAlg.WriteAna = 1
-PandoraPlusPFAlg.AnaFileName = "testRec_"+Name_suffix+".root"
+PandoraPlusPFAlg.AnaFileName = "RECFILE"
 ##----Readin collections----
 PandoraPlusPFAlg.MCParticleCollection = "MCParticle"
 PandoraPlusPFAlg.TrackCollections = ["MarlinTrkTracks"]
