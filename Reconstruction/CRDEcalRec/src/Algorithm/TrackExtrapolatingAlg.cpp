@@ -44,6 +44,9 @@ StatusCode TrackExtrapolatingAlg::ReadSettings(Settings& m_settings){
   if(settings.map_floatPars.find("B_field")==settings.map_floatPars.end())
     settings.map_floatPars["B_field"] = 3.0;
 
+  if(settings.map_intPars.find("Input_track")==settings.map_intPars.end())
+    settings.map_intPars["Input_track"] = 0;    // 0: reconstructed tracks.  1: MC particle track
+
   return StatusCode::SUCCESS;
 };
 
@@ -156,26 +159,55 @@ StatusCode TrackExtrapolatingAlg::GetLayerPoints(const std::vector<TVector2> & n
 
 // ...oooOO0OOooo......oooOO0OOooo......oooOO0OOooo...
 bool TrackExtrapolatingAlg::IsReachECAL(PandoraPlus::Track * track){
-  std::vector<TrackState> input_trackstates = track->getTrackStates("Input");
-  int count=0;
-  TVector3 t_vec;
-  for(int i=0; i<input_trackstates.size(); i++){
-    if(input_trackstates[i].location==PandoraPlus::TrackState::AtCalorimeter){
-      count++;
-      t_vec = input_trackstates[i].referencePoint;
+  if(settings.map_intPars["Input_track"] == 0){
+    // The track is reconstructed in ECAL. If the track reach ECAL, it should have track state at calorimeter
+    std::vector<TrackState> input_trackstates = track->getTrackStates("Input");
+    int count=0;
+    TVector3 t_vec;
+    for(int i=0; i<input_trackstates.size(); i++){
+      if(input_trackstates[i].location==PandoraPlus::TrackState::AtCalorimeter){
+        count++;
+        t_vec = input_trackstates[i].referencePoint;
+        break;
+      }
+    }
+    if(count==0){
+  std::cout<<"      the track has no track state at calorimeter"<<std::endl;
+      return false;
+    } 
+    if( Abs(Abs(t_vec.Z())-settings.map_floatPars["ECAL_half_length"]) < 1e-6 ){
+  std::cout<<"      the track escape from endcap"<<std::endl;
+      return false;
+    } 
+    
+
+    return true;
+  }
+  else if(settings.map_intPars["Input_track"] == 1){
+    // The track is from MC particle as ideal helix. 
+    // The pT should large enough to reach ECAL. The pz should not be so large that it escape from endcap
+    std::vector<TrackState> input_trackstates = track->getTrackStates("Input");
+    if(input_trackstates.size()==0){
+      std::cout << "Error! No track state!" << std::endl;
+      return false;
+    }
+
+    TrackState IP_trk_state;
+    for(int i=0; i<input_trackstates.size(); i++){
+      if(input_trackstates[i].location==PandoraPlus::TrackState::AtIP)
+        IP_trk_state = input_trackstates[i];
       break;
     }
-  }
-  if(count==0){
-std::cout<<"      the track has no track state at calorimeter"<<std::endl;
-    return false;
-  } 
-  if( Abs(Abs(t_vec.Z())-settings.map_floatPars["ECAL_half_length"]) < 1e-6 ){
-std::cout<<"      the track escape from endcap"<<std::endl;
-    return false;
-  } 
 
-  return true;
+    TVector3 ref_point = IP_trk_state.referencePoint;
+    double rho = GetRho(IP_trk_state);
+    double r_max = TMath::Sqrt(ref_point.X()*ref_point.X() + ref_point.Y()*ref_point.Y()) + rho*2;
+
+    if(r_max<settings.map_floatPars["ECAL_innermost_distance"]){ return false; }
+
+    return true;
+  }
+  
 }
 
 
@@ -206,17 +238,14 @@ StatusCode TrackExtrapolatingAlg::ExtrapolateByLayer(const std::vector<TVector2>
   float alpha0 = GetRefAlpha0(CALO_trk_state, center); 
   // bool is_rtbk = IsReturn(rho, center);
   // Evaluate delta_phi
-//std::cout << "    yyy: GetDeltaPhi()" << std::endl;
   std::vector<std::vector<float>> ECAL_delta_phi = GetDeltaPhi(rho, center, alpha0, normal_vectors, ECAL_layer_points, CALO_trk_state);
   std::vector<std::vector<float>> HCAL_delta_phi = GetDeltaPhi(rho, center, alpha0, normal_vectors, HCAL_layer_points, CALO_trk_state);
   
   // extrpolated track points. Will be stored as reference point in TrackState
-//std::cout << "    yyy: GetExtrapoPoints()" << std::endl;
   std::vector<TVector3> ECAL_ext_points = GetExtrapoPoints("ECAL", rho, center, alpha0, CALO_trk_state, ECAL_delta_phi);
   std::vector<TVector3> HCAL_ext_points = GetExtrapoPoints("HCAL", rho, center, alpha0, CALO_trk_state, HCAL_delta_phi);
   
   // Sort Extrapolated points
-//std::cout << "    yyy: Sort" << std::endl;
   std::vector<TrackState> t_ECAL_states;
   for(int ip=0; ip<ECAL_ext_points.size(); ip++){
     TrackState t_state = CALO_trk_state;

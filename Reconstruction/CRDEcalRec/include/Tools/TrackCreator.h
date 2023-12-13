@@ -21,7 +21,8 @@ namespace PandoraPlus{
    
     StatusCode CreateTracksFromMCParticle(PandoraPlusDataCol& m_DataCol, 
                                           DataHandle<edm4hep::MCParticleCollection>* r_MCParticleCol);
-   
+
+
     StatusCode Reset(){};
 
   private: 

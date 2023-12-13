@@ -116,7 +116,7 @@ namespace PandoraPlus{
 
       // Evaluate track state at vertex
       PandoraPlus::TrackState m_trkst;  
-      m_trkst.location = 5;  // At vertex
+      m_trkst.location = 1;  // At IP
       m_trkst.D0 = 0;
       m_trkst.Z0 = 0;
       m_trkst.phi0 = TMath::ATan2(mcp_p.Y(), mcp_p.X());
@@ -125,8 +125,10 @@ namespace PandoraPlus{
       m_trkst.tanLambda = mcp_p.Z() / mcp_pT;
       m_trkst.Omega = 0.3 * settings.map_floatPars.at("BField") / 1000. / mcp_pT;
       m_trkst.referencePoint = mcp_vertex;
-
       m_trkstates.push_back(m_trkst);
+
+
+
 
       m_trk->setTrackStates("Input", m_trkstates);
       m_trk->setType(0);  // It is a "MC track" and not detected by any tracker system
