@@ -207,6 +207,10 @@ bool TrackExtrapolatingAlg::IsReachECAL(PandoraPlus::Track * track){
 
     return true;
   }
+  else{
+    std::cout << "Error, wrong source of input tracks for TrackExtrapolatingAlg!" << std:: endl;
+    return false;
+  }
   
 }
 
@@ -216,12 +220,26 @@ StatusCode TrackExtrapolatingAlg::GetTrackStateAtCalo(PandoraPlus::Track * track
                                                 PandoraPlus::TrackState & trk_state_at_calo){
   std::vector<TrackState> input_trackstates = track->getTrackStates("Input");
 
-  for(int its=0; its<input_trackstates.size(); its++){
+  if(settings.map_intPars["Input_track"] == 0){
+    for(int its=0; its<input_trackstates.size(); its++){
       if(input_trackstates[its].location==PandoraPlus::TrackState::AtCalorimeter){
         trk_state_at_calo=input_trackstates[its];
         break;
       }
+    }
   }
+  else if((settings.map_intPars["Input_track"] == 0)){
+    for(int its=0; its<input_trackstates.size(); its++){
+      if(input_trackstates[its].location==PandoraPlus::TrackState::AtIP){
+        trk_state_at_calo=input_trackstates[its];
+        break;
+      }
+    }
+  }
+  else{
+    std::cout << "Error, wrong source of input tracks for TrackExtrapolatingAlg!" << std:: endl;
+  }
+  
   return StatusCode::SUCCESS;
   
 }
