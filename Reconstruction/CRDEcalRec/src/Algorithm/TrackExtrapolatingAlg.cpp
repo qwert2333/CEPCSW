@@ -228,7 +228,7 @@ StatusCode TrackExtrapolatingAlg::GetTrackStateAtCalo(PandoraPlus::Track * track
       }
     }
   }
-  else if((settings.map_intPars["Input_track"] == 0)){
+  else if((settings.map_intPars["Input_track"] == 1)){
     for(int its=0; its<input_trackstates.size(); its++){
       if(input_trackstates[its].location==PandoraPlus::TrackState::AtIP){
         trk_state_at_calo=input_trackstates[its];
