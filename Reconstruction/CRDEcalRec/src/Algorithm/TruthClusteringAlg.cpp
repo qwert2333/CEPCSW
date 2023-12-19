@@ -85,13 +85,13 @@ cout<<"Input bar size: "<<m_bars.size()<<endl;
         map_barCol[mcp].push_back(m_bars[ibar]);
       }
     }
-cout<<"truth map size "<<map_barCol.size()<<endl;
-for(auto& iter: map_barCol){ 
-  double totE = 0.;
-  for(int ibar=0; ibar<iter.second.size(); ibar++)
-    totE += iter.second[ibar]->getEnergy();
-  printf("  Truth MCP pdgid %d, bar size %d, totE %.3f \n", iter.first.getPDG(), iter.second.size(), totE);
-}   
+//cout<<"truth map size "<<map_barCol.size()<<endl;
+//for(auto& iter: map_barCol){ 
+//  double totE = 0.;
+//  for(int ibar=0; ibar<iter.second.size(); ibar++)
+//    totE += iter.second[ibar]->getEnergy();
+//  printf("  Truth MCP pdgid %d, bar size %d, totE %.3f \n", iter.first.getPDG(), iter.second.size(), totE);
+//}   
 
 
     for(auto& iter: map_barCol){
@@ -209,7 +209,7 @@ cout<<endl;
 
     //Create tower
     HalfClusterToTowers(m_halfclusterU, m_halfclusterV, m_towers);
-cout<<"  Ecal halfcluster size "<<m_halfclusterU.size()<<", "<<m_halfclusterV.size()<<", tower size "<<m_towers.size()<<endl;
+//cout<<"  Ecal halfcluster size "<<m_halfclusterU.size()<<", "<<m_halfclusterV.size()<<", tower size "<<m_towers.size()<<endl;
 
     m_datacol.map_1DCluster[settings.map_stringPars["OutputECAL1DClusters"]+"U"] = m_1dclusterUCol;
     m_datacol.map_1DCluster[settings.map_stringPars["OutputECAL1DClusters"]+"V"] = m_1dclusterVCol;
@@ -223,7 +223,7 @@ cout<<"  Ecal halfcluster size "<<m_halfclusterU.size()<<", "<<m_halfclusterV.si
 
   //HCAL clustering
   if(settings.map_boolPars["DoHCALClustering"]){
-cout<<"Input HCAL hit size "<<m_hits.size()<<endl;
+//cout<<"Input HCAL hit size "<<m_hits.size()<<endl;
     std::map<edm4hep::MCParticle, std::vector<std::shared_ptr<PandoraPlus::CaloHit>> > map_hitCol; map_hitCol.clear();
     for(int ihit=0; ihit<m_hits.size(); ihit++){
       if(settings.map_boolPars["UseSplit"]){
@@ -258,13 +258,13 @@ cout<<"Input HCAL hit size "<<m_hits.size()<<endl;
    
     }//End loop hits
 
-cout<<"truth map size "<<map_hitCol.size()<<endl;
-for(auto& iter: map_hitCol){
-  double totE = 0.;
-  for(int ibar=0; ibar<iter.second.size(); ibar++)
-    totE += iter.second[ibar]->getEnergy();
-  printf("  Truth MCP pdgid %d, bar size %d, totE %.3f \n", iter.first.getPDG(), iter.second.size(), totE);
-} 
+//cout<<"truth map size "<<map_hitCol.size()<<endl;
+//for(auto& iter: map_hitCol){
+//  double totE = 0.;
+//  for(int ibar=0; ibar<iter.second.size(); ibar++)
+//    totE += iter.second[ibar]->getEnergy();
+//  printf("  Truth MCP pdgid %d, bar size %d, totE %.3f \n", iter.first.getPDG(), iter.second.size(), totE);
+//} 
   
     for(auto& iter: map_hitCol){
       std::shared_ptr<PandoraPlus::Calo3DCluster> m_newCluster = std::make_shared<PandoraPlus::Calo3DCluster>();

@@ -18,6 +18,7 @@ StatusCode EnergyTimeMatchingAlg::ReadSettings(Settings& m_settings){
   if(settings.map_floatPars.find("th_ConeR")==settings.map_floatPars.end())          settings.map_floatPars["th_ConeR"] = 30.;
   if(settings.map_stringPars.find("ReadinHFClusterName")==settings.map_stringPars.end()) settings.map_stringPars["ReadinHFClusterName"] = "ESHalfCluster";
   if(settings.map_stringPars.find("ReadinTowerName")==settings.map_stringPars.end()) settings.map_stringPars["ReadinTowerName"] = "ESTower";
+  if(settings.map_stringPars.find("OutputClusterName")==settings.map_stringPars.end()) settings.map_stringPars["OutputClusterName"] = "EcalCluster";
   
 
   return StatusCode::SUCCESS;
@@ -491,8 +492,7 @@ for(int i=0; i<m_clusterCol.size(); i++){
   }
 
 }
-
-  m_datacol.map_CaloCluster["EcalCluster"] = m_clusterCol;
+  m_datacol.map_CaloCluster[settings.map_stringPars["OutputClusterName"]] = m_clusterCol;
 
 //cout<<" Save backup collections in to main datacol. "<<endl;
   //Save backup collections in to main datacol. 

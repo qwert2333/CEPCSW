@@ -1,6 +1,6 @@
 from Gaudi.Configuration import *
 Nskip = 0
-Nevt = 3
+Nevt = 1
 Name_suffix = 'PseudoJet'
 
 ############## GeomSvc #################
@@ -95,38 +95,70 @@ PandoraPlusPFAlg.HCalMCPAssociationName = ["HCALBarrelParticleAssoCol"]
 
 #----Algorithms----
 
-PandoraPlusPFAlg.AlgList = ["GlobalClusteringAlg",
-                            "LocalMaxFindingAlg",
-                            "TruthTrackMatchingAlg",
-                            "TruthPatternRecAlg",
-                            "TruthEnergySplittingAlg" ]
-#                            "TruthMatchingAlg", 
-#                            "TruthClusteringAlg",
-#                            "TruthClusterMergingAlg" ]
-PandoraPlusPFAlg.AlgParNames = [ ["unit_threshold"],
-                                 ["Eth_localMax", "Eth_MaxWithNeigh"],
-                                 [""],
-                                 [""],
-                                 [""] ]
-#                                 [""],
-#                                 ["DoECALClustering"],
-#                                 [""] ]
-PandoraPlusPFAlg.AlgParTypes = [ ["double"],
-                                 ["double", "double"],
-                                 [""],
-                                 [""],
-                                 [""] ]
-#                                 [""],
-#                                 ["bool"],
-#                                 [""] ]
-PandoraPlusPFAlg.AlgParValues = [ ["0.001"],
-                                  ["0.005", "0."],
-                                  [""], 
-                                  [""],
-                                  [""] ]
-#                                  [""],
-#                                  ["0"],
-#                                  [""]  ]
+PandoraPlusPFAlg.AlgList = ["GlobalClusteringAlg",      #1
+                            "LocalMaxFindingAlg",       #2
+                            "TrackMatchingAlg",         #3
+                            "HoughClusteringAlg",       #4
+                            "ConeClustering2DAlg",      #5
+                            "AxisMergingAlg",           #6
+                            "TruthTrackMatchingAlg",    #7
+                            "TruthPatternRecAlg",       #8
+                            "EnergySplittingAlg",       #9
+                            "TruthEnergySplittingAlg",  #10
+                            "EnergyTimeMatchingAlg",    #11
+                            "TruthMatchingAlg",         #12
+                            "HcalClusteringAlg",        #13
+                            "PFOCreatingAlg",           #14
+                            "TruthClusteringAlg",       #15
+                            "TruthClusterMergingAlg" ]  #16  
+PandoraPlusPFAlg.AlgParNames = [ ["InputECALBars","OutputECAL1DClusters","OutputECALHalfClusters"],#1
+                                 ["OutputLocalMaxName"],#2
+                                 ["ReadinLocalMaxName","OutputLongiClusName"],#3
+                                 ["ReadinLocalMaxName","LeftLocalMaxName","OutputLongiClusName"],#4
+                                 ["ReadinLocalMaxName", "OutputLongiClusName"],#5
+                                 ["OutputAxisName"],#6
+                                 ["ReadinLocalMaxName","OutputLongiClusName"],#7
+                                 ["ReadinLocalMaxName", "OutputLongiClusName", "DoAxisMerging", "ReadinAxisName", "OutputMergedAxisName"],#8
+                                 ["ReadinAxisName", "OutputClusName", "OutputTowerName"],#9
+                                 ["ReadinAxisName", "OutputClusName", "OutputTowerName"],#10
+                                 ["ReadinHFClusterName", "ReadinTowerName","OutputClusterName"],#11
+                                 ["ReadinHFClusterName", "ReadinTowerName", "OutputClusterName"],#12
+                                 ["InputHCALHits", "OutputHCALClusters"],#13
+                                 ["ReadinECALClusters","ReadinHCALClusters","OutputCombPFO"],#14
+                                 ["DoECALClustering","DoHCALClustering","InputHCALHits","OutputHCALClusters"],#15
+                                 ["DoECALMerge","DoHCALMerge","DoECALHCALConnection","ReadinECALClusters","ReadinHCALClusters","OutputECALCluster","OutputHCALCluster","OutputCombPFO"] ]#16
+PandoraPlusPFAlg.AlgParTypes = [ ["string","string","string"],#1
+                                 ["string"],#2
+                                 ["string","string"],#3
+                                 ["string","string","string"],#4
+                                 ["string","string"],#5
+                                 ["string"],#6
+                                 ["string","string"],#7
+                                 ["string","string","bool","string","string"],#8
+                                 ["string","string","string"],#9
+                                 ["string","string","string"],#10
+                                 ["string","string","string"],#11
+                                 ["string","string","string"],#12
+                                 ["string","string"],#13
+                                 ["string","string","string"],#14
+                                 ["bool","bool","string","string"],#15
+                                 ["bool","bool","bool","string","string","string","string","string"] ]#16
+PandoraPlusPFAlg.AlgParValues = [ ["BarCol","Cluster1DCol","HalfClusterCol"],#1
+                                  ["AllLocalMax"],#2
+                                  ["AllLocalMax","TrackAxis"],#3
+                                  ["AllLocalMax","LeftLocalMax","HoughAxis"],#4
+                                  ["LeftLocalMax","ConeAxis"],#5
+                                  ["MergedAxis"],#6
+                                  ["AllLocalMax","TruthTrackAxis"],#7
+                                  ["AllLocalMax","TruthAxis","1","TruthTrackAxis","TruthMergedAxis"],#8
+                                  ["MergedAxis","ESHalfCluster","ESTower"],#9
+                                  ["TruthMergedAxis","TruthESCluster","TruthESTower"],#10
+                                  ["ESHalfCluster","ESTower","EcalCluster"],#11
+                                  ["TruthESCluster","TruthESTower","TruthEcalCluster"],#12
+                                  ["HCALBarrel","HCALCluster"],#13
+                                  ["EcalCluster","HCALCluster","outputPFO"],#14
+                                  ["0","1","HCALBarrel","TruthHcalCluster"],#15
+                                  ["1","1","1","TruthEcalCluster","TruthHcalCluster","TruthMergedEcalCluster","TruthMergedHcalCluster","TruthCombPFO"]  ]#16
 
 
 ########################################

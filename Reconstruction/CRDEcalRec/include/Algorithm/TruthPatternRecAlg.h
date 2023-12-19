@@ -22,6 +22,8 @@ public:
   StatusCode RunAlgorithm( PandoraPlusDataCol& m_datacol );
   StatusCode ClearAlgorithm();
 
+  StatusCode OverlapMerging   ( std::vector<std::shared_ptr<PandoraPlus::CaloHalfCluster>>& m_axisCol );
+
 private: 
 
   std::vector<PandoraPlus::CaloHalfCluster*> p_HalfClusterV;

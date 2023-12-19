@@ -47,24 +47,24 @@ CRDHcalDigiAlg::CRDHcalDigiAlg(const std::string& name, ISvcLocator* svcLoc)
 
 StatusCode CRDHcalDigiAlg::initialize()
 {
-
-	std::string s_outfile = _filename;
-	m_wfile = new TFile(s_outfile.c_str(), "recreate");
-	t_simHit = new TTree("simHit", "simHit");
-
-	t_simHit->Branch("simHit_x", &m_simHit_x);
-	t_simHit->Branch("simHit_y", &m_simHit_y);
-	t_simHit->Branch("simHit_z", &m_simHit_z);
-	t_simHit->Branch("simHit_E", &m_simHit_E);
-	t_simHit->Branch("simHit_steps", &m_simHit_steps);
-
-	t_simHit->Branch("simHit_module", &m_simHit_module);
-	t_simHit->Branch("simHit_stave", &m_simHit_stave);
-	t_simHit->Branch("simHit_layer", &m_simHit_layer);
-	t_simHit->Branch("simHit_tower", &m_simHit_tower);
-	t_simHit->Branch("simHit_slice", &m_simHit_slice);
-	t_simHit->Branch("simHit_cellID", &m_simHit_cellID);
-
+  if(_writeNtuple){
+    std::string s_outfile = _filename;
+    m_wfile = new TFile(s_outfile.c_str(), "recreate");
+    t_simHit = new TTree("simHit", "simHit");
+    
+    t_simHit->Branch("simHit_x", &m_simHit_x);
+    t_simHit->Branch("simHit_y", &m_simHit_y);
+    t_simHit->Branch("simHit_z", &m_simHit_z);
+    t_simHit->Branch("simHit_E", &m_simHit_E);
+    t_simHit->Branch("simHit_steps", &m_simHit_steps);
+    
+    t_simHit->Branch("simHit_module", &m_simHit_module);
+    t_simHit->Branch("simHit_stave", &m_simHit_stave);
+    t_simHit->Branch("simHit_layer", &m_simHit_layer);
+    t_simHit->Branch("simHit_tower", &m_simHit_tower);
+    t_simHit->Branch("simHit_slice", &m_simHit_slice);
+    t_simHit->Branch("simHit_cellID", &m_simHit_cellID);
+  }
 	std::cout<<"CRDHcalDigiAlg::m_scale="<<m_scale<<std::endl;
 	m_geosvc = service<IGeomSvc>("GeomSvc");
 	if ( !m_geosvc )  throw "CRDHcalDigiAlg :Failed to find GeomSvc ...";
@@ -162,22 +162,22 @@ StatusCode CRDHcalDigiAlg::execute()
       rel_MC.setWeight(iter.second/Ehit_raw);
     }
 
-
-    m_simHit_x.push_back(digiHit.getPosition().x);
-    m_simHit_y.push_back(digiHit.getPosition().y);
-    m_simHit_z.push_back(digiHit.getPosition().z);
-    m_simHit_E.push_back(digiHit.getEnergy());
-    m_simHit_steps.push_back(simhit.contributions_size());
-    m_simHit_module.push_back(m_decoder->get(id, "module"));
-    m_simHit_stave.push_back(m_decoder->get(id, "stave"));
-    m_simHit_layer.push_back(m_decoder->get(id, "layer"));
-    m_simHit_slice.push_back(m_decoder->get(id, "slice"));
-    m_simHit_tower.push_back(m_decoder->get(id, "tower"));
-    m_simHit_cellID.push_back(id);
-
+    if(_writeNtuple){
+      m_simHit_x.push_back(digiHit.getPosition().x);
+      m_simHit_y.push_back(digiHit.getPosition().y);
+      m_simHit_z.push_back(digiHit.getPosition().z);
+      m_simHit_E.push_back(digiHit.getEnergy());
+      m_simHit_steps.push_back(simhit.contributions_size());
+      m_simHit_module.push_back(m_decoder->get(id, "module"));
+      m_simHit_stave.push_back(m_decoder->get(id, "stave"));
+      m_simHit_layer.push_back(m_decoder->get(id, "layer"));
+      m_simHit_slice.push_back(m_decoder->get(id, "slice"));
+      m_simHit_tower.push_back(m_decoder->get(id, "tower"));
+      m_simHit_cellID.push_back(id);
+    }
   }
 
-	t_simHit->Fill();
+	if(_writeNtuple) t_simHit->Fill();
 
 	_nEvt ++ ;
 	return StatusCode::SUCCESS;
@@ -185,12 +185,14 @@ StatusCode CRDHcalDigiAlg::execute()
 
 StatusCode CRDHcalDigiAlg::finalize()
 {
-	m_wfile->cd();
-	t_simHit->Write();
-	m_wfile->Close();
+  if(_writeNtuple){
+	  m_wfile->cd();
+	  t_simHit->Write();
+    m_wfile->Close();
+	  delete m_wfile, t_simHit; 
+  }
 
 	info() << "Processed " << _nEvt << " events " << endmsg;
-	delete m_wfile, t_simHit; 
 	delete m_cellIDConverter, m_decoder, m_geosvc;
 	return GaudiAlgorithm::finalize();
 }

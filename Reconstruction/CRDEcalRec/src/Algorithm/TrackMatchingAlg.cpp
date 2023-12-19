@@ -22,8 +22,6 @@ StatusCode TrackMatchingAlg::ReadSettings(PandoraPlus::Settings& m_settings){
     settings.map_floatPars["th_ConeTheta"] = TMath::Pi()/4.;
   if(settings.map_floatPars.find("th_ConeR")==settings.map_floatPars.end())        
     settings.map_floatPars["th_ConeR"] = 50;
-  //if(settings.map_intPars.find("Nmodule")==settings.map_intPars.end()) 
-  //  settings.map_intPars["Nmodule"] = 8;
   if(settings.map_stringPars.find("ReadinLocalMaxName")==settings.map_stringPars.end())
     settings.map_stringPars["ReadinLocalMaxName"] = "AllLocalMax";
   if(settings.map_stringPars.find("OutputLongiClusName")==settings.map_stringPars.end()) 
@@ -54,22 +52,26 @@ StatusCode TrackMatchingAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
   // This association is a many-to-many relationship: 
   //    One HalCluster may have multiple tracks; 
   //    One track may pass through multiple HalfClusters.
+//cout<<"track size: "<<m_TrackCol.size()<<", HFClusterU size "<<p_HalfClusterU->size()<<", HFClusterV size "<<p_HalfClusterV->size()<<endl;
+
   for(int itrk=0; itrk<m_TrackCol.size(); itrk++){  // loop tracks
+//printf("  In track %d: track state size %d \n", itrk, m_TrackCol[itrk]->getTrackStates("Ecal").size());
     if(m_TrackCol[itrk]->getTrackStates("Ecal").size()==0) continue;
 
     // Get extrapolated points of the track. These points are sorted by the track
     std::vector<TVector3> extrapo_points;
     GetExtrpoECALPoints(m_TrackCol[itrk], extrapo_points);
+//printf("  In track %d: extrapolated point size %d \n", itrk, extrapo_points.size());
     if(extrapo_points.size()==0) continue;
 
     double pT = TMath::Abs(1. / m_TrackCol[itrk]->getTrackStates("Ecal")[0].Kappa);
     if (pT >= settings.map_floatPars["ConeMatchingCut_pT"]){
-      std::cout << "For track " << itrk << ", pT = " << pT <<", match directly" << std::endl;
+//std::cout << "For track " << itrk << ", pT = " << pT <<", match directly" << std::endl;
 
       for(int ihc=0; ihc<p_HalfClusterV->size(); ihc++){  // loop HalfClusterV
         // Get local max of the HalfCluster
         std::vector<const PandoraPlus::Calo1DCluster*> localMaxColV = p_HalfClusterV->at(ihc).get()->getLocalMaxCol(settings.map_stringPars["ReadinLocalMaxName"]);
-
+//cout<<"    In HalfClusterV #"<<ihc<<": localMax size "<<localMaxColV.size()<<endl;
         // Track axis candidate.
         std::shared_ptr<PandoraPlus::CaloHalfCluster> t_track_axis = std::make_shared<PandoraPlus::CaloHalfCluster>();
         CreateTrackAxis(extrapo_points, localMaxColV, t_track_axis.get());
@@ -77,7 +79,7 @@ StatusCode TrackMatchingAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
         // If the track does not match the Halfcluster, the track axis candidate will have no 1DCluster
         if(t_track_axis->getCluster().size()==0)
           continue;
-
+//cout<<"      Created a track axis"<<endl;
         t_track_axis->addAssociatedTrack(m_TrackCol[itrk]);
         t_track_axis->setType(10000); //Track-type axis. 
         m_TrackCol[itrk]->addAssociatedHalfClusterV( p_HalfClusterV->at(ihc).get() );
@@ -88,6 +90,7 @@ StatusCode TrackMatchingAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
       for(int ihc=0; ihc<p_HalfClusterU->size(); ihc++){  // loop HalfClusterU
         // Get local max of the HalfCluster
         std::vector<const PandoraPlus::Calo1DCluster*> localMaxColU = p_HalfClusterU->at(ihc).get()->getLocalMaxCol(settings.map_stringPars["ReadinLocalMaxName"]);
+//cout<<"    In HalfClusterU #"<<ihc<<": localMax size "<<localMaxColU.size()<<endl;
 
         // Track axis candidate.
         std::shared_ptr<PandoraPlus::CaloHalfCluster> t_track_axis = std::make_shared<PandoraPlus::CaloHalfCluster>();
@@ -97,6 +100,7 @@ StatusCode TrackMatchingAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
         if(t_track_axis->getCluster().size()==0)
           continue;
         
+//cout<<"      Created a track axis"<<endl;
         t_track_axis->addAssociatedTrack(m_TrackCol[itrk]);
         t_track_axis->setType(10000); //Track-type axis. 
         m_TrackCol[itrk]->addAssociatedHalfClusterU( p_HalfClusterU->at(ihc).get() );
@@ -105,7 +109,7 @@ StatusCode TrackMatchingAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
       }  // end loop HalfClusterU
     }
     else{  // pT < settings.map_floatPars["ConeMatchingCut_pT"]
-      std::cout << "For track " << itrk << ", pT = " << pT <<", using Cone method" << std::endl;
+//std::cout << "For track " << itrk << ", pT = " << pT <<", using Cone method" << std::endl;
 
       // Get local max and HalfCluster near the extrapolated points
       std::vector<PandoraPlus::CaloHalfCluster*> t_nearbyHalfClustersV;  t_nearbyHalfClustersV.clear();
@@ -151,7 +155,7 @@ StatusCode TrackMatchingAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
     for(int imc=0; imc<m_matchedVCol.size(); imc++){
       // std::cout<<"  yyy: m_matchedVCol["<<imc<<"]->getCluster().size()="<<m_matchedVCol[imc]->getCluster().size()<<std::endl;
       // std::cout<<"  yyy: m_matchedVCol["<<imc<<"]->getAssociatedTracks().size()=" << m_matchedVCol[imc]->getAssociatedTracks().size() << std::endl;
-      int N_trk_axis = m_matchedVCol[imc]->getHalfClusterMap()["TrackAxis"].size() ;
+      int N_trk_axis = m_matchedVCol[imc]->getHalfClusterMap()[settings.map_stringPars["OutputLongiClusName"]].size() ;
       // std::cout<<"  yyy: m_matchedVCol["<<imc<<"]->getHalfClusterMap()[TrackAxis].size()="<< N_trk_axis << std::endl;
       for(int itk=0; itk<N_trk_axis; itk++){
         // std::cout<<"    yyy: for TrackAxis " << itk 

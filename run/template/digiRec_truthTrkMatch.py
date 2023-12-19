@@ -1,7 +1,6 @@
 from Gaudi.Configuration import *
 Nskip = 0
-Nevt = 100
-Name_suffix = 'PseudoJet_truth_scheme1'
+Nevt = NEVT
 
 ############## GeomSvc #################
 geometry_option = "CRD_o1_v01/CRD_o1_v01_HCAL.xml"
@@ -24,7 +23,7 @@ geomsvc.compact = geometry_path
 from Configurables import k4DataSvc
 podioevent = k4DataSvc("EventDataSvc")
 podioevent.inputs = [
-"PseudoJet_3Gam2Pi/Sim/Simu_PseudoJet_3Gam2Pi_000.root"
+"SIMFILE"
 ]
 ##########################################
 
@@ -55,7 +54,7 @@ EcalDigi.EnergyThreshold = 0.0001   #0.1 MeV
 EcalDigi.ChargeThresholdFrac = 0.05
 EcalDigi.Debug=1
 EcalDigi.WriteNtuple = 0
-#EcalDigi.OutFileName = "DigiEcal_"+Name_suffix+".root"
+EcalDigi.OutFileName = "ECALDIGIFILE"
 #########################################
 
 ##HCAL##
@@ -73,7 +72,7 @@ HcalDigi.MIPResponse = 0.0005  # 0.5 MeV / MIP
 HcalDigi.MIPThreshold = 0.5    # Unit: MIP
 HcalDigi.Debug=0
 HcalDigi.WriteNtuple = 0
-#HcalDigi.OutFileName = "DigiHcal_"+Name_suffix+".root"
+HcalDigi.OutFileName = "HCALDIGIFILE"
 
 ######### Reconstruction ################
 from Configurables import PandoraPlusPFAlg
@@ -84,7 +83,7 @@ PandoraPlusPFAlg.BField = 3.
 PandoraPlusPFAlg.Debug = 0
 PandoraPlusPFAlg.SkipEvt = Nskip
 PandoraPlusPFAlg.WriteAna = 1
-PandoraPlusPFAlg.AnaFileName = "testRec_"+Name_suffix+".root"
+PandoraPlusPFAlg.AnaFileName = "RECFILE"
 ##----Readin collections----
 PandoraPlusPFAlg.MCParticleCollection = "MCParticle"
 PandoraPlusPFAlg.TrackCollections = ["MarlinTrkTracks"]
@@ -97,18 +96,46 @@ PandoraPlusPFAlg.HCalMCPAssociationName = ["HCALBarrelParticleAssoCol"]
 
 #----Algorithms----
 
-PandoraPlusPFAlg.AlgList = ["TruthClusteringAlg",
-                            "TruthMatchingAlg",
-                            "TruthClusterMergingAlg" ]
-PandoraPlusPFAlg.AlgParNames = [ [""] ,
-                                 [""] ,
-                                 [""] ]
-PandoraPlusPFAlg.AlgParTypes = [ [""] ,
-                                 [""] ,
-                                 [""] ]
-PandoraPlusPFAlg.AlgParValues = [ [""] ,
-                                  [""] ,
-                                  [""]  ]
+PandoraPlusPFAlg.AlgList = ["GlobalClusteringAlg",      #1
+                            "LocalMaxFindingAlg",       #2
+                            "TruthTrackMatchingAlg",    #7
+                            "HoughClusteringAlg",       #4
+                            "ConeClustering2DAlg",      #5
+                            "AxisMergingAlg",           #6
+                            "EnergySplittingAlg",       #9
+                            "EnergyTimeMatchingAlg",    #11
+                            "HcalClusteringAlg",        #13
+                            "PFOCreatingAlg"]           #14
+PandoraPlusPFAlg.AlgParNames = [ ["InputECALBars","OutputECAL1DClusters","OutputECALHalfClusters"],#1
+                                 ["OutputLocalMaxName"],#2
+                                 ["ReadinLocalMaxName","OutputLongiClusName"],#7
+                                 ["ReadinLocalMaxName","LeftLocalMaxName","OutputLongiClusName"],#4
+                                 ["ReadinLocalMaxName", "OutputLongiClusName"],#5
+                                 ["OutputAxisName"],#6
+                                 ["ReadinAxisName", "OutputClusName", "OutputTowerName"],#9
+                                 ["ReadinHFClusterName", "ReadinTowerName","OutputClusterName"],#11
+                                 ["InputHCALHits", "OutputHCALClusters"],#13
+                                 ["ReadinECALClusters","ReadinHCALClusters","OutputCombPFO"] ]#14
+PandoraPlusPFAlg.AlgParTypes = [ ["string","string","string"],#1
+                                 ["string"],#2
+                                 ["string","string"],#7
+                                 ["string","string","string"],#4
+                                 ["string","string"],#5
+                                 ["string"],#6
+                                 ["string","string","string"],#9
+                                 ["string","string","string"],#11
+                                 ["string","string"],#13
+                                 ["string","string","string"] ]#14
+PandoraPlusPFAlg.AlgParValues = [ ["BarCol","Cluster1DCol","HalfClusterCol"],#1
+                                  ["AllLocalMax"],#2
+                                  ["AllLocalMax","TrackAxis"],#7
+                                  ["AllLocalMax","LeftLocalMax","HoughAxis"],#4
+                                  ["LeftLocalMax","ConeAxis"],#5
+                                  ["MergedAxis"],#6
+                                  ["MergedAxis","ESHalfCluster","ESTower"],#9
+                                  ["ESHalfCluster","ESTower","EcalCluster"],#11
+                                  ["HCALBarrel","HCALCluster"],#13
+                                  ["EcalCluster","HCALCluster","CombPFO"] ]#14
 
 
 ########################################
@@ -127,7 +154,7 @@ out.outputCommands = ["keep *"]
 from Configurables import ApplicationMgr
 ApplicationMgr( 
     TopAlg=[inp, EcalDigi, HcalDigi, PandoraPlusPFAlg],
-    #TopAlg=[inp, EcalDigi,HcalDigi],
+    #TopAlg=[inp, EcalDigi,caloDigi],
     EvtSel="NONE",
     EvtMax=Nevt,
     ExtSvc=[podioevent, geomsvc],

@@ -4,11 +4,12 @@ CurrPATH="$PWD"
 WorkPATH=$CurrPATH
 StdHepPATH="/cefs/data/stdhep/CEPC240/higgs/Higgs_10M/data/E240.Pnnh_gg.e0.p0.whizard195"
 #--------------------------------------------------------------
-EventName="E240_nnHgg"
+Scheme="truthTrkMatch"
+EventName="E240_nnHgg"_${Scheme}
 
 # -----------------------------------------------------------
 # Simulating / Processing event number per file
-Nevt=100
+Nevt=200
 
 # -----------------------------------------------------------
 # RecoDir=LayerCut${LayerCut}_Threshold${HCAL_Threshold_MIP}MIP_Calibration${HCAL_Calibration}
@@ -16,8 +17,8 @@ Nevt=100
 # RecoPATH=$WorkPATH/${EventName}/InitialTest_50Evt/Reco_BaselineArbor   #!!!!!!!!!!!!!!!!!!!!
 #SimuPATH=$WorkPATH/${EventName}/Sim
 SimuPATH=/cefs/higgs/zyang/cepcsoft/CEPCSW_v2.1.6.alpha/yang/physics/simdir
-RecoPATH=$WorkPATH/${EventName}_Reco/Reco   #!!!!!!!!!!!!!!!!!!!!
-jobPATH=$WorkPATH/${EventName}_Reco/job
+RecoPATH=$WorkPATH/${EventName}/Reco   #!!!!!!!!!!!!!!!!!!!!
+jobPATH=$WorkPATH/${EventName}/job
 #if [ ! -d "$SimuPATH" ]
 #then
 #mkdir -p $SimuPATH
@@ -59,7 +60,7 @@ do
 #    sed -i "s#SIMFILE#${SimuFile}#g" ${simScriptFile}
 #    sed -i "s#NEVT#${Nevt}#g" ${simScriptFile}
 
-    /bin/cp -fr $WorkPATH/template/digiRec_temp_truth_s1.py ${recScriptFile}
+    /bin/cp -fr $WorkPATH/template/digiRec_${Scheme}.py ${recScriptFile}
     sed -i "s#SIMFILE#${SimuFile}#g" ${recScriptFile}
     sed -i "s#ECALDIGIFILE#${ECALDigiFile}#g" ${recScriptFile}
     sed -i "s#HCALDIGIFILE#${HCALDigiFile}#g" ${recScriptFile}

@@ -31,7 +31,7 @@ StatusCode TruthMatchingAlg::Initialize( PandoraPlusDataCol& m_datacol ){
 };
 
 StatusCode TruthMatchingAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
-cout<<"TruthMatchingAlg: readin tower size "<<m_towerCol.size()<<endl;
+//cout<<"TruthMatchingAlg: readin tower size "<<m_towerCol.size()<<endl;
 
   for(int it=0; it<m_towerCol.size(); it++){
 
@@ -100,9 +100,15 @@ StatusCode TruthMatchingAlg::TruthMatching( std::vector<const PandoraPlus::CaloH
   //Truth split in HFClusterU
   for(int icl=0; icl<m_ClUCol.size(); icl++){
     auto truthMap = m_ClUCol[icl]->getLinkedMCP();
-//cout<<"    In HFClusU #"<<icl<<": truth link size "<<truthMap.size()<<endl;
+//cout<<"    In HFClusU #"<<icl<<": energy "<<m_ClUCol[icl]->getEnergy()<<", 1Dcluster size "<<m_ClUCol[icl]->getCluster().size()<<", truth link size "<<truthMap.size()<<endl;
 //for(auto& iter: truthMap)
 //  printf("    MC pid %d, weight %.3f \n", iter.first.getPDG(), iter.second);
+
+    if(truthMap.size()==1){
+      auto newClus = m_ClUCol[icl]->Clone();
+      m_truthESClUCol.push_back(newClus);
+      continue;
+    }
 
     for(auto& iter: truthMap ){
       if(iter.second<0.05) continue;
@@ -140,12 +146,13 @@ StatusCode TruthMatchingAlg::TruthMatching( std::vector<const PandoraPlus::CaloH
     }
   }
 //cout<<"    New HFClusterU size "<<m_truthESClUCol.size()<<endl;
+
   //Merge HFClusters linked to the same MCP
   for(int icl=0; icl<m_truthESClUCol.size() && m_truthESClUCol.size()>1; icl++){
     for(int jcl=icl+1; jcl<m_truthESClUCol.size(); jcl++){
       if(icl>m_truthESClUCol.size()) icl--;
 
-      if(m_truthESClUCol[icl]->getLinkedMCP()[0].first==m_truthESClUCol[jcl]->getLinkedMCP()[0].first){
+      if(m_truthESClUCol[icl]->getLeadingMCP()==m_truthESClUCol[jcl]->getLeadingMCP()){
         m_truthESClUCol[icl].get()->mergeHalfCluster(m_truthESClUCol[jcl].get());
         m_truthESClUCol.erase(m_truthESClUCol.begin()+jcl);
         jcl--;
@@ -163,6 +170,12 @@ StatusCode TruthMatchingAlg::TruthMatching( std::vector<const PandoraPlus::CaloH
 //cout<<"    In HFClusV #"<<icl<<": energy "<<m_ClVCol[icl]->getEnergy()<<", 1Dcluster size "<<m_ClVCol[icl]->getCluster().size()<<", truth link size "<<truthMap.size()<<endl;
 //for(auto& iter: truthMap)
 //  printf("    MC pid %d, weight %.3f \n", iter.first.getPDG(), iter.second);
+
+    if(truthMap.size()==1){
+      auto newClus = m_ClVCol[icl]->Clone();
+      m_truthESClVCol.push_back(newClus);
+      continue;
+    }
 
     for(auto iter: truthMap ){
       if(iter.second<0.05) continue;
@@ -205,7 +218,7 @@ StatusCode TruthMatchingAlg::TruthMatching( std::vector<const PandoraPlus::CaloH
     for(int jcl=icl+1; jcl<m_truthESClVCol.size(); jcl++){
       if(icl>m_truthESClVCol.size()) icl--;
 
-      if(m_truthESClVCol[icl]->getLinkedMCP()[0].first==m_truthESClVCol[jcl]->getLinkedMCP()[0].first){
+      if(m_truthESClVCol[icl]->getLeadingMCP()==m_truthESClVCol[jcl]->getLeadingMCP()){
         m_truthESClVCol[icl].get()->mergeHalfCluster(m_truthESClVCol[jcl].get());
         m_truthESClVCol.erase(m_truthESClVCol.begin()+jcl);
         jcl--;
@@ -214,7 +227,7 @@ StatusCode TruthMatchingAlg::TruthMatching( std::vector<const PandoraPlus::CaloH
     }
   }
   for(int icl=0; icl<m_truthESClVCol.size(); icl++) m_bkCol.map_HalfCluster["bkHalfCluster"].push_back(m_truthESClVCol[icl]);
-//cout<<"    HFClusterU size after merge "<<m_truthESClUCol.size()<<endl;
+//cout<<"    HFClusterV size after merge "<<m_truthESClVCol.size()<<endl;
 
 
   //Doing matching.
@@ -239,20 +252,26 @@ StatusCode TruthMatchingAlg::XYClusterMatchingL0( const PandoraPlus::CaloHalfClu
 {
 /*
 cout<<"  XYClusterMatchingL0: print input HFClusterU. ";
-printf("cluster size %d, MCP link size %d, Cover tower %d: ", m_longiClU->getCluster().size(), m_longiClU->getLinkedMCP().size(), m_longiClU->getTowerID().size());
+printf("cluster size %d, linked MC pid %d, track size %d, Cover tower %d: ", m_longiClU->getCluster().size(), m_longiClU->getLeadingMCP().getPDG(), m_longiClU->getAssociatedTracks().size(), m_longiClU->getTowerID().size());
 for(int it=0; it<m_longiClU->getTowerID().size(); it++) printf(" [%d, %d, %d] ", m_longiClU->getTowerID()[it][0], m_longiClU->getTowerID()[it][1], m_longiClU->getTowerID()[it][2]);
 cout<<endl;
 for(int ic=0; ic<m_longiClU->getCluster().size(); ic++){
-  printf("    Cluster #%d: layer %d, energy %.3f, bar size %d, seed size %d, MCP link size %d: ", ic, m_longiClU->getCluster()[ic]->getDlayer(), m_longiClU->getCluster()[ic]->getEnergy(), m_longiClU->getCluster()[ic]->getBars().size(), m_longiClU->getCluster()[ic]->getNseeds(), m_longiClU->getCluster()[ic]->getLinkedMCP().size() );
+  printf("    Cluster #%d: towerID [%d, %d, %d], layer %d, pos+E (%.3f, %.3f, %.3f, %.3f), bar size %d, seed size %d, MCP link size %d: ", 
+    ic, m_longiClU->getCluster()[ic]->getTowerID()[0][0], m_longiClU->getCluster()[ic]->getTowerID()[0][1], m_longiClU->getCluster()[ic]->getTowerID()[0][2], m_longiClU->getCluster()[ic]->getDlayer(), 
+    m_longiClU->getCluster()[ic]->getPos().x(), m_longiClU->getCluster()[ic]->getPos().y(), m_longiClU->getCluster()[ic]->getPos().z(),  m_longiClU->getCluster()[ic]->getEnergy(), 
+    m_longiClU->getCluster()[ic]->getBars().size(), m_longiClU->getCluster()[ic]->getNseeds(), m_longiClU->getCluster()[ic]->getLinkedMCP().size() );
   for(int imc=0; imc<m_longiClU->getCluster()[ic]->getLinkedMCP().size(); imc++) cout<<m_longiClU->getCluster()[ic]->getLinkedMCP()[imc].first.getPDG()<<", ";
   cout<<endl;
 }
 cout<<"  XYClusterMatchingL0: print input HFClusterV. ";
-printf("cluster size %d, MCP link size %d, Cover tower %d: ", m_longiClV->getCluster().size(), m_longiClV->getLinkedMCP().size(), m_longiClV->getTowerID().size());
+printf("cluster size %d, linked MC pid %d, track size %d, Cover tower %d: ", m_longiClV->getCluster().size(), m_longiClV->getLeadingMCP().getPDG(),  m_longiClV->getAssociatedTracks().size(), m_longiClV->getTowerID().size());
 for(int it=0; it<m_longiClV->getTowerID().size(); it++) printf(" [%d, %d, %d] ", m_longiClV->getTowerID()[it][0], m_longiClV->getTowerID()[it][1], m_longiClV->getTowerID()[it][2]);
 cout<<endl;
 for(int ic=0; ic<m_longiClV->getCluster().size(); ic++){
-  printf("    Cluster #%d: layer %d, energy %.3f, bar size %d, seed size %d, MCP link size %d: ", ic, m_longiClV->getCluster()[ic]->getDlayer(), m_longiClV->getCluster()[ic]->getEnergy(), m_longiClV->getCluster()[ic]->getBars().size(), m_longiClV->getCluster()[ic]->getNseeds(), m_longiClV->getCluster()[ic]->getLinkedMCP().size() );
+  printf("    Cluster #%d: towerID [%d, %d, %d], layer %d, pos+E (%.3f, %.3f, %.3f, %.3f), bar size %d, seed size %d, MCP link size %d: ", 
+    ic, m_longiClV->getCluster()[ic]->getTowerID()[0][0], m_longiClV->getCluster()[ic]->getTowerID()[0][1], m_longiClV->getCluster()[ic]->getTowerID()[0][2], m_longiClV->getCluster()[ic]->getDlayer(), 
+    m_longiClV->getCluster()[ic]->getPos().x(), m_longiClV->getCluster()[ic]->getPos().y(), m_longiClV->getCluster()[ic]->getPos().z(), m_longiClV->getCluster()[ic]->getEnergy(), 
+    m_longiClV->getCluster()[ic]->getBars().size(), m_longiClV->getCluster()[ic]->getNseeds(), m_longiClV->getCluster()[ic]->getLinkedMCP().size() );
   for(int imc=0; imc<m_longiClV->getCluster()[ic]->getLinkedMCP().size(); imc++) cout<<m_longiClV->getCluster()[ic]->getLinkedMCP()[imc].first.getPDG()<<", ";
   cout<<endl;
 }

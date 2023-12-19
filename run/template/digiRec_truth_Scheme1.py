@@ -1,7 +1,6 @@
 from Gaudi.Configuration import *
 Nskip = 0
-Nevt = 100
-Name_suffix = 'PseudoJet_truth_scheme1'
+Nevt = NEVT
 
 ############## GeomSvc #################
 geometry_option = "CRD_o1_v01/CRD_o1_v01_HCAL.xml"
@@ -24,7 +23,7 @@ geomsvc.compact = geometry_path
 from Configurables import k4DataSvc
 podioevent = k4DataSvc("EventDataSvc")
 podioevent.inputs = [
-"PseudoJet_3Gam2Pi/Sim/Simu_PseudoJet_3Gam2Pi_000.root"
+"SIMFILE"
 ]
 ##########################################
 
@@ -55,7 +54,7 @@ EcalDigi.EnergyThreshold = 0.0001   #0.1 MeV
 EcalDigi.ChargeThresholdFrac = 0.05
 EcalDigi.Debug=1
 EcalDigi.WriteNtuple = 0
-#EcalDigi.OutFileName = "DigiEcal_"+Name_suffix+".root"
+EcalDigi.OutFileName = "ECALDIGIFILE"
 #########################################
 
 ##HCAL##
@@ -73,7 +72,7 @@ HcalDigi.MIPResponse = 0.0005  # 0.5 MeV / MIP
 HcalDigi.MIPThreshold = 0.5    # Unit: MIP
 HcalDigi.Debug=0
 HcalDigi.WriteNtuple = 0
-#HcalDigi.OutFileName = "DigiHcal_"+Name_suffix+".root"
+HcalDigi.OutFileName = "HCALDIGIFILE"
 
 ######### Reconstruction ################
 from Configurables import PandoraPlusPFAlg
@@ -84,7 +83,7 @@ PandoraPlusPFAlg.BField = 3.
 PandoraPlusPFAlg.Debug = 0
 PandoraPlusPFAlg.SkipEvt = Nskip
 PandoraPlusPFAlg.WriteAna = 1
-PandoraPlusPFAlg.AnaFileName = "testRec_"+Name_suffix+".root"
+PandoraPlusPFAlg.AnaFileName = "RECFILE"
 ##----Readin collections----
 PandoraPlusPFAlg.MCParticleCollection = "MCParticle"
 PandoraPlusPFAlg.TrackCollections = ["MarlinTrkTracks"]
@@ -102,13 +101,13 @@ PandoraPlusPFAlg.AlgList = ["TruthClusteringAlg",
                             "TruthClusterMergingAlg" ]
 PandoraPlusPFAlg.AlgParNames = [ [""] ,
                                  [""] ,
-                                 [""] ]
+                                 ["OutputECALCluster","OutputHCALCluster","OutputCombPFO"] ]
 PandoraPlusPFAlg.AlgParTypes = [ [""] ,
                                  [""] ,
-                                 [""] ]
+                                 ["string", "string", "string"] ]
 PandoraPlusPFAlg.AlgParValues = [ [""] ,
                                   [""] ,
-                                  [""]  ]
+                                  ["EcalCluster", "HCALCluster","CombPFO"]  ]
 
 
 ########################################

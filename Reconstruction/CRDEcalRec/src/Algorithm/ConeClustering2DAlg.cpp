@@ -168,8 +168,10 @@ StatusCode ConeClustering2DAlg::LongiConeLinking(  std::map<int, std::vector<con
   }//end loop layers.
 
   bk_HFclus.insert(bk_HFclus.end(), m_clusCol.begin(), m_clusCol.end());
-  for(int icl=0; icl<m_clusCol.size(); icl++)
+  for(int icl=0; icl<m_clusCol.size(); icl++){
+    m_clusCol[icl]->getLinkedMCPfromUnit();
     ClusterCol.push_back( m_clusCol[icl].get() );  
+  }
 
   return StatusCode::SUCCESS;
 }

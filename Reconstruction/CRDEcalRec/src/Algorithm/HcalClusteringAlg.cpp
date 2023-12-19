@@ -7,7 +7,8 @@ using namespace PandoraPlus;
 StatusCode HcalClusteringAlg::ReadSettings(PandoraPlus::Settings& m_settings){
   settings = m_settings;
 
-  if(settings.map_stringPars.find("HCALCluster")==settings.map_stringPars.end())    settings.map_stringPars["HCALCluster"] = "HCALCluster";
+  if(settings.map_stringPars.find("InputHCALHits")==settings.map_stringPars.end())         settings.map_stringPars["InputHCALHits"] = "HCALBarrel";
+  if(settings.map_stringPars.find("OutputHCALClusters")==settings.map_stringPars.end())    settings.map_stringPars["OutputHCALClusters"] = "HCALCluster";
 
   //Set initial values
   if(settings.map_floatPars.find("th_ConeTheta_l1")==settings.map_floatPars.end())    settings.map_floatPars["th_ConeTheta_l1"] = TMath::Pi()/2.;
@@ -38,8 +39,8 @@ StatusCode HcalClusteringAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
 
   std::vector<PandoraPlus::CaloHit*> m_hcalHits;
   m_hcalHits.clear();
-  for(int ih=0; ih<m_datacol.map_CaloHit["HCALBarrel"].size(); ih++)
-    m_hcalHits.push_back( m_datacol.map_CaloHit["HCALBarrel"][ih].get() );
+  for(int ih=0; ih<m_datacol.map_CaloHit[settings.map_stringPars["InputHCALHits"]].size(); ih++)
+    m_hcalHits.push_back( m_datacol.map_CaloHit[settings.map_stringPars["InputHCALHits"]][ih].get() );
 
   std::vector<std::shared_ptr<PandoraPlus::Calo3DCluster>> m_clusterCol;  
   m_clusterCol.clear();
@@ -54,7 +55,7 @@ StatusCode HcalClusteringAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
   // }
 
 //   m_datacol.map_CaloCluster[settings.map_stringPars["OutputCluster"]] = m_clusterCol;
-  m_datacol.map_CaloCluster["HCALCluster"]= m_clusterCol;
+  m_datacol.map_CaloCluster[settings.map_stringPars["OutputHCALClusters"]]= m_clusterCol;
   return StatusCode::SUCCESS;
 };
 

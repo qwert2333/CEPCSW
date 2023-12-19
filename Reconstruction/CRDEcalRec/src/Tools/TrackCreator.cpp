@@ -91,9 +91,10 @@ namespace PandoraPlus{
 
   StatusCode TrackCreator::CreateTracksFromMCParticle(PandoraPlusDataCol& m_DataCol, 
                                           DataHandle<edm4hep::MCParticleCollection>* r_MCParticleCol){
+
+
     // Convert MC charged particles to local Track objects.
     // Assuming the tracks are ideal helixes.
-    std::cout << "yyy: CreateTracksFromMCParticle()" << std::endl;
 
     // Get charged MC particles with generatorStatus==1
     const edm4hep::MCParticleCollection* const_MCPCol = r_MCParticleCol->get();
@@ -138,6 +139,15 @@ namespace PandoraPlus{
     }
     m_DataCol.TrackCol = m_trkCol;
 
+    m_TrkExtraSettings.map_intPars["Input_track"] = 1;
+
+    m_TrkExtraAlg = new TrackExtrapolatingAlg();
+    m_TrkExtraAlg->ReadSettings(m_TrkExtraSettings);
+    m_TrkExtraAlg->Initialize( m_DataCol );
+    m_TrkExtraAlg->RunAlgorithm( m_DataCol );
+    m_TrkExtraAlg->ClearAlgorithm();
+    delete m_TrkExtraAlg;
+    m_TrkExtraAlg = nullptr;
 
     return StatusCode::SUCCESS;
   }

@@ -45,7 +45,7 @@ Keep the collection names compatible between the prototype and the existing CEPC
 * SETCollection
 
 ## Update in branch : EcalRec-2.1.6.alpha
-* New version: developed a truth-based reconstruction (WIP)
+* New version: developed a truth-based reconstruction
 ** All readin digitalized objects (track, EcalHit, HcalHit) have linked MCParticle(s) from edm4hep::MCRecoXXXXParticleAssociation (done)
 ** Readin these associations into CRDEcalRec package (done)
-** Truth-based reconstruction (WIP)
+** Truth-based reconstruction (done)

@@ -170,6 +170,7 @@ cout<<endl;
     std::vector<PandoraPlus::CaloHalfCluster*> tmp_goodAxis; tmp_goodAxis.clear(); 
     std::vector<PandoraPlus::CaloHalfCluster*> tmp_badAxis; tmp_badAxis.clear();
     for(int ic=0; ic<m_newAxisUCol.size(); ic++){
+      m_newAxisUCol[ic]->getLinkedMCPfromUnit();
       if( (m_newAxisUCol[ic]->getType()==100 && m_newAxisUCol[ic]->getCluster().size()>=settings.map_intPars["th_CoreNhit"] ) ||
           m_newAxisUCol[ic]->getType()>100 ){
             tmp_goodAxis.push_back( m_newAxisUCol[ic] );
@@ -256,6 +257,7 @@ cout<<endl;
     std::vector<PandoraPlus::CaloHalfCluster*> tmp_goodAxis; tmp_goodAxis.clear();
     std::vector<PandoraPlus::CaloHalfCluster*> tmp_badAxis; tmp_badAxis.clear();
     for(int ic=0; ic<m_newAxisVCol.size(); ic++){
+      m_newAxisVCol[ic]->getLinkedMCPfromUnit();
       if( (m_newAxisVCol[ic]->getType()==100 && m_newAxisVCol[ic]->getCluster().size()>=settings.map_intPars["th_CoreNhit"] ) ||
           m_newAxisVCol[ic]->getType()>100 ){
             tmp_goodAxis.push_back( m_newAxisVCol[ic] );

@@ -48,34 +48,36 @@ CRDEcalDigiAlg::CRDEcalDigiAlg(const std::string& name, ISvcLocator* svcLoc)
 StatusCode CRDEcalDigiAlg::initialize()
 {
 
-	std::string s_outfile = _filename;
-	m_wfile = new TFile(s_outfile.c_str(), "recreate");
-	t_SimCont = new TTree("SimStep", "SimStep");
-	t_SimBar = new TTree("SimBarHit", "SimBarHit");
-	t_SimCont->Branch("step_x", &m_step_x);
-	t_SimCont->Branch("step_y", &m_step_y);
-	t_SimCont->Branch("step_z", &m_step_z);
-	t_SimCont->Branch("step_t", &m_step_t);			// yyy: time of each step
-	t_SimCont->Branch("stepBar_x", &m_stepBar_x);
-	t_SimCont->Branch("stepBar_y", &m_stepBar_y);
-	t_SimCont->Branch("stepBar_z", &m_stepBar_z);
-	t_SimCont->Branch("step_E", &m_step_E);
-	t_SimCont->Branch("step_T1", &m_step_T1);
-	t_SimCont->Branch("step_T2", &m_step_T2);
-  t_SimBar->Branch("totE", &totE);
-	t_SimBar->Branch("simBar_x", &m_simBar_x);
-	t_SimBar->Branch("simBar_y", &m_simBar_y);
-	t_SimBar->Branch("simBar_z", &m_simBar_z);
-	t_SimBar->Branch("simBar_T1", &m_simBar_T1);
-	t_SimBar->Branch("simBar_T2", &m_simBar_T2);
-	t_SimBar->Branch("simBar_Q1", &m_simBar_Q1);
-	t_SimBar->Branch("simBar_Q2", &m_simBar_Q2);
-	t_SimBar->Branch("simBar_module", &m_simBar_module);
-	t_SimBar->Branch("simBar_stave", &m_simBar_stave);
-	t_SimBar->Branch("simBar_dlayer", &m_simBar_dlayer);
-	t_SimBar->Branch("simBar_part", &m_simBar_part);
-	t_SimBar->Branch("simBar_slayer", &m_simBar_slayer);
-	t_SimBar->Branch("simBar_cellID", &m_simBar_cellID);
+  if(_writeNtuple){
+    std::string s_outfile = _filename;
+    m_wfile = new TFile(s_outfile.c_str(), "recreate");
+    t_SimCont = new TTree("SimStep", "SimStep");
+    t_SimBar = new TTree("SimBarHit", "SimBarHit");
+    t_SimCont->Branch("step_x", &m_step_x);
+    t_SimCont->Branch("step_y", &m_step_y);
+    t_SimCont->Branch("step_z", &m_step_z);
+    t_SimCont->Branch("step_t", &m_step_t);			// yyy: time of each step
+    t_SimCont->Branch("stepBar_x", &m_stepBar_x);
+    t_SimCont->Branch("stepBar_y", &m_stepBar_y);
+    t_SimCont->Branch("stepBar_z", &m_stepBar_z);
+    t_SimCont->Branch("step_E", &m_step_E);
+    t_SimCont->Branch("step_T1", &m_step_T1);
+    t_SimCont->Branch("step_T2", &m_step_T2);
+    t_SimBar->Branch("totE", &totE);
+    t_SimBar->Branch("simBar_x", &m_simBar_x);
+    t_SimBar->Branch("simBar_y", &m_simBar_y);
+    t_SimBar->Branch("simBar_z", &m_simBar_z);
+    t_SimBar->Branch("simBar_T1", &m_simBar_T1);
+    t_SimBar->Branch("simBar_T2", &m_simBar_T2);
+    t_SimBar->Branch("simBar_Q1", &m_simBar_Q1);
+    t_SimBar->Branch("simBar_Q2", &m_simBar_Q2);
+    t_SimBar->Branch("simBar_module", &m_simBar_module);
+    t_SimBar->Branch("simBar_stave", &m_simBar_stave);
+    t_SimBar->Branch("simBar_dlayer", &m_simBar_dlayer);
+    t_SimBar->Branch("simBar_part", &m_simBar_part);
+    t_SimBar->Branch("simBar_slayer", &m_simBar_slayer);
+    t_SimBar->Branch("simBar_cellID", &m_simBar_cellID);
+  }
 
 	std::cout<<"CRDEcalDigiAlg::m_scale="<<m_scale<<std::endl;
 	m_geosvc = service<IGeomSvc>("GeomSvc");
@@ -328,26 +330,28 @@ StatusCode CRDEcalDigiAlg::execute()
 		totE+=(hitbar.getQ1()+hitbar.getQ2())/2;
 		
     //Temp: write into trees. 
-		m_simBar_x.push_back(hitbar.getPosition().x());
-		m_simBar_y.push_back(hitbar.getPosition().y());
-		m_simBar_z.push_back(hitbar.getPosition().z());
-		m_simBar_Q1.push_back(hitbar.getQ1());
-		m_simBar_Q2.push_back(hitbar.getQ2());
-		m_simBar_T1.push_back(hitbar.getT1());
-		m_simBar_T2.push_back(hitbar.getT2());
-		m_simBar_module.push_back(hitbar.getModule());
-		m_simBar_stave.push_back(hitbar.getStave());
-		m_simBar_dlayer.push_back(hitbar.getDlayer());
-		m_simBar_part.push_back(hitbar.getPart());
-		m_simBar_slayer.push_back(hitbar.getSlayer());
-    m_simBar_cellID.push_back(hitbar.getcellID());
-
+    if(_writeNtuple){
+      m_simBar_x.push_back(hitbar.getPosition().x());
+      m_simBar_y.push_back(hitbar.getPosition().y());
+      m_simBar_z.push_back(hitbar.getPosition().z());
+      m_simBar_Q1.push_back(hitbar.getQ1());
+      m_simBar_Q2.push_back(hitbar.getQ2());
+      m_simBar_T1.push_back(hitbar.getT1());
+      m_simBar_T2.push_back(hitbar.getT2());
+      m_simBar_module.push_back(hitbar.getModule());
+      m_simBar_stave.push_back(hitbar.getStave());
+      m_simBar_dlayer.push_back(hitbar.getDlayer());
+      m_simBar_part.push_back(hitbar.getPart());
+      m_simBar_slayer.push_back(hitbar.getSlayer());
+      m_simBar_cellID.push_back(hitbar.getcellID());
+    }
 	}
 
 
-
-	t_SimCont->Fill();
-	t_SimBar->Fill();
+  if(_writeNtuple){
+  	t_SimCont->Fill();
+	  t_SimBar->Fill();
+  }
 	if(_Debug>=1) std::cout<<"End Loop: Bar Digitalization!"<<std::endl;
 	std::cout<<"Total Bar Energy: "<<totE<<std::endl;
 
@@ -366,13 +370,15 @@ StatusCode CRDEcalDigiAlg::execute()
 
 StatusCode CRDEcalDigiAlg::finalize()
 {
-	m_wfile->cd();
-	t_SimCont->Write();
-	t_SimBar->Write();
-	m_wfile->Close();
+  if(_writeNtuple){
+  	m_wfile->cd();
+	  t_SimCont->Write();
+  	t_SimBar->Write();
+	  m_wfile->Close();
+    delete m_wfile, t_SimCont, t_SimBar; 
+  }
 
   info() << "Processed " << _nEvt << " events " << endmsg;
-  delete m_wfile, t_SimCont, t_SimBar; 
   delete m_cellIDConverter, m_decoder, m_geosvc;
   return GaudiAlgorithm::finalize();
 }

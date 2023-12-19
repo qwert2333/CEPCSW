@@ -5,6 +5,11 @@
 
 StatusCode PFOCreatingAlg::ReadSettings(Settings& m_settings){
   settings = m_settings;
+
+  if(settings.map_stringPars.find("ReadinECALClusters")==settings.map_stringPars.end()) settings.map_stringPars["ReadinECALClusters"] = "EcalCluster";
+  if(settings.map_stringPars.find("ReadinHCALClusters")==settings.map_stringPars.end()) settings.map_stringPars["ReadinHCALClusters"] = "HCALCluster";
+  if(settings.map_stringPars.find("OutputCombPFO")==settings.map_stringPars.end()) settings.map_stringPars["OutputCombPFO"] = "outputPFO";
+
   if(settings.map_floatPars.find("delta_phi_cut")==settings.map_floatPars.end())
     settings.map_floatPars["delta_phi_cut"] = 30./180.*TMath::Pi(); 
   if(settings.map_floatPars.find("delta_cosTheta_cut")==settings.map_floatPars.end())
@@ -25,11 +30,11 @@ StatusCode PFOCreatingAlg::Initialize( PandoraPlusDataCol& m_datacol ){
   for(int it=0; it<m_datacol.TrackCol.size(); it++){
     m_tracks.push_back( m_datacol.TrackCol[it].get() );
   }
-  for(int ie=0; ie<m_datacol.map_CaloCluster["EcalCluster"].size(); ie++){
-    m_ecal_clusters.push_back( m_datacol.map_CaloCluster["EcalCluster"][ie].get() );
+  for(int ie=0; ie<m_datacol.map_CaloCluster[settings.map_stringPars["ReadinECALClusters"]].size(); ie++){
+    m_ecal_clusters.push_back( m_datacol.map_CaloCluster[settings.map_stringPars["ReadinECALClusters"]][ie].get() );
   }
-  for(int ih=0; ih<m_datacol.map_CaloCluster["HCALCluster"].size(); ih++){
-    m_hcal_clusters.push_back( m_datacol.map_CaloCluster["HCALCluster"][ih].get() );
+  for(int ih=0; ih<m_datacol.map_CaloCluster[settings.map_stringPars["ReadinHCALClusters"]].size(); ih++){
+    m_hcal_clusters.push_back( m_datacol.map_CaloCluster[settings.map_stringPars["ReadinHCALClusters"]][ih].get() );
   }
 
   return StatusCode::SUCCESS;
@@ -121,7 +126,7 @@ StatusCode PFOCreatingAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
 
   }  
 
-  m_datacol.map_PFObjects["outputPFO"] = m_pfobjects;
+  m_datacol.map_PFObjects[settings.map_stringPars["OutputCombPFO"]] = m_pfobjects;
 
   
 

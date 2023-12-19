@@ -26,6 +26,8 @@ StatusCode TruthTrackMatchingAlg::Initialize( PandoraPlusDataCol& m_datacol ){
   p_HalfClusterU = &(m_datacol.map_HalfCluster["HalfClusterColU"]);
   p_HalfClusterV = &(m_datacol.map_HalfCluster["HalfClusterColV"]);
 
+cout<<"TruthTrackMatchingAlg: Input track size "<<m_TrackCol.size()<<", HFClusterU size "<<p_HalfClusterU->size()<<", HFClusterV size "<<p_HalfClusterV->size()<<endl;
+
   return StatusCode::SUCCESS;
 };
 
@@ -36,6 +38,7 @@ StatusCode TruthTrackMatchingAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
 
     //Get MCP linked to the track
     edm4hep::MCParticle mcp_trk = m_TrackCol[itrk]->getLeadingMCP();
+//cout<<"  Track #"<<itrk<<": MC pid "<<mcp_trk.getPDG()<<endl;
  
     //Loop in HFCluster U
     for(int ihf=0; ihf<p_HalfClusterU->size(); ihf++){
@@ -45,7 +48,6 @@ StatusCode TruthTrackMatchingAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
       //Loop for the localMax: 
       std::shared_ptr<PandoraPlus::CaloHalfCluster> t_axis = std::make_shared<PandoraPlus::CaloHalfCluster>();
       for(int ilm=0; ilm<localMaxColU.size(); ilm++){
-        auto truthMap_lm = localMaxColU[ilm]->getLinkedMCP();
         edm4hep::MCParticle mcp_lm = localMaxColU[ilm]->getLeadingMCP(); 
         if(mcp_lm==mcp_trk)
           t_axis->addUnit(localMaxColU[ilm]);
@@ -53,9 +55,11 @@ StatusCode TruthTrackMatchingAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
       }
 
       // If the track does not match the Halfcluster, the track axis candidate will have no 1DCluster
-      if(t_axis->getCluster().size()==0)
+      if(!t_axis || t_axis->getCluster().size()==0)
         continue;
 
+//cout<<"    HFCluster #"<<ihf<<" match with track. New axis localMax size "<<t_axis->getCluster().size()<<endl;
+      t_axis->getLinkedMCPfromUnit();
       t_axis->addAssociatedTrack(m_TrackCol[itrk]);
       t_axis->setType(10000); //Track-type axis.
       m_TrackCol[itrk]->addAssociatedHalfClusterU( p_HalfClusterU->at(ihf).get() );
@@ -71,7 +75,6 @@ StatusCode TruthTrackMatchingAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
       //Loop for the localMax:
       std::shared_ptr<PandoraPlus::CaloHalfCluster> t_axis = std::make_shared<PandoraPlus::CaloHalfCluster>();
       for(int ilm=0; ilm<localMaxColV.size(); ilm++){
-        auto truthMap_lm = localMaxColV[ilm]->getLinkedMCP();
         edm4hep::MCParticle mcp_lm = localMaxColV[ilm]->getLeadingMCP();
         if(mcp_lm==mcp_trk)
           t_axis->addUnit(localMaxColV[ilm]);
@@ -79,9 +82,11 @@ StatusCode TruthTrackMatchingAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
       }
 
       // If the track does not match the Halfcluster, the track axis candidate will have no 1DCluster
-      if(t_axis->getCluster().size()==0)
+      if(!t_axis || t_axis->getCluster().size()==0)
         continue;
 
+//cout<<"    HFCluster #"<<ihf<<" match with track. New axis localMax size "<<t_axis->getCluster().size()<<endl;
+      t_axis->getLinkedMCPfromUnit();
       t_axis->addAssociatedTrack(m_TrackCol[itrk]);
       t_axis->setType(10000); //Track-type axis.
       m_TrackCol[itrk]->addAssociatedHalfClusterV( p_HalfClusterV->at(ihf).get() );
@@ -91,12 +96,13 @@ StatusCode TruthTrackMatchingAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
 
   }//End loop track
 
-
+//cout<<"Check HFClusters linked to the same track"<<endl;
   //Loop track to check the associated cluster: merge clusters if they are associated to the same track.
   std::vector<PandoraPlus::CaloHalfCluster*> tmp_deleteClus; tmp_deleteClus.clear();
   for(auto &itrk : m_TrackCol){
     std::vector<PandoraPlus::CaloHalfCluster*> m_matchedUCol = itrk->getAssociatedHalfClustersU();
     std::vector<PandoraPlus::CaloHalfCluster*> m_matchedVCol = itrk->getAssociatedHalfClustersV();
+//cout<<"  In track "<<itrk<<": linked HFU size "<<m_matchedUCol.size()<<", linked HFV size "<<m_matchedVCol.size()<<endl;
 
     if( m_matchedUCol.size()>1 ){
       for(int i=1; i<m_matchedUCol.size(); i++){
@@ -128,7 +134,89 @@ StatusCode TruthTrackMatchingAlg::RunAlgorithm( PandoraPlusDataCol& m_datacol ){
     }
   }
 
+  //Clean the duplicated axes
+  for(int ihc=0; ihc<p_HalfClusterU->size(); ihc++){
+    std::vector<const PandoraPlus::CaloHalfCluster*> m_axis = p_HalfClusterU->at(ihc)->getHalfClusterCol(settings.map_stringPars["OutputLongiClusName"]);
+    std::vector<const PandoraPlus::CaloHalfCluster*> m_mergedAxis; m_mergedAxis.clear();
 
+//cout<<"  In HFCluster #"<<ihc<<": track axis size "<<m_axis.size();
+    if(m_axis.size()<=1){ 
+//cout<<endl;
+      continue;
+    }
+
+    std::map<const PandoraPlus::Track*, std::vector<const PandoraPlus::CaloHalfCluster*>> map_trk; map_trk.clear();
+    for(int iax=0; iax<m_axis.size(); iax++){
+      if(m_axis[iax]->getAssociatedTracks().size()==0){ 
+        m_mergedAxis.push_back(m_axis[iax]);
+        continue;
+      }
+      if(m_axis[iax]->getAssociatedTracks().size()>1)
+        std::cout<<"Warning: track axis has "<<m_axis[iax]->getAssociatedTracks().size()<<" matched tracks! Need to check! "<<endl;
+
+      map_trk[m_axis[iax]->getAssociatedTracks()[0]].push_back(m_axis[iax]);
+    }
+//cout<<"  map size "<<map_trk.size()<<", neutral axis size "<<m_mergedAxis.size()<<endl;;
+
+    for(auto &itrk: map_trk){
+//cout<<"  In track: axis size "<<itrk.second.size()<<endl;
+      if(itrk.second.size()==0) continue;
+      if(itrk.second.size()==1){ 
+        m_mergedAxis.push_back(itrk.second[0]);
+        continue;
+      }
+      PandoraPlus::CaloHalfCluster* p_axis = const_cast<PandoraPlus::CaloHalfCluster*>(itrk.second[0]);
+      for(int iax=1; iax<itrk.second.size(); iax++) p_axis->mergeHalfCluster(itrk.second[iax]);
+      m_mergedAxis.push_back(p_axis);
+    }
+    
+//cout<<". After merge: axis size "<<m_mergedAxis.size()<<endl;
+     p_HalfClusterU->at(ihc)->setHalfClusters(settings.map_stringPars["OutputLongiClusName"], m_mergedAxis);
+  }
+
+  for(int ihc=0; ihc<p_HalfClusterV->size(); ihc++){
+    std::vector<const PandoraPlus::CaloHalfCluster*> m_axis = p_HalfClusterV->at(ihc)->getHalfClusterCol(settings.map_stringPars["OutputLongiClusName"]);
+    std::vector<const PandoraPlus::CaloHalfCluster*> m_mergedAxis; m_mergedAxis.clear();
+
+//cout<<"  In HFCluster #"<<ihc<<": track axis size "<<m_axis.size();
+    if(m_axis.size()<=1){
+//cout<<endl;
+      continue;
+    }
+
+    std::map<const PandoraPlus::Track*, std::vector<const PandoraPlus::CaloHalfCluster*>> map_trk; map_trk.clear();
+    for(int iax=0; iax<m_axis.size(); iax++){
+      if(m_axis[iax]->getAssociatedTracks().size()==0){
+        m_mergedAxis.push_back(m_axis[iax]);
+        continue;
+      }
+      if(m_axis[iax]->getAssociatedTracks().size()>1)
+        std::cout<<"Warning: track axis has "<<m_axis[iax]->getAssociatedTracks().size()<<" matched tracks! Need to check! "<<endl;
+
+      map_trk[m_axis[iax]->getAssociatedTracks()[0]].push_back(m_axis[iax]);
+    }
+//cout<<"  map size "<<map_trk.size()<<", neutral axis size "<<m_mergedAxis.size()<<endl;;
+
+    for(auto &itrk: map_trk){
+//cout<<"  In track: axis size "<<itrk.second.size()<<endl;
+      if(itrk.second.size()==0) continue;
+      if(itrk.second.size()==1){
+        m_mergedAxis.push_back(itrk.second[0]);
+        continue;
+      }
+      PandoraPlus::CaloHalfCluster* p_axis = const_cast<PandoraPlus::CaloHalfCluster*>(itrk.second[0]);
+      for(int iax=1; iax<itrk.second.size(); iax++) p_axis->mergeHalfCluster(itrk.second[iax]);
+      m_mergedAxis.push_back(p_axis);
+    }
+
+//cout<<". After merge: axis size "<<m_mergedAxis.size()<<endl;
+     p_HalfClusterV->at(ihc)->setHalfClusters(settings.map_stringPars["OutputLongiClusName"], m_mergedAxis);
+  }
+
+
+
+/*
+cout<<"Track size: "<<m_TrackCol.size()<<endl;
 cout<<"Print HalfClusters and axis"<<endl;
 cout<<"  HalfClusterU size: "<<p_HalfClusterU->size()<<endl;
 for(int i=0; i<p_HalfClusterU->size(); i++){
@@ -137,12 +225,35 @@ for(int i=0; i<p_HalfClusterU->size(); i++){
   std::vector<const PandoraPlus::CaloHalfCluster*> m_axis = p_HalfClusterU->at(i)->getHalfClusterCol(settings.map_stringPars["OutputLongiClusName"]);
   printf("    In HalfCluster #%d: 1D cluster size %d, localMax size %d, axis size %d \n", i, m_1dcluster.size(), m_localMax.size(), m_axis.size());
 
-  cout<<"    Print 1D cluster"<<endl;
-  for(int i1d=0; i1d<m_1dcluster.size(); i1d++)
-    printf("      ");
+  for(int iax=0; iax<m_axis.size(); iax++){
+    printf("      In axis #%d: localMax size %d \n", iax, m_axis[iax]->getCluster().size() );
+    for(int ilm=0; ilm<m_axis[iax]->getCluster().size(); ilm++){
+      printf("        LocalMax #%d: layer %d, towersize %d, towerID [%d, %d, %d], En %.4f, leadingMC pid %d, address %p \n", 
+        ilm, m_axis[iax]->getCluster()[ilm]->getDlayer(), m_axis[iax]->getCluster()[ilm]->getTowerID().size(), 
+        m_axis[iax]->getCluster()[ilm]->getTowerID()[0][0], m_axis[iax]->getCluster()[ilm]->getTowerID()[0][1],m_axis[iax]->getCluster()[ilm]->getTowerID()[0][2],
+        m_axis[iax]->getCluster()[ilm]->getEnergy(), m_axis[iax]->getCluster()[ilm]->getLeadingMCP().getPDG(), m_axis[iax]->getCluster()[ilm] );
+    }
+  }
 }
 
+cout<<"  HalfClusterV size: "<<p_HalfClusterV->size()<<endl;
+for(int i=0; i<p_HalfClusterV->size(); i++){
+  std::vector<const PandoraPlus::Calo1DCluster*> m_1dcluster = p_HalfClusterV->at(i)->getCluster();
+  std::vector<const PandoraPlus::Calo1DCluster*> m_localMax = p_HalfClusterV->at(i).get()->getLocalMaxCol(settings.map_stringPars["ReadinLocalMaxName"]);
+  std::vector<const PandoraPlus::CaloHalfCluster*> m_axis = p_HalfClusterV->at(i)->getHalfClusterCol(settings.map_stringPars["OutputLongiClusName"]);
+  printf("    In HalfCluster #%d: 1D cluster size %d, localMax size %d, axis size %d \n", i, m_1dcluster.size(), m_localMax.size(), m_axis.size());
 
+  for(int iax=0; iax<m_axis.size(); iax++){
+    printf("      In axis #%d: localMax size %d \n", iax, m_axis[iax]->getCluster().size() );
+    for(int ilm=0; ilm<m_axis[iax]->getCluster().size(); ilm++){
+      printf("        LocalMax #%d: layer %d, towersize %d, towerID [%d, %d, %d], En %.4f, leadingMC pid %d, address %p \n",
+        ilm, m_axis[iax]->getCluster()[ilm]->getDlayer(), m_axis[iax]->getCluster()[ilm]->getTowerID().size(),
+        m_axis[iax]->getCluster()[ilm]->getTowerID()[0][0], m_axis[iax]->getCluster()[ilm]->getTowerID()[0][1],m_axis[iax]->getCluster()[ilm]->getTowerID()[0][2],
+        m_axis[iax]->getCluster()[ilm]->getEnergy(), m_axis[iax]->getCluster()[ilm]->getLeadingMCP().getPDG(), m_axis[iax]->getCluster()[ilm] );
+    }
+  }
+}
+*/
 
   return StatusCode::SUCCESS;
 };

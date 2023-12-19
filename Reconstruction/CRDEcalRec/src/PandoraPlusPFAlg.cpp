@@ -331,6 +331,7 @@ std::cout<<"Readin MCParticle"<<std::endl;
   m_pMCParticleCreator->CreateMCParticle( m_DataCol, *r_MCParticleCol );
 cout<<"Readin Tracks"<<endl;
   m_pTrackCreator->CreateTracks( m_DataCol, r_TrackCols, r_MCPTrkAssoCol );
+  //m_pTrackCreator->CreateTracksFromMCParticle(m_DataCol, r_MCParticleCol);
 cout<<"Readin CaloHits"<<endl;
   m_pCaloHitsCreator->CreateCaloHits( m_DataCol, r_CaloHitCols, map_readout_decoder, map_CaloMCPAssoCols );
 
@@ -419,8 +420,8 @@ cout<<"Write tuples"<<endl;
   //Save Cluster and MCP info
   ClearCluster();
   std::vector<PandoraPlus::Calo3DCluster*> m_clusvec;
-  for(int i=0; i<m_DataCol.map_CaloCluster["TruthMergedEcalCluster"].size(); i++)
-    m_clusvec.push_back( m_DataCol.map_CaloCluster["TruthMergedEcalCluster"][i].get() );
+  for(int i=0; i<m_DataCol.map_CaloCluster["EcalCluster"].size(); i++)
+    m_clusvec.push_back( m_DataCol.map_CaloCluster["EcalCluster"][i].get() );
 
   m_Nclus = m_clusvec.size();
   m_totE_EcalRec = 0;
@@ -543,8 +544,8 @@ cout<<"Write tuples"<<endl;
 
   //For HCAL cluster
   std::vector<PandoraPlus::Calo3DCluster*> m_hcalclusvec;
-  for(int i=0; i<m_DataCol.map_CaloCluster["TruthMergedHcalCluster"].size(); i++)
-    m_hcalclusvec.push_back( m_DataCol.map_CaloCluster["TruthMergedHcalCluster"][i].get() );
+  for(int i=0; i<m_DataCol.map_CaloCluster["HCALCluster"].size(); i++)
+    m_hcalclusvec.push_back( m_DataCol.map_CaloCluster["HCALCluster"][i].get() );
  
   m_totE_HcalRec = 0.; 
   for(int ic=0; ic<m_hcalclusvec.size(); ic++)
@@ -595,8 +596,8 @@ cout<<"Write tuples"<<endl;
   //Save PFO info
   ClearPFO();
   std::vector<PandoraPlus::PFObject*> m_pfobjects; m_pfobjects.clear();
-  for(int ip=0; ip<m_DataCol.map_PFObjects["TruthCombPFO"].size(); ip++)
-    m_pfobjects.push_back(m_DataCol.map_PFObjects["TruthCombPFO"][ip].get());
+  for(int ip=0; ip<m_DataCol.map_PFObjects["CombPFO"].size(); ip++)
+    m_pfobjects.push_back(m_DataCol.map_PFObjects["CombPFO"][ip].get());
 
   for(int ip=0; ip<m_pfobjects.size(); ip++){
     std::vector<const Track*> t_tracks = m_pfobjects[ip]->getTracks();

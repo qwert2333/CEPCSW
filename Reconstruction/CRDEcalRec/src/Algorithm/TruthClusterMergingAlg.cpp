@@ -27,7 +27,7 @@ StatusCode TruthClusterMergingAlg::Initialize( PandoraPlusDataCol& m_datacol ){
   for(int icl=0; icl<m_datacol.map_CaloCluster[settings.map_stringPars["ReadinHCALClusters"]].size(); icl++)
     m_HcalClusterCol.push_back(m_datacol.map_CaloCluster[settings.map_stringPars["ReadinHCALClusters"]][icl].get()); 
 
-/*
+
 cout<<"Print input ECAL cluster"<<endl;
 for(int ic=0; ic<m_EcalClusterCol.size(); ic++){
   printf("  Pos+E (%.3f, %.3f, %.3f, %.3f), linked leading MCP [%d, %.3f], linked track size %d \n", m_EcalClusterCol[ic]->getShowerCenter().x(), m_EcalClusterCol[ic]->getShowerCenter().y(), m_EcalClusterCol[ic]->getShowerCenter().z(), m_EcalClusterCol[ic]->getLongiE(), m_EcalClusterCol[ic]->getLeadingMCP().getPDG(), m_EcalClusterCol[ic]->getLeadingMCPweight(), m_EcalClusterCol[ic]->getAssociatedTracks().size() );
@@ -38,7 +38,7 @@ for(int ic=0; ic<m_HcalClusterCol.size(); ic++){
   printf("  Pos+E (%.3f, %.3f, %.3f, %.3f), linked leading MCP [%d, %.3f], linked track size %d \n", m_HcalClusterCol[ic]->getHitCenter().x(), m_HcalClusterCol[ic]->getHitCenter().y(), m_HcalClusterCol[ic]->getHitCenter().z(), m_HcalClusterCol[ic]->getHitsE(), m_HcalClusterCol[ic]->getLeadingMCP().getPDG(), m_HcalClusterCol[ic]->getLeadingMCPweight(), m_HcalClusterCol[ic]->getAssociatedTracks().size() );
   if(m_HcalClusterCol[ic]->getAssociatedTracks().size()>0) printf("    Track MCP: %d \n", m_HcalClusterCol[ic]->getAssociatedTracks()[0]->getLeadingMCP().getPDG());
 }
-*/
+
 
   return StatusCode::SUCCESS;
 };

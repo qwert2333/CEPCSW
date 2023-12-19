@@ -82,6 +82,7 @@ protected:
   mutable Gaudi::Property<std::string> _filename{this, "OutFileName", "testout.root", "Output file name"};
 
   //Input parameters
+  mutable Gaudi::Property<int>   _writeNtuple{this,  "WriteNtuple", 1, "Write ntuple"};
   mutable Gaudi::Property<int>   _Nskip{this,  "SkipEvt", 0, "Skip event"};
   mutable Gaudi::Property<float> _seed{this,   "Seed", 2131, "Random Seed"};
   mutable Gaudi::Property<int>  _Debug{this,   "Debug", 0, "Debug level"};
