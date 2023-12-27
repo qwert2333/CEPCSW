@@ -806,7 +806,7 @@ StatusCode EnergySplittingAlg::MergeToClosestCluster( const PandoraPlus::Calo1DC
     if(minLayer>m_clusters[ic].get()->getBeginningDlayer())  minLayer = m_clusters[ic].get()->getBeginningDlayer();
     if(maxLayer<m_clusters[ic].get()->getEndDlayer())        maxLayer = m_clusters[ic].get()->getEndDlayer();
   }
-  if(minLayer==99 || maxLayer<0) return StatusCode::SUCCESS;
+  if(minLayer==99 || minLayer<0 || maxLayer<0) return StatusCode::SUCCESS;
 
   int dlayer = m_shower->getDlayer();
   TVector3 sh_pos = m_shower->getPos();
