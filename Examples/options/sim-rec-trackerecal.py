@@ -79,7 +79,7 @@ tpc_sensdettool.TypeOption = 1
 
 from Configurables import GearSvc
 gearsvc = GearSvc("GearSvc")
-gearsvc.GearXMLFile = "Detector/DetCEPCv4/compact/FullDetGear.xml"
+#gearsvc.GearXMLFile = "Detector/DetCEPCv4/compact/FullDetGear.xml"
 
 from Configurables import TrackSystemSvc
 tracksystemsvc = TrackSystemSvc("TrackSystemSvc")
