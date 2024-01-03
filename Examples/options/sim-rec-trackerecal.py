@@ -40,7 +40,7 @@ from Configurables import HepMCRdr
 from Configurables import GenPrinter
 
 gun = GtGunTool("GtGunTool")
-gun.Particles = ["e-"]
+gun.Particles = ["gamma"]
 #gun.EnergyMins = [1]
 #gun.EnergyMaxs = [50]
 #gun.ThetaMins = [50]
@@ -330,10 +330,10 @@ write.outputCommands = ["keep *"]
 from Configurables import ApplicationMgr
 ApplicationMgr(
     #TopAlg = [genalg, detsimalg, digiVXD, digiSIT, digiSET, digiFTD, spSIT, spFTD, digiTPC, clupatra, tracking, forward, subset, full, dumpMC, dumpFu, dumpCl, dumpSu, dumpSi, dumpFo, write],
-    TopAlg = [genalg, detsimalg, digiVXD, digiSIT, digiSET, digiFTD, spSIT, spFTD, digiTPC, clupatra, tracking, forward, subset, full, simHitMerge, caloDigi, pandoralg, write],
+    TopAlg = [genalg, detsimalg, digiVXD, digiSIT, digiSET, digiFTD, spSIT, spFTD, digiTPC, clupatra, tracking, forward, subset, full, simHitMerge, caloDigi, write],
     EvtSel = 'NONE',
-    EvtMax = 10,
-    ExtSvc = [rndmengine, dsvc, evtseeder, geosvc, gearsvc, tracksystemsvc],
+    EvtMax = 30,
+    ExtSvc = [rndmengine, dsvc, evtseeder, gearsvc, geosvc, tracksystemsvc],
     HistogramPersistency='ROOT',
     OutputLevel=INFO
 )

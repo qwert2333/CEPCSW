@@ -14,7 +14,7 @@ Before run following commands, please make sure you setup the CVMFS:
 ```
 $ git clone git@github.com:cepc/CEPCSW.git
 $ cd CEPCSW
-$ git checkout master # branch name
+$ git checkout EcalRec-2.1.0.alpha # branch name
 $ source setup.sh
 $ ./build.sh
 $ ./run.sh Examples/options/helloalg.py
@@ -43,3 +43,9 @@ Keep the collection names compatible between the prototype and the existing CEPC
 * SITCollection
 * TPCCollection
 * SETCollection
+
+## Update in branch : EcalRec-2.1.6.alpha
+* New version: developed a truth-based reconstruction
+** All readin digitalized objects (track, EcalHit, HcalHit) have linked MCParticle(s) from edm4hep::MCRecoXXXXParticleAssociation (done)
+** Readin these associations into CRDEcalRec package (done)
+** Truth-based reconstruction (done)

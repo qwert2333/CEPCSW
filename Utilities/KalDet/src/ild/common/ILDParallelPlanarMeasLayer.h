@@ -61,7 +61,7 @@ public:
                                        Double_t  eps = 1.e-8) const {
   
     CellID = this->getCellIDs()[0]; // not multilayer
-    return CalcXingPointWith(hel,xx,phi,0,eps);
+    return CalcXingPointWith(hel,xx,phi,mode,eps);
   
   }
   

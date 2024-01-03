@@ -21,7 +21,7 @@
 #include <algorithm>
 
 #include "time.h"
-
+using namespace std;
 DECLARE_COMPONENT( DCHDigiAlg )
 
 DCHDigiAlg::DCHDigiAlg(const std::string& name, ISvcLocator* svcLoc)
@@ -41,6 +41,7 @@ DCHDigiAlg::DCHDigiAlg(const std::string& name, ISvcLocator* svcLoc)
 
 StatusCode DCHDigiAlg::initialize()
 {
+  debug()<<"Initialize DCHDigiAlg"<<endmsg;
   m_geosvc = service<IGeomSvc>("GeomSvc");
   if ( !m_geosvc )  throw "DCHDigiAlg :Failed to find GeomSvc ...";
   dd4hep::Detector* m_dd4hep = m_geosvc->lcdd();
@@ -59,7 +60,7 @@ StatusCode DCHDigiAlg::initialize()
       else {
           m_tuple = ntupleSvc()->book( "MyTuples/DCH_digi_evt", CLID_ColumnWiseTuple, "DCH_digi_evt" );
           if ( m_tuple ) {
-            m_tuple->addItem( "N_evt" , m_evt ).ignore();
+            //m_tuple->addItem( "N_evt" , m_evt ).ignore();
             m_tuple->addItem( "N_sim" , m_n_sim , 0, 1000000 ).ignore();
             m_tuple->addItem( "N_digi", m_n_digi, 0, 1000000 ).ignore();
             m_tuple->addItem( "run_time" , m_time ).ignore();
@@ -89,12 +90,14 @@ StatusCode DCHDigiAlg::initialize()
 
 StatusCode DCHDigiAlg::execute()
 {
-  m_start = clock();
+  //m_start = clock();
 
   info() << "Processing " << _nEvt << " events " << endmsg;
-  m_evt = _nEvt;
+  //m_evt = _nEvt;
+//cout<<"  Processing "<<m_evt<<" events: create output "<<endl;
   edm4hep::TrackerHitCollection* Vec   = w_DigiDCHCol.createAndPut();
   edm4hep::MCRecoTrackerAssociationCollection* AssoVec   = w_AssociationCol.createAndPut();
+cout<<"  Readin TrackerHits"<<endl;
   const edm4hep::SimTrackerHitCollection* SimHitCol =  r_SimDCHCol.get();
   if (SimHitCol->size() == 0) {
     return StatusCode::SUCCESS;
@@ -233,8 +236,8 @@ StatusCode DCHDigiAlg::execute()
         return StatusCode::FAILURE;
       }
   }
-  m_end = clock();
-  m_time = (m_end - m_start);
+  //m_end = clock();
+  //m_time = (m_end - m_start);
 
   return StatusCode::SUCCESS;
 }

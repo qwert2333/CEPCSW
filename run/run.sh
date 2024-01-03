@@ -28,7 +28,7 @@ function check-cepcsw-envvar() {
 }
 
 function build-dir() {
-    local blddir=build
+    local blddir=$WorkDIR/build
 
     if [ -n "${bldtool}" ]; then
         blddir=${blddir}.${bldtool}

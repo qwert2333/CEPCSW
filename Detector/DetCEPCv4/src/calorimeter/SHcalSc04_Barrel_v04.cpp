@@ -162,7 +162,11 @@ static Ref_t create_detector(Detector& theDetector, xml_h element, SensitiveDete
 //
 //====================================================================
   double      Hcal_inner_radius   = theDetector.constant<double>("Hcal_inner_radius");
-  double      Hcal_outer_radius   = theDetector.constant<double>("Hcal_outer_radius");
+   double      Hcal_outer_radius   = theDetector.constant<double>("Hcal_outer_radius");
+  // double      Hcal_outer_radius   = 3218.85*dd4hep::mm;
+  //double      Hcal_outer_radius   = 3606.29*dd4hep::mm;
+  // cout<<Hcal_outer_radius<<endl;
+  // cout<<dd4hep::mm<<endl;
   double      Hcal_half_length    = theDetector.constant<double>("Hcal_half_length");
   int         Hcal_inner_symmetry = theDetector.constant<int>("Hcal_inner_symmetry");
   int         Hcal_outer_symmetry = 0; // Fixed shape for Tube, and not allow to modify from compact xml.

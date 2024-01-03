@@ -30,7 +30,7 @@ CaloSensitiveDetector::Initialize(G4HCofThisEvent* HCE) {
 G4bool
 CaloSensitiveDetector::ProcessHits(G4Step* step, G4TouchableHistory*) {
 
-    // std::cout << "CaloSensitiveDetector::ProcessHits" << std::endl;
+    // std::cout << "CaloSensitiveDetector::ProcessHits. Merge Hit: " <<m_isMergeEnabled<< std::endl;
 
     dd4hep::sim::Geant4StepHandler h(step);
     if(m_applyBirksLaw) h.doApplyBirksLaw();

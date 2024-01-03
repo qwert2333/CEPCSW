@@ -1,5 +1,14 @@
 build.*
 build
 spack*
-./Generator/output/
-./Generator/options/
+Generator/output/
+Generator/options/
+run/*.root
+build/
+InstallArea
+*.swp
+yang/
+zhang/
+songweizheng/
+yyy_build_log
+

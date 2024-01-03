@@ -72,6 +72,7 @@ bool GtBeamBackgroundTool::mutate(MyHepMC::GenEvent& event) {
         }
 
         // create the MC particle
+        //edm4hep::MCParticle mcp = event.m_mc_vec.create();
         auto mcp = event.m_mc_vec.create();
         mcp.setPDG(beamdata.pdgid);
         mcp.setGeneratorStatus(1);
