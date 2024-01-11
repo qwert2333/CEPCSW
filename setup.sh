@@ -41,6 +41,10 @@ function setup-external() {
     info: "Setup CEPCSW externals: $f"
     source $f
 
+    Dir_PATH=$(cd "$(dirname ".")";pwd)
+    export WorkDIR=$Dir_PATH
+    info: "WorkDir Path: "
+    echo $WorkDIR
 }
 
 function setup-install-area() {

@@ -45,8 +45,8 @@ protected:
     CaloHitColHandler m_hcalotherhitcol {"HCALOther", Gaudi::DataHandle::Reader, this};
 
     typedef DataHandle<edm4hep::ReconstructedParticleCollection> RecParticleColHandler;
-    RecParticleColHandler m_reconep{"AncientPFOs", Gaudi::DataHandle::Reader, this};
-    RecParticleColHandler m_arbopfo{"ArborLICHPFOs", Gaudi::DataHandle::Reader, this};
+    RecParticleColHandler m_reconep{"ArborPFO", Gaudi::DataHandle::Reader, this};
+    RecParticleColHandler m_arbopfo{"ArborPFO", Gaudi::DataHandle::Reader, this};
 
     Gaudi::Property<std::string> _treeFileName{this,
             "TreeOutputFile", "MCTruth.root",

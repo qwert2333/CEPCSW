@@ -62,10 +62,10 @@ MarlinArbor::MarlinArbor(const std::string& name, ISvcLocator* svcLoc)
 StatusCode MarlinArbor::initialize() {
 
 	
-	_cepc_thresholds.push_back(10);
+	_cepc_thresholds.push_back(20);
 	_cepc_thresholds.push_back(90);
 	_cepc_thresholds.push_back(50);
-	_cepc_thresholds.push_back(7.5);
+	_cepc_thresholds.push_back(11);
 
      m_geosvc = service<IGeomSvc>("GeomSvc");
 
@@ -138,32 +138,31 @@ StatusCode MarlinArbor::execute()
 	for(unsigned int i1 = 0; i1 < _calCollections.size(); i1++)
 	{
 
-		std::cout<<i1<<"th collection"<<m_col_readout_map[m_ecalColNames.value().at(i1)]<<std::endl;
 		std::string tmp_readout;
 		
-	      if(i1<2)tmp_readout = m_col_readout_map[m_ecalColNames.value().at(i1)];
-	      else
-		      tmp_readout = m_col_readout_map[m_hcalColNames.value().at(i1-2)];
+	  if(i1<3) tmp_readout = m_col_readout_map[m_ecalColNames.value().at(i1)];
+	  else
+		  tmp_readout = m_col_readout_map[m_hcalColNames.value().at(i1-3)];
 
-	      std::cout<<tmp_readout<<std::endl;
-              // get the DD4hep readout
-              m_decoder = m_geosvc->getDecoder(tmp_readout);
-			KShift = 0;
-			SubDId = -1; 
+	  std::cout<<tmp_readout<<std::endl;
+    // get the DD4hep readout
+    m_decoder = m_geosvc->getDecoder(tmp_readout);
+		KShift = 0;
+		SubDId = -1; 
 
-			if( i1 < _EcalCalCollections.size() )
-				SubDId = 1; 
-			else if( i1 < _EcalCalCollections.size() + _HcalCalCollections.size() )
-				SubDId = 2;
-			else
-				SubDId = 3; 
+		if( i1 < m_ecalColNames.size() )
+			SubDId = 1; 
+		else if( i1 < m_ecalColNames.size() + m_hcalColNames.size() )
+			SubDId = 2;
+		else
+			SubDId = 3; 
 
-			if(i1 >  _EcalCalCollections.size() - 1)
-				KShift = 100; 
-			else if( i1 == _calCollections.size() - 2)	//HCAL Ring
-				KShift = 50;
+		if(i1 >  m_ecalColNames.size() - 1)
+			KShift = 100; 
+		else if( i1 == _calCollections.size() - 2)	//HCAL Ring
+			KShift = 50;
 
-			auto CaloHitColl = _calCollections[i1]->get();
+		auto CaloHitColl = _calCollections[i1]->get();
 		
 			//int NHitsCurrCol = CaloHitColl->getNumberOfElements();
 			//CellIDDecoder<CalorimeterHit> idDecoder(CaloHitColl);

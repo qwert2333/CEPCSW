@@ -107,6 +107,7 @@ class MarlinArbor  : public GaudiAlgorithm
 		bool _FlagUseTrackerEndHit; 
 		std::string m_encoder_str;
 
+    DataHandle<edm4hep::MCRecoCaloAssociationCollection> _caloTruthLinkCollection{"MCRecoCaloAssociationCollection", Gaudi::DataHandle::Reader, this};
 		DataHandle<edm4hep::ClusterCollection>   branchCol{"EHBushes",Gaudi::DataHandle::Writer, this};
 		DataHandle<edm4hep::CalorimeterHitCollection>   m_isohitcol{"IsoHits",Gaudi::DataHandle::Writer, this};
 		TH2F *_h1, *_h2, *_h7; 

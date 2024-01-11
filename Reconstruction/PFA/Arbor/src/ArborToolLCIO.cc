@@ -1169,6 +1169,51 @@ int ArborToolLCIO::ClusterFlag(edm4hep::Cluster a_tree, edm4hep::Track a_trk)
 		std::vector<float> hitTheta;
 		hitTheta.clear();
 
+    int ntrkhits=a_trk.trackerHits_size();
+    int chose_high = int(0.3*ntrkhits);
+    float cen_high = 999.;
+    int maxhit = 99999;
+    float totaled = 0.;
+    for(int ihit = 0; ihit < chose_high;ihit++){
+      maxhit = ihit;
+      auto hiti=a_trk.getTrackerHits(maxhit);
+      auto hiti1=a_trk.getTrackerHits(maxhit+1);
+      TVector3 hitposi = TVector3(hiti.getPosition().x,hiti.getPosition().y,hiti.getPosition().z);
+      TVector3 lastposi = TVector3(hiti1.getPosition().x,hiti1.getPosition().y,hiti1.getPosition().z);
+      float cudisi = (hitposi-lastposi).Mag();
+      float maxdedx = hiti.getEDep()/cudisi;
+      for(int jhit = ihit+1; jhit<ntrkhits-1; jhit++){
+        auto hitj=a_trk.getTrackerHits(jhit);
+        auto hitj1=a_trk.getTrackerHits(jhit+1);
+        TVector3 hitposj = TVector3(hitj.getPosition().x,hitj.getPosition().y,hitj.getPosition().z);
+        TVector3 lastposj = TVector3(hitj1.getPosition().x,hitj1.getPosition().y,hitj1.getPosition().z);
+        float cudisj = (hitposj-lastposj).Mag();
+        if(hitj.getEDep()/cudisj>maxdedx&&hitj.getEDep()/cudisj<cen_high){
+          maxhit = jhit;
+          maxdedx = hitj.getEDep()/cudisj;
+        }
+      }
+      cen_high = maxdedx;
+    }
+    int nhiteff = 0;
+    for(int ihit = 0; ihit < ntrkhits-1; ihit++)
+    {
+      auto hit=a_trk.getTrackerHits(ihit);
+      float mindis = 999.;
+      auto last=a_trk.getTrackerHits(ihit+1);
+      TVector3 hitpos = TVector3(hit.getPosition().x,hit.getPosition().y,hit.getPosition().z);
+      TVector3 lastpos = TVector3(last.getPosition().x,last.getPosition().y,last.getPosition().z);
+      float cudis = (hitpos-lastpos).Mag();
+      mindis= cudis;
+      if(hit.getEDep()/mindis<cen_high){
+        float dedx = hit.getEDep()/mindis;
+        totaled += dedx;
+        nhiteff ++;
+      }
+    }
+    dEdx = totaled/nhiteff;
+
+
 		for(unsigned int j1 = 0; j1 < a_tree.hits_size(); j1++)
 		{
 			auto a_hit = a_tree.getHits(j1);
