@@ -21,6 +21,8 @@ gaudi_add_module(GenAlgo
                          src/BeamBackgroundFileParserV1.cpp
                          src/BeamBackgroundFileParserV2.cpp
                          src/GuineaPigPairsFileParser.cpp
+												 # ------- Data ----------
+												 src/DataProcessor.cpp
                  LINK ${ROOT_LIBRARIES}
                       k4FWCore::k4FWCore 
                       Gaudi::GaudiAlgLib
