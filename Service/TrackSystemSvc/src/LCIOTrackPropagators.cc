@@ -327,9 +327,9 @@ namespace LCIOTrackPropagators{
     
     const double delta_phi_half = (omega*s)/2.0 ;
     
-    const double x = x_pca + s * ( sin(delta_phi_half) / delta_phi_half ) *  cos( phi0 - delta_phi_half ) ;
-    const double y = y_pca + s * ( sin(delta_phi_half) / delta_phi_half ) *  sin( phi0 - delta_phi_half ) ;
-    
+    const double x = x_pca + (s==0? 0: (s * ( sin(delta_phi_half) / delta_phi_half ) *  cos( phi0 - delta_phi_half ))) ;
+    const double y = y_pca + (s==0? 0: (s * ( sin(delta_phi_half) / delta_phi_half ) *  sin( phi0 - delta_phi_half ))) ;
+
     return PropagateLCIOToNewRef(ts,x,y,z);
     
   }

@@ -16,8 +16,8 @@ namespace Cyber {
 
 
     TVector2 getCenterPoint() const { return m_center_point; }
-    TVector2 getUpperPoint() const { return m_center_point + TVector2( 0.7*m_cell_size*cos(m_center_point.Phi() + TMath::PiOver2()), 0.7*m_cell_size*sin(m_center_point.Phi() + TMath::PiOver2()) ); }
-    TVector2 getLowerPoint() const { return m_center_point + TVector2( 0.7*m_cell_size*cos(m_center_point.Phi() + 3*TMath::PiOver2()), 0.7*m_cell_size*sin(m_center_point.Phi() + 3*TMath::PiOver2()) ); }
+    TVector2 getUpperPoint() const;
+    TVector2 getLowerPoint() const;
     //TVector2 getPointU()  const { return m_center_point + TVector2(0,  m_cell_size/TMath::Sqrt(2)); }
     //TVector2 getPointD()  const { return m_center_point + TVector2(0, -m_cell_size/TMath::Sqrt(2)); }
     //TVector2 getPointL()  const { return m_center_point + TVector2(-m_cell_size/TMath::Sqrt(2), 0); }

@@ -13,6 +13,107 @@ namespace Cyber{
   }
 
 
+  TVector2 HoughObject::getUpperPoint() const {    
+    // Barrel 
+    if(m_local_max->getBars()[0]->getSystem()==CaloUnit::System_Barrel){  
+      // Slayer 0, or U bars. Bars perpendicular to z axis
+      if(m_local_max->getSlayer()==0){
+        if(m_center_point.Y()>=0){
+          return m_center_point + TVector2(-0.5*m_cell_size, 0.5*m_cell_size);
+        }
+        else{
+          return m_center_point + TVector2(0.5*m_cell_size, 0.5*m_cell_size);
+        }
+      }
+      // Slayer 1, or V bars. Bars parallel to z axis
+      else if(m_local_max->getSlayer()==1){
+        return m_center_point + TVector2( 0.5*m_cell_size*cos(m_center_point.Phi() + TMath::PiOver2()), 0.5*m_cell_size*sin(m_center_point.Phi() + TMath::PiOver2()) );
+      }
+      else{
+        std::cout<<"Error: Slayer="<<m_local_max->getSlayer()<<", do not use getUpperPoint()!"<<std::endl;
+        return TVector2(0,0);
+      }
+    }
+
+    // Endcap
+    else if(m_local_max->getBars()[0]->getSystem()==CaloUnit::System_Endcap){
+      if(m_center_point.X()>=0){
+        if(m_center_point.Y()>=0){
+          return m_center_point + TVector2(-0.5*m_cell_size, 0.5*m_cell_size);
+        }
+        else{
+          return m_center_point + TVector2(0.5*m_cell_size, 0.5*m_cell_size);
+        }
+      }
+      else{
+        if(m_center_point.Y()>=0){
+          return m_center_point + TVector2(0.5*m_cell_size, 0.5*m_cell_size);
+        }
+        else{
+          return m_center_point + TVector2(-0.5*m_cell_size, 0.5*m_cell_size);
+        }
+      }
+    }
+
+    else{
+      std::cout<<"Error: System="<<m_local_max->getBars()[0]->getSystem()<<", do not use getUpperPoint()!"<<std::endl;
+      return TVector2(0,0);
+    }
+    
+  }
+
+
+  TVector2 HoughObject::getLowerPoint() const {
+    // Barrel
+    if(m_local_max->getBars()[0]->getSystem()==CaloUnit::System_Barrel){  
+      // Slayer 0, or U bars. Bars perpendicular to z axis
+      if(m_local_max->getSlayer()==0){
+        if(m_center_point.Y()>=0){
+          return m_center_point + TVector2(0.5*m_cell_size, -0.5*m_cell_size);
+        }
+        else{
+          return m_center_point + TVector2(-0.5*m_cell_size, -0.5*m_cell_size);
+        }
+      }
+      // Slayer 1, or V bars. Bars parallel to z axis
+      else if(m_local_max->getSlayer()==1){
+        return m_center_point + TVector2( 0.5*m_cell_size*cos(m_center_point.Phi() + 3*TMath::PiOver2()), 0.5*m_cell_size*sin(m_center_point.Phi() + 3*TMath::PiOver2()) );
+      }
+      else{
+        std::cout<<"Error: Slayer="<<m_local_max->getSlayer()<<", do not use getLowerPoint()!"<<std::endl;
+        return TVector2(0,0);
+      }
+    }
+
+    // Endcap
+    else if(m_local_max->getBars()[0]->getSystem()==CaloUnit::System_Endcap){
+      if(m_center_point.X()>=0){
+        if(m_center_point.Y()>=0){
+          return m_center_point + TVector2(0.5*m_cell_size, -0.5*m_cell_size);
+        }
+        else{
+          return m_center_point + TVector2(-0.5*m_cell_size, -0.5*m_cell_size);
+        }
+      }
+      else{
+        if(m_center_point.Y()>=0){
+          return m_center_point + TVector2(-0.5*m_cell_size, -0.5*m_cell_size);
+        }
+        else{
+          return m_center_point + TVector2(0.5*m_cell_size, -0.5*m_cell_size);
+        }
+      }
+    }
+
+    else{
+      std::cout<<"Error: System="<<m_local_max->getBars()[0]->getSystem()<<", do not use getLowerPoint()!"<<std::endl;
+      return TVector2(0,0);
+    }
+
+  }
+
+
+
   void HoughObject::setCenterPoint(double& _ecal_inner_radius){
     if(m_local_max->getBars()[0]->getSystem()==CaloUnit::System_Barrel){  // barrel bars
       if(m_local_max->getSlayer()==0){  // bars perpendicular to z axis

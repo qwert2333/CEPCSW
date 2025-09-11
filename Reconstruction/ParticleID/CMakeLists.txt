@@ -4,9 +4,11 @@
 gaudi_add_module(ParticleID
                  SOURCES src/TPCDndxAlg.cpp
                          src/DCHDndxAlg.cpp
-			 src/TofRecAlg.cpp
-			 src/FinalPIDAlg.cpp
+                         src/TofRecAlg.cpp
+                         src/FinalPIDAlg.cpp
                  LINK SimplePIDSvc
+                      FinalPIDSvc
+                      FinalPIDSvcLib
                       Gaudi::GaudiAlgLib
                       Gaudi::GaudiKernel
                       DataHelperLib
@@ -15,7 +17,7 @@ gaudi_add_module(ParticleID
                       ${GSL_LIBRARIES}
                       ${GEAR_LIBRARIES}
                       ${LCIO_LIBRARIES}
-		      EDM4CEPC::edm4cepc EDM4CEPC::edm4cepcDict
+		                  EDM4CEPC::edm4cepc EDM4CEPC::edm4cepcDict
                       EDM4HEP::edm4hep EDM4HEP::edm4hepDict
                       k4FWCore::k4FWCore
 )

@@ -551,7 +551,9 @@ StatusCode CyberPFAlg::initialize()
 
 
     //Tower
-    t_Tower->Branch("towerID", towerID, "towerID[3]/I");
+    t_Tower->Branch("Ntower", &m_Ntower);
+    t_Tower->Branch("towerID_id1", &m_towerID_id1);
+    t_Tower->Branch("towerID_id2", &m_towerID_id2);
     t_Tower->Branch("NclusU", &m_NclusU);
     t_Tower->Branch("NclusV", &m_NclusV);
     t_Tower->Branch("totEn", &m_totEn);
@@ -1386,21 +1388,21 @@ StatusCode CyberPFAlg::execute()
     //Tower
     ClearTower();
     std::vector<std::shared_ptr<Cyber::Calo3DCluster>> m_tower = m_DataCol.map_CaloCluster["ESTower"];
+    m_Ntower = m_tower.size();
     for(int it=0; it<m_tower.size(); it++){
-      ClearTower();
-      towerID[0] = m_tower[it]->getTowerID()[0][0];
-      towerID[1] = m_tower[it]->getTowerID()[0][1];
-      towerID[2] = m_tower[it]->getTowerID()[0][2];
-   
+      //ClearTower();
+      m_towerID_id1.push_back(m_tower[it]->getTowerID()[0][1]);
+      m_towerID_id2.push_back(m_tower[it]->getTowerID()[0][2]);
+
       std::vector<const CaloHalfCluster*> m_HFClusU = m_tower[it]->getHalfClusterUCol("ESHalfClusterU");
       std::vector<const CaloHalfCluster*> m_HFClusV = m_tower[it]->getHalfClusterVCol("ESHalfClusterV");
    
-      m_NclusU = m_HFClusU.size();
-      m_NclusV = m_HFClusV.size();
-      m_totEn = m_tower[it]->getEnergy();
-      m_totEn_U = 0.;
-      m_totEn_V = 0.;
-      for(int ic=0; ic<m_NclusU; ic++){
+      m_NclusU.push_back(m_HFClusU.size());
+      m_NclusV.push_back(m_HFClusV.size());
+      m_totEn.push_back(m_tower[it]->getEnergy());
+      float tmp_totEn_U = 0.;
+      float tmp_totEn_V = 0.;
+      for(int ic=0; ic<m_HFClusU.size(); ic++){
         m_HalfClusterU_tag.push_back(it);
         m_HalfClusterU_x.push_back(m_HFClusU[ic]->getPos().x());
         m_HalfClusterU_y.push_back(m_HFClusU[ic]->getPos().y());
@@ -1408,10 +1410,10 @@ StatusCode CyberPFAlg::execute()
         m_HalfClusterU_E.push_back(m_HFClusU[ic]->getEnergy());
         m_HalfClusterU_type.push_back(m_HFClusU[ic]->getType());
         m_HalfClusterU_nTrk.push_back(m_HFClusU[ic]->getAssociatedTracks().size());
-        m_totEn_U += m_HFClusU[ic]->getEnergy();
+        tmp_totEn_U += m_HFClusU[ic]->getEnergy();
       }
    
-      for(int ic=0; ic<m_NclusV; ic++){
+      for(int ic=0; ic<m_HFClusV.size(); ic++){
         m_HalfClusterV_tag.push_back(it);
         m_HalfClusterV_x.push_back(m_HFClusV[ic]->getPos().x());
         m_HalfClusterV_y.push_back(m_HFClusV[ic]->getPos().y());
@@ -1419,10 +1421,12 @@ StatusCode CyberPFAlg::execute()
         m_HalfClusterV_E.push_back(m_HFClusV[ic]->getEnergy());
         m_HalfClusterV_type.push_back(m_HFClusV[ic]->getType());
         m_HalfClusterV_nTrk.push_back(m_HFClusV[ic]->getAssociatedTracks().size());
-        m_totEn_V += m_HFClusV[ic]->getEnergy();
+        tmp_totEn_V += m_HFClusV[ic]->getEnergy();
       }
-      t_Tower->Fill();
+      m_totEn_U.push_back(tmp_totEn_U);
+      m_totEn_V.push_back(tmp_totEn_V);
     }
+    t_Tower->Fill();
 
     cout<<"  Write 3D cluster"<<endl;
     //3D cluster
@@ -2064,14 +2068,14 @@ void CyberPFAlg::ClearHalfCluster(){
 }
 
 void CyberPFAlg::ClearTower(){
-  towerID[0] = 0;
-  towerID[1] = 0;
-  towerID[2] = 0;
-  m_NclusU = -99;
-  m_NclusV = -99;
-  m_totEn = -99;
-  m_totEn_U = -99.;
-  m_totEn_V = -99.;
+  m_Ntower = 0;
+  m_towerID_id1.clear();
+  m_towerID_id2.clear();
+  m_NclusU.clear();
+  m_NclusV.clear();
+  m_totEn.clear();
+  m_totEn_U.clear();
+  m_totEn_V.clear();
   m_HalfClusterV_x.clear();
   m_HalfClusterV_y.clear();
   m_HalfClusterV_z.clear();

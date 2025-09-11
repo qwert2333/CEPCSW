@@ -10,7 +10,14 @@
 #include "edm4hep/RecDqdx.h"
 #include "edm4hep/RecDqdxCollection.h"
 #include "edm4hep/ParticleIDCollection.h"
+#include "edm4hep/TrackerHitCollection.h"
 #include "TVector3.h"
+
+#include "FinalPIDSvc/IFinalPIDSvc.h"
+#include "DetInterface/IGeomSvc.h"
+#include <GaudiKernel/Service.h>
+
+#include "FinalPIDSvc/WorkingPoint.h"
 
 class FinalPIDAlg : public Algorithm {
  public:
@@ -24,26 +31,35 @@ class FinalPIDAlg : public Algorithm {
 
  private:
   DataHandle<edm4hep::ReconstructedParticleCollection> m_inPFOCol{"CyberPFO", Gaudi::DataHandle::Reader, this};
+
   DataHandle<edm4hep::RecTofCollection> m_inTofCol{"RecTofCollection", Gaudi::DataHandle::Reader, this};
   DataHandle<edm4hep::RecDqdxCollection> m_inDqdxCol{"DndxTracks", Gaudi::DataHandle::Reader, this};
+  DataHandle<edm4hep::TrackerHitCollection> m_inputMuonBarrel{"MuonBarrelTrackerHits", Gaudi::DataHandle::Reader, this};
+  DataHandle<edm4hep::TrackerHitCollection> m_inputMuonEndcap{"MuonEndcapTrackerHits", Gaudi::DataHandle::Reader, this};
   //DataHandle<edm4hep::ParticleIDCollection> m_PIDCol{"finalPID", Gaudi::DataHandle::Writer, this};
   DataHandle<edm4hep::ReconstructedParticleCollection> m_outPFOCol{"CyberPFOPID", Gaudi::DataHandle::Writer, this};
-  Gaudi::Property<std::string> m_method{this, "PIDMethod", "TPC+TOF+CALO"};
+  DataHandle<edm4hep::ParticleIDCollection> m_ParticleID{"ParticleID", Gaudi::DataHandle::Writer, this};
+
+  SmartIF<IFinalPIDSvc> m_pid_svc;
+
+  // Gaudi::Property<std::string> m_method{this, "PIDMethod", "TPC+TOF+CALO"};
 
 
-  void FillTPCPID(const edm4hep::RecDqdxCollection* dqdxcol, edm4hep::MutableReconstructedParticle& pfo, std::array<double, 5>& chi2s);
-  void FillTOFPID(const edm4hep::RecTofCollection* tofcol, edm4hep::MutableReconstructedParticle& pfo, std::array<double, 5>& chi2s);
-  StatusCode FillCaloPID(edm4hep::MutableReconstructedParticle& pfo);
+  // void FillTPCPID(const edm4hep::RecDqdxCollection* dqdxcol, edm4hep::MutableReconstructedParticle& pfo, std::array<double, 5>& chi2s);
+  // void FillTOFPID(const edm4hep::RecTofCollection* tofcol, edm4hep::MutableReconstructedParticle& pfo, std::array<double, 5>& chi2s);
+  // StatusCode FillCaloPID(edm4hep::MutableReconstructedParticle& pfo);
 
   int _nEvt;
   bool _hasTPC;
   bool _hasTOF;
+  bool _hasMuonBarrel;
+  bool _hasMuonEndcap;
 
   //Detector geometry size
-  const float EcalOuterR = 2130.;
-  const float EcalHalfZ = 3230.;
-  const float HcalOuterR = 3455.;
-  const float HcalHalfZ = 4575.;
+  // const float EcalOuterR = 2130.;
+  // const float EcalHalfZ = 3230.;
+  // const float HcalOuterR = 3455.;
+  // const float HcalHalfZ = 4575.;
 
 
   const std::map<int, int> PDGIDs = {
@@ -52,6 +68,8 @@ class FinalPIDAlg : public Algorithm {
     {2, 211},
     {3, 321},
     {4, 2212},
+    {5, 22},
+    {6, 130}
   };
   //Particle mass from PDGLive 2024 edition [https://pdglive.lbl.gov/Viewer.action]
   const std::map<int, double> ParticleMass = {

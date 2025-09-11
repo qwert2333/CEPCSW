@@ -47,12 +47,12 @@ StatusCode EnergyTimeMatchingAlg::RunAlgorithm( CyberDataCol& m_datacol ){
 
 
   m_clusterCol.clear();
-  std::vector<const Cyber::CaloHalfCluster*> m_leftHFClusterUCol; 
-  std::vector<const Cyber::CaloHalfCluster*> m_leftHFClusterVCol; 
-
+  //std::vector<const Cyber::CaloHalfCluster*> m_leftHFClusterUCol; 
+  //std::vector<const Cyber::CaloHalfCluster*> m_leftHFClusterVCol; 
   //Loop for towers:  
   for(int it=0; it<m_towerCol.size(); it++){
     m_HFClusUCol.clear(); m_HFClusVCol.clear();
+    m_emptyHFClusUCol.clear(); m_emptyHFClusVCol.clear();
 
 //cout<<"Check tower ID: ";
 //for(int i=0; i<m_towerCol[it]->getTowerID().size(); i++) printf("[%d, %d, %d], ", m_towerCol[it]->getTowerID()[i][0], m_towerCol[it]->getTowerID()[i][1], m_towerCol[it]->getTowerID()[i][2]);
@@ -60,25 +60,42 @@ StatusCode EnergyTimeMatchingAlg::RunAlgorithm( CyberDataCol& m_datacol ){
 
     m_HFClusUCol = m_towerCol.at(it)->getHalfClusterUCol(settings.map_stringPars["ReadinHFClusterName"]+"U");
     m_HFClusVCol = m_towerCol.at(it)->getHalfClusterVCol(settings.map_stringPars["ReadinHFClusterName"]+"V");
+    //cout<<"  Axis HFCluster: ["<<m_HFClusUCol.size()<<", "<<m_HFClusVCol.size()<<"] "<<endl;
 
-    Matching(m_HFClusUCol, m_HFClusVCol, m_clusterCol);
+    double tmp_towerEn = m_towerCol.at(it)->getEnergy();
+    if(tmp_towerEn<1.){
+      for(int ih=0; ih<m_HFClusUCol.size(); ih++){
+        if(m_HFClusUCol[ih]->getEnergy()<0.05*tmp_towerEn){
+          m_HFClusUCol.erase(m_HFClusUCol.begin()+ih);
+        }
+      }
+      for(int ih=0; ih<m_HFClusVCol.size(); ih++){
+        if(m_HFClusVCol[ih]->getEnergy()<0.05*tmp_towerEn){
+          m_HFClusVCol.erase(m_HFClusVCol.begin()+ih);
+        }
+      }
+    }
+  
+    //m_emptyHFClusUCol = m_towerCol.at(it)->getHalfClusterUCol("emptyHalfClusterU");
+    //m_emptyHFClusVCol = m_towerCol.at(it)->getHalfClusterVCol("emptyHalfClusterV");
+
+//cout<<"  Axis HFCluster after filter: ["<<m_HFClusUCol.size()<<", "<<m_HFClusVCol.size()<<"] "<<endl;
+//cout<<"  Empty HFCluster: ["<<m_emptyHFClusUCol.size()<<", "<<m_emptyHFClusVCol.size()<<"] "<<endl;
+//cout<<"  3D cluster size (step 0): "<<m_clusterCol.size()<<endl;
+    if(m_HFClusUCol.size()>0 && m_HFClusVCol.size()>0)
+      Matching(m_HFClusUCol, m_HFClusVCol, m_clusterCol);
+    //else if(m_HFClusUCol.size()>0 && m_emptyHFClusVCol.size()>0)
+    //  Matching(m_HFClusUCol, m_emptyHFClusVCol, m_clusterCol);
+    //else if(m_HFClusVCol.size()>0 && m_emptyHFClusUCol.size()>0)
+    //  Matching(m_emptyHFClusUCol, m_HFClusVCol, m_clusterCol);
+    //else      
+    //  Matching(m_emptyHFClusUCol, m_emptyHFClusVCol, m_clusterCol);
 
   }//End loop towers
 
-  //Re-loop tower for empty half-clusters
-//cout<<"Match clusters without axis"<<endl;
-  for(int it=0; it<m_towerCol.size(); it++){
-    m_HFClusUCol.clear(); m_HFClusVCol.clear();
-
-    m_HFClusUCol = m_towerCol.at(it)->getHalfClusterUCol("emptyHalfClusterU");
-    m_HFClusVCol = m_towerCol.at(it)->getHalfClusterVCol("emptyHalfClusterV");
-
-    Matching(m_HFClusUCol, m_HFClusVCol, m_clusterCol);
-
-  }//End loop tower
-
   ClusterReconnecting( m_clusterCol );
   
+//cout<<"  3D cluster size (after reconnection): "<<m_clusterCol.size()<<endl;
   m_datacol.map_CaloCluster[settings.map_stringPars["OutputClusterName"]] = m_clusterCol;
 
 //cout<<" Save backup collections in to main datacol. "<<endl;
@@ -113,13 +130,13 @@ StatusCode EnergyTimeMatchingAlg::Matching( std::vector<const Cyber::CaloHalfClu
   const int NclusU = m_HFClusUCol.size();
   const int NclusV = m_HFClusVCol.size();
 
-//cout<<" cluster size ["<<NclusU<<", "<<NclusV<<"] "<<endl;
-//cout<<"ClusterU energy: ";
-//for(int i=0; i<NclusU; i++) cout<<m_HFClusUCol[i]->getEnergy()<<'\t';
-//cout<<endl;
-//cout<<"ClusterV energy: ";
-//for(int i=0; i<NclusV; i++) cout<<m_HFClusVCol[i]->getEnergy()<<'\t';
-//cout<<endl;
+cout<<" cluster size ["<<NclusU<<", "<<NclusV<<"] "<<endl;
+cout<<"ClusterU energy: ";
+for(int i=0; i<NclusU; i++) cout<<m_HFClusUCol[i]->getEnergy()<<'\t';
+cout<<endl;
+cout<<"ClusterV energy: ";
+for(int i=0; i<NclusV; i++) cout<<m_HFClusVCol[i]->getEnergy()<<'\t';
+cout<<endl;
 
 
   std::vector<std::shared_ptr<Cyber::Calo3DCluster>> tmp_clusters; tmp_clusters.clear();

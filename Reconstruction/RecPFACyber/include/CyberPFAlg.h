@@ -284,10 +284,12 @@ protected:
 
   //Tower
   TTree *t_Tower; 
-  int towerID[3];
-  int m_NclusU, m_NclusV; 
-  float m_totEn, m_totEn_U, m_totEn_V;
-
+  int m_Ntower;
+  IntVec m_towerID_id1; 
+  IntVec m_towerID_id2; 
+  IntVec m_NclusU, m_NclusV;
+  FloatVec m_totEn, m_totEn_U, m_totEn_V;
+  
 
   //3D clusters
   TTree *t_Cluster;

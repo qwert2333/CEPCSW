@@ -25,6 +25,16 @@ geomsvc.fastinit = True
 geomsvc.metadata_path = os.path.join(cepcswdatatop, "CEPCSWData/offline-data/Detector/DetGeomMetaWriter/data/tdr25.5.0/GeometryMetaData.root")
 #######################################
 
+########### FinalPIDSvc #################
+from Configurables import FinalPIDSvc
+pidsvc = FinalPIDSvc("FinalPIDSvc")
+pidsvc.input_eleID_WP = os.path.join(cepcswdatatop, "CEPCSWData/offline-data/Service/FinalPIDSvc/data/eID_WP_20250502.root")
+pidsvc.input_muID_WP = os.path.join(cepcswdatatop, "CEPCSWData/offline-data/Service/FinalPIDSvc/data/muID_WP_20250502.root")
+pidsvc.input_lepID_model = os.path.join(cepcswdatatop, "CEPCSWData/offline-data/Service/FinalPIDSvc/data/xgb_lepton_20250515.json")
+pidsvc.input_hadID_model = os.path.join(cepcswdatatop, "CEPCSWData/offline-data/Service/FinalPIDSvc/data/xgb_hadron_20250516.json")
+pidsvc.input_phoID_model = os.path.join(cepcswdatatop, "CEPCSWData/offline-data/Service/FinalPIDSvc/data/xgb_photon_20250416.json")
+##########################################
+
 ########### k4DataSvc ####################
 from Configurables import k4DataSvc
 podioevent = k4DataSvc("EventDataSvc", input="CaloDigi_TDR_o1_v01_00.root")
@@ -143,7 +153,7 @@ CyberPFAlg.AlgParValues = [ ["BarCol","Cluster1DCol","HalfClusterCol"],#1
 from Configurables import FinalPIDAlg
 pid = FinalPIDAlg("FinalPIDAlg")
 pid.OutputPFOName = "CyberPFOPID"
-
+pid.ParticleIDName = "ParticleID"
 
 from Configurables import GenMatch
 genmatch = GenMatch("GenMatch")

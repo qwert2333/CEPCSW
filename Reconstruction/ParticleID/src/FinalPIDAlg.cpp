@@ -16,22 +16,19 @@ FinalPIDAlg::FinalPIDAlg( const std::string& name, ISvcLocator* pSvcLocator )
   declareProperty("PFOCollection", m_inPFOCol, "Reconstructed particles to be PIDed");
   declareProperty("TOFPIDCollection", m_inTofCol, "TOF PID information");
   declareProperty("TPCPIDCollection", m_inDqdxCol, "TPC PID information");
+  declareProperty("BarrelTrackerHits", m_inputMuonBarrel, "handler of the input barrel tracker hit collection");
+  declareProperty("EndcapTrackerHits", m_inputMuonEndcap, "handler of the input endcap tracker hit collection");
+
   // output
   declareProperty("OutputPFOName", m_outPFOCol, "Reconstructed particles with PID information");
-  // PID method
-  declareProperty("PIDMethod", m_method = "TPC+TOF+CALO", "PID method: TPC, TPC+TOF, TPC+TOF+CALO"); 
+  declareProperty("ParticleIDName", m_ParticleID, "Particle ID collection");
 }
 
 //------------------------------------------------------------------------------
 StatusCode FinalPIDAlg::initialize(){
   debug() << "Initializing..." << endmsg;
-  if (m_method == "TPC" || m_method == "TPC+TOF" || m_method == "TPC+TOF+CALO" ) { // add muon later
-    debug() << "PID method: " << m_method << endmsg;
-  } else {
-    error() << "Unknown PID method: " << m_method << endmsg;
-    return StatusCode::FAILURE;
-  }
   _nEvt = 0;
+  m_pid_svc = service("FinalPIDSvc");
   return StatusCode::SUCCESS;
 }
 
@@ -41,11 +38,17 @@ StatusCode FinalPIDAlg::execute(){
   const edm4hep::ReconstructedParticleCollection* inpfocol = nullptr;
   const edm4hep::RecTofCollection* tofcol = nullptr;
   const edm4hep::RecDqdxCollection* dqdxcol = nullptr;
+  const edm4hep::TrackerHitCollection* barrelhits = nullptr;
+  const edm4hep::TrackerHitCollection* endcaphits = nullptr;
+
   _hasTOF = true;
   _hasTPC = true;
+  _hasMuonBarrel = true;
+  _hasMuonEndcap = true;
 
   //auto outpfocol = m_outPFOCol.createAndPut();
   edm4hep::ReconstructedParticleCollection* outpfocol = m_outPFOCol.createAndPut();
+  edm4hep::ParticleIDCollection* ParticleID = m_ParticleID.createAndPut();
 
   try {
     inpfocol = m_inPFOCol.get();
@@ -67,37 +70,65 @@ StatusCode FinalPIDAlg::execute(){
   catch ( GaudiException &e ) {
     _hasTPC = false;
   }
+  try{
+    barrelhits = m_inputMuonBarrel.get();
+  }
+  catch ( GaudiException &e ) {
+    _hasMuonBarrel = false;
+  }
+
+  try{
+    endcaphits = m_inputMuonEndcap.get();
+  }
+  catch ( GaudiException &e ) {
+    _hasMuonEndcap = false;
+  }
+
   debug()<<" has TOF : "<<_hasTOF<<" has TPC : "<<_hasTPC<<" TOF size : "<<tofcol->size()<<" dqdx size : "<<dqdxcol->size()<<endmsg;
-  
-  //if ( ( !_hasTPC && !_hasTOF ) || ( tofcol->size() == 0 && dqdxcol->size() == 0 ) ){
-  //  
-  //  debug() << "TPC and TOF PID information are not available, skip event " << _nEvt << endmsg;
-  //  
-  //  for ( auto pfo : *inpfocol ){
-  //    auto outpfo = pfo.clone();
-  //    outpfocol->push_back(outpfo);
-  //  }
-  //  
-  //  _nEvt++;
-  //  return StatusCode::SUCCESS;
-  //}
+  debug()<<" has Muon Barrel : "<<_hasMuonBarrel<<" has Muon Endcap : "<<_hasMuonEndcap<<" Muon Barrel size : "<<barrelhits->size()<<" Muon Endcap size : "<<endcaphits->size()<<endmsg;
+
+  m_pid_svc->SetCollections(barrelhits, endcaphits, tofcol, dqdxcol, inpfocol);
+  m_pid_svc->MatchMuonHitsToTracks();
+  m_pid_svc->SetWP_mu(WP::Best);
+  m_pid_svc->SetWP_ele(WP::Best);
+
+  debug()<<"Begin loop over PFOs"<<endmsg;
 
   for ( auto pfo : *inpfocol ){
     auto outpfo = pfo.clone();
-    outpfocol->push_back(outpfo);
-    if(m_method.value().find("TPC+TOF")!=std::string::npos ){
-      std::array<double, 5> chi2s; chi2s.fill(0);
-      if( _hasTPC && dqdxcol->size()>0){
-        FillTPCPID(dqdxcol, outpfo, chi2s);
-      }
-      if( _hasTOF && tofcol->size()>0){
-        FillTOFPID(tofcol, outpfo, chi2s);
-      }
-    }
-    if(m_method.value().find("CALO")!=std::string::npos ) 
-      FillCaloPID(outpfo);
+    bool load=m_pid_svc->LoadPFO(pfo);
+    if (!load) continue;
 
-    debug()<<" cyber pfo pid : " << outpfo.getType() << " cyber pfo charge : " << outpfo.getCharge() << " cyber pfo energy "<< outpfo.getEnergy() << " cyber pfo mass "<< outpfo.getMass() << endmsg;
+    if (outpfo.getCharge()==0) {
+      for (unsigned int i_fl=0;i_fl<2;i_fl++) {
+        int PDG=PDGIDs.at(i_fl+5);
+        edm4hep::MutableParticleID pid(PDG, PDG, 0, m_pid_svc->GetProb(i_fl));
+        ParticleID->push_back(pid);
+        outpfo.addToParticleIDs(pid);
+      }
+      int PDG=m_pid_svc->GetType();
+      outpfo.setType( PDG );
+      outpfo.setMass( ParticleMass.at( abs(PDG) ) );
+      outpfo.setEnergy( sqrt(outpfo.getMomentum()[0]*outpfo.getMomentum()[0] + outpfo.getMomentum()[1]*outpfo.getMomentum()[1] + outpfo.getMomentum()[2]*outpfo.getMomentum()[2] + outpfo.getMass()*outpfo.getMass()) );
+    }
+    else {
+      for (unsigned int i_fl=0;i_fl<5;i_fl++) {
+        int PDG=PDGIDs.at(i_fl)*outpfo.getCharge();
+        edm4hep::MutableParticleID pid(PDG, PDG, 0, m_pid_svc->GetProb(i_fl));
+        ParticleID->push_back(pid);
+        outpfo.addToParticleIDs(pid);
+      }
+      int PDG=m_pid_svc->GetType();
+      if (PDG==11 || PDG==13) PDG*=-1;
+      PDG*=outpfo.getCharge();
+      outpfo.setType( PDG );
+      outpfo.setMass( ParticleMass.at( abs(PDG) ) );
+      outpfo.setEnergy( sqrt(outpfo.getMomentum()[0]*outpfo.getMomentum()[0] + outpfo.getMomentum()[1]*outpfo.getMomentum()[1] + outpfo.getMomentum()[2]*outpfo.getMomentum()[2] + outpfo.getMass()*outpfo.getMass()) );
+    }
+
+    outpfocol->push_back(outpfo);
+
+    debug()<<"Pdgid: "<<outpfo.getType()<<endmsg;
   }
 
   _nEvt++;
@@ -109,115 +140,4 @@ StatusCode FinalPIDAlg::execute(){
 StatusCode FinalPIDAlg::finalize(){
   debug() << "Finalizing..." << endmsg;
   return StatusCode::SUCCESS;
-}
-
-
-void FinalPIDAlg::FillTPCPID(const edm4hep::RecDqdxCollection* dqdxcol, edm4hep::MutableReconstructedParticle& pfo, std::array<double, 5>& chi2s){
-
-    for (auto trk : pfo.getTracks()){
-
-      for (auto dqdx : *dqdxcol){
-        if (dqdx.getTrack() == trk){
-          for (int i = 0; i < 5; i++){
-            chi2s[i] = dqdx.getHypotheses(i).chi2;
-          }
-        }
-      }
-
-      int pdgid = 0;
-      if ( std::all_of(chi2s.begin(), chi2s.end(), [](double x){return x == 0;}) ){
-        pdgid = pfo.getCharge() * 211;
-      }else{
-        int minchi2idx = std::distance(chi2s.begin(), std::min_element(chi2s.begin(), chi2s.end()));
-        pdgid = pfo.getCharge() * PDGIDs.at(minchi2idx);
-      }
-      pfo.setType( pdgid );
-      pfo.setMass( ParticleMass.at( abs(pdgid) ) );
-      pfo.setEnergy( sqrt(pfo.getMomentum()[0]*pfo.getMomentum()[0] + pfo.getMomentum()[1]*pfo.getMomentum()[1] + pfo.getMomentum()[2]*pfo.getMomentum()[2] + pfo.getMass()*pfo.getMass()) );
-      debug() << " fill tpc pid:  chi2s : " << chi2s[0]<<" " <<chi2s[1]<<" " <<chi2s[2]<<" "<<chi2s[3]<<" "<<chi2s[4]<<"	id:"<<pfo.getType()<<" 	mass:"<<pfo.getMass()<<endmsg;
-    }
-    
-}
-
-void FinalPIDAlg::FillTOFPID(const edm4hep::RecTofCollection* tofcol, edm4hep::MutableReconstructedParticle& pfo, std::array<double, 5>& chi2s){
-
-    for (auto trk : pfo.getTracks()){
-
-      for (auto tof : *tofcol){
-        if (tof.getTrack() == trk){
-          double toft = tof.getTime();
-          std::array<float, 5> tofexpts = tof.getTimeExp();
-          double tofexpterr = tof.getSigma();
-          std::array<double, 5> tofchi2s;
-          for (int i = 0; i < 5; i++){
-            tofchi2s[i] = std::pow( (tofexpts[i] - toft) / tofexpterr, 2);
-            chi2s[i] += tofchi2s[i];
-          }
-        }
-      }
-
-      int pdgid = 0;
-      if ( std::all_of(chi2s.begin(), chi2s.end(), [](double x){return x == 0;}) ){
-        pdgid = pfo.getCharge() * 211;
-      }else{
-        int minchi2idx = std::distance(chi2s.begin(), std::min_element(chi2s.begin(), chi2s.end()));
-        pdgid = pfo.getCharge() * PDGIDs.at(minchi2idx);
-      }
-
-      pfo.setType( pdgid );
-      pfo.setMass( ParticleMass.at( abs(pdgid) ) );
-      pfo.setEnergy( sqrt(pfo.getMomentum()[0]*pfo.getMomentum()[0] + pfo.getMomentum()[1]*pfo.getMomentum()[1] + pfo.getMomentum()[2]*pfo.getMomentum()[2] + pfo.getMass()*pfo.getMass()) );
-      debug() << " fill tof pid: chi2 : " << chi2s[0]<<" " <<chi2s[1]<<" " <<chi2s[2]<<" "<<chi2s[3]<<" "<<chi2s[4]<<"	id:"<<pfo.getType()<<" 	mass:"<<pfo.getMass()<<endmsg;
-
-    }
-
-}
-
-
-StatusCode FinalPIDAlg::FillCaloPID(edm4hep::MutableReconstructedParticle& pfo){
-    //Use cluster position to do preliminary gamma/h0 PID. 
-    //TODO: update with cluster type and energy in sub-detector. 
-
-    int Ncluster = pfo.clusters_size(); 
-    //std::cout<<"In PFO: total cluster size "<<Ncluster<<", current pid: "<<pfo.getType()<<std::endl;
-    double Etot_cluster = 0.;
-    TVector3 pfo_position(0., 0., 0.);
-    for(auto clu : pfo.getClusters() ){
-        if(!clu.isAvailable()) continue;
-        //printf("  In cluster #: pos+E (%.3f, %.3f, %.3f, %.3f), type %d, sub-cluster size %d, hit size %d \n", 
-        //    clu.getPosition().x, 
-        //    clu.getPosition().y, 
-        //    clu.getPosition().z, 
-        //    clu.getEnergy(), 
-        //    clu.getType(), 
-        //    clu.clusters_size(), 
-        //    clu.hits_size()  );
-
-        Etot_cluster += clu.getEnergy();
-        TVector3 clu_position(clu.getPosition().x, clu.getPosition().y, clu.getPosition().z);
-        pfo_position += clu.getEnergy() * clu_position;
-    }
-    pfo_position = pfo_position*(1./Etot_cluster);
-
-    debug() << "PFO position (" << pfo_position.Perp()<<", "<<pfo_position.z()<<"), total energy " << Etot_cluster << endmsg;
-
-    if( pfo.getType()==0 ){ //Temp: do not consider combined PID from different sub-detectors. 
-        if( fabs(pfo_position.Z())<EcalHalfZ && fabs(pfo_position.Perp())<EcalOuterR ){
-            int pdgid = 22;
-            pfo.setType( pdgid );
-            pfo.setMass( ParticleMass.at( abs(pdgid) ) );
-            double p_scale = sqrt( pfo.getEnergy()*pfo.getEnergy() - pfo.getMass()*pfo.getMass() ) / sqrt(pfo.getMomentum()[0]*pfo.getMomentum()[0] + pfo.getMomentum()[1]*pfo.getMomentum()[1] + pfo.getMomentum()[2]*pfo.getMomentum()[2] );
-            pfo.setMomentum( Vector3f(pfo.getMomentum()[0]*p_scale, pfo.getMomentum()[1]*p_scale, pfo.getMomentum()[2]*p_scale) );
-        }
-        else{
-            int pdgid = 130;
-            pfo.setType( pdgid );
-            pfo.setMass( ParticleMass.at( abs(pdgid) ) );
-            double p_scale = sqrt( pfo.getEnergy()*pfo.getEnergy() - pfo.getMass()*pfo.getMass() ) / sqrt(pfo.getMomentum()[0]*pfo.getMomentum()[0] + pfo.getMomentum()[1]*pfo.getMomentum()[1] + pfo.getMomentum()[2]*pfo.getMomentum()[2] );
-            pfo.setMomentum( Vector3f(pfo.getMomentum()[0]*p_scale, pfo.getMomentum()[1]*p_scale, pfo.getMomentum()[2]*p_scale) );
-
-        }
-    }
-
-    return StatusCode::SUCCESS;
 }

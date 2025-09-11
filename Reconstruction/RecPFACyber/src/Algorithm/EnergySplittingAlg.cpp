@@ -100,9 +100,10 @@ for(int ih=0; ih<p_HalfClusterV.size(); ih++){
     }
   }
 }
-
+*/
 
 cout<<"Readin empty half cluster size "<<p_emptyHalfClusterU.size()<<", "<<p_emptyHalfClusterV.size()<<endl;
+/*
 tmp_totE_U = 0;
 for(int ih=0; ih<p_emptyHalfClusterU.size(); ih++) tmp_totE_U += p_emptyHalfClusterU[ih]->getEnergy();
 tmp_totE_V = 0;
@@ -310,8 +311,9 @@ cout<<"Empty half cluster energy "<<tmp_totE_U<<", "<<tmp_totE_V<<endl;
   m_datacol.map_HalfCluster[settings.map_stringPars["OutputClusName"]+"U"] = m_newClusUCol; 
   m_datacol.map_HalfCluster[settings.map_stringPars["OutputClusName"]+"V"] = m_newClusVCol; 
 
-/*
+
 cout<<"  After splitting: HalfCluster U size "<<m_newClusUCol.size()<<", print check"<<endl;
+/*
 for(int icl=0; icl<m_newClusUCol.size(); icl++){
   cout<<"      In HFClusU #"<<icl<<": shower size = "<<m_newClusUCol[icl]->getCluster().size()<<endl;
   for(auto ish : m_newClusUCol[icl]->getCluster()){
@@ -322,8 +324,9 @@ for(int icl=0; icl<m_newClusUCol.size(); icl++){
   }
 }
 cout<<endl;
-
+*/
 cout<<"  After splitting: HalfCluster V size "<<m_newClusVCol.size()<<", print check"<<endl;
+/*
 for(int icl=0; icl<m_newClusVCol.size(); icl++){
   cout<<"      In HFClusV #"<<icl<<": shower size = "<<m_newClusVCol[icl]->getCluster().size()<<endl;
   for(auto ish : m_newClusVCol[icl]->getCluster()){
@@ -531,8 +534,8 @@ StatusCode EnergySplittingAlg::HalfClusterToTowers( std::vector<Cyber::CaloHalfC
                                                     std::vector<Cyber::CaloHalfCluster*>& m_emptyClusV,
                                                     std::vector<std::shared_ptr<Cyber::Calo3DCluster>>& m_towers )
 {
-//cout<<"  HalfClusterToTowers: Input halfcluster size "<<m_halfClusU.size()<<", "<<m_halfClusV.size()<<endl;
-//cout<<"    Input empty cluster size "<<m_emptyClusU.size()<<", "<<m_emptyClusV.size()<<endl;
+cout<<"  HalfClusterToTowers: Input halfcluster size "<<m_halfClusU.size()<<", "<<m_halfClusV.size()<<endl;
+cout<<"    Input empty cluster size "<<m_emptyClusU.size()<<", "<<m_emptyClusV.size()<<endl;
 
   m_towers.clear(); 
 
@@ -545,12 +548,14 @@ StatusCode EnergySplittingAlg::HalfClusterToTowers( std::vector<Cyber::CaloHalfC
 
   //Assign the empty clusters into tower
   for(int il=0; il<m_emptyClusU.size(); il++){
-//cout<<"  Empty clusterU #"<<il<<": towerID size "<<m_emptyClusU[il]->getTowerID().size()<<endl;
-    map_emptyHalfClusterU[m_emptyClusU[il]->getTowerID()[0]].push_back(m_emptyClusU[il]);
+cout<<"  Empty clusterU #"<<il<<": towerID size "<<m_emptyClusU[il]->getTowerID().size()<<endl;
+    //map_emptyHalfClusterU[m_emptyClusU[il]->getTowerID()[0]].push_back(m_emptyClusU[il]);
+    map_HalfClusterU[m_emptyClusU[il]->getTowerID()[0]].push_back(m_emptyClusU[il]);
   }
   for(int il=0; il<m_emptyClusV.size(); il++){
-//cout<<"  Empty clusterV #"<<il<<": towerID size "<<m_emptyClusV[il]->getTowerID().size()<<endl;
-    map_emptyHalfClusterV[m_emptyClusV[il]->getTowerID()[0]].push_back(m_emptyClusV[il]);
+cout<<"  Empty clusterV #"<<il<<": towerID size "<<m_emptyClusV[il]->getTowerID().size()<<endl;
+    //map_emptyHalfClusterV[m_emptyClusV[il]->getTowerID()[0]].push_back(m_emptyClusV[il]);
+    map_HalfClusterV[m_emptyClusV[il]->getTowerID()[0]].push_back(m_emptyClusV[il]);
   }
 
 
@@ -802,7 +807,7 @@ StatusCode EnergySplittingAlg::HalfClusterToTowers( std::vector<Cyber::CaloHalfC
   //Form a tower:
   for(auto &iter : map_2DCluster){
     std::vector<int> m_towerID = iter.first;
-//printf("  In tower: [%d, %d, %d] \n", m_towerID[0], m_towerID[1], m_towerID[2]);
+printf("  In tower: [%d, %d, %d, %d] \n", m_towerID[0], m_towerID[1], m_towerID[2], m_towerID[3]);
     //Check cousin clusters: 
     std::vector<Cyber::CaloHalfCluster*> m_HFClusUInTower = map_HalfClusterU[m_towerID];
     for(auto &m_HFclus : m_HFClusUInTower){
@@ -828,22 +833,22 @@ StatusCode EnergySplittingAlg::HalfClusterToTowers( std::vector<Cyber::CaloHalfC
       for(int ics=0; ics<tmp_delClus.size(); ics++) m_HFclus->deleteCousinCluster( tmp_delClus[ics] );
     }
 
-    std::vector<const Cyber::CaloHalfCluster*> const_emptyClusU; const_emptyClusU.clear();
-    std::vector<const Cyber::CaloHalfCluster*> const_emptyClusV; const_emptyClusV.clear();
-    if(map_emptyHalfClusterU.find(m_towerID)!=map_emptyHalfClusterU.end()){
-      for(int icl=0; icl<map_emptyHalfClusterU[m_towerID].size(); icl++){
-        map_emptyHalfClusterU[m_towerID][icl]->getLinkedMCPfromUnit();
-        const_emptyClusU.push_back(map_emptyHalfClusterU[m_towerID][icl]);
-      }
-      map_emptyHalfClusterU.erase(m_towerID);
-    }
-    if(map_emptyHalfClusterV.find(m_towerID)!=map_emptyHalfClusterV.end()){
-      for(int icl=0; icl<map_emptyHalfClusterV[m_towerID].size(); icl++){
-        map_emptyHalfClusterV[m_towerID][icl]->getLinkedMCPfromUnit();
-        const_emptyClusV.push_back(map_emptyHalfClusterV[m_towerID][icl]);
-      }
-      map_emptyHalfClusterV.erase(m_towerID);
-    }
+    //std::vector<const Cyber::CaloHalfCluster*> const_emptyClusU; const_emptyClusU.clear();
+    //std::vector<const Cyber::CaloHalfCluster*> const_emptyClusV; const_emptyClusV.clear();
+    //if(map_emptyHalfClusterU.find(m_towerID)!=map_emptyHalfClusterU.end()){
+    //  for(int icl=0; icl<map_emptyHalfClusterU[m_towerID].size(); icl++){
+    //    map_emptyHalfClusterU[m_towerID][icl]->getLinkedMCPfromUnit();
+    //    const_emptyClusU.push_back(map_emptyHalfClusterU[m_towerID][icl]);
+    //  }
+    //  map_emptyHalfClusterU.erase(m_towerID);
+    //}
+    //if(map_emptyHalfClusterV.find(m_towerID)!=map_emptyHalfClusterV.end()){
+    //  for(int icl=0; icl<map_emptyHalfClusterV[m_towerID].size(); icl++){
+    //    map_emptyHalfClusterV[m_towerID][icl]->getLinkedMCPfromUnit();
+    //    const_emptyClusV.push_back(map_emptyHalfClusterV[m_towerID][icl]);
+    //  }
+    //  map_emptyHalfClusterV.erase(m_towerID);
+    //}
 //cout<<"  Found empty half cluster size: "<<const_emptyClusU.size()<<", "<<const_emptyClusV.size()<<endl;
 
     //Convert to const
@@ -858,41 +863,41 @@ StatusCode EnergySplittingAlg::HalfClusterToTowers( std::vector<Cyber::CaloHalfC
     for(int i2d=0; i2d<map_2DCluster[m_towerID].size(); i2d++) m_tower->addUnit(map_2DCluster[m_towerID][i2d]);
     m_tower->setHalfClusters( settings.map_stringPars["OutputClusName"]+"U", const_HFClusU, 
                               settings.map_stringPars["OutputClusName"]+"V", const_HFClusV );
-    m_tower->setHalfClusters( "emptyHalfClusterU", const_emptyClusU,
-                              "emptyHalfClusterV", const_emptyClusV );
+    //m_tower->setHalfClusters( "emptyHalfClusterU", const_emptyClusU,
+    //                          "emptyHalfClusterV", const_emptyClusV );
     m_towers.push_back(m_tower);
   }
 
-  if(map_emptyHalfClusterU.size()>0 && map_emptyHalfClusterV.size()>0){
-    for(auto iter: map_emptyHalfClusterU){
-      std::vector<int> m_towerID = iter.first;
+  //if(map_emptyHalfClusterU.size()>0 && map_emptyHalfClusterV.size()>0){
+  //  for(auto iter: map_emptyHalfClusterU){
+  //    std::vector<int> m_towerID = iter.first;
 
-      if( map_emptyHalfClusterV.find(m_towerID)==map_emptyHalfClusterV.end() ){
-        iter.second.clear();
-        //map_emptyHalfClusterU.erase(m_towerID);
-        continue;
-      }
+  //    if( map_emptyHalfClusterV.find(m_towerID)==map_emptyHalfClusterV.end() ){
+  //      iter.second.clear();
+  //      //map_emptyHalfClusterU.erase(m_towerID);
+  //      continue;
+  //    }
 
-      std::vector<const Cyber::CaloHalfCluster*> const_emptyClusU; const_emptyClusU.clear();
-      std::vector<const Cyber::CaloHalfCluster*> const_emptyClusV; const_emptyClusV.clear();
-      for(int icl=0; icl<map_emptyHalfClusterU[m_towerID].size(); icl++){
-        map_emptyHalfClusterU[m_towerID][icl]->getLinkedMCPfromUnit();
-        const_emptyClusU.push_back(map_emptyHalfClusterU[m_towerID][icl]);
-      }
-      //map_emptyHalfClusterU.erase(m_towerID);
-      for(int icl=0; icl<map_emptyHalfClusterV[m_towerID].size(); icl++){
-        map_emptyHalfClusterV[m_towerID][icl]->getLinkedMCPfromUnit();
-        const_emptyClusV.push_back(map_emptyHalfClusterV[m_towerID][icl]);
-      }
-      //map_emptyHalfClusterV.erase(m_towerID);
+  //    std::vector<const Cyber::CaloHalfCluster*> const_emptyClusU; const_emptyClusU.clear();
+  //    std::vector<const Cyber::CaloHalfCluster*> const_emptyClusV; const_emptyClusV.clear();
+  //    for(int icl=0; icl<map_emptyHalfClusterU[m_towerID].size(); icl++){
+  //      map_emptyHalfClusterU[m_towerID][icl]->getLinkedMCPfromUnit();
+  //      const_emptyClusU.push_back(map_emptyHalfClusterU[m_towerID][icl]);
+  //    }
+  //    //map_emptyHalfClusterU.erase(m_towerID);
+  //    for(int icl=0; icl<map_emptyHalfClusterV[m_towerID].size(); icl++){
+  //      map_emptyHalfClusterV[m_towerID][icl]->getLinkedMCPfromUnit();
+  //      const_emptyClusV.push_back(map_emptyHalfClusterV[m_towerID][icl]);
+  //    }
+  //    //map_emptyHalfClusterV.erase(m_towerID);
 
-      std::shared_ptr<Cyber::Calo3DCluster> m_tower = std::make_shared<Cyber::Calo3DCluster>();
-      m_tower->addTowerID( m_towerID );
-      m_tower->setHalfClusters( "emptyHalfClusterU", const_emptyClusU,
-                                "emptyHalfClusterV", const_emptyClusV );
-      m_towers.push_back(m_tower);
-    }
-  }
+  //    std::shared_ptr<Cyber::Calo3DCluster> m_tower = std::make_shared<Cyber::Calo3DCluster>();
+  //    m_tower->addTowerID( m_towerID );
+  //    m_tower->setHalfClusters( "emptyHalfClusterU", const_emptyClusU,
+  //                              "emptyHalfClusterV", const_emptyClusV );
+  //    m_towers.push_back(m_tower);
+  //  }
+  //}
 
 /*
 cout<<"  After splitting: tower size "<<m_towers.size()<<". Print Tower: "<<endl;

@@ -52,7 +52,7 @@ StatusCode TrackClusterConnectingAlg::Initialize( CyberDataCol& m_datacol ){
   }
 
   m_bkCol.EnergyCorrSvc = m_datacol.EnergyCorrSvc;
-/*
+
 cout<<"Readin Track size: "<<m_tracks.size()<<", ECAL cluster size: "<<m_EcalClusters.size()<<", HCAL cluster size "<<m_HcalClusters.size()<<endl;
 cout<<"Print track"<<endl;
 for(int i=0; i<m_tracks.size(); i++)
@@ -63,7 +63,8 @@ for(int ic=0; ic<m_EcalClusters.size(); ic++){
   if(m_EcalClusters[ic]->getAssociatedTracks().size()>0) cout<<", Leading track P = "<<m_EcalClusters[ic]->getAssociatedTracks()[0]->getMomentum()<<endl;
   else cout<<endl;
 }
-*/
+
+
   return StatusCode::SUCCESS;
 };
 

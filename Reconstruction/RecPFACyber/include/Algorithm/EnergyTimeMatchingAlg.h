@@ -75,6 +75,8 @@ private:
 
   std::vector<const Cyber::CaloHalfCluster*> m_HFClusUCol;
   std::vector<const Cyber::CaloHalfCluster*> m_HFClusVCol;
+  std::vector<const Cyber::CaloHalfCluster*> m_emptyHFClusUCol;
+  std::vector<const Cyber::CaloHalfCluster*> m_emptyHFClusVCol;
   std::vector<std::shared_ptr<Cyber::Calo3DCluster>> m_clusterCol; 
 
   CyberDataCol m_bkCol;
