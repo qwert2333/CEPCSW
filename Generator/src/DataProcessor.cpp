@@ -12,7 +12,8 @@
 DECLARE_COMPONENT(DataProcessor)
 
 DataProcessor::DataProcessor(const std::string& name, ISvcLocator* pSvcLocator): GaudiAlgorithm(name, pSvcLocator) {
-		declareProperty("RawCaloHit", rawhit_hdl, "Raw hit collection name");
+		declareProperty("RawHGCaloHit", rawHGhit_hdl, "High-gain Raw hit collection name");
+		declareProperty("RawLGCaloHit", rawLGhit_hdl, "Low-gain Raw hit collection name");
     m_evtid = 0;
 
 }
@@ -46,14 +47,12 @@ DataProcessor::initialize() {
 		Double_t Tstamp_us_tmp = -1;
     while (std::getline(DataFile, DataLine))
     {
-//std::cout<<"Data line: "<<DataLine<<std::endl;
         std::istringstream iss(DataLine);
         TString TempStr;
 
         Int_t NumCount = 0;
         while (iss >> TempStr)
             NumCount++;
-//std::cout<<"  data Num: "<<NumCount<<std::endl;
 
         iss.clear();
 				iss.seekg(0);
@@ -67,13 +66,10 @@ DataProcessor::initialize() {
           iss >> fTriggerID;
           iss >> NHits;
 
-//std::cout<<"  Data: "<<fBoardID<<'\t'<<fChannelID<<'\t'<<fADC_LG<<'\t'<<fADC_HG<<'\t'<<Tstamp_us<<'\t'<<fTriggerID<<'\t'<<NHits<<std::endl;
-
 					fTriggerID_tmp = fTriggerID;
 					Tstamp_us_tmp = Tstamp_us; 
 					auto iter = std::find_if(EventCol.begin(), EventCol.end(), [&fTriggerID](const Event& evt) { return evt.TriggerID == fTriggerID;});
 					if(iter==EventCol.end()){
-//std::cout<<"  New event: trigger ID "<<fTriggerID<<std::endl;
 						Event m_newEvt;
 						m_newEvt.TriggerID = fTriggerID;
 						m_newEvt.TStamp = Tstamp_us;
@@ -102,7 +98,6 @@ DataProcessor::initialize() {
           iss >> fADC_LG;
           iss >> fADC_HG;
 
-//std::cout<<"  Data: "<<fBoardID<<'\t'<<fChannelID<<'\t'<<fADC_LG<<'\t'<<fADC_HG<<'\t'<<Tstamp_us<<'\t'<<fTriggerID<<'\t'<<NHits<<std::endl;
 
           auto iter = std::find_if(EventCol.begin(), EventCol.end(), [&fTriggerID_tmp](const Event& evt) { return evt.TriggerID == fTriggerID_tmp;});
 					if(iter==EventCol.end()){
@@ -129,7 +124,6 @@ DataProcessor::initialize() {
 		DataFile.close();
 
 		std::cout<<"Event size: "<<EventCol.size()<<std::endl;
-		//for(int i=0; i<EventCol.size(); i++) std::cout<<"Event #"<<i<<": trigger ID "<<EventCol[i].TriggerID<<", hit size "<<EventCol[i].fBorderID.size()<<std::endl;
 
 		//Create cellID map
 		std::ifstream fMapFile(m_channel_map.value());
@@ -156,22 +150,18 @@ DataProcessor::initialize() {
             std::cerr << "Error: Failed to parse line: " << line << std::endl;
             continue;
         }
+				std::vector<Int_t> cellidvec(4);
         ChannelMap[std::make_pair(board, channel)] = {layer, index, side, cellid};
     }
     fMapFile.close();
     
-//std::cout<<"Print channel map: "<<std::endl;
-//std::cout<<"Board"<<'\t'<<"Channel"<<'\t'<<"Layer"<<'\t'<<"Index"<<'\t'<<"Side"<<'\t'<<"CellID"<<std::endl;
-//for(auto iter: ChannelMap){
-//	std::cout<<iter.first.first<<'\t'<<iter.first.second<<'\t'<<iter.second.Layer<<'\t'<<iter.second.Index<<'\t'<<iter.second.Side<<'\t'<<iter.second.CellID<<std::endl;
-//}
-
     return StatusCode::SUCCESS;
 }
 
 StatusCode
 DataProcessor::execute() {
-		edm4hep::RawCalorimeterHitCollection *rawhitcol = rawhit_hdl.createAndPut();
+		edm4hep::RawCalorimeterHitCollection *rawHGhitcol = rawHGhit_hdl.createAndPut();
+		edm4hep::RawCalorimeterHitCollection *rawLGhitcol = rawLGhit_hdl.createAndPut();
 
 	  if(m_evtid>=EventCol.size()){
 	  	//std::cout<<"Finished all events in file: "<<m_evtid<<std::endl;
@@ -187,33 +177,29 @@ DataProcessor::execute() {
 	  }
 
 		//Construct event
-		std::cout<<"  Processing event #"<<m_evtid<<std::endl;
+		if(m_evtid%100==0) std::cout<<"  Processing event #"<<m_evtid<<std::endl;
 
 		auto event = EventCol[m_evtid];
-//std::cout<<"    Hit vec size "<<event.fBorderID.size()<<'\t'<<event.fChannelID.size()<<'\t'<<event.fADC_HG.size()<<'\t'<<event.fADC_LG.size()<<'\t'<<event.fToA_LSB.size()<<'\t'<<event.fToT_LSB.size()<<std::endl;
 
 		for(int ihit=0; ihit<event.fBorderID.size(); ihit++){
 			//Derive cell ID
-//std::cout<<"      Hit #"<<ihit<<": "<<event.fBorderID[ihit]<<'\t'<<event.fChannelID[ihit]<<'\t';
 			auto key = std::make_pair(event.fBorderID[ihit], event.fChannelID[ihit]);
 			auto it = ChannelMap.find(key);
 			if(it==ChannelMap.end()){
           std::cerr << "Error: Key not found in map for BoardID: " << event.fBorderID[ihit] << ", ChannelID: " << event.fChannelID[ihit] << std::endl;
           continue;
 			}
-			//if(it->second.CellID==-1) continue;
-//std::cout<<it->second.CellID<<'\t'<<event.fADC_HG[ihit]<<'\t'<<event.fADC_LG[ihit]<<'\t'<<std::endl;
 
 			//Create HG hit
-			auto rawhit_HG = rawhitcol->create();
+			auto rawhit_HG = rawHGhitcol->create();
 			rawhit_HG.setCellID(it->second.CellID);
 			rawhit_HG.setAmplitude(event.fADC_HG[ihit]);
 			rawhit_HG.setTimeStamp(event.TStamp);
 
 			//Create LG hit
-      auto rawhit_LG = rawhitcol->create();
+      auto rawhit_LG = rawLGhitcol->create();
       rawhit_LG.setCellID(it->second.CellID);
-      rawhit_LG.setAmplitude(event.fADC_HG[ihit]);
+      rawhit_LG.setAmplitude(event.fADC_LG[ihit]);
       rawhit_LG.setTimeStamp(event.TStamp);
 		}
 

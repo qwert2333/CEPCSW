@@ -52,9 +52,11 @@ private:
 		Gaudi::Property<int> m_skipline_map{this, "MapFileHeaderLine", 8};
 
     int m_evtid;                               
-    DataHandle<edm4hep::RawCalorimeterHitCollection> rawhit_hdl{"RawCaloHit", Gaudi::DataHandle::Writer, this};
+    DataHandle<edm4hep::RawCalorimeterHitCollection> rawHGhit_hdl{"RawHGCaloHit", Gaudi::DataHandle::Writer, this};
+    DataHandle<edm4hep::RawCalorimeterHitCollection> rawLGhit_hdl{"RawLGCaloHit", Gaudi::DataHandle::Writer, this};
 		std::vector<Event> EventCol; 
-		std::map<std::pair<Int_t, Int_t>, ChannelMapEntry> ChannelMap; 
+		std::map<std::pair<Int_t, Int_t>, ChannelMapEntry> ChannelMap;
+
 
 };
 
