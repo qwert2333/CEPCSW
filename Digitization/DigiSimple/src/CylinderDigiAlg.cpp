@@ -102,7 +102,7 @@ StatusCode CylinderDigiAlg::execute(){
     trkHit.setCovMatrix(std::array<float, 6>{m_resRPhi*m_resRPhi/2, 0, m_resRPhi*m_resRPhi/2, 0, 0, m_resZ*m_resZ});
     trkHit.setType(1<<CEPCConf::TrkHitTypeBit::CYLINDER);
 #if edm4hep_VERSION >= EDM4HEP_VERSION(1, 0, 0)
-    throw std::runtime_error("The RAWHIT related interfaces are removed from TrackerHit");
+    //throw std::runtime_error("The RAWHIT related interfaces are removed from TrackerHit");
 #else
     trkHit.addToRawHits(simhit.getObjectID());
 #endif

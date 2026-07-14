@@ -232,7 +232,7 @@ namespace MarlinTrk {
 	//std::cout << "space point is not still valid! pelease wait updating..." <<std::endl;
 	//exit(1);
 #if edm4hep_VERSION >= EDM4HEP_VERSION(1, 0, 0)
-        throw std::runtime_error("The RAWHIT related interfaces are removed from TrackerHit");
+        //throw std::runtime_error("The RAWHIT related interfaces are removed from TrackerHit");
 #else
         int nRawHit = trkHit.rawHits_size();
         for( unsigned k=0; k< nRawHit; k++ ){
@@ -451,7 +451,7 @@ namespace MarlinTrk {
         //exit(1);
 	// get strip hits 
 #if edm4hep_VERSION >= EDM4HEP_VERSION(1, 0, 0)
-        throw std::runtime_error("The RAWHIT related interfaces are removed from TrackerHit");
+        //throw std::runtime_error("The RAWHIT related interfaces are removed from TrackerHit");
 #else
         int nRawHit = trkHit.rawHits_size();
         for( unsigned k=0; k< nRawHit; k++ ){
@@ -591,8 +591,9 @@ namespace MarlinTrk {
     }
     
     double r_first = firstHit.getPosition()[0]*firstHit.getPosition()[0] + firstHit.getPosition()[1]*firstHit.getPosition()[1];
-#if podio_VERSION >= PODIO_VERSION(1, 0, 0)
-    throw std::runtime_error("The setRadiusOfInnermostHit interface is removed from TrackerHit");    
+    //#if podio_VERSION >= PODIO_VERSION(1, 0, 0)
+#if edm4hep_VERSION >= EDM4HEP_VERSION(1, 0, 0)
+    //throw std::runtime_error("The setRadiusOfInnermostHit interface is removed from TrackerHit");
 #else
     track->setRadiusOfInnermostHit(sqrt(r_first));
 #endif

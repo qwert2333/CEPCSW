@@ -458,8 +458,9 @@ int KalTestTool::finaliseTrack(MarlinTrk::IMarlinTrack* marlintrk, edm4hep::Muta
 
   double r_first = firstHit.getPosition()[0]*firstHit.getPosition()[0] + firstHit.getPosition()[1]*firstHit.getPosition()[1];
 
-#if podio_VERSION >= PODIO_VERSION(1, 0, 0)
-  throw std::runtime_error("The setRadiusOfInnermostHit interface is removed from Track");
+  //#if podio_VERSION >= PODIO_VERSION(1, 0, 0)
+#if edm4hep_VERSION >= EDM4HEP_VERSION(1, 0, 0)
+  //throw std::runtime_error("The setRadiusOfInnermostHit interface is removed from Track");
 #else
   track->setRadiusOfInnermostHit(sqrt(r_first));
 #endif

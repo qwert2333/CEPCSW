@@ -1150,7 +1150,7 @@ StatusCode ClupatraAlg::execute() {
 				trk.setChi2(     firstTrk.getChi2()     ) ;
 				trk.setNdf(      firstTrk.getNdf()      ) ;
 #if edm4hep_VERSION >= EDM4HEP_VERSION(1, 0, 0)
-				throw std::runtime_error("setDEdx and setRadiusOfInnermostHit missing in EDM4hep v1.0.0");
+				//throw std::runtime_error("setDEdx and setRadiusOfInnermostHit missing in EDM4hep v1.0.0");
 #else
 				trk.setDEdx(     firstTrk.getDEdx()     ) ;
 				trk.setDEdxError(firstTrk.getDEdxError()) ;
@@ -1176,7 +1176,7 @@ StatusCode ClupatraAlg::execute() {
 				   :  0.0 ) ;
 				   */
 #if podio_VERSION >= PODIO_VERSION(1, 0, 0)
-				throw std::runtime_error("The setRadiusOfInnermostHit interface is removed from Track");
+				//throw std::runtime_error("The setRadiusOfInnermostHit interface is removed from Track");
 #else
 				trk.setRadiusOfInnermostHit( RMin  ) ;
 #endif
