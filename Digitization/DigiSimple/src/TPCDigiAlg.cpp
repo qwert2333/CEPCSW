@@ -1378,7 +1378,7 @@ void TPCDigiAlg::writeVoxelToHit( Voxel_tpc* aVoxel){
 
     if (_use_raw_hits_to_store_simhit_pointer) {
 #if edm4hep_VERSION >= EDM4HEP_VERSION(1, 0, 0)
-      throw std::runtime_error("The RAWHIT related interfaces are removed from TrackerHit");
+      //throw std::runtime_error("The RAWHIT related interfaces are removed from TrackerHit");
 #else
       trkHit.addToRawHits(_tpcHitMap[seed_hit].getObjectID());
 #endif

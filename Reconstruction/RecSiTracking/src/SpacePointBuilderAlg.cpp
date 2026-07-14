@@ -224,7 +224,7 @@ StatusCode SpacePointBuilderAlg::execute(){
 
               // store the hits it's composed of:
 #if edm4hep_VERSION >= EDM4HEP_VERSION(1, 0, 0)
-              throw std::runtime_error("The RAWHIT related interfaces are removed from TrackerHit");
+              //throw std::runtime_error("The RAWHIT related interfaces are removed from TrackerHit");
 #else
               spacePoint.addToRawHits( hitFront.getObjectID() );
               spacePoint.addToRawHits( hitBack.getObjectID() );
@@ -242,12 +242,12 @@ StatusCode SpacePointBuilderAlg::execute(){
               if( simHitsFront.size() == 1 ){
 		edm4hep::SimTrackerHit& simHit = simHitsFront[0];
 		auto spAss = relCol->create();
-		#if edm4hep_VERSION >= EDM4HEP_VERSION(1, 0, 0)
-spAss.setFrom(spacePoint);
-spAss.setTo(simHit);
+#if edm4hep_VERSION >= EDM4HEP_VERSION(1, 0, 0)
+		spAss.setFrom(spacePoint);
+		spAss.setTo(simHit);
 #else
-spAss.setRec(spacePoint);
-spAss.setSim(simHit);
+		spAss.setRec(spacePoint);
+		spAss.setSim(simHit);
 #endif
 		spAss.setWeight( 0.5 );
               }

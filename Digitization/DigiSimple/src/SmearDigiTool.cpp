@@ -337,7 +337,7 @@ StatusCode SmearDigiTool::Call(edm4hep::SimTrackerHit simhit, IDigiTool::CEPCSWT
 	    << " with a weight of " << weight
 	    << endmsg;
 #if edm4hep_VERSION >= EDM4HEP_VERSION(1, 0, 0)
-    throw std::runtime_error("The RAWHIT related interfaces are removed from TrackerHit");
+    //throw std::runtime_error("The RAWHIT related interfaces are removed from TrackerHit");
     ass.setTo(simhit);
     ass.setFrom(outhit);
 #else

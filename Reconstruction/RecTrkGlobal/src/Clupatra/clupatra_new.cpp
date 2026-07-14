@@ -1368,7 +1368,7 @@ start:
 		MarTrk_of_edm4hepTrack(trk) = mtrk ;
 
 #if edm4hep_VERSION >= EDM4HEP_VERSION(1, 0, 0)
-		throw std::runtime_error("setDEdx missing in EDM4hep v1.0.0");
+		//throw std::runtime_error("setDEdx missing in EDM4hep v1.0.0");
 #else
 		trk.setDEdx( ( nHit ? e/nHit : -1. )  ) ;
 #endif
@@ -1543,7 +1543,7 @@ start:
 						+ tsFH.referencePoint[1] * tsFH.referencePoint[1] ) ;
 
 #if edm4hep_VERSION >= EDM4HEP_VERSION(1, 0, 0)
-				throw std::runtime_error("setRadiusOfInnermostHit missing in EDM4hep v1.0.0");
+				//throw std::runtime_error("setRadiusOfInnermostHit missing in EDM4hep v1.0.0");
 #else
 				trk.setRadiusOfInnermostHit( RMin  ) ;
 #endif

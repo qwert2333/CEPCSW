@@ -402,7 +402,7 @@ StatusCode PlanarDigiAlg::execute()
             << " with a weight of " << weight 
             << endmsg;
 #if edm4hep_VERSION >= EDM4HEP_VERSION(1, 0, 0)
-    throw std::runtime_error("No addToRawHits in EDM4hep");
+    //throw std::runtime_error("No addToRawHits in EDM4hep");
     rel.setTo(SimTHit);
     rel.setFrom(trkHit);
 #else

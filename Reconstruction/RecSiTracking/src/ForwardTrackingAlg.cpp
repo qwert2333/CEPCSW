@@ -1035,7 +1035,7 @@ void ForwardTrackingAlg::finaliseTrack( edm4hep::MutableTrack* trackImpl ){
   
   const edm4hep::Vector3f& p = trkStateFirstHit.referencePoint;
 #if podio_VERSION >= PODIO_VERSION(1, 0, 0)
-  throw std::runtime_error("The setRadiusOfInnermostHit interface is removed from TrackerHit");
+  //throw std::runtime_error("The setRadiusOfInnermostHit interface is removed from TrackerHit");
 #else
   trackImpl->setRadiusOfInnermostHit( sqrt( p[0]*p[0] + p[1]*p[1] + p[2]*p[2] ) );
 #endif
