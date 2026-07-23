@@ -1,7 +1,7 @@
 # gaudi_add_header_only_library(ParticleIDLib)
 
 # Modules
-gaudi_add_module(ParticleID
+gaudi_add_module(ParticleIDAlg
                  SOURCES src/TPCDndxAlg.cpp
                          src/DCHDndxAlg.cpp
                          src/TofRecAlg.cpp
@@ -21,11 +21,11 @@ gaudi_add_module(ParticleID
                       k4FWCore::k4FWCore
 )
 
-target_include_directories(ParticleID PUBLIC
+target_include_directories(ParticleIDAlg PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}>/include
   $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
 
-install(TARGETS ParticleID
+install(TARGETS ParticleIDAlg
   EXPORT CEPCSWTargets
   RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}" COMPONENT bin
   LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}" COMPONENT shlib
