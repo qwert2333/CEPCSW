@@ -153,7 +153,10 @@ StatusCode TPCDndxAlg::execute() {
             q.error = dndx_sigma;
 
 #if edm4hep_VERSION >= EDM4HEP_VERSION(1, 0, 0)
-            throw std::runtime_error("Hypothesis not available in EDM4hep v1.0.0");
+            //throw std::runtime_error("Hypothesis not available in EDM4hep v1.0.0");
+            MutableRecDqdx dndx_track(q);
+            dndx_track.setTrack(trk);
+            outCol->push_back(dndx_track);
 #else
             std::array<Hypothesis, 5> hypotheses;
             for (int pid = 0; pid < 5; pid++) {
