@@ -1,0 +1,6 @@
+v2::libDetCRD.so:CRDBeamPipe_v01
+v2::libDetCRD.so:CRDEcalBarrel_v01
+v2::libDetCRD.so:DD4hep_RotatedCrystalCalorimeter_v01
+v2::libDetCRD.so:DD4hep_RotatedPolyhedraBarrelCalorimeter_v01
+v2::libDetCRD.so:SiTrackerSkewRing_v01
+v2::libDetCRD.so:SiTrackerStaggeredLadder_v01

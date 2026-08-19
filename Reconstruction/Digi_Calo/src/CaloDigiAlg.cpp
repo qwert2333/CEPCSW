@@ -14,6 +14,7 @@
 #include <cmath>
 #include <algorithm>
 
+using namespace std;
 DECLARE_COMPONENT( CaloDigiAlg )
 
 CaloDigiAlg::CaloDigiAlg(const std::string& name, ISvcLocator* svcLoc)
@@ -23,7 +24,8 @@ CaloDigiAlg::CaloDigiAlg(const std::string& name, ISvcLocator* svcLoc)
   
   // Input collections
   declareProperty("SimCaloHitCollection", r_SimCaloCol, "Handle of the Input SimCaloHit collection");
-  
+  declareProperty("ECALBarrelParticleAssoCol", r_MCRCaloPAssCol, "Handle of CaloAssociation collection"); 
+ 
   // Output collections
   declareProperty("CaloHitCollection", w_DigiCaloCol, "Handle of Digi CaloHit collection");
   
@@ -48,6 +50,9 @@ StatusCode CaloDigiAlg::execute()
   std::map<unsigned long long, edm4hep::MutableSimCalorimeterHit> id_hit_map;
   edm4hep::CalorimeterHitCollection* caloVec   = w_DigiCaloCol.createAndPut();
   edm4hep::MCRecoCaloAssociationCollection* caloAssoVec   = w_CaloAssociationCol.createAndPut();
+
+  const edm4hep::MCRecoCaloParticleAssociationCollection* MCPAssoCol = r_MCRCaloPAssCol.get();
+   cout<<"caloMCPAssoVec->size : "<<MCPAssoCol->size()<<endl;
   const edm4hep::SimCalorimeterHitCollection* SimHitCol =  r_SimCaloCol.get();
   double tot_e = 0 ;
   if(SimHitCol == 0) 
@@ -64,8 +69,11 @@ StatusCode CaloDigiAlg::execute()
   {
       auto SimHit = SimHitCol->at(i);
       unsigned long long id = SimHit.getCellID();
+      
+      
       float en = SimHit.getEnergy();
       tot_e += en;
+
       if ( id_hit_map.find(id) != id_hit_map.end()) id_hit_map[id].setEnergy(id_hit_map[id].getEnergy() + en);
       else {
         edm4hep::MutableSimCalorimeterHit newSimHit(SimHit.getCellID(), SimHit.getEnergy(), SimHit.getPosition());

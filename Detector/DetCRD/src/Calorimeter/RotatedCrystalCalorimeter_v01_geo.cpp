@@ -19,7 +19,7 @@ using namespace dd4hep;
 using namespace dd4hep::detail;
 
 static Ref_t create_detector(Detector& description, xml_h e, SensitiveDetector sens) {
-  std::cout << "This is the RotatedCrystalCalorimeter_v01:"  << std::endl;
+  std::cout << "This is the double RotatedCrystalCalorimeter:"  << std::endl;
 
   xml_det_t x_det = e;
   xml_dim_t dim = x_det.dimensions();
@@ -52,11 +52,14 @@ static Ref_t create_detector(Detector& description, xml_h e, SensitiveDetector s
   envelope.setVisAttributes(description, "SeeThrough");
 
   DetElement module0(cal, "module1", x_det.id());
+  DetElement module_even(cal, "module_even", x_det.id());
   
   double yhalf = zhalf/nz;
   Tube moduleTube(rmin, rmax, yhalf);
-  Volume moduleVol("module", moduleTube, air);
-  moduleVol.setVisAttributes(description, "SeeThrough");
+  Volume moduleVol_odd("module_odd", moduleTube, air);
+  Volume moduleVol_even("module_even", moduleTube, air);
+  moduleVol_odd.setVisAttributes(description, "SeeThrough");
+  moduleVol_even.setVisAttributes(description, "SeeThrough");
   //
   //          |         __C
   //          |      __/  |
@@ -104,20 +107,39 @@ static Ref_t create_detector(Detector& description, xml_h e, SensitiveDetector s
     //
     xml_comp_t x_slice = xp;
   }
-  
-  for(int crystal_id=1; crystal_id<=nphi; crystal_id++){
+  for(int crystal_id=1; crystal_id<=nphi; crystal_id++){  //nphi
+    double angleRot = -alpha + dphi/2 + (crystal_id-1)*dphi;
+    double phiCenter = phi0Center + (crystal_id-1)*dphi;
+/*    std::cout << "module_odd: crystal_id = " << crystal_id << ", phiCenter = " << phiCenter/degree
+	      << ", phi0Center = " << phi0Center/degree 
+	      << ", phiCenter = " << phiCenter/degree 
+	      << std::endl;*/
+    Transform3D trafo(RotationZYX(0, angleRot+M_PI/2, M_PI/2), Translation3D(center2O*cos(phiCenter), center2O*sin(phiCenter), 0));
+    PlacedVolume pv = moduleVol_odd.placeVolume(crystalVol, trafo);
+    pv.addPhysVolID("crystal", crystal_id);
+   // DetElement crystal(moduleVol_odd, _toString(crystal_id,"crystal%d"), x_det.id());
+  //  crystal.setPlacement(pv);
+  }
+
+  for(int crystal_id=1; crystal_id<=nphi; crystal_id++){//nphi
     double angleRot = -alpha + dphi/2 + (crystal_id-1)*dphi;
     double phiCenter = phi0Center + (crystal_id-1)*dphi;
     Transform3D trafo(RotationZYX(0, angleRot+M_PI/2, M_PI/2), Translation3D(center2O*cos(phiCenter), center2O*sin(phiCenter), 0));
-    PlacedVolume pv = moduleVol.placeVolume(crystalVol, trafo);
-    pv.addPhysVolID("crystal", crystal_id);
-    DetElement crystal(module0, _toString(crystal_id,"crystal%d"), x_det.id());
-    crystal.setPlacement(pv);
+    PlacedVolume pv = moduleVol_even.placeVolume(crystalVol, trafo);
+    pv.addPhysVolID("crystal", nphi+1-crystal_id);
+  //  DetElement crystal(moduleVol_even, _toString(nphi+1 -crystal_id,"crystal%d"), x_det.id());
+  //  crystal.setPlacement(pv);
   }
 
   for (int module_id = 1; module_id <= nz; module_id++){
     DetElement module = module_id > 1 ? module0.clone(_toString(module_id,"module%d")) : module0;
-    PlacedVolume pv = envelope.placeVolume(moduleVol, Position(0,0,-zhalf+(2*module_id-1)*yhalf));
+
+    Transform3D trafo2(RotationZYX(0, 0, (module_id % 2) * M_PI), Translation3D(0,0,-zhalf+(2*module_id-1)*yhalf));
+    // Z even layer counter clockwise rotate alpha, old layer clockwise rotate alpha
+    PlacedVolume pv = envelope.placeVolume(module_id % 2==0 ? moduleVol_odd : moduleVol_even, trafo2);
+   //
+    // only clock wise rotate alpha
+  //  PlacedVolume pv = envelope.placeVolume(moduleVol_odd, Position(0,0,-zhalf+(2*module_id-1)*yhalf));
     pv.addPhysVolID("module", module_id);
     module.setPlacement(pv);
   }

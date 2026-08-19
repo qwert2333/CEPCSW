@@ -1,4 +1,3 @@
-
 ## Modules
 gaudi_add_module(Digi_Calo
                  SOURCES src/CaloDigiAlg.cpp

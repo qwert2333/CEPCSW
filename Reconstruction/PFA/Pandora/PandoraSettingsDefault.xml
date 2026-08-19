@@ -69,7 +69,7 @@
         <ClusterListName>PhotonClusters</ClusterListName>
         <ReplaceCurrentClusterList>false</ReplaceCurrentClusterList>
         <ShouldMakePdfHistograms>false</ShouldMakePdfHistograms>
-        <HistogramFile>Reconstruction/PFA/Pandora/PandoraLikelihoodData9EBin.xml</HistogramFile>
+        <HistogramFile>/cefs/higgs/guofy/CEPCSW_v1.2/Reconstruction/PFA/Pandora/PandoraLikelihoodData9EBin.xml</HistogramFile>
     </algorithm>
 
     <!-- Clustering parent algorithm runs a daughter clustering algorithm -->
