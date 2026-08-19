@@ -111,22 +111,24 @@ function detect-os() {
 
 
 # CEPCSW_LCG_OS: centos7 or el9
-if [ -z "$CEPCSW_LCG_OS" ]; then
-    # try to detect os
-    detect-os
-fi
-
-# if user don't specify the version, try to detect according to the current os
-if [ -z "$CEPCSW_LCG_VERSION" ]; then
-    case "$CEPCSW_LCG_OS" in
-        el9)
-            CEPCSW_LCG_VERSION=105.0.0
-            ;;
-        *)
-            CEPCSW_LCG_VERSION=103.0.2
-            ;;
-    esac
-fi
+#if [ -z "$CEPCSW_LCG_OS" ]; then
+#    # try to detect os
+#    detect-os
+#fi
+#
+## if user don't specify the version, try to detect according to the current os
+#if [ -z "$CEPCSW_LCG_VERSION" ]; then
+#    case "$CEPCSW_LCG_OS" in
+#        el9)
+#            CEPCSW_LCG_VERSION=105.0.0
+#            ;;
+#        *)
+#            CEPCSW_LCG_VERSION=103.0.2
+#            ;;
+#    esac
+#fi
+CEPCSW_LCG_OS=el9
+CEPCSW_LCG_VERSION=105.0.0
 export CEPCSW_LCG_VERSION
 
 
