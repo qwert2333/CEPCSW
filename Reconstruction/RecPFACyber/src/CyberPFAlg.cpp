@@ -13,6 +13,8 @@
 
 #include "CyberPFAlg.h"
 
+#include <exception>
+
 // #include <fstream>
 // #include <ctime>
 
@@ -54,6 +56,19 @@ CyberPFAlg::CyberPFAlg(const std::string& name, ISvcLocator* svcLoc)
 
 StatusCode CyberPFAlg::initialize()
 {
+  // PodioDataSvc's selective read fails before execute() if any configured
+  // collection is absent. CyberPFA treats tracking inputs as optional, so read
+  // the complete Frame and decide which optional inputs to use event by event.
+  m_podioDataSvc = dynamic_cast<PodioDataSvc*>(evtSvc().get());
+  if(!m_podioDataSvc) {
+    error() << "Failed to retrieve PodioDataSvc; optional tracking inputs cannot be checked" << endmsg;
+    return StatusCode::FAILURE;
+  }
+#if edm4hep_VERSION >= EDM4HEP_VERSION(1, 0, 0)
+  m_podioDataSvc->setCollsToRead(std::vector<std::string>{});
+  warning() << "CyberPFA disabled selective input reading so missing tracking collections can be skipped" << endmsg;
+#endif
+
   //Initialize global settings
   m_GlobalSettings.map_floatPars["BField"] = m_BField;
   m_GlobalSettings.map_floatPars["Seed"] = m_seed;
@@ -111,7 +126,9 @@ StatusCode CyberPFAlg::initialize()
   if(!name_MCParticleCol.empty()) r_MCParticleCol = new DataHandle<edm4hep::MCParticleCollection> (name_MCParticleCol, Gaudi::DataHandle::Reader, this);
 
   //---Tracks, dN/dx and TOF---
-  for(auto& _trk : name_TrackCol) if(!_trk.empty()) r_TrackCols.push_back( new TrackType(_trk, Gaudi::DataHandle::Reader, this) );
+  for(auto& _trk : name_TrackCol) {
+    r_TrackCols.push_back(_trk.empty() ? nullptr : new TrackType(_trk, Gaudi::DataHandle::Reader, this));
+  }
   if(!name_dNdxCol.empty()) r_dNdxCol = new DataHandle<edm4hep::RecDqdxCollection> (name_dNdxCol, Gaudi::DataHandle::Reader, this);
   if(!name_tofCol.empty()) r_TofCol = new DataHandle<edm4hep::RecTofCollection>(name_tofCol, Gaudi::DataHandle::Reader, this);
 
@@ -735,15 +752,64 @@ StatusCode CyberPFAlg::execute()
   //InitializeForNewEvent(); 
   CyberDataCol     m_DataCol;
   m_DataCol.Clear();
-  m_DataCol.EnergyCorrSvc = m_energycorsvc; 
-  m_DataCol.tofCol = const_cast<edm4hep::RecTofCollection*>(r_TofCol->get());
-  m_DataCol.dNdxCol = const_cast<edm4hep::RecDqdxCollection*>(r_dNdxCol->get()); 
+  m_DataCol.EnergyCorrSvc = m_energycorsvc;
+
+  const auto availableCollectionNames = m_podioDataSvc->getEventFrame().getAvailableCollections();
+  const std::unordered_set<std::string> availableCollections(availableCollectionNames.begin(),
+                                                              availableCollectionNames.end());
+  const auto isAvailable = [&](const std::string& name) {
+    return !name.empty() && availableCollections.find(name) != availableCollections.end();
+  };
+  const auto reportMissingOptionalCollection = [&](const std::string& name) {
+    if(!name.empty() && m_reportedMissingOptionalCollections.insert(name).second) {
+      warning() << "Optional tracking collection " << name
+                << " is not available; continuing without it" << endmsg;
+    }
+  };
+
+  std::vector<TrackType*> eventTrackCols = r_TrackCols;
+  auto* eventMCPTrkAssoCol = r_MCPTrkAssoCol;
+
+  if(!m_useMCPTrk) {
+    const auto& trackCollectionNames = name_TrackCol.value();
+    for(std::size_t iCol = 0; iCol < eventTrackCols.size(); ++iCol) {
+      if(!isAvailable(trackCollectionNames[iCol])) {
+        eventTrackCols[iCol] = nullptr;
+        reportMissingOptionalCollection(trackCollectionNames[iCol]);
+      }
+    }
+
+    if(r_MCPTrkAssoCol && !isAvailable(name_MCPTrkAssoCol.value())) {
+      eventMCPTrkAssoCol = nullptr;
+      reportMissingOptionalCollection(name_MCPTrkAssoCol.value());
+    }
+
+    if(r_TofCol && isAvailable(name_tofCol.value())) {
+      try {
+        m_DataCol.tofCol = const_cast<edm4hep::RecTofCollection*>(r_TofCol->get());
+      } catch(const std::exception&) {
+        reportMissingOptionalCollection(name_tofCol.value());
+      }
+    } else if(r_TofCol) {
+      reportMissingOptionalCollection(name_tofCol.value());
+    }
+
+    if(r_dNdxCol && isAvailable(name_dNdxCol.value())) {
+      try {
+        m_DataCol.dNdxCol = const_cast<edm4hep::RecDqdxCollection*>(r_dNdxCol->get());
+      } catch(const std::exception&) {
+        reportMissingOptionalCollection(name_dNdxCol.value());
+      }
+    } else if(r_dNdxCol) {
+      reportMissingOptionalCollection(name_dNdxCol.value());
+    }
+  }
 
 
   //Readin collections 
   m_pMCParticleCreator->CreateMCParticle( m_DataCol, *r_MCParticleCol );
   if(m_useMCPTrk) m_pTrackCreator->CreateTracksFromMCParticle(m_DataCol, *r_MCParticleCol);
-  else m_pTrackCreator->CreateTracks( m_DataCol, r_TrackCols, r_MCPTrkAssoCol );
+  else m_pTrackCreator->CreateTracks( m_DataCol, eventTrackCols, eventMCPTrkAssoCol );
   m_pCaloHitsCreator->CreateCaloHits( m_DataCol, r_CaloHitCols, map_readout_decoder, map_CaloMCPAssoCols, m_geosvc, barNumberMapEndcapMap);
 
   //Perform PFA algorithm
@@ -1721,11 +1787,23 @@ StatusCode CyberPFAlg::finalize()
   }
 
   delete m_pMCParticleCreator;
-  delete m_pTrackCreator; 
+  m_pMCParticleCreator = nullptr;
+  delete m_pTrackCreator;
+  m_pTrackCreator = nullptr;
   delete m_pCaloHitsCreator;
+  m_pCaloHitsCreator = nullptr;
   delete m_pOutputCreator;
+  m_pOutputCreator = nullptr;
 
   delete r_MCParticleCol;
+  r_MCParticleCol = nullptr;
+  delete r_MCPTrkAssoCol;
+  r_MCPTrkAssoCol = nullptr;
+  delete r_TofCol;
+  r_TofCol = nullptr;
+  delete r_dNdxCol;
+  r_dNdxCol = nullptr;
+  m_podioDataSvc = nullptr;
   for(auto iter : r_TrackCols) delete iter; 
   //for(auto iter : r_ECalHitCols) delete iter; 
   //for(auto iter : r_HCalHitCols) delete iter; 
