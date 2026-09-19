@@ -17,9 +17,21 @@ namespace Cyber{
     if(r_TrackCols.size()==0 || settings.map_stringVecPars.at("trackCollections").size()==0) return StatusCode::SUCCESS;
 
     //Save readin collections
-    m_DataCol.collectionMap_Track.clear(); 
+    m_DataCol.collectionMap_Track.clear();
     for(int icol=0; icol<r_TrackCols.size(); icol++){
-      const edm4hep::TrackCollection* const_TrkCol = r_TrackCols[icol]->get(); 
+      if(!r_TrackCols[icol]) continue;
+
+      // Track collections are optional: a handle may be registered for a
+      // collection that is absent from the input Frame (e.g. when track
+      // reconstruction was not run). Retrieving it would throw, so skip the
+      // missing collection gracefully instead of aborting the whole event.
+      const edm4hep::TrackCollection* const_TrkCol = nullptr;
+      try {
+        const_TrkCol = r_TrackCols[icol]->get();
+      } catch(...) {
+        continue;
+      }
+      if(!const_TrkCol) continue;
 
       std::vector<edm4hep::Track> m_TrkCol; m_TrkCol.clear();
       for(unsigned int icol=0; icol<const_TrkCol->size(); icol++){
@@ -28,13 +40,27 @@ namespace Cyber{
         m_TrkCol.push_back(m_trk);
       }
 
-      m_DataCol.collectionMap_Track[ settings.map_stringVecPars.at("trackCollections")[icol] ] = m_TrkCol; 
+      m_DataCol.collectionMap_Track[ settings.map_stringVecPars.at("trackCollections")[icol] ] = m_TrkCol;
     }
+
+    // If no track collection could be read, there is nothing else to do here.
+    if(m_DataCol.collectionMap_Track.empty()) return StatusCode::SUCCESS;
 
 
     //Convert to local objects
     std::vector<std::shared_ptr<Cyber::Track>> m_trkCol; m_trkCol.clear();
-    const CEPCSWMcRecoTrackParticleAssociationCollection* const_MCPTrkAssoCol = r_MCParticleTrkCol->get();
+    // The track<->MCParticle association collection is optional: the handle is
+    // only created when the property name is non-empty (see CyberPFAlg
+    // initialize). Guard against nullptr / retrieval failure so that tracks
+    // can still be built without truth matching.
+    const CEPCSWMcRecoTrackParticleAssociationCollection* const_MCPTrkAssoCol = nullptr;
+    if(r_MCParticleTrkCol) {
+      try {
+        const_MCPTrkAssoCol = r_MCParticleTrkCol->get();
+      } catch(...) {
+        const_MCPTrkAssoCol = nullptr;
+      }
+    }
 
     for(auto iter : m_DataCol.collectionMap_Track){
       auto const_TrkCol = iter.second; 
@@ -63,7 +89,7 @@ namespace Cyber{
         m_trk->setType(const_TrkCol[itrk].getType());
         m_trk->setOriginTrack( const_TrkCol[itrk] );
 
-        for(int ilink=0; ilink<const_MCPTrkAssoCol->size(); ilink++){
+        for(int ilink=0; const_MCPTrkAssoCol && ilink<const_MCPTrkAssoCol->size(); ilink++){
 #if edm4hep_VERSION >= EDM4HEP_VERSION(0, 99, 0)
           if( const_TrkCol[itrk] == const_MCPTrkAssoCol->at(ilink).getFrom() ) {
             m_trk->addLinkedMCP( std::make_pair(const_MCPTrkAssoCol->at(ilink).getTo(), const_MCPTrkAssoCol->at(ilink).getWeight()) );

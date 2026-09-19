@@ -11,6 +11,7 @@
 #define PANDORAPLUS_ALG_H
 
 #include <string>
+#include <unordered_set>
 #include "k4FWCore/DataHandle.h"
 #include "GaudiKernel/Algorithm.h"
 #include <DDRec/DetectorData.h>
@@ -96,6 +97,7 @@ protected:
 
   SmartIF<IGeomSvc> m_geosvc;
   SmartIF<ICrystalEcalSvc> m_energycorsvc;
+  PodioDataSvc* m_podioDataSvc = nullptr;
   std::map<std::string, dd4hep::DDSegmentation::BitFieldCoder*> map_readout_decoder;
   dd4hep::Detector* m_dd4hep;
   //dd4hep::rec::CellIDPositionConverter* m_cellIDConverter;
@@ -106,10 +108,10 @@ protected:
 
 
   //Creators and their setting
-  MCParticleCreator       *m_pMCParticleCreator;
-  TrackCreator            *m_pTrackCreator;
-  CaloHitsCreator         *m_pCaloHitsCreator;
-  OutputCreator           *m_pOutputCreator;
+  MCParticleCreator       *m_pMCParticleCreator = nullptr;
+  TrackCreator            *m_pTrackCreator = nullptr;
+  CaloHitsCreator         *m_pCaloHitsCreator = nullptr;
+  OutputCreator           *m_pOutputCreator = nullptr;
 
   Settings   m_pMCParticleCreatorSettings;
   Settings   m_pTrackCreatorSettings;
@@ -149,15 +151,16 @@ protected:
   typedef DataHandle<edm4hep::MCRecoCaloParticleAssociationCollection>  CaloParticleAssoType;
   using CEPCSWMcRecoTrackParticleAssociationCollection = edm4hep::MCRecoTrackParticleAssociationCollection;
 #endif
-  DataHandle<edm4hep::MCParticleCollection>* r_MCParticleCol;
-  DataHandle<CEPCSWMcRecoTrackParticleAssociationCollection>* r_MCPTrkAssoCol;
+  DataHandle<edm4hep::MCParticleCollection>* r_MCParticleCol = nullptr;
+  DataHandle<CEPCSWMcRecoTrackParticleAssociationCollection>* r_MCPTrkAssoCol = nullptr;
   std::vector<TrackType*> r_TrackCols; 
   //std::vector<CaloType*>  r_ECalHitCols; 
   //std::vector<CaloType*>  r_HCalHitCols; 
   std::vector<CaloType*>  r_CaloHitCols; 
   std::map<std::string, CaloParticleAssoType*> map_CaloMCPAssoCols;
-  DataHandle<edm4hep::RecTofCollection>* r_TofCol;
-  DataHandle<edm4hep::RecDqdxCollection>* r_dNdxCol;
+  DataHandle<edm4hep::RecTofCollection>* r_TofCol = nullptr;
+  DataHandle<edm4hep::RecDqdxCollection>* r_dNdxCol = nullptr;
+  std::unordered_set<std::string> m_reportedMissingOptionalCollections;
 
   //Global parameters.
   Gaudi::Property<float>  m_BField{this,  "BField", 3., "Magnetic field"};
