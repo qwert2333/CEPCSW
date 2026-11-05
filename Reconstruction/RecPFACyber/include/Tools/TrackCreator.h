@@ -45,7 +45,7 @@ namespace Cyber{
       {4, 2212},
     };
     const Cyber::Settings  settings; 
-    Cyber::Algorithm*      m_TrkExtraAlg; 
+    Cyber::Algorithm*      m_TrkExtraAlg = nullptr;
     Cyber::Settings        m_TrkExtraSettings;  
 
     static bool compTrkIP( std::shared_ptr<Cyber::Track> trk1, std::shared_ptr<Cyber::Track> trk2 ){ 
